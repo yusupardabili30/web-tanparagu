@@ -1,1 +1,0 @@
-haloo saya yusup
