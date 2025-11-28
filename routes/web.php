@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SoalController;
@@ -18,6 +19,20 @@ use App\Http\Controllers\LockScreenController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+/*
+|--------------------------------------------------------------------------
+| Routes UI
+|--------------------------------------------------------------------------
+*/
+Route::get('/ui', [UiController::class, 'index'])->name('home');
+/*
+|--------------------------------------------------------------------------
+| End Routes UI
+|--------------------------------------------------------------------------
+*/
+
+
 Route::get('/', function () {
     //return view('home.index');
     return redirect()->route('login');
