@@ -164,6 +164,7 @@
         $('.add-btn').on('click', function () {
             $('#modal-tittle').text('Tambah Kegiatan');    
             $('#exampleModalLabel').text('Tambah Kegiatan');    
+             $('#add-btn').text('Tambah Kegiatan'); 
             $('#add-btn').show();
             $('input[name="kegiatan_id"]').val('');
             $('input[name="kegiatan"]').val('');
@@ -172,13 +173,13 @@
 
         // start btn-view
         $('.btn-view').on('click', function () {
-        let tusi_id = $(this).data('id'); // pastikan ini sesuai HTML
+        let kegiatan_id = $(this).data('id'); // pastikan ini sesuai HTML
         $('#modal-tittle').text('View Data');    
         $('#exampleModalLabel').text('View Data');    
         $('#add-btn').hide();
-        $.get('/home/tusi/get/' + kegiatan_id , function (data) {
-            $('input[name="kegiatan_id"]').val(data.tusi_id);
-            $('input[name="kegiatan"]').val(data.tusi);
+        $.get('/kegiatan/get/' + kegiatan_id , function (data) {
+            $('input[name="kegiatan_id"]').val(data.kegiatan_id);
+            $('input[name="kegiatan"]').val(data.kegiatan_name);
             $('#showModal').modal('show');
             });
         });
@@ -187,7 +188,7 @@
         // edit
         $('.btn-edit').on('click', function () {
         let kegiatan_id = $(this).data('id'); // pastikan ini sesuai HTML
-        alert(kegiatan_id);
+        // alert(kegiatan_id);
         $('#modal-tittle').text('Ubah Kegiatan');    
         $('#exampleModalLabel').text('Ubah Kegiatan');    
         $('#add-btn').text('Ubah Kegiatan');  
