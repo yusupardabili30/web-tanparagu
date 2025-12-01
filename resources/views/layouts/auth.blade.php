@@ -272,14 +272,6 @@
         background: #f8f9fa;
     }
 
-    .info-section {
-        flex: 1;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        position: relative;
-        overflow: hidden;
-    }
-
     .login-section {
         flex: 1;
         display: flex;
@@ -346,12 +338,6 @@
         margin-top: 1rem;
     }
 
-    .btn-login {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        padding: 0.75rem;
-        font-weight: 500;
-    }
 
     .btn-login:hover {
         opacity: 0.9;
