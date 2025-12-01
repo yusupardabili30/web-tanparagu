@@ -28,7 +28,7 @@
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Enter username" style="max-width: 400px;">
-                        </di
+                        </div>
                         <div class="mb-3">
                             <label class="form-label" for="password-input">Password</label>
                             <div class="position-relative auth-pass-inputgroup mb-3">
@@ -39,9 +39,9 @@
                         <div class="mt-4">
                             <button class="btn btn-success w-100" type="submit" style="max-width: 400px;">Masuk</button>
                         </div>
-                    </form>  
-                </div> 
-            </div>             
+                    </form>
+                </div>
+            </div>
         </div>
         <!-- end container -->
     </div>
@@ -54,7 +54,9 @@
                 <div class="col-lg-12">
                     <div class="text-center">
                         <p class="mb-0 text-muted">&copy;
-                            <script>document.write(new Date().getFullYear())</script>
+                            <script>
+                                document.write(new Date().getFullYear())
+                            </script>
                         </p>
                     </div>
                 </div>

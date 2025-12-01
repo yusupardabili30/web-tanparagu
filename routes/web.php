@@ -25,7 +25,8 @@ use App\Http\Controllers\LockScreenController;
 | Routes UI
 |--------------------------------------------------------------------------
 */
-Route::get('/ui', [UiController::class, 'index'])->name('home');
+
+Route::get('/home', [UiController::class, 'index'])->name('home');
 /*
 |--------------------------------------------------------------------------
 | End Routes UI
@@ -46,8 +47,13 @@ Route::post('/auth/authenticate/logout', [AuthController::class, 'logout'])->nam
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+// Tambahkan route ini di web.php
+Route::post('/kegiatan/extend/{kegiatan_id}', [KegiatanController::class, 'extend']);
+
 Route::get('/kegiatan', [KegiatanController::class, 'index'])->name('kegiatan.index');
 Route::get('/kegiatan/get/{kegiatan_id}', [KegiatanController::class, 'get'])->name('kegiatan.get');
+// Tambahkan route ini di web.php
+Route::delete('/kegiatan/delete/{kegiatan_id}', [KegiatanController::class, 'delete'])->name('kegiatan.delete');
 Route::post('/kegiatan/submit', [KegiatanController::class, 'store'])->name('kegiatan.store');
 
 Route::get('/lockscreen/{encode_kegiatan_id}', [LockScreenController::class, 'index'])->name('lockscreen');
@@ -64,6 +70,3 @@ Route::get('/instrumen/soal/{sub_indikator_id}', [SoalController::class, 'getSoa
 
 Route::get('/soal/{soal_id}', [SoalController::class, 'getSingleSoal']);
 Route::post('/submit-jawaban', [SoalController::class, 'submitJawaban']);
-
-
-

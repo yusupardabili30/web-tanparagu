@@ -11,15 +11,15 @@ class LockScreenController extends Controller
     public function index($encode_kegiatan_id)
     {
         if (count(Hashids::decode($encode_kegiatan_id)) === 0) {
-            abort(404); 
+            abort(404);
         }
-        $kegiatan_id= Hashids::decode($encode_kegiatan_id)[0];
+        $kegiatan_id = Hashids::decode($encode_kegiatan_id)[0];
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)
-                            ->where('status','Active')->first();
+            ->where('status', 'Active')->first();
         if (!$kegiatan) {
-             abort(404);
+            abort(404);
         }
-        return view('lockscreen.index',[
+        return view('lockscreen.index', [
             'title' => 'Lock Screen'
         ]);
     }
@@ -32,7 +32,7 @@ class LockScreenController extends Controller
         } else {
             # code...
         }
-        
+
 
         return redirect()->route('ptk.search', $request->nik);
 
