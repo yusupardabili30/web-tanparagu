@@ -258,4 +258,149 @@
             padding: 2rem 1rem;
         }
     }
+
+
+
+
+
+
+
+
+    .auth-container {
+        display: flex;
+        min-height: 100vh;
+        background: #f8f9fa;
+    }
+
+    .info-section {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-section {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: white;
+    }
+
+    .carousel-container {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+    }
+
+    .carousel-content {
+        width: 100%;
+        max-width: 800px;
+    }
+
+    .system-name {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .system-logo {
+        max-width: 300px;
+        height: auto;
+    }
+
+    .carousel-image {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .carousel-caption {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 1rem;
+        border-radius: 5px;
+        bottom: 20px;
+    }
+
+    .login-form-container {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .login-logo {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-title-icon {
+        max-width: 200px;
+        height: auto;
+    }
+
+    .login-subtitle {
+        color: #666;
+        margin-top: 1rem;
+    }
+
+    .btn-login {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 0.75rem;
+        font-weight: 500;
+    }
+
+    .btn-login:hover {
+        opacity: 0.9;
+    }
+
+    .photo-gallery {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .gallery-photo {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border-radius: 5px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .input-group-text {
+        cursor: pointer;
+        background-color: #f8f9fa;
+    }
+
+    .kegiatan-info {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        border-left: 4px solid #667eea;
+    }
+
+    @media (max-width: 768px) {
+        .auth-container {
+            flex-direction: column;
+        }
+
+        .info-section {
+            display: none;
+        }
+
+        .login-section {
+            padding: 1rem;
+        }
+    }
 </style>

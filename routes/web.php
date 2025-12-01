@@ -5,6 +5,7 @@ use App\Http\Controllers\UiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SoalController;
+use App\Http\Controllers\PtkController; // Pastikan controller ini ada
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\LockScreenController;
 
