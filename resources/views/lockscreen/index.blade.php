@@ -9,145 +9,6 @@
     <title>Lock Screen</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <style>
-        .auth-container {
-            display: flex;
-            min-height: 100vh;
-            background: #f8f9fa;
-        }
-
-        .info-section {
-            flex: 1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-section {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            background: white;
-        }
-
-        .carousel-container {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 3rem;
-        }
-
-        .carousel-content {
-            width: 100%;
-            max-width: 800px;
-        }
-
-        .system-name {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .system-logo {
-            max-width: 300px;
-            height: auto;
-        }
-
-        .carousel-image {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-
-        .carousel-caption {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 1rem;
-            border-radius: 5px;
-            bottom: 20px;
-        }
-
-        .login-form-container {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-logo {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .login-title-icon {
-            max-width: 200px;
-            height: auto;
-        }
-
-        .login-subtitle {
-            color: #666;
-            margin-top: 1rem;
-        }
-
-        .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            padding: 0.75rem;
-            font-weight: 500;
-        }
-
-        .btn-login:hover {
-            opacity: 0.9;
-        }
-
-        .photo-gallery {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .gallery-photo {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            border-radius: 5px;
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: #333;
-        }
-
-        .input-group-text {
-            cursor: pointer;
-            background-color: #f8f9fa;
-        }
-
-        .kegiatan-info {
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border-left: 4px solid #667eea;
-        }
-
-        @media (max-width: 768px) {
-            .auth-container {
-                flex-direction: column;
-            }
-
-            .info-section {
-                display: none;
-            }
-
-            .login-section {
-                padding: 1rem;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -213,11 +74,19 @@
 
                     <!-- Info Kegiatan -->
                     <div class="kegiatan-info">
-                        <h6 class="mb-1">Kegiatan Aktif:</h6>
-                        <p class="mb-1"><strong>{{ $kegiatan->kegiatan_name }}</strong></p>
-                        <small class="text-muted">
-                            Periode: {{ date('d/m/Y', strtotime($kegiatan->start_date)) }} - {{ date('d/m/Y', strtotime($kegiatan->end_date)) }}
-                        </small>
+                        <h6 class="mb-2 text-primary">
+                            <i class="ri-calendar-event-line me-1"></i> Kegiatan Aktif:
+                        </h6>
+                        <h5 class="mb-2">{{ $kegiatan->kegiatan_name }}</h5>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">
+                                <i class="ri-calendar-line me-1"></i>
+                                {{ date('d/m/Y', strtotime($kegiatan->start_date)) }} - {{ date('d/m/Y', strtotime($kegiatan->end_date)) }}
+                            </small>
+                            <small class="text-muted">
+                                <i class="ri-key-2-line me-1"></i> Token Required
+                            </small>
+                        </div>
                     </div>
                 </div>
 
@@ -238,47 +107,45 @@
                 </div>
                 @endif
 
-                <form action="{{ route('lockscreen.unlock') }}" method="POST">
-                    @csrf
-                    <!-- Input hidden untuk kegiatan_id -->
-                    <input type="hidden" name="kegiatan_id" value="{{ $kegiatan_id }}">
+                <div class="token-form">
+                    <form action="{{ route('lockscreen.unlock') }}" method="POST">
+                        @csrf
+                        <!-- Input hidden untuk kegiatan_id -->
+                        <input type="hidden" name="kegiatan_id" value="{{ $kegiatan_id }}">
 
-                    <div class="mb-3">
-                        <label for="user_name" class="form-label">
-                            <i class="ri-user-3-line me-1"></i> NIP / Username
-                        </label>
-                        <input type="text" class="form-control" id="user_name" name="user_name"
-                            placeholder="Masukkan NIP Anda" value="{{ old('user_name') }}" required
-                            autofocus>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <label for="password" class="form-label">
-                                <i class="ri-key-2-line me-1"></i> Token Kegiatan
-                            </label>
-                            <small>
-                                <a href="#" id="show-token-info" data-bs-toggle="modal" data-bs-target="#tokenInfoModal">
-                                    <i class="ri-information-line"></i> Info Token
-                                </a>
-                            </small>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="password" class="form-label fw-bold">
+                                    <i class="ri-key-2-line me-1"></i> Masukkan Token Kegiatan
+                                </label>
+                                <small>
+                                    <a href="#" id="show-token-info" data-bs-toggle="modal" data-bs-target="#tokenInfoModal" class="text-decoration-none">
+                                        <i class="ri-information-line"></i> Info Token
+                                    </a>
+                                </small>
+                            </div>
+                            <div class="input-group">
+                                <input type="password" class="form-control form-control-lg" id="password" name="password"
+                                    placeholder="Masukkan token kegiatan" required
+                                    autofocus>
+                                <span class="input-group-text password-toggle" id="password-toggle" style="cursor: pointer;">
+                                    <i class="ri-eye-fill"></i>
+                                </span>
+                            </div>
+                            <div class="mt-2 text-center">
+                                <small class="text-muted">
+                                    Token diberikan oleh administrator kegiatan
+                                </small>
+                            </div>
                         </div>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password"
-                                placeholder="Masukkan token kegiatan" required>
-                            <span class="input-group-text password-toggle" id="password-toggle">
-                                <i class="ri-eye-fill"></i>
-                            </span>
-                        </div>
-                        <small class="text-muted">Token diberikan oleh administrator kegiatan</small>
-                    </div>
 
-                    <div class="d-grid mt-4">
-                        <button class="btn btn-login text-white" type="submit">
-                            <i class="ri-login-box-line me-1"></i> Masuk ke Assesmen
-                        </button>
-                    </div>
-                </form>
+                        <div class="d-grid mt-4">
+                            <button class="btn btn-login text-white btn-lg" type="submit">
+                                <i class="ri-login-box-line me-1"></i> Masuk dengan Token
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
                 <!-- Galeri Logo di Bawah Form Login -->
                 <div class="photo-gallery">
@@ -345,20 +212,25 @@
             wrap: true
         });
 
-        // Validasi form dengan sweet alert atau konfirmasi sederhana
+        // Validasi form
         document.querySelector('form').addEventListener('submit', function(e) {
-            const username = document.getElementById('user_name').value;
             const password = document.getElementById('password').value;
 
-            if (!username || !password) {
+            if (!password) {
                 e.preventDefault();
-                alert('Harap isi NIP dan Token terlebih dahulu!');
+                alert('Harap masukkan token terlebih dahulu!');
+                document.getElementById('password').focus();
             }
         });
 
-        // Auto fokus ke input username
+        // Auto fokus ke input token
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('user_name').focus();
+            document.getElementById('password').focus();
+        });
+
+        // Modal info token
+        document.getElementById('show-token-info').addEventListener('click', function(e) {
+            e.preventDefault();
         });
     </script>
 </body>

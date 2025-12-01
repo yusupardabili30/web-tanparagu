@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kegiatan;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -33,14 +32,13 @@ class LockScreenController extends Controller
     public function unlock_screen(Request $request)
     {
         $request->validate([
-            'user_name' => 'required',
             'password' => 'required',
             'kegiatan_id' => 'required'
         ]);
 
         // Decode kegiatan_id
         if (count(Hashids::decode($request->kegiatan_id)) === 0) {
-            return back()->withErrors(['error' => 'Invalid kegiatan ID']);
+            return back()->withErrors(['error' => 'ID kegiatan tidak valid'])->withInput();
         }
 
         $kegiatan_id = Hashids::decode($request->kegiatan_id)[0];
@@ -51,30 +49,22 @@ class LockScreenController extends Controller
             ->first();
 
         if (!$kegiatan) {
-            return back()->withErrors(['error' => 'Kegiatan tidak aktif atau tidak ditemukan']);
+            return back()->withErrors(['error' => 'Kegiatan tidak aktif atau tidak ditemukan'])->withInput();
         }
 
         // Verifikasi token dari kegiatan
         if ($request->password !== $kegiatan->instrumen_token) {
-            return back()->withErrors(['password' => 'Token tidak valid']);
+            return back()->withErrors(['password' => 'Token tidak valid'])->withInput();
         }
 
-        // Cari user berdasarkan user_name/NIP
-        $user = User::where('user_name', $request->user_name)
-            ->orWhere('nip', $request->user_name)
-            ->first();
-
-        if (!$user) {
-            return back()->withErrors(['user_name' => 'NIP tidak ditemukan']);
-        }
-
-        // Redirect ke halaman PTK dengan NIK
-        // Simpan user_id dan kegiatan_id di session untuk digunakan di PTK Controller jika diperlukan
+        // Simpan informasi di session
         session([
-            'lockscreen_user_id' => $user->user_id,
-            'lockscreen_kegiatan_id' => $kegiatan->kegiatan_id
+            'lockscreen_authenticated' => true,
+            'lockscreen_kegiatan_id' => $kegiatan->kegiatan_id,
+            'kegiatan_name' => $kegiatan->kegiatan_name
         ]);
 
-        return redirect()->route('ptk.search', $user->nik);
+        // Redirect langsung ke halaman PTK tanpa parameter
+        return redirect()->route('ptk');
     }
 }
