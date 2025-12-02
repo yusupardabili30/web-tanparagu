@@ -1,7 +1,8 @@
 @extends('layouts.auth')
 @section('mycontent')
+<!DOCTYPE html>
+<html lang="id">
 
-<<<<<<< HEAD
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -237,6 +238,3 @@
 </body>
 
 </html>
-=======
-@endsection
->>>>>>> f8379aa0312d4d5d96e9b1cfc0a50c99c8c4f739

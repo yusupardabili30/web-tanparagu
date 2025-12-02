@@ -24,6 +24,7 @@
                             alt="Logo">
                     </h1>
 
+
                     <div id="infoCarousel" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-indicators">
                             <button type="button" data-bs-target="#infoCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
@@ -72,7 +73,7 @@
                 <div class="login-form-container">
                     <div class="login-logo">
                         <h2 class="login-title" style="margin-bottom: 40px;">
-                            <img src="{{ asset('') }}" 
+                            <img src="{{ asset('build/images/logo-dark.png') }}" 
                                 class="login-title-icon" 
                                 alt="Login Icon"
                                 style="width: 400px; height:auto;">
@@ -83,6 +84,7 @@
                         </p>
 
                     </div>
+
 
                 <!-- Menampilkan pesan error jika ada -->
                 @if ($errors->any())

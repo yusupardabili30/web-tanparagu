@@ -30,13 +30,34 @@
         overflow: hidden;
     }
 
-    .carousel-container {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 2rem;
+        .carousel-container {
+            position: relative;
+        }
+
+        .carousel-logo {
+            position: absolute;
+            top: 40px;
+            left: 70px;        /* ⬅️ LOGO DIGESER KE KANAN */
+            z-index: 20;
+        }
+
+        .system-logo {
+            width: 250px !important;
+            height: auto;
+        }
+
+    .lock-logo-wrapper {
+        position: absolute;
+        top: 40px;      /* geser atas */
+        left: 70px;     /* geser kanan */
+        z-index: 20;
     }
+
+    .lock-logo {
+        width: 260px !important;
+        height: auto !important;
+    }
+
 
     .carousel-content {
         height: 100%;
@@ -113,7 +134,7 @@
     }
 
     .carousel-indicators {
-        bottom: -40px;
+        bottom: -30px;
     }
 
     .carousel-indicators button {
@@ -235,11 +256,6 @@
 
 
 
-
-
-
-
-
     .auth-container {
         display: flex;
         min-height: 100vh;
@@ -302,9 +318,9 @@
         margin-bottom: 2rem;
     }
 
-    .login-title-icon {
-        max-width: 200px;
-        height: auto;
+   .login-title-icon {
+        width: 250px !important;   /* paksa ukuran berubah */
+        height: auto !important;
     }
 
     .login-subtitle {

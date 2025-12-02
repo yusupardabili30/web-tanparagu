@@ -153,6 +153,38 @@
             margin-top: 15px !important;
         }
 
+            /* Kecilkan padding card */
+            .card-body {
+                padding: 20px !important;
+            }
+
+            /* Header card sedikit lebih kecil */
+            .card-header {
+                padding: 12px 20px !important;
+            }
+
+            /* Kecilkan jarak antar baris tabel */
+            .table td {
+                padding: 4px 0 !important;
+                vertical-align: middle;
+            }
+
+            .table-borderless td {
+                padding: 3px 0 !important;
+            }
+
+            /* Kecilkan jarak judul card */
+            .fw-bold, .card-title, h2, h4, h5, h6 {
+                margin-bottom: 6px !important;
+                line-height: 1.2;
+            }
+
+            /* Kecilkan bubble icon + rapatkan spacing */
+            .icon-bubble {
+                padding: 6px 10px !important;
+                border-radius: 6px !important;
+            }
+
         </style>
 
 </head>
