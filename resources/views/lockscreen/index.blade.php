@@ -1,7 +1,6 @@
 @extends('layouts.auth')
 @section('mycontent')
 
-<<<<<<< HEAD
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -63,14 +62,14 @@
         </div>
 
         <!-- Bagian Kanan: Form Login -->
-        <div class="login-section"style="margin-top: 80px;">
+        <div class="login-section" style="margin-top: 80px;">
             <div class="login-form-container">
                 <div class="login-logo">
                     <h2 class="login-title" style="margin-bottom: 40px;">
-                        <img src="{{ asset('build/images/logo-dark.png') }}" 
-                        class="login-title-icon" 
-                        alt="Login Icon" 
-                        style="width: 400px; height:auto;">>
+                        <img src="{{ asset('build/images/logo-dark.png') }}"
+                            class="login-title-icon"
+                            alt="Login Icon"
+                            style="width: 400px; height:auto;">>
                     </h2>
                     <p class="login-subtitle">Masuk ke Sistem Assesmen</p>
 
@@ -237,6 +236,3 @@
 </body>
 
 </html>
-=======
-@endsection
->>>>>>> f8379aa0312d4d5d96e9b1cfc0a50c99c8c4f739
