@@ -13,7 +13,6 @@ class LockScreenController extends Controller
         if (count(Hashids::decode($encode_kegiatan_id)) === 0) {
             abort(404);
         }
-
         $kegiatan_id = Hashids::decode($encode_kegiatan_id)[0];
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)
             ->where('status', 'Active')->first();
@@ -32,6 +31,7 @@ class LockScreenController extends Controller
     public function unlock_screen(Request $request)
     {
         $request->validate([
+
             'password' => 'required',
             'kegiatan_id' => 'required'
         ]);
@@ -81,5 +81,4 @@ class LockScreenController extends Controller
 
         return redirect('/')->with('info', 'Anda telah logout dari lockscreen');
     }
-
 }

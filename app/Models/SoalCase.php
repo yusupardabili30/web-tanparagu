@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\SubIndikator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SoalCase extends Model
 {
@@ -16,6 +17,7 @@ class SoalCase extends Model
     protected $fillable = [
         'soal_case_id',
         'sub_indikator_id',
+        'sub_indikator_code',
         'tittle',
         'case'
     ];
@@ -24,5 +26,10 @@ class SoalCase extends Model
     public function soal()
     {
         return $this->hasMany(Soal::class, 'soal_case_id', 'soal_case_id');
+    }
+
+    public function sub_indikator()
+    {
+        return $this->belongsTo(SubIndikator::class, 'sub_indikator_id', 'sub_indikator_id');
     }
 }

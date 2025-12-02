@@ -30,7 +30,7 @@ class AuthController extends Controller
 
             $user = Auth::user();
             $user_id = $user->user_id;
-            return redirect()->route('home');
+            return redirect()->route('admin.home');
         }
 
         return back()->withErrors([
