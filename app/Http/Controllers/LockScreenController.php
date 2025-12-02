@@ -81,4 +81,5 @@ class LockScreenController extends Controller
 
         return redirect('/')->with('info', 'Anda telah logout dari lockscreen');
     }
+
 }
