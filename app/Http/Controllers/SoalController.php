@@ -5,22 +5,34 @@ namespace App\Http\Controllers;
 use App\Models\Soal;
 use App\Models\SoalCase;
 use App\Models\SoalJawaban;
+use App\Models\SubIndikator;
 use Illuminate\Http\Request;
 use Vinkla\Hashids\Facades\Hashids;
 
 class SoalController extends Controller
 {
+    public function index(){
+        // $soal = SoalCase::with('soal')->paginate(10);
+        $soal = SoalCase::with(['soal.soal_jawaban', 'sub_indikator'])->paginate(1);
+        return view('soal.index', [
+            'tittle' => 'Soal',
+            'data' => $soal
+        ]);
+    }
     public function quiz($sub_indikator_id, $no_urut)
     {
-        //$hash = Hashids::encode(1);
-        // return Hashids::decode('gAXBNX4q')[0];
-        // nomor urut soal (default 1)
+        //return $hash = Hashids::encode(10);
+        //return Hashids::decode('jR')[0];
+        //nomor urut soal (default 1)
+        $soal = Soal::find(1);
+        $case = $soal->soal_case;
+
         $no_urut = request()->get('no_urut', $no_urut);
 
         //ambil SOAL (bukan soal_case)
         $soal = Soal::where('sub_indikator_id', $sub_indikator_id)
             ->where('no_urut', $no_urut)
-            ->first();
+            ->first(); 
 
         if (!$soal) {
             return redirect()->route('quiz.finish');
@@ -74,11 +86,9 @@ class SoalController extends Controller
 
         // Jika bobot = 4 → lanjut ke soal berikutnya
         if ($bobot == 4) {
-
             $nextSoal = Soal::where('sub_indikator_id', $sub_indikator_id)
                 ->where('no_urut', $soal->no_urut + 1)
                 ->first();
-
 
             if ($nextSoal) {
                 // lanjut ke soal selanjutnya di subindikator yang sama
@@ -148,7 +158,6 @@ class SoalController extends Controller
                 ];
             })
         ];
-
         return response()->json($response);
     }   
 

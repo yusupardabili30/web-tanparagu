@@ -27,7 +27,7 @@ use App\Http\Controllers\LockScreenController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/home', [UiController::class, 'index'])->name('home');
+Route::get('/ui', [UiController::class, 'index'])->name('home');
 /*
 |--------------------------------------------------------------------------
 | End Routes UI
@@ -55,7 +55,6 @@ Route::get('/kegiatan/get/{kegiatan_id}', [KegiatanController::class, 'get'])->n
 Route::delete('/kegiatan/delete/{kegiatan_id}', [KegiatanController::class, 'delete'])->name('kegiatan.delete');
 Route::post('/kegiatan/submit', [KegiatanController::class, 'store'])->name('kegiatan.store');
 
-//Lockscreen Routes
 Route::get('/lockscreen/{encode_kegiatan_id}', [LockScreenController::class, 'index'])->name('lockscreen');
 // Lockscreen Routes
 Route::get('/lockscreen/{encode_kegiatan_id}', [LockScreenController::class, 'index'])->name('lockscreen');
