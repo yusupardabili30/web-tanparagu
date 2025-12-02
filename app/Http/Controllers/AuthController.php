@@ -10,7 +10,7 @@ class AuthController extends Controller
 {
     public function index()
     {
-        return view('auth.login',[
+        return view('auth.login', [
             'title' => 'Login'
         ]);
     }
@@ -30,7 +30,7 @@ class AuthController extends Controller
 
             $user = Auth::user();
             $user_id = $user->user_id;
-            return redirect()->route('admin.home');
+            return redirect()->route('home');
         }
 
         return back()->withErrors([
@@ -39,11 +39,11 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request)
-	{
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-    return redirect()->route('login');
-	}
+        return redirect()->route('login');
+    }
 }
