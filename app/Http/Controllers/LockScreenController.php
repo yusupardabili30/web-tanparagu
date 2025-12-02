@@ -10,6 +10,7 @@ class LockScreenController extends Controller
 {
     public function index($encode_kegiatan_id)
     {
+
         if (count(Hashids::decode($encode_kegiatan_id)) === 0) {
             abort(404);
         }
