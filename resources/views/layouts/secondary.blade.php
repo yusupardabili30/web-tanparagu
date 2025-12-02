@@ -19,7 +19,7 @@
     <!-- Begin page -->
     <div id="layout-wrapper">
 
-        {{--  @include("partials.menu")  --}}
+        {{-- @include("partials.menu")  --}}
 
         <!-- ============================================================== -->
         <!-- Start right Content here -->
@@ -39,7 +39,7 @@
     <!-- END layout-wrapper -->
 
 
-{{--
+    {{--
     @include("partials.customizer")  --}}
 
     @include("partials.vendor-scripts")
@@ -47,7 +47,7 @@
 
 
 
-    {{--  <!-- apexcharts -->
+    {{-- <!-- apexcharts -->
     <script src="{{asset('build')}}/libs/apexcharts/apexcharts.min.js"></script>
 
     <!-- Vector map-->
@@ -58,7 +58,7 @@
     <script src="{{asset('build')}}/libs/swiper/swiper-bundle.min.js"></script>
 
     <!-- Dashboard init -->
-    <script src="{{asset('build')}}/js/pages/dashboard-ecommerce.init.js"></script>  --}}
+    <script src="{{asset('build')}}/js/pages/dashboard-ecommerce.init.js"></script> --}}
 
     <!-- Sweet Alerts js -->
     <script src="{{asset('build')}}/libs/sweetalert2/sweetalert2.min.js"></script>

@@ -77,33 +77,38 @@
                                             {{ route('lockscreen.lock', ['encode_kegiatan_id' => Hashids::encode($row->kegiatan_id)]) }}
                                         </a>
                                     </td>
-                                    <td class="client_name">{{ $row->status }}</td>
+                                    {{-- Di bagian status --}}
+                                    <td class="client_name">
+                                        @if($row->status == 'Active')
+                                        <span class="badge bg-success">Active</span>
+                                        @else
+                                        <span class="badge bg-danger">Inactive</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         <div class="dropdown">
                                             <button class="btn btn-soft-secondary btn-sm dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="ri-more-fill align-middle"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end">
-                                                <li><button 
+                                                <li><button
                                                         class="dropdown-item btn-view"
-                                                        href="#showModal" 
+                                                        href="#showModal"
                                                         data-bs-toggle="modal"
-                                                        data-id="{{$row->kegiatan_id}}"
-                                                    ><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</button></li>
+                                                        data-id="{{$row->kegiatan_id}}"><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</button></li>
                                                 <li>
-                                                    <a 
-                                                        class="dropdown-item edit-item-btn btn-edit" 
-                                                        href="#showModal" 
+                                                    <a
+                                                        class="dropdown-item edit-item-btn btn-edit"
+                                                        href="#showModal"
                                                         data-bs-toggle="modal"
-                                                        data-id="{{$row->kegiatan_id}}"
-                                                    >
-                                                    <i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edit</a></li>
+                                                        data-id="{{$row->kegiatan_id}}">
+                                                        <i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edit</a>
+                                                </li>
                                                 <li>
-                                                    <a class="dropdown-item remove-item-btn btn-delete" 
-                                                        data-bs-toggle="modal" 
+                                                    <a class="dropdown-item remove-item-btn btn-delete"
+                                                        data-bs-toggle="modal"
                                                         href="#deleteOrder"
-                                                        data-id="{{$row->kegiatan_id}}"
-                                                    >
+                                                        data-id="{{$row->kegiatan_id}}">
                                                         <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete
                                                     </a>
                                                 </li>
@@ -114,7 +119,7 @@
                                 @endforeach
                             </tbody>
                         </table>
-                         {{-- Pagination --}}
+                        {{-- Pagination --}}
                         {!! $data->withQueryString()->links('pagination::bootstrap-5') !!}
 
                     </div>
@@ -153,105 +158,266 @@
 @endsection
 
 @section('sipproja-js')
-    <script>
-        @if (session('success'))
+<script>
+    // Fungsi untuk copy text ke clipboard
+    function copyToClipboard(text, element) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Ubah ikon sementara menjadi centang
+            const originalHTML = element.innerHTML;
+            element.innerHTML = '<i class="ri-check-line"></i>';
+            element.classList.remove('btn-outline-secondary');
+            element.classList.add('btn-success');
+
+            // Kembalikan ke keadaan semula setelah 2 detik
+            setTimeout(() => {
+                element.innerHTML = originalHTML;
+                element.classList.remove('btn-success');
+                element.classList.add('btn-outline-secondary');
+            }, 2000);
+
+            // Tampilkan notifikasi sukses
             Swal.fire({
-                position: 'center',
+                toast: true,
+                position: 'top-end',
                 icon: 'success',
-                title: 'data inserted successfully!',
+                title: 'Teks berhasil disalin!',
                 showConfirmButton: false,
-                timer: 2000,
-                showCloseButton: true
+                timer: 1500,
+                timerProgressBar: true
             });
-        @endif
-
-        //start add btn
-        $('.add-btn').on('click', function () {
-            $('#modal-tittle').text('Tambah Kegiatan');    
-            $('#exampleModalLabel').text('Tambah Kegiatan');    
-             $('#add-btn').text('Tambah Kegiatan'); 
-            $('#add-btn').show();
-            $('input[name="kegiatan_id"]').val('');
-            $('input[name="kegiatan"]').val('');
-        });
-        // end add
-
-        // start btn-view
-        $('.btn-view').on('click', function () {
-        let kegiatan_id = $(this).data('id'); // pastikan ini sesuai HTML
-        $('#modal-tittle').text('View Data');    
-        $('#exampleModalLabel').text('View Data');    
-        $('#add-btn').hide();
-        $.get('/kegiatan/get/' + kegiatan_id , function (data) {
-            $('input[name="kegiatan_id"]').val(data.kegiatan_id);
-            $('input[name="kegiatan"]').val(data.kegiatan_name);
-            $('#showModal').modal('show');
+        }).catch(function(err) {
+            console.error('Gagal menyalin teks: ', err);
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'Gagal menyalin teks',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
             });
         });
-        // end btn-view
+    }
 
-        // edit
-        $('.btn-edit').on('click', function () {
-        let kegiatan_id = $(this).data('id'); // pastikan ini sesuai HTML
-        // alert(kegiatan_id);
-        $('#modal-tittle').text('Ubah Kegiatan');    
-        $('#exampleModalLabel').text('Ubah Kegiatan');    
-        $('#add-btn').text('Ubah Kegiatan');  
+    // Event listener untuk tombol copy token
+    $(document).on('click', '#copy-token-btn', function() {
+        const tokenValue = $('#token_display').val();
+        if (tokenValue && tokenValue !== 'Akan digenerate otomatis (16 karakter)') {
+            copyToClipboard(tokenValue, this);
+        }
+    });
+
+    // Event listener untuk tombol copy URL
+    $(document).on('click', '#copy-url-btn', function() {
+        const urlValue = $('#url_display').val();
+        if (urlValue && urlValue !== 'Akan digenerate otomatis') {
+            copyToClipboard(urlValue, this);
+        }
+    });
+
+    //start add btn
+    $('.add-btn').on('click', function() {
+        $('#modal-tittle').text('Tambah Kegiatan');
+        $('#exampleModalLabel').text('Tambah Kegiatan');
+        $('#add-btn').text('Tambah Kegiatan');
         $('#add-btn').show();
-        $.get('/kegiatan/get/' + kegiatan_id , function (data) {
+
+        // Reset form
+        $('input[name="kegiatan_id"]').val('');
+        $('input[name="kegiatan"]').val('');
+        $('#entity').val('');
+        $('#status').val('Active');
+        $('#start_date').val('');
+        $('#end_date').val('');
+        $('#token_display').val('');
+        $('#url_display').val('');
+
+        // Set tanggal default
+        const today = new Date().toISOString().split('T')[0];
+        $('#start_date').val(today);
+        $('#end_date').val(today);
+
+        // Generate preview
+        $('#token_display').val('Akan digenerate otomatis (16 karakter)');
+        $('#url_display').val('Akan digenerate otomatis');
+
+        // Nonaktifkan tombol copy
+        $('#copy-token-btn, #copy-url-btn').prop('disabled', true);
+    });
+
+    // start btn-view
+    $('.btn-view').on('click', function() {
+        let kegiatan_id = $(this).data('id');
+        $('#modal-tittle').text('View Data');
+        $('#exampleModalLabel').text('View Data');
+        $('#add-btn').hide();
+
+        $.get('/kegiatan/get/' + kegiatan_id, function(data) {
             $('input[name="kegiatan_id"]').val(data.kegiatan_id);
             $('input[name="kegiatan"]').val(data.kegiatan_name);
+            $('#entity').val(data.entity).prop('disabled', true);
+            $('#status').val(data.status).prop('disabled', true);
+            $('#start_date').val(data.start_date).prop('disabled', true);
+            $('#end_date').val(data.end_date).prop('disabled', true);
+            $('#token_display').val(data.instrumen_token);
+            $('#url_display').val("{{ config('app.url') }}/" + data.instrumen_url);
+
+            // Aktifkan tombol copy
+            $('#copy-token-btn, #copy-url-btn').prop('disabled', false);
+
             $('#showModal').modal('show');
-            });
         });
+    });
 
-        //start
-        // Saat tombol "Hapus" (yang buka modal) diklik
-        $('.btn-delete').on('click', function () {
-            var id = $(this).data('id'); // Ambil ID dari data-id
-            $('#kegiatan_id').val(id);     // Masukkan ke input hidden
+    // edit
+    $('.btn-edit').on('click', function() {
+        let kegiatan_id = $(this).data('id');
+        $('#modal-tittle').text('Ubah Kegiatan');
+        $('#exampleModalLabel').text('Ubah Kegiatan');
+        $('#add-btn').text('Ubah Kegiatan');
+        $('#add-btn').show();
+
+        $.get('/kegiatan/get/' + kegiatan_id, function(data) {
+            $('input[name="kegiatan_id"]').val(data.kegiatan_id);
+            $('input[name="kegiatan"]').val(data.kegiatan_name);
+            $('#entity').val(data.entity).prop('disabled', false);
+            $('#status').val(data.status).prop('disabled', false);
+            $('#start_date').val(data.start_date).prop('disabled', false);
+            $('#end_date').val(data.end_date).prop('disabled', false);
+            $('#token_display').val(data.instrumen_token);
+            $('#url_display').val("{{ config('app.url') }}/" + data.instrumen_url);
+
+            // Aktifkan tombol copy
+            $('#copy-token-btn, #copy-url-btn').prop('disabled', false);
+
+            $('#showModal').modal('show');
         });
+    });
 
-        // Saat tombol "Yes, Delete It" ditekan di modal
-        $('#delete-record').on('click', function () {
-            var id = $('#tusi_id').val(); 
-            $.ajax({
-                url: "/tusi/delete/" + id,
-                type: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}' // CSRF token wajib di Laravel
-                },
-                success: function (response) {
-                    // Tampilkan pesan sukses dengan SweetAlert
-                    Swal.fire({
-                        position: 'center',
-                        icon: 'success',
-                        title: response.message || 'Data deleted successfully!',
-                        showConfirmButton: false,
-                        timer: 2000,
-                        showCloseButton: true
-                    });
+    // Handle form submit untuk edit dan tambah
+    $('form.tablelist-form').on('submit', function(e) {
+        e.preventDefault();
 
-                    // Sembunyikan modal
-                    $('#deleteOrder').modal('hide');
+        const form = $(this);
+        const formData = new FormData(this);
+        const kegiatan_id = $('input[name="kegiatan_id"]').val();
+        const isEdit = kegiatan_id !== '';
 
-                    // Refresh halaman atau reload data tabel
-                    location.reload(); // atau bisa juga: fetchResults();
-                },
-                error: function (xhr) {
-                    // Tampilkan pesan error dengan SweetAlert
-                    Swal.fire({
-                        position: 'center',
-                        icon: 'error',
-                        title: 'Gagal menghapus data',
-                        text: xhr.responseJSON?.message || 'Terjadi kesalahan saat menghapus.',
-                        showConfirmButton: true
-                    });
+        // Submit form via AJAX
+        submitForm(form, formData, isEdit);
+    });
 
-                    console.error(xhr.responseText);
+    // Fungsi untuk submit form
+    function submitForm(form, formData, isEdit) {
+        const url = form.attr('action');
+        const method = 'POST';
+
+        $.ajax({
+            url: url,
+            type: method,
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // Jika response adalah JSON (AJAX)
+                if (typeof response === 'object') {
+                    if (response.success) {
+                        // Tutup modal
+                        $('#showModal').modal('hide');
+
+                        // Tampilkan notifikasi sukses
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'success',
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2000,
+                            showCloseButton: true
+                        }).then(() => {
+                            // Refresh halaman
+                            location.reload();
+                        });
+                    } else {
+                        // Tampilkan error
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'error',
+                            title: response.message,
+                            showConfirmButton: true
+                        });
+                    }
+                } else {
+                    // Jika response bukan JSON (redirect), maka reload halaman
+                    // Ini seharusnya tidak terjadi karena kita set AJAX, tapi untuk jaga-jaga
+                    location.reload();
                 }
-            });
+            },
+            error: function(xhr) {
+                let errorMessage = 'Terjadi kesalahan saat menyimpan data';
+
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                Swal.fire({
+                    position: 'center',
+                    icon: 'error',
+                    title: 'Gagal menyimpan data',
+                    text: errorMessage,
+                    showConfirmButton: true
+                });
+            }
         });
-        //end
-    </script>
+    }
+
+    // Saat modal ditutup, reset form
+    $('#showModal').on('hidden.bs.modal', function() {
+        $('#entity').prop('disabled', false);
+        $('#status').prop('disabled', false);
+        $('#start_date').prop('disabled', false);
+        $('#end_date').prop('disabled', false);
+
+        // Reset tombol copy
+        $('#copy-token-btn, #copy-url-btn').prop('disabled', true);
+    });
+
+    // Delete functionality
+    $('.btn-delete').on('click', function() {
+        var id = $(this).data('id');
+        $('#tusi_id').val(id);
+    });
+
+    $('#delete-record').on('click', function() {
+        var id = $('#tusi_id').val();
+        $.ajax({
+            url: "/kegiatan/delete/" + id,
+            type: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: response.message || 'Data deleted successfully!',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    showCloseButton: true
+                });
+                $('#deleteOrder').modal('hide');
+                location.reload();
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    position: 'center',
+                    icon: 'error',
+                    title: 'Gagal menghapus data',
+                    text: xhr.responseJSON?.message || 'Terjadi kesalahan saat menghapus.',
+                    showConfirmButton: true
+                });
+                console.error(xhr.responseText);
+            }
+        });
+    });
+</script>
 @endsection

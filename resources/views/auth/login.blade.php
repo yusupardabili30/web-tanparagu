@@ -1,67 +1,146 @@
-@extends('layouts.secondary')
+@extends('layouts.auth')
 @section('mycontent')
-<div class="auth-page-wrapper pt-5">
-    <!-- auth page bg -->
-    <div class="auth-one-bg-position auth-one-bg" id="auth-particles">
-        {{-- <div class="bg-overlay"></div>
+<!DOCTYPE html>
+<html lang="id">
 
-        <div class="shape">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1440 120">
-                <path d="M 0,36 C 144,53.6 432,123.2 720,124 C 1008,124.8 1296,56.8 1440,40L1440 140L0 140z"></path>
-            </svg>
-        </div> --}}
-    </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
 
-    <!-- auth page content -->
-    <div class="auth-page-content">
-        <div class="container">
-            <div class="left">
-                <h2>Selamat Datang di Tautan Pemetaan</h2>
-                <h2>Kebutuhan Belajar Guru</h2>
-            </div>
+<body>
+    <div class="auth-container">
+        <!-- Bagian Kiri: Carousel -->
+        <div class="info-section">
+            <div class="carousel-container">
+                <div class="carousel-content">
+                    <h1 class="system-name">
+                        <img src="{{ asset('images/logobgtkputih.png') }}" class="system-logo" alt="Logo">
+                    </h1>
 
-            <!-- Kanan: Form Login -->
-            <div class="right">
-                <div class="p-2 mt-4">
-                    <form action="{{ route('authenticate') }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Enter username" style="max-width: 400px;">
-                        </di
-                        <div class="mb-3">
-                            <label class="form-label" for="password-input">Password</label>
-                            <div class="position-relative auth-pass-inputgroup mb-3">
-                                <input type="password" name="password" class="form-control pe-5 password-input" placeholder="Enter password" id="password-input" style="max-width: 400px;">
-                                <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
+                    <div id="infoCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#infoCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#infoCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                            <button type="button" data-bs-target="#infoCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                        </div>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="{{ asset('images/1.jpg') }}" class="carousel-image" alt="Team Collaboration">
+                                <div class="carousel-caption">
+                                    <h5>Kolaborasi Tim</h5>
+                                    <p>Bekerja sama untuk mencapai tujuan bersama</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img src="{{ asset('images/2.jpg') }}" class="carousel-image" alt="Technology">
+                                <div class="carousel-caption">
+                                    <h5>Teknologi Modern</h5>
+                                    <p>Menggunakan teknologi terkini untuk solusi terbaik</p>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <img src="{{ asset('images/3.jpg') }}" class="carousel-image" alt="Meeting">
+                                <div class="carousel-caption">
+                                    <h5>Diskusi Produktif</h5>
+                                    <p>Berbagi ide untuk inovasi yang lebih baik</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="mt-4">
-                            <button class="btn btn-success w-100" type="submit" style="max-width: 400px;">Masuk</button>
-                        </div>
-                    </form>  
-                </div> 
-            </div>             
-        </div>
-        <!-- end container -->
-    </div>
-    <!-- end auth page content -->
-
-    <!-- footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="text-center">
-                        <p class="mb-0 text-muted">&copy;
-                            <script>document.write(new Date().getFullYear())</script>
-                        </p>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#infoCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#infoCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </footer>
-    <!-- end Footer -->
-</div>
-<!-- container-fluid -->
-@endsection
+
+        <!-- Bagian Kanan: Form Login -->
+        <div class="login-section">
+            <div class="login-form-container">
+                <div class="login-logo">
+                    <h2 class="login-title">
+                        <img src="{{ asset('images/logobgtkhitam.png') }}" class="login-title-icon" alt="Login Icon">
+                    </h2>
+                    <p class="login-subtitle">Silahkan Masuk</p>
+                </div>
+
+                <!-- Menampilkan pesan error jika ada -->
+                @if ($errors->any())
+                <div class="alert alert-danger mb-3">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                <form action="{{ route('authenticate') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="user_name" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Enter username" value="{{ old('user_name') }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
+                            <span class="input-group-text password-toggle" id="password-toggle">
+                                <i class="ri-eye-fill"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button class="btn btn-login text-white" type="submit">Masuk</button>
+                    </div>
+                </form>
+
+                <!-- Galeri Foto di Bawah Form Login -->
+                <div class="photo-gallery">
+                    <img src="{{ asset('images/logo.jpg') }}" class="gallery-photo" alt="Photo 1">
+                    <img src="{{ asset('images/logoPendidikan.png') }}" class="gallery-photo" alt="Photo 2">
+                    <img src="{{ asset('images/logoRamah.png') }}" class="gallery-photo" alt="Photo 3">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle visibility password
+        document.getElementById('password-toggle').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('ri-eye-fill');
+                icon.classList.add('ri-eye-off-fill');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('ri-eye-off-fill');
+                icon.classList.add('ri-eye-fill');
+            }
+        });
+
+        // Auto slide carousel
+        const myCarousel = document.getElementById('infoCarousel');
+        const carousel = new bootstrap.Carousel(myCarousel, {
+            interval: 4000,
+            wrap: true
+        });
+    </script>
+</body>
+
+</html>

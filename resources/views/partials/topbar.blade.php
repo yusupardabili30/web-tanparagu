@@ -6,7 +6,7 @@
                 <div class="navbar-brand-box horizontal-logo">
                     <a href="{{ route('home') }}" class="logo logo-dark">
                         <span class="logo-sm">
-                            <img src="{{asset('build')}}/images/logo-sm.png" alt="" height="22">
+                            <img src="{{asset('build')}}/images/logo-sm.png" alt="" height="80">
                         </span>
                         <span class="logo-lg">
                             <img src="{{asset('build')}}/images/logo-dark.png" alt="" height="40">
@@ -15,7 +15,7 @@
 
                     <a href="{{ route('home') }}" class="logo logo-light">
                         <span class="logo-sm">
-                            <img src="{{asset('build')}}/images/logo-sm.png" alt="" height="22">
+                            <img src="{{asset('build')}}/images/logo-sm.png" alt="" height="80">
                         </span>
                         <span class="logo-lg">
                             <img src="{{asset('build')}}/images/logo-light.png" alt="" height="40">
@@ -49,20 +49,20 @@
                                 <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{auth()->user()->nama}}</span>
                                 <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">
                                     @switch(auth()->user()->role_id)
-                                        @case(1)
-                                            Administrator
-                                            @break
-                                        @case(2)
-                                            Supervisor
-                                            @break
-                                        @case(3)
-                                            Katim
-                                            @break
-                                        @case(4)
-                                            Tim
-                                            @break
-                                        @default
-                                            Role Tidak Terdaftar
+                                    @case(1)
+                                    Administrator
+                                    @break
+                                    @case(2)
+                                    Supervisor
+                                    @break
+                                    @case(3)
+                                    Katim
+                                    @break
+                                    @case(4)
+                                    Tim
+                                    @break
+                                    @default
+                                    Role Tidak Terdaftar
                                     @endswitch
                                     {{-- {{auth()->user()->role_id}} --}}
                                 </span>
@@ -76,11 +76,11 @@
                         <a class="dropdown-item" href="apps-tasks-kanban.html"><i class="mdi mdi-calendar-check-outline text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Taskboard</span></a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="auth-lockscreen-basic.html"><i class="mdi mdi-lock text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Lock screen</span></a> --}}
-                        
+
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
                             <button class="dropdown-item" type="submit"><i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> Log Out</button>
-                        </form> 
+                        </form>
                     </div>
                 </div>
             </div>

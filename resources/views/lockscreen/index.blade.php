@@ -1,4 +1,4 @@
-@extends('layouts.secondary')
+@extends('layouts.auth')
 @section('mycontent')
-ini lock scree
+
 @endsection
