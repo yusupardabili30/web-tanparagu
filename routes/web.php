@@ -87,3 +87,5 @@ Route::get('/instrumen/soal/{sub_indikator_id}', [SoalController::class, 'getSoa
 // Soal Routes (existing routes)
 Route::get('/soal/{soal_id}', [SoalController::class, 'getSingleSoal']);
 Route::post('/submit-jawaban', [SoalController::class, 'submitJawaban']);
+
+//yusup
