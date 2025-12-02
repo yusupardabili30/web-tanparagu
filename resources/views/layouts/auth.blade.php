@@ -206,14 +206,6 @@
         color: #721c24;
     }
 
-    .system-logo {
-        width: 200px;
-        height: auto;
-        object-fit: contain;
-        display: block;
-        margin-bottom: 15px;
-        /* 🔥 JARAK KE BAWAH */
-    }
 
     .system-name {
         margin: 0;

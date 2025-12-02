@@ -9,7 +9,7 @@
                             <img src="{{asset('build')}}/images/logo-sm.png" alt="" height="80">
                         </span>
                         <span class="logo-lg">
-                            <img src="{{asset('build')}}/images/logo-dark.png" alt="" height="100">
+                            <img src="{{asset('build')}}/images/logo-dark.png" alt="" height="40">
                         </span>
                     </a>
 
@@ -18,7 +18,7 @@
                             <img src="{{asset('build')}}/images/logo-sm.png" alt="" height="80">
                         </span>
                         <span class="logo-lg">
-                            <img src="{{asset('build')}}/images/logo-light.png" alt="" height="100">
+                            <img src="{{asset('build')}}/images/logo-light.png" alt="" height="40">
                         </span>
                     </a>
                 </div>
@@ -41,7 +41,7 @@
                     </button>
                 </div>
 
-                
+
             </div>
         </div>
     </div>

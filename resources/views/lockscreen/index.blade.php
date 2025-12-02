@@ -111,7 +111,7 @@
                     <form action="{{ route('lockscreen.unlock') }}" method="POST">
                         @csrf
                         <!-- Input hidden untuk kegiatan_id -->
-                        <input type="hidden" name="kegiatan_id" value="{{ $kegiatan_id }}">
+                        <input type="text" name="kegiatan_id" value="{{ $kegiatan_id }}">
 
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">

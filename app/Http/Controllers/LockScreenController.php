@@ -10,6 +10,7 @@ class LockScreenController extends Controller
 {
     public function index($encode_kegiatan_id)
     {
+
         if (count(Hashids::decode($encode_kegiatan_id)) === 0) {
             abort(404);
         }
@@ -32,6 +33,7 @@ class LockScreenController extends Controller
     public function unlock_screen(Request $request)
     {
         $request->validate([
+
             'password' => 'required',
             'kegiatan_id' => 'required'
         ]);
@@ -81,5 +83,4 @@ class LockScreenController extends Controller
 
         return redirect('/')->with('info', 'Anda telah logout dari lockscreen');
     }
-
 }
