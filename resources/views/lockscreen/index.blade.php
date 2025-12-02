@@ -1,8 +1,7 @@
 @extends('layouts.auth')
 @section('mycontent')
-<!DOCTYPE html>
-<html lang="id">
 
+<<<<<<< HEAD
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,8 +16,8 @@
         <div class="info-section">
             <div class="carousel-container">
                 <div class="carousel-content">
-                    <h1 class="system-name">
-                        <img src="{{ asset('images/logobgtkputih.png') }}" class="system-logo" alt="Logo">
+                    <h1 class="system-name" style="margin-top: -100px;">
+                        <img src="{{ asset('build/images/logobgtkPutih.png') }}" class="system-logo" alt="Logo" style="width: 250px; height: auto;">>
                     </h1>
 
                     <div id="infoCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -64,11 +63,14 @@
         </div>
 
         <!-- Bagian Kanan: Form Login -->
-        <div class="login-section">
+        <div class="login-section"style="margin-top: 80px;">
             <div class="login-form-container">
                 <div class="login-logo">
-                    <h2 class="login-title">
-                        <img src="{{ asset('images/logobgtkhitam.png') }}" class="login-title-icon" alt="Login Icon">
+                    <h2 class="login-title" style="margin-bottom: 40px;">
+                        <img src="{{ asset('build/images/logo-dark.png') }}" 
+                        class="login-title-icon" 
+                        alt="Login Icon" 
+                        style="width: 400px; height:auto;">>
                     </h2>
                     <p class="login-subtitle">Masuk ke Sistem Assesmen</p>
 
@@ -111,7 +113,7 @@
                     <form action="{{ route('lockscreen.unlock') }}" method="POST">
                         @csrf
                         <!-- Input hidden untuk kegiatan_id -->
-                        <input type="text" name="kegiatan_id" value="{{ $kegiatan_id }}">
+                        <input type="hidden" name="kegiatan_id" value="{{ $kegiatan_id }}">
 
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -149,7 +151,6 @@
 
                 <!-- Galeri Logo di Bawah Form Login -->
                 <div class="photo-gallery">
-                    <img src="{{ asset('images/logo.jpg') }}" class="gallery-photo" alt="Logo 1">
                     <img src="{{ asset('images/logoPendidikan.png') }}" class="gallery-photo" alt="Logo Pendidikan">
                     <img src="{{ asset('images/logoRamah.png') }}" class="gallery-photo" alt="Logo Ramah">
                 </div>
@@ -236,3 +237,6 @@
 </body>
 
 </html>
+=======
+@endsection
+>>>>>>> f8379aa0312d4d5d96e9b1cfc0a50c99c8c4f739

@@ -145,6 +145,14 @@
             transform: translateY(-10px);
         }
         }
+        .navbar-brand-box img,
+        .navbar-brand img,
+        .logo img,
+        .logo-lg img,
+        .logo-sm img {
+            margin-top: 15px !important;
+        }
+
         </style>
 
 </head>

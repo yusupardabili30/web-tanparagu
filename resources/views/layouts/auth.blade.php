@@ -214,24 +214,6 @@
         line-height: 0;
     }
 
-    .login-title-icon {
-        width: 300px;
-        height: auto;
-        object-fit: contain;
-        display: inline-block;
-        margin: 0;
-    }
-
-
-    .login-title {
-        font-size: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        line-height: 0 !important;
-        text-align: center;
-    }
-
-
 
     @media (max-width: 992px) {
         .auth-container {
