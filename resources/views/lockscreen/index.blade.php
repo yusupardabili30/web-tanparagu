@@ -154,6 +154,3 @@
 </body>
 
 </html>
-=======
-@endsection
->>>>>>> f8379aa0312d4d5d96e9b1cfc0a50c99c8c4f739
