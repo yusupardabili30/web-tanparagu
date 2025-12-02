@@ -67,14 +67,9 @@
                                     <td class="client_name">{{ $row->kegiatan_name }}</td>
                                     <td class="client_name">{{ $row->entity }}</td>
                                     <td class="client_name">{{ $row->instrumen_token }}</td>
-                                    {{-- <td class="client_name">
+                                    <td class="client_name">
                                         <a href="{{ config('app.url') . '/' . $row->instrumen_url }}" target="_blank">
                                             {{ config('app.url') . '/' . $row->instrumen_url }}
-                                        </a>
-                                    </td> --}}
-                                    <td class="client_name">
-                                        <a href="{{ route('lockscreen.lock', ['encode_kegiatan_id'=> Hashids::encode($row->kegiatan_id)]) }}" target="_blank">
-                                            {{ route('lockscreen.lock', ['encode_kegiatan_id' => Hashids::encode($row->kegiatan_id)]) }}
                                         </a>
                                     </td>
                                     {{-- Di bagian status --}}

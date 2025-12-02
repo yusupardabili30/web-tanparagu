@@ -45,7 +45,7 @@ Route::post('/auth/authenticate/logout', [AuthController::class, 'logout'])->nam
 
 
 //Tanparagu
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/home', [HomeController::class, 'index'])->name('admin.home');
 Route::get('/home/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // Kegiatan Routes
