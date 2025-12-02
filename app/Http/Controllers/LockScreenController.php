@@ -61,10 +61,24 @@ class LockScreenController extends Controller
         session([
             'lockscreen_authenticated' => true,
             'lockscreen_kegiatan_id' => $kegiatan->kegiatan_id,
-            'kegiatan_name' => $kegiatan->kegiatan_name
+            'kegiatan_name' => $kegiatan->kegiatan_name,
+            'kegiatan_token' => $kegiatan->instrumen_token
         ]);
 
         // Redirect langsung ke halaman PTK tanpa parameter
         return redirect()->route('ptk');
+    }
+
+    // Tambahkan method logout
+    public function logout()
+    {
+        session()->forget([
+            'lockscreen_authenticated',
+            'lockscreen_kegiatan_id',
+            'kegiatan_name',
+            'kegiatan_token'
+        ]);
+
+        return redirect('/')->with('info', 'Anda telah logout dari lockscreen');
     }
 }

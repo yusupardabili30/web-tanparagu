@@ -1,56 +1,65 @@
-<style>
-/* Override kuat untuk card kiri */
-#company-view-detail.card {
-    border-radius: 16px !important;
-    box-shadow: 0 6px 25px rgba(0,0,0,0.07) !important;
+/* ============================================================
+   BOX PROFIL — Premium Style
+============================================================ */
+#profile-box.card {
+    border-radius: 18px !important;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0) !important;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.08) !important;
     border: none !important;
+    padding-top: 20px !important;
 }
 
-#company-view-detail:hover .avatar-md {
-    transform: scale(1.07) !important;
-    transition: .3s ease !important;
+/* Avatar efek */
+#profile-box .avatar-md {
+    transform: scale(1);
+    transition: 0.3s ease;
 }
 
-#company-view-detail h5 {
+#profile-box:hover .avatar-md {
+    transform: scale(1.08);
+}
+
+/* Title profil */
+#profile-box h5 {
     font-weight: 700 !important;
+    color: #1e293b !important;
 }
 
-#company-view-detail p {
-    font-size: 14px !important;
+/* Subtext profil */
+#profile-box p {
     color: #64748b !important;
 }
 
-#company-view-detail table td:first-child {
+/* Table profil */
+#profile-box table td:first-child {
     font-weight: 600 !important;
     color: #334155 !important;
 }
 
-/* Card kanan */
-#companyList.card {
-    border-radius: 16px !important;
-    border: none !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.06) !important;
+
+/* ============================================================
+   BOX KEGIATAN — Flat Clean
+============================================================ */
+#kegiatan-box.card {
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.04) !important;
+}
+
+#kegiatan-box .card-header {
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
 }
 
 /* Table header */
-.table-light th {
-    background: #f8fafc !important;
-    font-weight: 600 !important;
-    color: #334155 !important;
-}
-
-#companyList tbody tr:hover {
+#kegiatan-box .table-light th {
     background: #f1f5f9 !important;
+    font-weight: 600 !important;
 }
 
-#companyList .image_src {
-    border-radius: 50% !important;
-    border: 2px solid #e5e7eb !important;
+/* Hover row */
+#kegiatan-box tbody tr:hover {
+    background: #f8fafc !important;
+    transition: .2s;
 }
-
-.pagination .active a.page {
-    background: #6366f1 !important;
-    color: white !important;
-    border-radius: 8px !important;
-}
-</style>
