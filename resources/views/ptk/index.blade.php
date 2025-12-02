@@ -48,8 +48,8 @@
                         <!-- FOTO USER -->
                         <div class="me-4">
                             <img src="{{ asset('assets/images/brands/mail_chimp.png') }}"
-                                 class="rounded-circle"
-                                 style="width:95px; height:95px; object-fit:cover;">
+                                class="rounded-circle"
+                                style="width:95px; height:95px; object-fit:cover;">
                         </div>
 
                         <!-- DETAIL PROFIL -->
@@ -124,7 +124,7 @@
 
     <!-- TOGGLE SCRIPT -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const collapse = document.getElementById('profilCollapse');
             const icon = document.getElementById('iconToggle');
 
@@ -150,7 +150,7 @@
 
             <div class="card border-0 shadow-sm" style="border-radius:14px;">
                 <div class="card-header"
-                     style="background:#1a5bb8; color:white; border-radius:14px 14px 0 0;">
+                    style="background:#1a5bb8; color:white; border-radius:14px 14px 0 0;">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0 text-white">Informasi Kegiatan</h5>
                         <div class="text-white">
@@ -214,7 +214,7 @@
                                         <i class="ri-information-line me-2"></i> Informasi Kegiatan
                                     </h6>
 
-                                   <table class="table table-borderless mb-0">
+                                    <table class="table table-borderless mb-0">
                                         <tbody>
 
                                             <tr class="row-blue">
@@ -236,9 +236,9 @@
                                                 <td class="fw-semibold">Status</td>
                                                 <td>:
                                                     @if($kegiatan->status == 'Active')
-                                                        <span class="badge bg-success">Aktif</span>
+                                                    <span class="badge bg-success">Aktif</span>
                                                     @else
-                                                        <span class="badge bg-secondary">Tidak Aktif</span>
+                                                    <span class="badge bg-secondary">Tidak Aktif</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -260,14 +260,20 @@
 
                                     <table class="table table-borderless mb-0">
                                         <tbody>
-                                            <tr><td><b>Tanggal Mulai</b></td><td>: {{ $start_date }}</td></tr>
-                                            <tr><td><b>Tanggal Selesai</b></td><td>: {{ $end_date }}</td></tr>
+                                            <tr>
+                                                <td><b>Tanggal Mulai</b></td>
+                                                <td>: {{ $start_date }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Tanggal Selesai</b></td>
+                                                <td>: {{ $end_date }}</td>
+                                            </tr>
                                             <tr>
                                                 <td><b>Durasi</b></td>
                                                 <td>:
                                                     @php
-                                                        $start = \Carbon\Carbon::parse($kegiatan->start_date);
-                                                        $end = \Carbon\Carbon::parse($kegiatan->end_date);
+                                                    $start = \Carbon\Carbon::parse($kegiatan->start_date);
+                                                    $end = \Carbon\Carbon::parse($kegiatan->end_date);
                                                     @endphp
                                                     {{ $start->diffInDays($end) + 1 }} hari
                                                 </td>
@@ -276,8 +282,8 @@
                                                 <td><b>Sisa Waktu</b></td>
                                                 <td>:
                                                     @php
-                                                        $now = \Carbon\Carbon::now();
-                                                        $remaining = $now->diffInDays($end, false);
+                                                    $now = \Carbon\Carbon::now();
+                                                    $remaining = $now->diffInDays($end, false);
                                                     @endphp
 
                                                     @if($remaining > 0)
@@ -314,8 +320,8 @@
 
                             <div class="ms-auto">
                                 <a class="btn btn-outline-danger btn-sm"
-                                   href="{{ route('lockscreen.logout') }}">
-                                   Logout
+                                    href="{{ route('lockscreen.logout') }}">
+                                    Logout
                                 </a>
                             </div>
                         </div>
@@ -329,4 +335,3 @@
     </div>
 
 </div>
-
