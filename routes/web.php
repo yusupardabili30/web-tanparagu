@@ -25,7 +25,7 @@ use App\Http\Controllers\LockScreenController;
 | Routes UI
 |--------------------------------------------------------------------------
 */
-Route::get('/ui', [UiController::class, 'index'])->name('home');
+Route::get('/ui', [UiController::class, 'index'])->name('ui');
 /*
 |--------------------------------------------------------------------------
 | End Routes UI
@@ -50,7 +50,7 @@ Route::get('/kegiatan', [KegiatanController::class, 'index'])->name('kegiatan.in
 Route::get('/kegiatan/get/{kegiatan_id}', [KegiatanController::class, 'get'])->name('kegiatan.get');
 Route::post('/kegiatan/submit', [KegiatanController::class, 'store'])->name('kegiatan.store');
 
-Route::get('/lockscreen/{encode_kegiatan_id}', [LockScreenController::class, 'index'])->name('lockscreen');
+Route::get('/lockscreen/{encode_kegiatan_id}', [LockScreenController::class, 'index'])->name('lockscreen.lock');
 Route::post('/lockscreen/unlock', [LockScreenController::class, 'unlock_screen'])->name('lockscreen.unlock');
 
 Route::get('/ptk', [PtkController::class, 'index'])->name('ptk');
@@ -64,6 +64,7 @@ Route::get('/instrumen/soal/{sub_indikator_id}', [SoalController::class, 'getSoa
 
 Route::get('/soal/{soal_id}', [SoalController::class, 'getSingleSoal']);
 Route::post('/submit-jawaban', [SoalController::class, 'submitJawaban']);
+Route::get('/soal', [SoalController::class, 'index']);
 
 
 

@@ -1,4 +1,169 @@
 @extends('layouts.main')
+@section('mycss')
+<style>
+        .studi-kasus-container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .studi-kasus-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-in-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .studi-kasus-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .studi-kasus-content {
+            padding: 20px;
+        }
+        .soal-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        .soal-teks {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .pilihan-list {
+            list-style: none;
+            padding: 0;
+        }
+        .pilihan-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .pilihan-teks {
+            flex: 1;
+            font-size: 14px;
+        }
+        .bobot {
+            font-weight: bold;
+            color: #28a745;
+            background: #d4edda;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .aksi {
+            margin-top: 20px;
+            text-align: right;
+        }
+        button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .edit-soal-btn {
+            background: #ffc107;
+            color: #212529;
+        }
+        .edit-soal-btn:hover {
+            background: #e0a800;
+        }
+        .add-soal-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background: #28a745;
+        }
+        .add-soal-btn:hover {
+            background: #218838;
+        }
+        /* Modal Edit */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .pilihan-edit {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .pilihan-edit input[type="text"] {
+            flex: 1;
+        }
+        .pilihan-edit input[type="number"] {
+            width: 80px;
+        }
+        </style>
+@endsection
 @section('mycontent')
 <div class="container-fluid">
     <!-- start page title -->
@@ -25,7 +190,7 @@
             <div class="card" id="ticketsList">
                 <div class="card-header border-0">
                     <div class="d-flex align-items-center">
-                        <h5 class="card-title mb-0 flex-grow-1">{{ $tittle }}</h5>
+                        <h5 class="card-title mb-0 flex-grow-1"></h5>
                         <div class="flex-shrink-0">
                             <div class="d-flex flex-wrap gap-2">
                                 <button class="btn btn-danger add-btn" data-bs-toggle="modal" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i> Tambah {{ $tittle }}</button>
@@ -38,76 +203,40 @@
                 <!--end card-body-->
                 <div class="card-body">
                     <div class="table-responsive table-card mb-4">
-                        <table class="table align-middle table-nowrap mb-0" id="ticketTable">
-                            <thead>
-                                <tr>
-                                    <th scope="col" style="width: 40px;">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="checkAll" value="option">
-                                        </div>
-                                    </th>
-                                    <th class="sort" data-sort="id">ID</th>
-                                    <th class="sort" data-sort="kegiatan">Kegiatan</th>
-                                    <th class="sort" data-sort="kegiatan">Entitas</th>
-                                    <th class="sort" data-sort="kegiatan">Token</th>
-                                    <th class="sort" data-sort="kegiatan">url</th>
-                                    <th class="sort" data-sort="kegiatan">status</th>
-                                    <th class="sort" data-sort="action">Action</th>
-                                </tr>
-                            </thead>
+                        <table class="table align-middle mb-0" id="ticketTable">
+                            {{-- {{dd($data)}} --}}
                             <tbody class="list form-check-all" id="ticket-list-data">
                                 @foreach ($data as $row)
                                 <tr>
-                                    <th scope="row">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="checkAll" value="option1">
-                                        </div>
-                                    </th>
-                                    <td class="id"><a href="javascript:void(0);" onclick="ViewTickets(this)" data-id="001" class="fw-medium link-primary">{{ $row->kegiatan_id }}</a></td>
-                                    <td class="client_name">{{ $row->kegiatan_name }}</td>
-                                    <td class="client_name">{{ $row->entity }}</td>
-                                    <td class="client_name">{{ $row->instrumen_token }}</td>
-                                    {{-- <td class="client_name">
-                                        <a href="{{ config('app.url') . '/' . $row->instrumen_url }}" target="_blank">
-                                            {{ config('app.url') . '/' . $row->instrumen_url }}
-                                        </a>
-                                    </td> --}}
-                                    <td class="client_name">
-                                        <a href="{{ route('lockscreen.lock', ['encode_kegiatan_id'=> Hashids::encode($row->kegiatan_id)]) }}" target="_blank">
-                                            {{ route('lockscreen.lock', ['encode_kegiatan_id' => Hashids::encode($row->kegiatan_id)]) }}
-                                        </a>
-                                    </td>
-                                    <td class="client_name">{{ $row->status }}</td>
                                     <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-soft-secondary btn-sm dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="ri-more-fill align-middle"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end">
-                                                <li><button 
-                                                        class="dropdown-item btn-view"
-                                                        href="#showModal" 
-                                                        data-bs-toggle="modal"
-                                                        data-id="{{$row->kegiatan_id}}"
-                                                    ><i class="ri-eye-fill align-bottom me-2 text-muted"></i> View</button></li>
-                                                <li>
-                                                    <a 
-                                                        class="dropdown-item edit-item-btn btn-edit" 
-                                                        href="#showModal" 
-                                                        data-bs-toggle="modal"
-                                                        data-id="{{$row->kegiatan_id}}"
-                                                    >
-                                                    <i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edit</a></li>
-                                                <li>
-                                                    <a class="dropdown-item remove-item-btn btn-delete" 
-                                                        data-bs-toggle="modal" 
-                                                        href="#deleteOrder"
-                                                        data-id="{{$row->kegiatan_id}}"
-                                                    >
-                                                        <i class="ri-delete-bin-fill align-bottom me-2 text-muted"></i> Delete
-                                                    </a>
-                                                </li>
-                                            </ul>
+                                        <div class="studi-kasus-container" id="studiKasusContainer">
+                                            <div class="studi-kasus-card">
+                                                <div class="studi-kasus-header">{{ $row->sub_indikator_code . ' ' .$row->sub_indikator->sub_indikator_name }}</div>                                                
+                                                <div class="studi-kasus-content">
+                                                    <p>{{$row->case}}</p>
+                                                    <div class="soal-item">
+                                                        @foreach ($row->soal as $item)                                                           
+                                                            <div class="soal-teks">Soal {{ $item->no_urut }} : {{ $item->soal }}</div>
+                                                             @foreach ($item->soal_jawaban as $item)
+                                                            <ul class="pilihan-list">
+                                                                <li class="pilihan-item">
+                                                                   
+                                                                        <div class="pilihan-teks">{{$item->pilihan_jawaban}}</div>
+                                                                        <div class="bobot">Bobot: {{$item->bobot}}</div>
+                                                                    
+                                                                </li>                                                            
+                                                            </ul>
+                                                            @endforeach
+                                                        @endforeach
+                                                        <button class="edit-soal-btn">Edit Soal</button>
+                                                    </div>                                                    
+                                                    <div class="aksi">
+                                                        <button>Edit Studi Kasus</button>
+                                                        <button>Hapus Studi Kasus</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button class="add-soal-btn">Tambah Studi Kasus Baru</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -148,7 +277,7 @@
     </div>
     <!--end row-->
 
-    @include('partials.modal.kegiatan.add')
+    {{-- @include('partials.modal.kegiatan.add') --}}
 </div>
 @endsection
 

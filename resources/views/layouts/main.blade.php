@@ -3,7 +3,7 @@
 <head>
 
     @include("partials.title-meta")
-
+    @yield("mycss")
     <!-- jsvectormap css -->
     <link href="{{asset('build')}}/libs/jsvectormap/css/jsvectormap.min.css" rel="stylesheet" type="text/css" />
 

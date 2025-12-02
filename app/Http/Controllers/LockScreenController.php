@@ -10,10 +10,12 @@ class LockScreenController extends Controller
 {
     public function index($encode_kegiatan_id)
     {
+        
         if (count(Hashids::decode($encode_kegiatan_id)) === 0) {
             abort(404); 
         }
         $kegiatan_id= Hashids::decode($encode_kegiatan_id)[0];
+
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)
                             ->where('status','Active')->first();
         if (!$kegiatan) {
@@ -34,7 +36,9 @@ class LockScreenController extends Controller
         }
         
 
-        return redirect()->route('ptk.search', $request->nik);
+        //return redirect()->route('ptk.search', $request->nik);
+        return redirect()->Route
+        return redirect()->route('lockscreen.profil', $request->kegiatan_id, $request->nip);
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
