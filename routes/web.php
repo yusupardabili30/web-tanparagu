@@ -27,7 +27,7 @@ use App\Http\Controllers\LockScreenController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/ui', [UiController::class, 'index'])->name('home');
+Route::get('/home', [UiController::class, 'index'])->name('home');
 /*
 |--------------------------------------------------------------------------
 | End Routes UI
@@ -45,7 +45,7 @@ Route::post('/auth/authenticate/logout', [AuthController::class, 'logout'])->nam
 
 
 //Tanparagu
-Route::get('/home', [HomeController::class, 'index'])->name('admin.home');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // Kegiatan Routes
@@ -55,20 +55,26 @@ Route::get('/kegiatan/get/{kegiatan_id}', [KegiatanController::class, 'get'])->n
 Route::delete('/kegiatan/delete/{kegiatan_id}', [KegiatanController::class, 'delete'])->name('kegiatan.delete');
 Route::post('/kegiatan/submit', [KegiatanController::class, 'store'])->name('kegiatan.store');
 
+//Lockscreen Routes
 Route::get('/lockscreen/{encode_kegiatan_id}', [LockScreenController::class, 'index'])->name('lockscreen');
-// Lockscreen Routes
-Route::get('/lockscreen/{encode_kegiatan_id}', [LockScreenController::class, 'index'])->name('lockscreen');
-Route::post('/lockscreen/check-ptk', [LockScreenController::class, 'check_ptk'])->name('lockscreen.check-ptk');
-Route::post('/lockscreen/create-ptk', [LockScreenController::class, 'create_ptk'])->name('lockscreen.create-ptk');
-Route::get('/lockscreen/token/{ptk_id}/{encode_kegiatan_id}', [LockScreenController::class, 'show_token_form'])->name('lockscreen.token');
 Route::post('/lockscreen/unlock', [LockScreenController::class, 'unlock_screen'])->name('lockscreen.unlock');
 Route::get('/lockscreen/logout', [LockScreenController::class, 'logout'])->name('lockscreen.logout');
 
-// PTK Routes (tanpa session)
-Route::get('/ptk/{ptk_id}/{encode_kegiatan_id}', [PtkController::class, 'show'])->name('ptk.show');
-Route::get('/ptk/search/{nik}', [PtkController::class, 'search'])->name('ptk.search');
-Route::get('/ptk/start/{ptk_id}/{encode_kegiatan_id}', [PtkController::class, 'startQuiz'])->name('ptk.start-quiz');
-Route::get('/ptk/continue/{ptk_id}/{encode_kegiatan_id}', [PtkController::class, 'continueQuiz'])->name('ptk.continue-quiz');
+
+// 3. Route untuk cek session (opsional, untuk AJAX)
+Route::get('/check-session', function () {
+    return response()->json([
+        'authenticated' => session()->has('lockscreen_authenticated'),
+        'kegiatan_name' => session('kegiatan_name'),
+        'kegiatan_id' => session('lockscreen_kegiatan_id')
+    ]);
+});
+
+// PTK Routes
+Route::get('/ptk', [PtkController::class, 'index'])->name('ptk');
+Route::get('/ptk/{nik}', [PtkController::class, 'search'])->name('ptk.search');
+Route::get('/ptk/start/{kegiatan_id}', [PtkController::class, 'startQuiz'])->name('ptk.start-quiz');
+Route::get('/ptk/continue/{kegiatan_id}', [PtkController::class, 'continueQuiz'])->name('ptk.continue-quiz');
 
 // Quiz Routes (existing routes)
 Route::get('/quiz/{sub_indikator_id}/{no_urut}', [SoalController::class, 'quiz'])->name('quiz.show');
