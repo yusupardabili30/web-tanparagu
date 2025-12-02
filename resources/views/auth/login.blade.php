@@ -18,7 +18,10 @@
             <div class="carousel-container">
                 <div class="carousel-content">
                     <h1 class="system-name">
-                        <img src="{{ asset('images/logobgtkputih.png') }}" class="system-logo" alt="Logo">
+                        <img src="{{ asset('build/images/logobgtkPutih.png') }}"
+                            class="system-logo"
+                            style="width: 250px; height: auto;"
+                            alt="Logo">
                     </h1>
 
                     <div id="infoCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -63,15 +66,23 @@
             </div>
         </div>
 
-        <!-- Bagian Kanan: Form Login -->
-        <div class="login-section">
-            <div class="login-form-container">
-                <div class="login-logo">
-                    <h2 class="login-title">
-                        <img src="{{ asset('images/logobgtkhitam.png') }}" class="login-title-icon" alt="Login Icon">
-                    </h2>
-                    <p class="login-subtitle">Silahkan Masuk</p>
-                </div>
+
+            <!-- Bagian Kanan: Form Login -->
+            <div class="login-section" style="margin-top:40px;">
+                <div class="login-form-container">
+                    <div class="login-logo">
+                        <h2 class="login-title" style="margin-bottom: 40px;">
+                            <img src="{{ asset('') }}" 
+                                class="login-title-icon" 
+                                alt="Login Icon"
+                                style="width: 400px; height:auto;">
+                        </h2>
+
+                        <p class="login-subtitle" style="margin-bottom: 50px;">
+                            Masuk ke Sistem Assesmen
+                        </p>
+
+                    </div>
 
                 <!-- Menampilkan pesan error jika ada -->
                 @if ($errors->any())
@@ -108,7 +119,6 @@
 
                 <!-- Galeri Foto di Bawah Form Login -->
                 <div class="photo-gallery">
-                    <img src="{{ asset('images/logo.jpg') }}" class="gallery-photo" alt="Photo 1">
                     <img src="{{ asset('images/logoPendidikan.png') }}" class="gallery-photo" alt="Photo 2">
                     <img src="{{ asset('images/logoRamah.png') }}" class="gallery-photo" alt="Photo 3">
                 </div>
