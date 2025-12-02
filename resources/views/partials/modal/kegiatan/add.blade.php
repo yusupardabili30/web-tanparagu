@@ -41,7 +41,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <div class="form-floating">
-                                    <select class="form-select" name="status" id="status" required>
+                                    <select class="form-select" name="status_id" id="status_id" required>
                                         <option value="Active">Active</option>
                                         <option value="Inactive">Inactive</option>
                                     </select>

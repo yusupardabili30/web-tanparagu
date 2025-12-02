@@ -21,77 +21,95 @@ class KegiatanController extends Controller
     public function store(Request $request)
     {
         date_default_timezone_set('Asia/Jakarta');
+        $token = Kegiatan::generateToken();
 
-        try {
-            // Jika kegiatan_id kosong, berarti create baru
-            if (empty($request->kegiatan_id)) {
-                // Generate token dan URL sekaligus
-                $token = Kegiatan::generateToken();
-
-                // Generate URL dengan placeholder ID dulu, nanti diupdate setelah create
-                $tempUrl = 'temp-' . uniqid();
-
-                $data = [
+        try{
+            Kegiatan::updateOrCreate([
+                'kegiatan_id' => $request->kegiatan_id
+            ],[
                     'kegiatan_name' => $request->kegiatan,
                     'entity' => $request->entity,
                     'start_date' => $request->start_date,
                     'end_date' => $request->end_date,
-                    'status' => $request->status,
+                    'status' => $request->status_id,
                     'instrumen_token' => $token,
-                    'instrumen_url' => $tempUrl,
                     'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                     'modified_at' => Carbon::now()->format('Y-m-d H:i:s')
-                ];
+            ]);
+            return redirect()->route('kegiatan.index')->with('success', 'Data berhasil ditambahkan');
 
-                // Create data sekali saja
-                $kegiatan = Kegiatan::create($data);
-
-                // Update URL dengan kegiatan_id yang sebenarnya
-                $kegiatan->instrumen_url = Kegiatan::generateUrl($kegiatan->kegiatan_id);
-                $kegiatan->save();
-
-                $message = 'Data berhasil ditambahkan';
-            } else {
-                // Untuk update existing data
-                $data = [
-                    'kegiatan_name' => $request->kegiatan,
-                    'entity' => $request->entity,
-                    'start_date' => $request->start_date,
-                    'end_date' => $request->end_date,
-                    'status' => $request->status,
-                    'modified_at' => Carbon::now()->format('Y-m-d H:i:s')
-                ];
-
-                $kegiatan = Kegiatan::updateOrCreate(
-                    ['kegiatan_id' => $request->kegiatan_id],
-                    $data
-                );
-
-                $message = 'Data berhasil diubah';
-            }
-
-            // Jika request AJAX, return JSON
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $message
-                ]);
-            }
-
-            return redirect()->route('kegiatan.index')->with('success', $message);
-        } catch (\Throwable $e) {
-            $errorMessage = 'Terjadi kesalahan: ' . $e->getMessage();
-
-            // Jika request AJAX, return JSON error
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $errorMessage
-                ], 500);
-            }
-
+        }catch(Throwable $e){
+            // dd($e);
+            $errorMessage = 'Data berhasil ditambahkan';
             return redirect()->back()->with('error', $errorMessage);
         }
+
+        // try {
+        //     // Jika kegiatan_id kosong, berarti create baru
+        //     if (empty($request->kegiatan_id)) {
+        //         // Generate token dan URL sekaligus
+        //         $token = Kegiatan::generateToken();
+
+        //         $data = [
+        //             'kegiatan_name' => $request->kegiatan,
+        //             'entity' => $request->entity,
+        //             'start_date' => $request->start_date,
+        //             'end_date' => $request->end_date,
+        //             'status' => $request->status_id,
+        //             'instrumen_token' => $token,
+        //             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        //             'modified_at' => Carbon::now()->format('Y-m-d H:i:s')
+        //         ];
+
+        //         // Create data sekali saja
+        //         $kegiatan = Kegiatan::create($data);
+
+        //         // Update URL dengan kegiatan_id yang sebenarnya
+        //         $kegiatan->instrumen_url = Kegiatan::generateUrl($kegiatan->kegiatan_id);
+        //         $kegiatan->save();
+
+        //         $message = 'Data berhasil ditambahkan';
+        //     } else {
+        //         // Untuk update existing data
+        //         $data = [
+        //             'kegiatan_name' => $request->kegiatan,
+        //             'entity' => $request->entity,
+        //             'start_date' => $request->start_date,
+        //             'end_date' => $request->end_date,
+        //             'status' => $request->status,
+        //             'modified_at' => Carbon::now()->format('Y-m-d H:i:s')
+        //         ];
+
+        //         $kegiatan = Kegiatan::updateOrCreate(
+        //             ['kegiatan_id' => $request->kegiatan_id],
+        //             $data
+        //         );
+
+        //         $message = 'Data berhasil diubah';
+        //     }
+
+        //     // Jika request AJAX, return JSON
+        //     if ($request->ajax()) {
+        //         return response()->json([
+        //             'success' => true,
+        //             'message' => $message
+        //         ]);
+        //     }
+
+        //     return redirect()->route('kegiatan.index')->with('success', $message);
+        // } catch (\Throwable $e) {
+        //     $errorMessage = 'Terjadi kesalahan: ' . $e->getMessage();
+
+        //     // Jika request AJAX, return JSON error
+        //     if ($request->ajax()) {
+        //         return response()->json([
+        //             'success' => false,
+        //             'message' => $errorMessage
+        //         ], 500);
+        //     }
+
+        //     return redirect()->back()->with('error', $errorMessage);
+        // }
     }
 
     public function get($kegiatan_id)

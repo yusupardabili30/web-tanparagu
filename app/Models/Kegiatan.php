@@ -30,7 +30,7 @@ class Kegiatan extends Model
     // Method untuk generate token otomatis (unik) - 16 karakter
     public static function generateToken()
     {
-        return substr(bin2hex(random_bytes(8)), 0, 16);
+        return substr(bin2hex(random_bytes(8)), 0, 6);
     }
 
     // Method untuk generate URL otomatis - menggunakan encoded kegiatan_id

@@ -60,16 +60,6 @@ Route::get('/lockscreen/{encode_kegiatan_id}', [LockScreenController::class, 'in
 Route::post('/lockscreen/unlock', [LockScreenController::class, 'unlock_screen'])->name('lockscreen.unlock');
 Route::get('/lockscreen/logout', [LockScreenController::class, 'logout'])->name('lockscreen.logout');
 
-
-// 3. Route untuk cek session (opsional, untuk AJAX)
-Route::get('/check-session', function () {
-    return response()->json([
-        'authenticated' => session()->has('lockscreen_authenticated'),
-        'kegiatan_name' => session('kegiatan_name'),
-        'kegiatan_id' => session('lockscreen_kegiatan_id')
-    ]);
-});
-
 // PTK Routes
 Route::get('/ptk', [PtkController::class, 'index'])->name('ptk');
 Route::get('/ptk/{nik}', [PtkController::class, 'search'])->name('ptk.search');
@@ -77,7 +67,7 @@ Route::get('/ptk/start/{kegiatan_id}', [PtkController::class, 'startQuiz'])->nam
 Route::get('/ptk/continue/{kegiatan_id}', [PtkController::class, 'continueQuiz'])->name('ptk.continue-quiz');
 
 // Quiz Routes (existing routes)
-Route::get('/quiz/{sub_indikator_id}/{no_urut}', [SoalController::class, 'quiz'])->name('quiz.show');
+Route::get('/quiz/kegiatanid/{encoded_kegiatan_id}/user/{nip}/quiz/{sub_indikator_id}/{no_urut}', [SoalController::class, 'quiz'])->name('quiz.show');
 Route::post('/quiz/submit', [SoalController::class, 'submit'])->name('quiz.submit');
 
 // Instrumen Routes (existing routes)
@@ -87,5 +77,3 @@ Route::get('/instrumen/soal/{sub_indikator_id}', [SoalController::class, 'getSoa
 // Soal Routes (existing routes)
 Route::get('/soal/{soal_id}', [SoalController::class, 'getSingleSoal']);
 Route::post('/submit-jawaban', [SoalController::class, 'submitJawaban']);
-
-//yusup

@@ -56,7 +56,11 @@
                                 </tr>
                             </thead>
                             <tbody class="list form-check-all" id="ticket-list-data">
+                                
                                 @foreach ($data as $row)
+                                @php
+                                    $encoded_kegiatan_id = \Vinkla\Hashids\Facades\Hashids::encode($row->kegiatan_id);
+                                @endphp
                                 <tr>
                                     <th scope="row">
                                         <div class="form-check">
@@ -68,10 +72,15 @@
                                     <td class="client_name">{{ $row->entity }}</td>
                                     <td class="client_name">{{ $row->instrumen_token }}</td>
                                     <td class="client_name">
+                                        <a href="{{ route('lockscreen', ['encode_kegiatan_id' => $encoded_kegiatan_id]) }}" target="_blank">
+                                            {{ route('lockscreen', ['encode_kegiatan_id' => $encoded_kegiatan_id]) }}
+                                        </a>
+                                    </td>
+                                    {{-- <td class="client_name">
                                         <a href="{{ config('app.url') . '/' . $row->instrumen_url }}" target="_blank">
                                             {{ config('app.url') . '/' . $row->instrumen_url }}
                                         </a>
-                                    </td>
+                                    </td> --}}
                                     {{-- Di bagian status --}}
                                     <td class="client_name">
                                         @if($row->status == 'Active')
