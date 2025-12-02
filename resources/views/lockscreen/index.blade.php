@@ -40,26 +40,29 @@
         overflow: hidden;
     }
 
-        .carousel-container {
-            position: relative;
-        }
+    .carousel-container {
+        position: relative;
+    }
 
-        .carousel-logo {
-            position: absolute;
-            top: 40px;
-            left: 70px;        /* ⬅️ LOGO DIGESER KE KANAN */
-            z-index: 20;
-        }
+    .carousel-logo {
+        position: absolute;
+        top: 40px;
+        left: 70px;
+        /* ⬅️ LOGO DIGESER KE KANAN */
+        z-index: 20;
+    }
 
-        .system-logo {
-            width: 250px !important;
-            height: auto;
-        }
+    .system-logo {
+        width: 250px !important;
+        height: auto;
+    }
 
     .lock-logo-wrapper {
         position: absolute;
-        top: 40px;      /* geser atas */
-        left: 70px;     /* geser kanan */
+        top: 40px;
+        /* geser atas */
+        left: 70px;
+        /* geser kanan */
         z-index: 20;
     }
 
@@ -328,8 +331,9 @@
         margin-bottom: 2rem;
     }
 
-   .login-title-icon {
-        width: 250px !important;   /* paksa ukuran berubah */
+    .login-title-icon {
+        width: 250px !important;
+        /* paksa ukuran berubah */
         height: auto !important;
     }
 
@@ -390,6 +394,7 @@
         }
     }
 </style>
+
 <body>
     <div class="auth-container">
 
@@ -533,5 +538,3 @@
 </body>
 
 </html>
-
-
