@@ -27,7 +27,7 @@ use App\Http\Controllers\LockScreenController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/home', [UiController::class, 'index'])->name('home');
+Route::get('/ui', [UiController::class, 'index'])->name('ui');
 /*
 |--------------------------------------------------------------------------
 | End Routes UI
