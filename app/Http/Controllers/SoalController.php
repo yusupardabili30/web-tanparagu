@@ -132,7 +132,7 @@ class SoalController extends Controller
 
         // Jika bobot = 4 → lanjut ke soal berikutnya
         if ($bobot == 4) {
-            $nextSoal = Soal::where('sub_indikator_id', $sub_indikator_id)
+            $nextSoal = Soal::where('sub_indikator_id', Hashids::decode($encoded_sub_indikator_id)[0])
                 ->where('no_urut', $current_no_urut + 1)
                 ->first();
 
@@ -150,7 +150,7 @@ class SoalController extends Controller
         }
 
         // Jika bobot != 4 → pindah ke sub_indikator berikutnya
-        $nextSubIndikator = $sub_indikator_id + 1;
+        $nextSubIndikator = Hashids::decode($encoded_sub_indikator_id)[0] + 1;
 
         $cekSoal = Soal::where('sub_indikator_id', $nextSubIndikator)->first();
         if (!$cekSoal) {
@@ -159,7 +159,7 @@ class SoalController extends Controller
 
         // Encode next sub_indikator_id dan mulai dari no_urut = 1
         $next_encoded_sub_indikator_id = Hashids::encode($nextSubIndikator);
-        $next_encoded_no_urut = Hashids::encode(1);
+        $next_encoded_no_urut = Hashids::encode(1);//kembali ke no urut 1 pada subindikator baru
 
         return redirect()->route('quiz.show', [
             'encoded_kegiatan_id' => $encoded_kegiatan_id,
