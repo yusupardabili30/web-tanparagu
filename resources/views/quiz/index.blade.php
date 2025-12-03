@@ -54,7 +54,10 @@
                                 @csrf
 
                                 <input type="hidden" name="soal_id" value="{{ $soal->soal_id }}">
-                                <input type="hidden" name="sub_indikator_id" value="{{ $soal->sub_indikator_id }}">
+                                <input type="text" name="encoded_kegiatan_id" value="{{ request()->route('encoded_kegiatan_id') }}">
+                                <input type="text" name="encoded_sub_indikator_id" value="{{ request()->route('encoded_sub_indikator_id') }}">
+                                <input type="text" name="encoded_no_urut" value="{{ request()->route('encoded_no_urut') }}">
+                                <input type="text" placeholder="nip" name="nip" value="{{ request()->route('nip') }}">
                                 <input type="text" name="bobot" id="bobot">
 
                                 @foreach ($choices as $c)

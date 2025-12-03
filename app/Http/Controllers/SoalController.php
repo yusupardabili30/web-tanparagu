@@ -15,8 +15,14 @@ class SoalController extends Controller
 {
     public function index()
     {
-        // $soal = SoalCase::with('soal')->paginate(10);
+        $soal = SoalCase::with('soal')->paginate(10);
         $soal = SoalCase::with(['soal.soal_jawaban', 'sub_indikator'])->paginate(1);
+        return $soal;
+        $soal = DB::table('users')
+                ->join('contacts', 'users.id', '=', 'contacts.user_id')
+                ->join('orders', 'users.id', '=', 'orders.user_id')
+                ->select('users.*', 'contacts.phone', 'orders.price')
+                ->get();
         return view('soal.index', [
             'tittle' => 'Soal',
             'data' => $soal
@@ -41,7 +47,9 @@ class SoalController extends Controller
 
         // Lanjutkan dengan logika yang sudah ada, hanya ubah parameter input
         $soal = Soal::find(1);
+        
         $case = $soal->soal_case;
+
 
         $no_urut = request()->get('no_urut', $no_urut);
 
@@ -78,15 +86,21 @@ class SoalController extends Controller
 
     public function submit(Request $request)
     {
-        $request->validate([
-            'soal_id' => 'required',
-            'sub_indikator_id' => 'required',
-            'pilihan_jawaban_id' => 'required',
-            'encoded_kegiatan_id' => 'required', // Tambahkan
-            'encoded_sub_indikator_id' => 'required', // Tambahkan
-            'encoded_no_urut' => 'required', // Tambahkan
-            'nip' => 'required' // Tambahkan
-        ]);
+
+        try {
+        //     $request->validate([
+        //     'soal_id' => 'required',
+        //     'sub_indikator_id' => 'required',
+        //     'pilihan_jawaban_id' => 'required',
+        //     'encoded_kegiatan_id' => 'required', // Tambahkan
+        //     'encoded_sub_indikator_id' => 'required', // Tambahkan
+        //     'encoded_no_urut' => 'required', // Tambahkan
+        //     'nip' => 'required' // Tambahkan
+        // ]);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+
 
         $soal_id = $request->soal_id;
         $sub_indikator_id = $request->sub_indikator_id;
@@ -108,6 +122,7 @@ class SoalController extends Controller
         }
 
         $jawaban = SoalJawaban::where('soal_jawaban_id', $jawaban_id)->first();
+        
 
         if (!$jawaban) {
             return redirect()->back()->with('error', 'Jawaban tidak ditemukan');

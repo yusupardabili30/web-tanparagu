@@ -84,7 +84,7 @@ Route::get('/ptk/start/{encode_kegiatan_id}/{nip}', [PtkController::class, 'star
 Route::get('/ptk/continue/{encode_kegiatan_id}/{nip}', [PtkController::class, 'continueQuiz'])->name('ptk.continue-quiz');
 
 // Quiz Routes (encoded_kegiatan_id)
-Route::get('/quiz/kegiatan/{encoded_kegiatan_id}/user/{nip}/quiz/{encoded_sub_indikator_id}/{encoded_no_urut}', [SoalController::class, 'quiz'])->name('quiz.show');
+Route::get('/quiz/kegiatan/{encoded_kegiatan_id}/user/{nip}/sub/{encoded_sub_indikator_id}/no/{encoded_no_urut}', [SoalController::class, 'quiz'])->name('quiz.show');
 Route::post('/quiz/submit', [SoalController::class, 'submit'])->name('quiz.submit');
 Route::get('/quiz/finish', [SoalController::class, 'finish'])->name('quiz.finish');
 
