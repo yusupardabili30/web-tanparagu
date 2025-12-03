@@ -19,7 +19,6 @@
     </div>
     <!-- end page title -->
 
-
     <div class="row">
         <div class="col-lg-12">
             <div class="card" id="ticketsList">
@@ -56,10 +55,10 @@
                                 </tr>
                             </thead>
                             <tbody class="list form-check-all" id="ticket-list-data">
-                                
+
                                 @foreach ($data as $row)
                                 @php
-                                    $encoded_kegiatan_id = \Vinkla\Hashids\Facades\Hashids::encode($row->kegiatan_id);
+                                $encoded_kegiatan_id = \Vinkla\Hashids\Facades\Hashids::encode($row->kegiatan_id);
                                 @endphp
                                 <tr>
                                     <th scope="row">
@@ -76,12 +75,6 @@
                                             {{ route('lockscreen', ['encode_kegiatan_id' => $encoded_kegiatan_id]) }}
                                         </a>
                                     </td>
-                                    {{-- <td class="client_name">
-                                        <a href="{{ config('app.url') . '/' . $row->instrumen_url }}" target="_blank">
-                                            {{ config('app.url') . '/' . $row->instrumen_url }}
-                                        </a>
-                                    </td> --}}
-                                    {{-- Di bagian status --}}
                                     <td class="client_name">
                                         @if($row->status == 'Active')
                                         <span class="badge bg-success">Active</span>
@@ -163,6 +156,27 @@
 
 @section('sipproja-js')
 <script>
+    // NOTIFIKASI SWEETALERT DARI CONTROLLER
+    @if(session('success'))
+    Swal.fire({
+        position: 'center',
+        icon: 'success',
+        title: '{{ session("success") }}',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
+    @endif
+
+    @if(session('error'))
+    Swal.fire({
+        position: 'center',
+        icon: 'error',
+        title: '{{ session("error") }}',
+        showConfirmButton: true
+    });
+    @endif
+
     // Fungsi untuk copy text ke clipboard
     function copyToClipboard(text, element) {
         navigator.clipboard.writeText(text).then(function() {
@@ -206,7 +220,7 @@
     // Event listener untuk tombol copy token
     $(document).on('click', '#copy-token-btn', function() {
         const tokenValue = $('#token_display').val();
-        if (tokenValue && tokenValue !== 'Akan digenerate otomatis (16 karakter)') {
+        if (tokenValue && tokenValue !== 'Akan digenerate otomatis') {
             copyToClipboard(tokenValue, this);
         }
     });
@@ -230,7 +244,7 @@
         $('input[name="kegiatan_id"]').val('');
         $('input[name="kegiatan"]').val('');
         $('#entity').val('');
-        $('#status').val('Active');
+        $('#status_id').val('Active');
         $('#start_date').val('');
         $('#end_date').val('');
         $('#token_display').val('');
@@ -242,11 +256,14 @@
         $('#end_date').val(today);
 
         // Generate preview
-        $('#token_display').val('Akan digenerate otomatis (16 karakter)');
+        $('#token_display').val('Akan digenerate otomatis');
         $('#url_display').val('Akan digenerate otomatis');
 
         // Nonaktifkan tombol copy
         $('#copy-token-btn, #copy-url-btn').prop('disabled', true);
+
+        // Aktifkan semua field
+        $('#entity, #status_id, #start_date, #end_date, input[name="kegiatan"]').prop('disabled', false);
     });
 
     // start btn-view
@@ -260,16 +277,34 @@
             $('input[name="kegiatan_id"]').val(data.kegiatan_id);
             $('input[name="kegiatan"]').val(data.kegiatan_name);
             $('#entity').val(data.entity).prop('disabled', true);
-            $('#status').val(data.status).prop('disabled', true);
+            $('#status_id').val(data.status).prop('disabled', true);
             $('#start_date').val(data.start_date).prop('disabled', true);
             $('#end_date').val(data.end_date).prop('disabled', true);
-            $('#token_display').val(data.instrumen_token);
-            $('#url_display').val("{{ config('app.url') }}/" + data.instrumen_url);
 
-            // Aktifkan tombol copy
-            $('#copy-token-btn, #copy-url-btn').prop('disabled', false);
+            // Tampilkan token yang sudah ada
+            $('#token_display').val(data.instrumen_token || 'Token tidak tersedia');
+
+            // Generate URL untuk view - PAKAI CARA SAMA DENGAN TABLE
+            const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
+            const baseUrl = window.location.origin;
+            $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
+
+            // Aktifkan tombol copy jika ada data
+            if (data.instrumen_token && data.instrumen_token !== '') {
+                $('#copy-token-btn').prop('disabled', false);
+            }
+            if ($('#url_display').val() && $('#url_display').val() !== '') {
+                $('#copy-url-btn').prop('disabled', false);
+            }
 
             $('#showModal').modal('show');
+        }).fail(function() {
+            Swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: 'Gagal memuat data',
+                showConfirmButton: true
+            });
         });
     });
 
@@ -285,99 +320,44 @@
             $('input[name="kegiatan_id"]').val(data.kegiatan_id);
             $('input[name="kegiatan"]').val(data.kegiatan_name);
             $('#entity').val(data.entity).prop('disabled', false);
-            $('#status').val(data.status).prop('disabled', false);
+            $('#status_id').val(data.status).prop('disabled', false);
             $('#start_date').val(data.start_date).prop('disabled', false);
             $('#end_date').val(data.end_date).prop('disabled', false);
-            $('#token_display').val(data.instrumen_token);
-            $('#url_display').val("{{ config('app.url') }}/" + data.instrumen_url);
 
-            // Aktifkan tombol copy
-            $('#copy-token-btn, #copy-url-btn').prop('disabled', false);
+            // Tampilkan token yang sudah ada
+            $('#token_display').val(data.instrumen_token || 'Token tidak tersedia');
+
+            // Generate URL untuk edit - PAKAI CARA SAMA DENGAN TABLE
+            const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
+            const baseUrl = window.location.origin;
+            $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
+
+            // Aktifkan tombol copy jika ada data
+            if (data.instrumen_token && data.instrumen_token !== '') {
+                $('#copy-token-btn').prop('disabled', false);
+            }
+            if ($('#url_display').val() && $('#url_display').val() !== '') {
+                $('#copy-url-btn').prop('disabled', false);
+            }
 
             $('#showModal').modal('show');
+        }).fail(function() {
+            Swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: 'Gagal memuat data',
+                showConfirmButton: true
+            });
         });
     });
 
-    // Handle form submit untuk edit dan tambah
-    $('form.tablelist-form').on('submit', function(e) {
-        e.preventDefault();
-
-        const form = $(this);
-        const formData = new FormData(this);
-        const kegiatan_id = $('input[name="kegiatan_id"]').val();
-        const isEdit = kegiatan_id !== '';
-
-        // Submit form via AJAX
-        submitForm(form, formData, isEdit);
-    });
-
-    // Fungsi untuk submit form
-    function submitForm(form, formData, isEdit) {
-        const url = form.attr('action');
-        const method = 'POST';
-
-        $.ajax({
-            url: url,
-            type: method,
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                // Jika response adalah JSON (AJAX)
-                if (typeof response === 'object') {
-                    if (response.success) {
-                        // Tutup modal
-                        $('#showModal').modal('hide');
-
-                        // Tampilkan notifikasi sukses
-                        Swal.fire({
-                            position: 'center',
-                            icon: 'success',
-                            title: response.message,
-                            showConfirmButton: false,
-                            timer: 2000,
-                            showCloseButton: true
-                        }).then(() => {
-                            // Refresh halaman
-                            location.reload();
-                        });
-                    } else {
-                        // Tampilkan error
-                        Swal.fire({
-                            position: 'center',
-                            icon: 'error',
-                            title: response.message,
-                            showConfirmButton: true
-                        });
-                    }
-                } else {
-                    // Jika response bukan JSON (redirect), maka reload halaman
-                    // Ini seharusnya tidak terjadi karena kita set AJAX, tapi untuk jaga-jaga
-                    location.reload();
-                }
-            },
-            error: function(xhr) {
-                let errorMessage = 'Terjadi kesalahan saat menyimpan data';
-
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMessage = xhr.responseJSON.message;
-                }
-
-                Swal.fire({
-                    position: 'center',
-                    icon: 'error',
-                    title: 'Gagal menyimpan data',
-                    text: errorMessage,
-                    showConfirmButton: true
-                });
-            }
-        });
-    }
+    // FORM SUBMIT TIDAK PERLU AJAX - Biarkan form submit normal
+    // Karena controller sudah redirect dengan session message
 
     // Saat modal ditutup, reset form
     $('#showModal').on('hidden.bs.modal', function() {
         $('#entity').prop('disabled', false);
-        $('#status').prop('disabled', false);
+        $('#status_id').prop('disabled', false);
         $('#start_date').prop('disabled', false);
         $('#end_date').prop('disabled', false);
 
@@ -403,13 +383,15 @@
                 Swal.fire({
                     position: 'center',
                     icon: 'success',
-                    title: response.message || 'Data deleted successfully!',
+                    title: response.message || 'Data berhasil dihapus!',
                     showConfirmButton: false,
                     timer: 2000,
                     showCloseButton: true
                 });
                 $('#deleteOrder').modal('hide');
-                location.reload();
+                setTimeout(function() {
+                    location.reload();
+                }, 2000);
             },
             error: function(xhr) {
                 Swal.fire({

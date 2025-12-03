@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kegiatan;
+use App\Models\Ptk;
+use App\Models\PtkJabatan;
 use Illuminate\Http\Request;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -10,38 +12,50 @@ class LockScreenController extends Controller
 {
     public function index($encode_kegiatan_id)
     {
+        // $encode_kegiatan_id adalah kegiatan_id yang sudah di-encode
         if (count(Hashids::decode($encode_kegiatan_id)) === 0) {
-            abort(404);
+            // Tampilkan halaman kegiatan tidak aktif untuk semua kasus error
+            return view('errors.inactive-kegiatan', [
+                'title' => 'Akses Ditolak',
+                'message' => 'Link tidak valid atau kegiatan tidak ditemukan.'
+            ]);
         }
+
+        // Decode untuk mendapatkan kegiatan_id asli
         $kegiatan_id = Hashids::decode($encode_kegiatan_id)[0];
+
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)
             ->where('status', 'Active')->first();
 
         if (!$kegiatan) {
-            abort(404);
+            // Tampilkan halaman kegiatan tidak aktif
+            return view('errors.inactive-kegiatan', [
+                'title' => 'Kegiatan Tidak Aktif',
+                'message' => 'Kegiatan sudah tidak aktif atau tidak ditemukan.'
+            ]);
         }
+
+        $jabatans = PtkJabatan::orderBy('nama_jabatan')->get();
 
         return view('lockscreen.index', [
             'title' => 'Lock Screen',
-            'kegiatan_id' => $encode_kegiatan_id,
-            'kegiatan' => $kegiatan
+            'encode_kegiatan_id' => $encode_kegiatan_id,
+            'kegiatan_id' => $kegiatan_id,
+            'kegiatan' => $kegiatan,
+            'jabatans' => $jabatans
         ]);
     }
 
-    public function unlock_screen(Request $request)
+
+    public function authenticate(Request $request)
     {
         $request->validate([
-
-            'password' => 'required',
-            'kegiatan_id' => 'required'
+            'nip' => 'required',
+            'token' => 'required',
+            'kegiatan_id' => 'required' // Ini adalah kegiatan_id asli (belum encode)
         ]);
 
-        // Decode kegiatan_id
-        if (count(Hashids::decode($request->kegiatan_id)) === 0) {
-            return back()->withErrors(['error' => 'ID kegiatan tidak valid'])->withInput();
-        }
-
-        $kegiatan_id = Hashids::decode($request->kegiatan_id)[0];
+        $kegiatan_id = $request->kegiatan_id;
 
         // Cari kegiatan yang aktif
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)
@@ -49,36 +63,125 @@ class LockScreenController extends Controller
             ->first();
 
         if (!$kegiatan) {
-            return back()->withErrors(['error' => 'Kegiatan tidak aktif atau tidak ditemukan'])->withInput();
+            return response()->json([
+                'success' => false,
+                'message' => 'Kegiatan tidak aktif atau tidak ditemukan'
+            ]);
         }
 
         // Verifikasi token dari kegiatan
-        if ($request->password !== $kegiatan->instrumen_token) {
-            return back()->withErrors(['password' => 'Token tidak valid'])->withInput();
+        if ($request->token !== $kegiatan->instrumen_token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token tidak valid'
+            ]);
         }
 
-        // Simpan informasi di session
-        session([
-            'lockscreen_authenticated' => true,
-            'lockscreen_kegiatan_id' => $kegiatan->kegiatan_id,
-            'kegiatan_name' => $kegiatan->kegiatan_name,
-            'kegiatan_token' => $kegiatan->instrumen_token
-        ]);
+        // Cek apakah NIP ada di database
+        $ptk = Ptk::where('nip', $request->nip)->first();
 
-        // Redirect langsung ke halaman PTK tanpa parameter
-        return redirect()->route('ptk');
+        if (!$ptk) {
+            return response()->json([
+                'success' => false,
+                'show_register_modal' => true,
+                'nip' => $request->nip,
+                'kegiatan_id' => $kegiatan_id, // Kirim kegiatan_id asli
+                'token' => $request->token
+            ]);
+        }
+
+        // ENCODE kegiatan_id untuk URL PTK
+        $encoded_kegiatan_id = Hashids::encode($kegiatan_id);
+
+        // Redirect ke halaman PTK dengan encode_kegiatan_id
+        return response()->json([
+            'success' => true,
+            'redirect_url' => route('ptk.show', [
+                'encode_kegiatan_id' => $encoded_kegiatan_id, // Gunakan encoded ID
+                'nip' => $request->nip
+            ])
+        ]);
     }
 
-    // Tambahkan method logout
-    public function logout()
+    public function register(Request $request)
     {
-        session()->forget([
-            'lockscreen_authenticated',
-            'lockscreen_kegiatan_id',
-            'kegiatan_name',
-            'kegiatan_token'
+        $request->validate([
+            'nip' => 'required|unique:ptk,nip',
+            'nik' => 'nullable|max:16',
+            'nuptk' => 'nullable|max:19',
+            'npwp' => 'nullable|max:20',
+            'nama' => 'required|max:200',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tempat_lahir' => 'required|max:45',
+            'tgl_lahir' => 'required|date',
+            'id_jabatan' => 'required|exists:ptk_jabatan,id_jabatan',
+            'email' => 'required|email|max:100',
+            'no_hp' => 'required|max:16',
+            'agama' => 'nullable|max:45',
+            'pendidikan' => 'nullable|max:100',
+            'alamat_rumah' => 'nullable|max:200',
+            'instansi' => 'nullable|max:100',
+            'kegiatan_id' => 'required|integer', // kegiatan_id asli
+            'token' => 'required'
         ]);
 
-        return redirect('/')->with('info', 'Anda telah logout dari lockscreen');
+        $kegiatan_id = $request->kegiatan_id;
+
+        // Verifikasi token kegiatan
+        $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)
+            ->where('instrumen_token', $request->token)
+            ->where('status', 'Active')
+            ->first();
+
+        if (!$kegiatan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token tidak valid atau kegiatan tidak aktif'
+            ]);
+        }
+
+        try {
+            // Ambil nama jabatan berdasarkan id_jabatan
+            $jabatan = PtkJabatan::find($request->id_jabatan);
+            $nama_jabatan = $jabatan ? $jabatan->nama_jabatan : null;
+
+            // Buat data PTK baru
+            $ptk = Ptk::create([
+                'nip' => $request->nip,
+                'nik' => $request->nik,
+                'nuptk' => $request->nuptk,
+                'nama' => $request->nama,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'tempat_lahir' => $request->tempat_lahir,
+                'tgl_lahir' => $request->tgl_lahir,
+                'jabatan' => $nama_jabatan,
+                'email' => $request->email,
+                'no_hp' => $request->no_hp,
+                'npwp' => $request->npwp,
+                'agama' => $request->agama,
+                'pendidikan' => $request->pendidikan,
+                'alamat_rumah' => $request->alamat_rumah,
+                'instansi' => $request->instansi,
+                'last_update' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Registrasi berhasil! Silakan login dengan NIP Anda.',
+                'nip' => $request->nip
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error registering PTK: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
+    // public function logout()
+    // {
+    //     return redirect('/')->with('info', 'Anda telah logout dari sistem');
+    // }
 }

@@ -47,7 +47,6 @@
                                     </select>
                                     <label for="status">Status</label>
                                 </div>
-                                <small class="text-muted">Kontrol akses token dan URL lockscreen</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -64,31 +63,28 @@
                                     <input type="date" class="form-control" name="end_date" id="end_date" required>
                                     <label for="end_date">Tanggal Selesai</label>
                                 </div>
-                                <small class="text-muted">Informasi tanggal kegiatan (tidak mempengaruhi token)</small>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="token_display" class="form-label">Token (16 karakter, Auto Generate)</label>
+                                <label for="token_display" class="form-label">Token</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" name="token_display" id="token_display" placeholder="Token" readonly>
-                                    <button type="button" class="btn btn-outline-secondary" id="copy-token-btn" title="Salin token">
+                                    <input type="text" class="form-control" name="token_display" id="token_display" placeholder="Akan digenerate otomatis" readonly>
+                                    <button type="button" class="btn btn-outline-secondary" id="copy-token-btn" title="Salin token" disabled>
                                         <i class="ri-file-copy-line"></i>
                                     </button>
                                 </div>
-                                <small class="text-muted">Token unik 16 karakter untuk keperluan internal</small>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="url_display" class="form-label">URL Lockscreen (Auto Generate)</label>
+                                <label for="url_display" class="form-label">URL Lockscreen</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" name="url_display" id="url_display" placeholder="URL" readonly>
-                                    <button type="button" class="btn btn-outline-secondary" id="copy-url-btn" title="Salin URL">
+                                    <input type="text" class="form-control" name="url_display" id="url_display" placeholder="Akan digenerate otomatis" readonly>
+                                    <button type="button" class="btn btn-outline-secondary" id="copy-url-btn" title="Salin URL" disabled>
                                         <i class="ri-file-copy-line"></i>
                                     </button>
                                 </div>
-                                <small class="text-muted">URL untuk akses lockscreen peserta</small>
                             </div>
                         </div>
                     </div>
