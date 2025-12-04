@@ -58,20 +58,19 @@
                                 <input type="text" name="bobot" id="bobot">
 
                                 @foreach ($choices as $c)
-                                    <div class="form-check mb-2">
-                                        <input 
-                                            class="form-check-input pilihan" 
-                                            type="radio"
-                                            name="pilihan_jawaban_id"
-                                            id="choice{{ $c->soal_jawaban_id }}"
-                                            value="{{ $c->soal_jawaban_id }}"
-                                            data-bobot="{{ $c->bobot }}"
-                                            required
-                                        >
-                                        <label class="form-check-label" for="choice{{ $c->soal_jawaban_id }}" style="text-align: justify;">
-                                            {{ $c->pilihan_jawaban }}
-                                        </label>
-                                    </div>
+                                <div class="form-check mb-2">
+                                    <input
+                                        class="form-check-input pilihan"
+                                        type="radio"
+                                        name="pilihan_jawaban_id"
+                                        id="choice{{ $c->soal_jawaban_id }}"
+                                        value="{{ $c->soal_jawaban_id }}"
+                                        data-bobot="{{ $c->bobot }}"
+                                        required>
+                                    <label class="form-check-label" for="choice{{ $c->soal_jawaban_id }}" style="text-align: justify;">
+                                        {{ $c->pilihan_jawaban }}
+                                    </label>
+                                </div>
                                 @endforeach
 
                                 <button type="submit" class="btn btn-primary mt-3">Jawab</button>
@@ -91,13 +90,13 @@
 
 @section('sipproja-js')
 <script>
-$(document).ready(function(){    
-    // Tambahkan logika JS di sini jika dibutuhkan
-    document.querySelectorAll('.pilihan').forEach(radio => {
-    radio.addEventListener('change', function() {
-         document.getElementById('bobot').value = this.dataset.bobot;
+    $(document).ready(function() {
+        // Tambahkan logika JS di sini jika dibutuhkan
+        document.querySelectorAll('.pilihan').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('bobot').value = this.dataset.bobot;
+            });
+        });
     });
-});
-});
 </script>
 @endsection
