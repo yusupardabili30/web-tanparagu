@@ -8,9 +8,13 @@
                         <span class="logo-sm">
                             <img src="{{asset('build')}}/images/logo-sm.png" alt="" height="15">
                         </span>
-                        <span class="logo-lg">
-                            <img src="{{asset('build')}}/images/logo-dark.png" alt="" height="40">
+                        <span class="logo-lg" style="align-self:flex-start !important;">
+                            <img src="{{asset('build')}}/images/tanparagu.png"
+                                alt=""
+                                height="60"
+                                style="position:relative; top:-10px;">
                         </span>
+
                     </a>
 
                     <a href="{{ route('home') }}" class="logo logo-light">

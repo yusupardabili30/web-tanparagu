@@ -74,70 +74,47 @@
                             </thead>
 
                             <tbody>
-                                @php
-                                // Data dummy riwayat kegiatan
-                                $riwayatDummy = [
-                                [
-                                'nama' => 'Pelatihan Guru Nasional',
-                                'token' => 'XX12AB',
-                                'entity' => 'DITPSDM',
-                                'tgl_mulai' => '12 Jan 2023',
-                                'tgl_selesai' => '20 Jan 2023',
-                                'status' => 'Selesai'
-                                ],
-                                [
-                                'nama' => 'Workshop Kurikulum Merdeka',
-                                'token' => 'KK98PL',
-                                'entity' => 'Puskur',
-                                'tgl_mulai' => '5 Apr 2022',
-                                'tgl_selesai' => '8 Apr 2022',
-                                'status' => 'Selesai'
-                                ],
-                                [
-                                'nama' => 'Bimbingan Teknis IT',
-                                'token' => 'IT445Q',
-                                'entity' => 'Pusdatin',
-                                'tgl_mulai' => '1 Sep 2021',
-                                'tgl_selesai' => '3 Sep 2021',
-                                'status' => 'Selesai'
-                                ],
-                                [
-                                'nama' => $kegiatan->kegiatan_name,
-                                'token' => $kegiatan->instrumen_token,
-                                'entity' => $kegiatan->entity,
-                                'tgl_mulai' => date('d M Y', strtotime($kegiatan->start_date)),
-                                'tgl_selesai' => date('d M Y', strtotime($kegiatan->end_date)),
-                                'status' => $kegiatan->status == 'Active' ? 'Aktif' : 'Selesai'
-                                ]
-                                ];
-                                @endphp
 
-                                @foreach($riwayatDummy as $index => $riwayat)
+                                @if($riwayat->count() == 0)
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">
+                                        Belum ada riwayat kegiatan.
+                                    </td>
+                                </tr>
+                                @endif
+
+                                @foreach($riwayat as $index => $item)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
+
                                     <td class="text-start">
-                                        {{ $riwayat['nama'] }}<br>
-                                        <small>Token: <code>{{ $riwayat['token'] }}</code></small>
+                                        {{ $item->kegiatan_name }}
                                     </td>
-                                    <td>{{ $riwayat['entity'] }}</td>
-                                    <td>{{ $riwayat['tgl_mulai'] }}</td>
-                                    <td>{{ $riwayat['tgl_selesai'] }}</td>
+
+                                    <td>{{ $item->entity }}</td>
+
+                                    <td>{{ date('d M Y', strtotime($item->start_date)) }}</td>
+                                    <td>{{ date('d M Y', strtotime($item->end_date)) }}</td>
+
                                     <td>
-                                        @if($riwayat['status'] == 'Aktif')
+                                        @if($item->status == 'Active')
                                         <span class="badge bg-success">Aktif</span>
                                         @else
                                         <span class="badge bg-secondary">Selesai</span>
                                         @endif
                                     </td>
+
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">
-                                            <i class="ri-eye-line me-1"></i> Detail
+                                        <a href="{{ route('ptk.detailriwayat', ['encode_kegiatan_id' => \Vinkla\Hashids\Facades\Hashids::encode($item->kegiatan_id), 'nip' => $ptk->nip]) }}"
+                                            class="btn btn-sm btn-outline-info">
+                                            <i class="ri-eye-line"></i> Detail
                                         </a>
                                     </td>
                                 </tr>
                                 @endforeach
 
                             </tbody>
+
 
                         </table>
                     </div>

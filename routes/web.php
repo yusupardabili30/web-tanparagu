@@ -76,7 +76,7 @@ Route::get('/error/inactive-kegiatan', function () {
 // TAMBAHKAN ROUTE INI UNTUK RIWAYAT
 Route::get('/ptk/riwayat/kegiatan/{encode_kegiatan_id}/user/{nip}', [PtkController::class, 'riwayatKegiatan'])->name('ptk.riwayat');
 
-// Route untuk detail riwayat (opsional)
+// Route untuk detail riwayat
 Route::get('/ptk/detail-riwayat/{encode_kegiatan_id}/user/{nip}', [PtkController::class, 'detailRiwayat'])->name('ptk.detailriwayat');
 
 Route::get('/ptk/kegiatan/{encode_kegiatan_id}/user/{nip}', [PtkController::class, 'index'])->name('ptk.show');
@@ -86,6 +86,10 @@ Route::get('/ptk/continue/{encode_kegiatan_id}/{nip}', [PtkController::class, 'c
 // Quiz Routes (encoded_kegiatan_id)
 Route::get('/quiz/kegiatan/{encoded_kegiatan_id}/user/{nip}/sub/{encoded_sub_indikator_id}/no/{encoded_no_urut}', [SoalController::class, 'quiz'])->name('quiz.show');
 Route::post('/quiz/submit', [SoalController::class, 'submit'])->name('quiz.submit');
+
+Route::get('/quiz/finish/{encoded_kegiatan_id}/{nip}', [SoalController::class, 'finish'])->name('quiz.finish');
+
+
 Route::get('/quiz/finish', [SoalController::class, 'finish'])->name('quiz.finish');
 
 // Instrumen Routes
@@ -95,3 +99,7 @@ Route::get('/instrumen/soal/{sub_indikator_id}', [SoalController::class, 'getSoa
 // Soal Routes
 Route::get('/soal/{soal_id}', [SoalController::class, 'getSingleSoal']);
 Route::post('/submit-jawaban', [SoalController::class, 'submitJawaban']);
+
+
+// API Routes untuk lockscreen
+Route::get('/api/search-sekolah', [LockScreenController::class, 'searchSekolah'])->name('api.search-sekolah');

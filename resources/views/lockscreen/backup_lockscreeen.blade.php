@@ -16,108 +16,6 @@
         .no-radius * {
             border-radius: 0 !important;
         }
-
-
-        /* ===== MODAL WRAPPER ===== */
-        .custom-modal .modal-content {
-            border-radius: 10px !important;
-            border: none !important;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* ===== HEADER ===== */
-        .custom-modal .modal-header {
-            background: #dff1ff !important;
-            /* biru muda seperti gambar */
-            padding: 18px 22px !important;
-            border-bottom: 1px solid #e7edf3 !important;
-        }
-
-        .custom-modal .modal-header h5,
-        .custom-modal-title {
-            font-size: 20px !important;
-            font-weight: 700 !important;
-            color: #444 !important;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .custom-modal .btn-close {
-            filter: invert(0.4);
-            transform: scale(1.2);
-        }
-
-        /* ===== MODAL BODY ===== */
-        .custom-modal .modal-body {
-            padding: 28px 26px !important;
-        }
-
-        /* ===== LABEL ===== */
-        .custom-modal .form-label {
-            font-weight: 600 !important;
-            color: #555 !important;
-            font-size: 14px !important;
-            margin-bottom: 6px !important;
-        }
-
-        /* ===== INPUT / SELECT ===== */
-        .custom-modal .form-control,
-        .custom-modal select,
-        .custom-modal textarea {
-            background: #ffffff !important;
-            border: 1px solid #d6d6d6 !important;
-            border-radius: 6px !important;
-            font-size: 15px !important;
-            padding: 10px 12px !important;
-            color: #333 !important;
-            box-shadow: none !important;
-        }
-
-        .custom-modal .form-control:focus,
-        .custom-modal select:focus,
-        .custom-modal textarea:focus {
-            border-color: #8bb5ff !important;
-            box-shadow: 0 0 0 2px rgba(120, 160, 255, 0.25) !important;
-        }
-
-        /* ===== INPUT GROUP COPY BUTTON ===== */
-        .custom-modal .input-group-text {
-            background: #fff !important;
-            border-left: none !important;
-            border-radius: 0 6px 6px 0 !important;
-            cursor: pointer;
-            border: 1px solid #d6d6d6 !important;
-            border-left: none !important;
-        }
-
-        .custom-modal .input-group .form-control {
-            border-right: none !important;
-        }
-
-        /* ===== FOOTER ===== */
-        .custom-modal .modal-footer {
-            padding: 18px 26px !important;
-            border-top: 1px solid #eaeaea !important;
-        }
-
-        .custom-modal .btn-secondary {
-            background: #f3f3f3;
-            color: #444;
-            border: none;
-            padding: 9px 20px;
-            font-size: 15px;
-            border-radius: 8px;
-        }
-
-        .custom-modal .btn-primary {
-            background: #1db5a6 !important;
-            /* hijau seperti gambar */
-            border: none !important;
-            padding: 9px 22px !important;
-            font-size: 15px !important;
-            border-radius: 8px !important;
-        }
     </style>
 </head>
 
@@ -202,7 +100,7 @@
                 <!-- Info Kegiatan Aktif -->
                 <div class="kegiatan-info mb-3">
                     <h6 class="mb-1 text-primary">
-                        <i class="ri-calendar-event-line me-1"></i> Kegiatan Berlangsung:
+                        <i class="ri-calendar-event-line me-1"></i> Kegiatan Aktif:
                     </h6>
                     <h5 class="mb-2">{{ $kegiatan->kegiatan_name }}</h5>
                     <small class="text-muted">
@@ -273,10 +171,9 @@
     <!-- Modal Registrasi -->
     <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content custom-modal">
+            <div class="modal-content">
                 <!-- Modal Header -->
                 <div class="modal-header">
-                    <h5 class="modal-title">Form Biodata</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -326,36 +223,36 @@
 
                             <!-- Data Pribadi -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Nama Lengkap</label>
+                                <label class="form-label required-field">NAMA LENGKAP</label>
                                 <input type="text" name="nama" class="form-control"
-                                    placeholder="Nama lengkap sesuai ijazah"
+                                    placeholder="Nama lengkap"
                                     required>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Jenis Kelamin</label>
+                                <label class="form-label required-field">JENIS KELAMIN</label>
                                 <select name="jenis_kelamin" class="form-control" required>
                                     <option value="">Pilih Jenis Kelamin</option>
-                                    <option value="L">Laki-Laki</option>
-                                    <option value="P">Perempuan</option>
+                                    <option value="L">LAKI-LAKI</option>
+                                    <option value="P">PEREMPUAN</option>
                                 </select>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Tempat Lahir</label>
+                                <label class="form-label required-field">TEMPAT LAHIR</label>
                                 <input type="text" name="tempat_lahir" class="form-control"
                                     placeholder="Kota tempat lahir"
                                     required>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Tanggal Lahir</label>
+                                <label class="form-label required-field">TANGGAL LAHIR</label>
                                 <input type="date" name="tgl_lahir" class="form-control" required>
                             </div>
 
                             <!-- Data Jabatan -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Pangkat/Jabatan</label>
+                                <label class="form-label required-field">PANGKAT/JABATAN</label>
                                 <select name="pangkat_jabatan_id" class="form-control" required>
                                     <option value="">Pilih Pangkat/Jabatan</option>
                                     @foreach($pangkatJabatans as $pangkatJabatan)
@@ -374,14 +271,14 @@
 
                             <!-- Kontak -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Email</label>
+                                <label class="form-label required-field">EMAIL</label>
                                 <input type="email" name="email" class="form-control"
                                     placeholder="email@contoh.com"
                                     required>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Nomor HP</label>
+                                <label class="form-label required-field">NOMOR HP</label>
                                 <input type="text" name="no_hp" class="form-control"
                                     placeholder="081234567890"
                                     required>
@@ -389,7 +286,7 @@
 
                             <!-- Data Tambahan -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Agama</label>
+                                <label class="form-label">AGAMA</label>
                                 <select name="agama" class="form-control">
                                     <option value="">Pilih Agama</option>
                                     <option value="Islam">Islam</option>
@@ -402,21 +299,21 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Pendidikan Terakhir</label>
+                                <label class="form-label">PENDIDIKAN TERAKHIR</label>
                                 <input type="text" name="pendidikan" class="form-control"
                                     placeholder="Contoh: S1 Pendidikan Matematika">
                             </div>
 
                             <!-- Alamat Rumah -->
                             <div class="col-12 mb-3">
-                                <label class="form-label">Alamat Rumah</label>
+                                <label class="form-label">ALAMAT RUMAH</label>
                                 <textarea name="alamat_rumah" class="form-control" rows="2"
                                     placeholder="Alamat lengkap tempat tinggal"></textarea>
                             </div>
 
                             <!-- KOTA -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Kota</label>
+                                <label class="form-label required-field">KOTA</label>
                                 <select name="kota_id" class="form-control" id="kotaSelect" required>
                                     <option value="">Pilih Kota</option>
                                     @foreach($kotas as $kota)
@@ -429,7 +326,7 @@
 
                             <!-- Sekolah/Instansi -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Sekolah/Instansi</label>
+                                <label class="form-label required-field">SEKOLAH/INSTANSI</label>
 
                                 <!-- Pilihan: Sekolah dari database atau input manual -->
                                 <div class="mb-2">
@@ -487,13 +384,13 @@
 
                             <!-- Alamat Kantor -->
                             <div class="col-12 mb-3">
-                                <label class="form-label">Alamat Kantor</label>
+                                <label class="form-label">ALAMAT KANTOR</label>
                                 <textarea name="alamat_kantor" class="form-control" rows="2"
                                     placeholder="Alamat lengkap tempat kerja"></textarea>
                             </div>
 
                             <div class="col-md-6 mb-4">
-                                <label class="form-label">Nomor Rekening</label>
+                                <label class="form-label">NOMOR REKENING</label>
                                 <input type="text" name="no_rekening" class="form-control"
                                     placeholder="Nomor rekening bank">
                             </div>
@@ -518,10 +415,10 @@
                 <!-- Modal Footer -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i></i> Close
+                        <i class="ri-close-line me-2"></i> BATAL
                     </button>
                     <button type="button" class="btn btn-primary" id="submit-register">
-                        <i></i> Simpan Data
+                        <i class="ri-save-line me-2"></i> SIMPAN DATA
                     </button>
                 </div>
             </div>

@@ -86,23 +86,21 @@
             </div>
         </div>
 
+
         <!-- Bagian Kanan: Form Login -->
         <div class="login-section" style="margin-top:40px;">
             <div class="login-form-container">
+
                 <div class="login-logo">
                     <h2 class="login-title" style="margin-bottom: 40px;">
-                        <img src="{{ asset('build/images/logo-dark.png') }}"
-                            class="login-title-icon"
-                            alt="Login Icon"
-                            style="width: 400px; height:auto;">
+                        <img src="{{ asset('build/images/tanparagu.png') }}" class="login-title-icon" style="width: 400px;">
                     </h2>
 
-                    <p class="login-subtitle" style="margin-bottom: 50px; font-size: 22px; font-weight: 600;">
+                    <p class="login-subtitle" style="margin-bottom: 10px; font-size: 22px; font-weight: 600;">
                         Silahkan Masuk
                     </p>
                 </div>
 
-                <!-- Menampilkan pesan error jika ada -->
                 @if ($errors->any())
                 <div class="alert alert-danger mb-3">
                     <ul class="mb-0">
@@ -115,60 +113,55 @@
 
                 <form action="{{ route('authenticate') }}" method="POST">
                     @csrf
+
                     <div class="mb-3">
-                        <label for="user_name" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Enter username" value="{{ old('user_name') }}">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" name="user_name" placeholder="Masukan username" value="{{ old('user_name') }}">
                     </div>
 
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
+                        <label class="form-label">Password</label>
                         <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter Password">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Masukan password">
                             <span class="input-group-text password-toggle" id="password-toggle">
                                 <i class="ri-eye-fill"></i>
                             </span>
                         </div>
                     </div>
 
-                    <div class="d-grid mt-4">
-                        <button class="btn btn-login text-white py-2" style="font-size:15px;" type="submit">Masuk</button>
+                    <div class="d-grid mt-3">
+                        <button class="btn btn-login text-white py-2 d-flex align-items-center justify-content-center"
+                            style="font-size:15px; gap:6px;">
+                            <i class="ri-login-box-line"></i>
+                            <span>Masuk</span>
+                        </button>
                     </div>
+
                 </form>
 
-                <!-- Galeri Foto di Bawah Form Login -->
                 <div class="photo-gallery mt-4">
-                    <img src="{{ asset('images/logoPendidikan.png') }}" class="gallery-photo" alt="Photo 2">
-                    <img src="{{ asset('images/logoRamah.png') }}" class="gallery-photo" alt="Photo 3">
+                    <img src="{{ asset('images/logoPendidikan.png') }}" class="gallery-photo">
+                    <img src="{{ asset('images/logoRamah.png') }}" class="gallery-photo">
                 </div>
+
             </div>
         </div>
-    </div>
+
+    </div> <!-- END auth-container -->
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // Toggle visibility password
         document.getElementById('password-toggle').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
+            const p = document.getElementById('password');
             const icon = this.querySelector('i');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('ri-eye-fill');
-                icon.classList.add('ri-eye-off-fill');
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('ri-eye-off-fill');
-                icon.classList.add('ri-eye-fill');
-            }
-        });
-
-        // Auto slide carousel
-        const myCarousel = document.getElementById('infoCarousel');
-        const carousel = new bootstrap.Carousel(myCarousel, {
-            interval: 4000,
-            wrap: true
+            p.type = p.type === 'password' ? 'text' : 'password';
+            icon.classList.toggle('ri-eye-fill');
+            icon.classList.toggle('ri-eye-off-fill');
         });
     </script>
+
 </body>
 
 </html>

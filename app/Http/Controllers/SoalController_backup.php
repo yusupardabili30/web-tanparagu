@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ptk;
-use App\Models\Kegiatan;
+use App\Models\Ptk; // TAMBAHKAN INI
+use App\Models\Kegiatan; // TAMBAHKAN INI
 use App\Models\Soal;
 use App\Models\SoalCase;
 use App\Models\SoalJawaban;
 use App\Models\SubIndikator;
-use App\Models\PtkJawaban;
 use Illuminate\Http\Request;
 use Vinkla\Hashids\Facades\Hashids;
-use DB;
 
 class SoalController extends Controller
 {
@@ -41,30 +39,33 @@ class SoalController extends Controller
             abort(404, 'Parameter tidak valid');
         }
 
-        // Verifikasi PTK
+        // Verifikasi PTK dan Kegiatan (jika diperlukan)
         $ptk = Ptk::where('nip', $nip)->first();
         if (!$ptk) {
             abort(404, 'Data PTK tidak ditemukan');
         }
 
+        // Lanjutkan dengan logika yang sudah ada, hanya ubah parameter input
+        $soal = Soal::find(1);
+
+        $case = $soal->soal_case;
+
+
         $no_urut = request()->get('no_urut', $no_urut);
 
-        // Ambil SOAL
+        //ambil SOAL (bukan soal_case)
         $soal = Soal::where('sub_indikator_id', $sub_indikator_id)
             ->where('no_urut', $no_urut)
             ->first();
 
         if (!$soal) {
-            return redirect()->route('quiz.finish', [
-                'encoded_kegiatan_id' => $encoded_kegiatan_id,
-                'nip' => $nip
-            ]);
+            return redirect()->route('quiz.finish');
         }
 
-        // Ambil STUDI KASUS
+        //ambil STUDI KASUS
         $case = SoalCase::where('soal_case_id', $soal->soal_case_id)->first();
 
-        // Ambil pilihan jawaban
+        //ambil pilihan jawaban berdasarkan soal_id (inRandomOrder)
         $choices = SoalJawaban::where('soal_id', $soal->soal_id)
             ->inRandomOrder()
             ->get();
@@ -85,11 +86,21 @@ class SoalController extends Controller
 
     public function submit(Request $request)
     {
+
         try {
-            // Validasi opsional seperti di kode kedua
+            //     $request->validate([
+            //     'soal_id' => 'required',
+            //     'sub_indikator_id' => 'required',
+            //     'pilihan_jawaban_id' => 'required',
+            //     'encoded_kegiatan_id' => 'required', // Tambahkan
+            //     'encoded_sub_indikator_id' => 'required', // Tambahkan
+            //     'encoded_no_urut' => 'required', // Tambahkan
+            //     'nip' => 'required' // Tambahkan
+            // ]);
         } catch (\Throwable $th) {
             //throw $th;
         }
+
 
         $soal_id = $request->soal_id;
         $sub_indikator_id = $request->sub_indikator_id;
@@ -104,9 +115,6 @@ class SoalController extends Controller
         // Decode current no_urut
         $current_no_urut = Hashids::decode($encoded_no_urut)[0];
 
-        // Decode kegiatan_id untuk penyimpanan
-        $kegiatan_id = Hashids::decode($encoded_kegiatan_id)[0] ?? 0;
-
         // Logika yang sama seperti sebelumnya...
         $soal = Soal::where('soal_id', $soal_id)->first();
         if (!$soal) {
@@ -115,36 +123,10 @@ class SoalController extends Controller
 
         $jawaban = SoalJawaban::where('soal_jawaban_id', $jawaban_id)->first();
 
+
         if (!$jawaban) {
             return redirect()->back()->with('error', 'Jawaban tidak ditemukan');
         }
-
-        // ==============================================
-        // TAMBAHKAN: SIMPAN KE TABEL ptk_jawaban
-        // ==============================================
-        $ptk = Ptk::where('nip', $nip)->first();
-        if ($ptk) {
-            try {
-                // Ambil data sub indikator
-                $sub_indikator_data = SubIndikator::find($sub_indikator_id);
-
-                // Simpan ke ptk_jawaban
-                DB::table('ptk_jawaban')->insert([
-                    'kegiatan_id' => $kegiatan_id,
-                    'ptk_id' => $ptk->ptk_id, // gunakan ptk_id
-                    'instrumen_id' => $sub_indikator_data->instrumen_id ?? null,
-                    'indikator_id' => $sub_indikator_data->indikator_id ?? null,
-                    'sub_indikator_id' => $sub_indikator_id,
-                    'sub_indikator_code' => $sub_indikator_data->sub_indikator_code ?? null,
-                    'level' => $soal->level,
-                    'date_create' => now(),
-                    'date_update' => now()
-                ]);
-            } catch (\Exception $e) {
-                // Tangani error, tapi lanjutkan proses
-            }
-        }
-        // ==============================================
 
         $bobot = $jawaban->bobot;
 
@@ -172,15 +154,12 @@ class SoalController extends Controller
 
         $cekSoal = Soal::where('sub_indikator_id', $nextSubIndikator)->first();
         if (!$cekSoal) {
-            return redirect()->route('quiz.finish', [
-                'encoded_kegiatan_id' => $encoded_kegiatan_id,
-                'nip' => $nip
-            ]);
+            return redirect()->route('quiz.finish');
         }
 
         // Encode next sub_indikator_id dan mulai dari no_urut = 1
         $next_encoded_sub_indikator_id = Hashids::encode($nextSubIndikator);
-        $next_encoded_no_urut = Hashids::encode(1);
+        $next_encoded_no_urut = Hashids::encode(1); //kembali ke no urut 1 pada subindikator baru
 
         return redirect()->route('quiz.show', [
             'encoded_kegiatan_id' => $encoded_kegiatan_id,
@@ -189,39 +168,6 @@ class SoalController extends Controller
             'encoded_no_urut' => $next_encoded_no_urut
         ]);
     }
-
-    /**
-     * Tampilan finish/selesai quiz
-     */
-    public function finish($encoded_kegiatan_id, $nip)
-    {
-        $kegiatan_id = Hashids::decode($encoded_kegiatan_id)[0] ?? 0;
-        $ptk = Ptk::where('nip', $nip)->first();
-
-        if (!$ptk) {
-            abort(404, 'Data PTK tidak ditemukan');
-        }
-
-        $kegiatan = Kegiatan::find($kegiatan_id);
-        if (!$kegiatan) {
-            abort(404, 'Kegiatan tidak ditemukan');
-        }
-
-        // Hitung jumlah jawaban yang sudah disimpan
-        $jumlahJawaban = DB::table('ptk_jawaban')
-            ->where('kegiatan_id', $kegiatan_id)
-            ->where('ptk_id', $ptk->ptk_id)
-            ->count();
-
-        return view('quiz.finish', [
-            'ptk' => $ptk,
-            'kegiatan' => $kegiatan,
-            'jumlahJawaban' => $jumlahJawaban,
-            'encoded_kegiatan_id' => $encoded_kegiatan_id,
-            'nip' => $nip
-        ]);
-    }
-
     /**
      * Ambil soal berdasarkan sub_indikator_id
      */
@@ -262,7 +208,7 @@ class SoalController extends Controller
                             "pilihan_jawaban" => $c->pilihan_jawaban,
                             "bobot" => $c->bobot
                         ];
-                    })->values()
+                    })->values() // supaya index 0,1,2,3 rapi
                 ];
             })
         ];
@@ -330,6 +276,7 @@ class SoalController extends Controller
 
         // Jika bobot != 4 → pindah ke subindikator berikutnya
         if ($bobot != 4) {
+
             $nextSubIndikator = Soal::where('sub_indikator_id', '>', $soal->sub_indikator_id)
                 ->orderBy('sub_indikator_id', 'asc')
                 ->value('sub_indikator_id');
