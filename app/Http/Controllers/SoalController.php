@@ -15,8 +15,14 @@ class SoalController extends Controller
 {
     public function index()
     {
-        // $soal = SoalCase::with('soal')->paginate(10);
+        $soal = SoalCase::with('soal')->paginate(10);
         $soal = SoalCase::with(['soal.soal_jawaban', 'sub_indikator'])->paginate(1);
+        return $soal;
+        $soal = DB::table('users')
+                ->join('contacts', 'users.id', '=', 'contacts.user_id')
+                ->join('orders', 'users.id', '=', 'orders.user_id')
+                ->select('users.*', 'contacts.phone', 'orders.price')
+                ->get();
         return view('soal.index', [
             'tittle' => 'Soal',
             'data' => $soal
@@ -41,7 +47,9 @@ class SoalController extends Controller
 
         // Lanjutkan dengan logika yang sudah ada, hanya ubah parameter input
         $soal = Soal::find(1);
+        
         $case = $soal->soal_case;
+
 
         $no_urut = request()->get('no_urut', $no_urut);
 
@@ -78,15 +86,21 @@ class SoalController extends Controller
 
     public function submit(Request $request)
     {
-        $request->validate([
-            'soal_id' => 'required',
-            'sub_indikator_id' => 'required',
-            'pilihan_jawaban_id' => 'required',
-            'encoded_kegiatan_id' => 'required', // Tambahkan
-            'encoded_sub_indikator_id' => 'required', // Tambahkan
-            'encoded_no_urut' => 'required', // Tambahkan
-            'nip' => 'required' // Tambahkan
-        ]);
+
+        try {
+        //     $request->validate([
+        //     'soal_id' => 'required',
+        //     'sub_indikator_id' => 'required',
+        //     'pilihan_jawaban_id' => 'required',
+        //     'encoded_kegiatan_id' => 'required', // Tambahkan
+        //     'encoded_sub_indikator_id' => 'required', // Tambahkan
+        //     'encoded_no_urut' => 'required', // Tambahkan
+        //     'nip' => 'required' // Tambahkan
+        // ]);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+
 
         $soal_id = $request->soal_id;
         $sub_indikator_id = $request->sub_indikator_id;
@@ -108,6 +122,7 @@ class SoalController extends Controller
         }
 
         $jawaban = SoalJawaban::where('soal_jawaban_id', $jawaban_id)->first();
+        
 
         if (!$jawaban) {
             return redirect()->back()->with('error', 'Jawaban tidak ditemukan');
@@ -117,7 +132,7 @@ class SoalController extends Controller
 
         // Jika bobot = 4 → lanjut ke soal berikutnya
         if ($bobot == 4) {
-            $nextSoal = Soal::where('sub_indikator_id', $sub_indikator_id)
+            $nextSoal = Soal::where('sub_indikator_id', Hashids::decode($encoded_sub_indikator_id)[0])
                 ->where('no_urut', $current_no_urut + 1)
                 ->first();
 
@@ -135,7 +150,7 @@ class SoalController extends Controller
         }
 
         // Jika bobot != 4 → pindah ke sub_indikator berikutnya
-        $nextSubIndikator = $sub_indikator_id + 1;
+        $nextSubIndikator = Hashids::decode($encoded_sub_indikator_id)[0] + 1;
 
         $cekSoal = Soal::where('sub_indikator_id', $nextSubIndikator)->first();
         if (!$cekSoal) {
@@ -144,7 +159,7 @@ class SoalController extends Controller
 
         // Encode next sub_indikator_id dan mulai dari no_urut = 1
         $next_encoded_sub_indikator_id = Hashids::encode($nextSubIndikator);
-        $next_encoded_no_urut = Hashids::encode(1);
+        $next_encoded_no_urut = Hashids::encode(1);//kembali ke no urut 1 pada subindikator baru
 
         return redirect()->route('quiz.show', [
             'encoded_kegiatan_id' => $encoded_kegiatan_id,
