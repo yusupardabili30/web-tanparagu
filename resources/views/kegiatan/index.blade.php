@@ -48,6 +48,7 @@
                                     <th class="sort" data-sort="id">ID</th>
                                     <th class="sort" data-sort="kegiatan">Kegiatan</th>
                                     <th class="sort" data-sort="kegiatan">Entitas</th>
+                                    <th class="sort" data-sort="kegiatan">Tahap Soal</th>
                                     <th class="sort" data-sort="kegiatan">Token</th>
                                     <th class="sort" data-sort="kegiatan">url</th>
                                     <th class="sort" data-sort="kegiatan">status</th>
@@ -69,6 +70,7 @@
                                     <td class="id"><a href="javascript:void(0);" onclick="ViewTickets(this)" data-id="001" class="fw-medium link-primary">{{ $row->kegiatan_id }}</a></td>
                                     <td class="client_name">{{ $row->kegiatan_name }}</td>
                                     <td class="client_name">{{ $row->entity }}</td>
+                                    <td class="client_name">{{ $row->tahap }}</td>
                                     <td class="client_name">{{ $row->instrumen_token }}</td>
                                     <td class="client_name">
                                         <a href="{{ route('lockscreen', ['encode_kegiatan_id' => $encoded_kegiatan_id]) }}" target="_blank">

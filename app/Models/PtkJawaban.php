@@ -11,8 +11,7 @@ class PtkJawaban extends Model
 
     protected $table = 'ptk_jawaban';
     protected $primaryKey = 'ptk_jawaban_id';
-    public $timestamps = false;
-    public $incrementing = true;
+    public $timestamps = true;
 
     protected $fillable = [
         'kegiatan_id',
@@ -22,7 +21,7 @@ class PtkJawaban extends Model
         'sub_indikator_id',
         'sub_indikator_code',
         'level',
-        'date_create',
-        'date_update'
+        'created_at',
+        'updated_at'
     ];
 }

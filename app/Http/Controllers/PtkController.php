@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kegiatan;
 use App\Models\Ptk;
-use App\Models\PangkatJabatan;
 use App\Models\Kota;
+use App\Models\Soal;
 use App\Models\Sekolah;
+use App\Models\Kegiatan;
 use Illuminate\Http\Request;
-use Vinkla\Hashids\Facades\Hashids;
+use App\Models\PangkatJabatan;
 use Illuminate\Support\Facades\DB;
+use Vinkla\Hashids\Facades\Hashids;
 
 class PtkController extends Controller
 {
@@ -39,11 +40,13 @@ class PtkController extends Controller
 
         // Ambil data kegiatan
         $kegiatan = Kegiatan::find($kegiatan_id);
-
         if (!$kegiatan) {
             return redirect()->route('lockscreen', ['encode_kegiatan_id' => $encode_kegiatan_id])
                 ->with('error', 'Kegiatan tidak ditemukan');
         }
+        $soal = Soal::where('entity', $kegiatan->entity)
+            ->where('tahap', $kegiatan->tahap)
+            ->first();
 
         // Periksa apakah kegiatan masih aktif
         if ($kegiatan->status !== 'Active') {
@@ -82,7 +85,8 @@ class PtkController extends Controller
             'remaining' => $remaining,
             'current_nip' => $nip,
             'current_encode_kegiatan_id' => $encode_kegiatan_id,
-            'current_kegiatan_id' => $kegiatan_id
+            'current_kegiatan_id' => $kegiatan_id,
+            'data' => $soal
         ]);
     }
 

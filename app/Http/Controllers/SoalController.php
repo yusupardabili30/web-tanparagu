@@ -31,7 +31,59 @@ class SoalController extends Controller
         ]);
     }
 
-    public function quiz($encoded_kegiatan_id, $nip, $encoded_sub_indikator_id, $encoded_no_urut)
+    public function quiz1($tahap, $encoded_kegiatan_id, $nip, $encoded_indikator_id, $encoded_no_urut)
+    {
+        // Decode semua parameter yang di-encode
+        $indikator_id = Hashids::decode($encoded_indikator_id)[0] ?? 0;
+        $no_urut = Hashids::decode($encoded_no_urut)[0] ?? 0;
+
+        if (!$indikator_id || !$no_urut) {
+            abort(404, 'Parameter tidak valid');
+        }
+
+        // Verifikasi PTK
+        $ptk = Ptk::where('nip', $nip)->first();
+        if (!$ptk) {
+            abort(404, 'Data PTK tidak ditemukan');
+        }
+
+        $no_urut = request()->get('no_urut', $no_urut);
+
+        // Ambil SOAL
+        $soal = Soal::where('indikator_id', $indikator_id)
+            ->where('no_urut', $no_urut)
+            ->first(); 
+
+        if (!$soal) {
+            return redirect()->route('quiz.finish', [
+                'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                'nip' => $nip
+            ]);
+        }
+
+        // Ambil STUDI KASUS
+        //$case = SoalCase::where('soal_case_id', $soal->soal_case_id)->first();
+
+        // Ambil pilihan jawaban
+        $choices = SoalJawaban::where('soal_id', $soal->soal_id)
+            ->inRandomOrder()
+            ->get();
+
+        return view('quiz.quiz1', [
+            'soal' => $soal,
+            //'case' => $case,
+            'choices' => $choices,
+            'indikator_id' => $indikator_id,
+            'no_urut' => $no_urut,
+            'encoded_kegiatan_id' => $encoded_kegiatan_id,
+            'encoded_indikator_id' => $encoded_indikator_id,
+            'encoded_no_urut' => $encoded_no_urut,
+            'nip' => $nip,
+            'ptk' => $ptk
+        ]);
+    }
+
+    public function quiz2($tahap, $encoded_kegiatan_id, $nip, $encoded_sub_indikator_id, $encoded_no_urut)
     {
         // Decode semua parameter yang di-encode
         $sub_indikator_id = Hashids::decode($encoded_sub_indikator_id)[0] ?? 0;
@@ -85,12 +137,6 @@ class SoalController extends Controller
 
     public function submit(Request $request)
     {
-        try {
-            // Validasi opsional seperti di kode kedua
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-
         $soal_id = $request->soal_id;
         $sub_indikator_id = $request->sub_indikator_id;
         $jawaban_id = $request->pilihan_jawaban_id;
@@ -100,6 +146,7 @@ class SoalController extends Controller
         $encoded_sub_indikator_id = $request->encoded_sub_indikator_id;
         $encoded_no_urut = $request->encoded_no_urut;
         $nip = $request->nip;
+        $bobot = $request->bobot;
 
         // Decode current no_urut
         $current_no_urut = Hashids::decode($encoded_no_urut)[0];
@@ -113,59 +160,77 @@ class SoalController extends Controller
             return redirect()->back()->with('error', 'Soal tidak ditemukan');
         }
 
-        $jawaban = SoalJawaban::where('soal_jawaban_id', $jawaban_id)->first();
+        // $jawaban = SoalJawaban::where('soal_jawaban_id', $jawaban_id)->first();
 
-        if (!$jawaban) {
-            return redirect()->back()->with('error', 'Jawaban tidak ditemukan');
-        }
+        // if (!$jawaban) {
+        //     return redirect()->back()->with('error', 'Jawaban tidak ditemukan');
+        // }
 
-        // ==============================================
-        // TAMBAHKAN: SIMPAN KE TABEL ptk_jawaban
-        // ==============================================
+        // start logic algoritma
         $ptk = Ptk::where('nip', $nip)->first();
-        if ($ptk) {
-            try {
-                // Ambil data sub indikator
-                $sub_indikator_data = SubIndikator::find($sub_indikator_id);
+        //return $soal->level;
+        switch ($soal->level) {
+            case 2:
+            case 3:
+                if ($bobot >= 3) {
+                    $nextSoal = Soal::where('sub_indikator_id', Hashids::decode($encoded_sub_indikator_id)[0])
+                        ->where('no_urut', $current_no_urut + 1)
+                        ->first();
 
-                // Simpan ke ptk_jawaban
-                DB::table('ptk_jawaban')->insert([
-                    'kegiatan_id' => $kegiatan_id,
-                    'ptk_id' => $ptk->ptk_id, // gunakan ptk_id
-                    'instrumen_id' => $sub_indikator_data->instrumen_id ?? null,
-                    'indikator_id' => $sub_indikator_data->indikator_id ?? null,
-                    'sub_indikator_id' => $sub_indikator_id,
-                    'sub_indikator_code' => $sub_indikator_data->sub_indikator_code ?? null,
-                    'level' => $soal->level,
-                    'date_create' => now(),
-                    'date_update' => now()
-                ]);
-            } catch (\Exception $e) {
-                // Tangani error, tapi lanjutkan proses
-            }
+                    if ($nextSoal) {
+                        // Encode next no_urut
+                        $next_encoded_no_urut = Hashids::encode($current_no_urut + 1);
+
+                        return redirect()->route('quiz.show', [
+                            'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                            'nip' => $nip,
+                            'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                            'encoded_no_urut' => $next_encoded_no_urut
+                        ]);
+                    }
+                }else{
+                    //do simpan jawaban ptk
+                    PtkJawaban::updateOrCreate([
+                        'kegiatan_id' => Hashids::decode($encoded_kegiatan_id)[0],
+                        'sub_indikator_id' => Hashids::decode($encoded_sub_indikator_id)[0],
+                        'ptk_id' => $ptk->ptk_id
+                    ], [
+                        'level' => $soal->level
+                    ]);
+                }
+                break;
+            case 4:
+                if ($bobot == 4) {
+                    $nextSoal = Soal::where('sub_indikator_id', Hashids::decode($encoded_sub_indikator_id)[0])
+                        ->where('no_urut', $current_no_urut + 1)
+                        ->first();
+
+                    if ($nextSoal) {
+                        // Encode next no_urut
+                        $next_encoded_no_urut = Hashids::encode($current_no_urut + 1);
+
+                        return redirect()->route('quiz.show', [
+                            'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                            'nip' => $nip,
+                            'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                            'encoded_no_urut' => $next_encoded_no_urut
+                        ]);
+                    }
+                }else{
+                    //do simpan jawaban ptk
+                    PtkJawaban::updateOrCreate([
+                        'kegiatan_id' => Hashids::decode($encoded_kegiatan_id)[0],
+                        'sub_indikator_id' => Hashids::decode($encoded_sub_indikator_id)[0],
+                        'ptk_id' => $ptk->ptk_id
+                    ], [
+                        'level' => $soal->level
+                    ]);
+                }
+                break;
+            default:
+                return "Invalid Algoritma";
         }
-        // ==============================================
-
-        $bobot = $jawaban->bobot;
-
-        // Jika bobot = 4 → lanjut ke soal berikutnya
-        if ($bobot == 4) {
-            $nextSoal = Soal::where('sub_indikator_id', Hashids::decode($encoded_sub_indikator_id)[0])
-                ->where('no_urut', $current_no_urut + 1)
-                ->first();
-
-            if ($nextSoal) {
-                // Encode next no_urut
-                $next_encoded_no_urut = Hashids::encode($current_no_urut + 1);
-
-                return redirect()->route('quiz.show', [
-                    'encoded_kegiatan_id' => $encoded_kegiatan_id,
-                    'nip' => $nip,
-                    'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
-                    'encoded_no_urut' => $next_encoded_no_urut
-                ]);
-            }
-        }
+        // end logic algoritma      
 
         // Jika bobot != 4 → pindah ke sub_indikator berikutnya
         $nextSubIndikator = Hashids::decode($encoded_sub_indikator_id)[0] + 1;

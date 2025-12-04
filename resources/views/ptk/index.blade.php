@@ -270,15 +270,46 @@
                         $encoded_no_urut = Hashids::encode(1);
                         @endphp
 
-                        <a href="{{ route('quiz.show', [
-                            'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-                            'nip' => $current_nip,
-                            'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
-                            'encoded_no_urut' => $encoded_no_urut
-                        ]) }}"
-                            class="btn btn-primary btn-lg px-5" style="border-radius:10px;">
-                            <i class="ri-play-line me-2"></i> Mulai Quiz
-                        </a>
+                        @switch($kegiatan->tahap)
+                            @case(1)
+                                @php
+                                    $encoded_indikator_id = Hashids::encode($data->indikator_id);
+                                    $encoded_no_urut = Hashids::encode(1);
+                                @endphp
+                                <a href="{{ route('quiz1.show', [
+                                    'tahap' => $kegiatan->tahap,
+                                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                                    'nip' => $current_nip,
+                                    'encoded_indikator_id' => $encoded_indikator_id,
+                                    'encoded_no_urut' => $encoded_no_urut
+                                ]) }}" 
+                                class="btn btn-primary btn-lg px-5" style="border-radius:10px;">
+                                    <i class="ri-play-line me-2"></i> Mulai Quiz
+                                </a>
+                                @break
+
+                            @case(2)
+                                @php
+                                    $encoded_sub_indikator_id = Hashids::encode(1);
+                                    $encoded_no_urut = Hashids::encode(1);
+                                @endphp
+                                <a href="{{ route('quiz2.show', [
+                                    'tahap' => $kegiatan->tahap,
+                                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                                    'nip' => $current_nip,
+                                    'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                                    'encoded_no_urut' => $encoded_no_urut
+                                ]) }}" 
+                                class="btn btn-primary btn-lg px-5" style="border-radius:10px;">
+                                    <i class="ri-play-line me-2"></i> Mulai Quiz
+                                </a>
+                                @break
+
+                            @default
+                                {{-- Optional: tampilkan fallback --}}
+                                {{-- Tidak ada quiz untuk tahap ini --}}
+                        @endswitch
+
                     </div>
 
                 </div>
