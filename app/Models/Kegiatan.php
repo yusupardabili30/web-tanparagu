@@ -18,6 +18,7 @@ class Kegiatan extends Model
         'kegiatan_id',
         'kegiatan_name',
         'entity',
+        'tahap',
         'instrumen_url',
         'instrumen_token',
         'status', // Tetap pakai 'status'

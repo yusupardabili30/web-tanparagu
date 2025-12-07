@@ -42,7 +42,7 @@
 
                 <div class="card-header baduy-bg">
                     <h5 class="mb-0 text-white" style="font-size:20px; font-weight:700;">
-                        Profil PTK
+                        Profil PTK 
                     </h5>
                 </div>
 
@@ -266,14 +266,14 @@
 
                     <div class="text-center mt-4">
                         @php
-                        $encoded_sub_indikator_id = Hashids::encode(1);
+                        //$encoded_sub_indikator_id = Hashids::encode(1);
                         $encoded_no_urut = Hashids::encode(1);
                         @endphp
 
                         @switch($kegiatan->tahap)
                             @case(1)
                                 @php
-                                    $encoded_indikator_id = Hashids::encode($data->indikator_id);
+                                    //$encoded_indikator_id = Hashids::encode($data->indikator_id);
                                     $encoded_no_urut = Hashids::encode(1);
                                 @endphp
                                 <a href="{{ route('quiz1.show', [
@@ -290,7 +290,8 @@
 
                             @case(2)
                                 @php
-                                    $encoded_sub_indikator_id = Hashids::encode(1);
+                                    
+                                    //$encoded_sub_indikator_id = Hashids::encode(1);
                                     $encoded_no_urut = Hashids::encode(1);
                                 @endphp
                                 <a href="{{ route('quiz2.show', [

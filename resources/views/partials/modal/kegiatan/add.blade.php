@@ -65,7 +65,18 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <div class="form-floating">
+                                    <select class="form-select" name="ddl_tahap" id="ddl_tahap" required>
+                                        <option value="1">Tahap 1 - Indikator</option>
+                                        <option value="2">Tahap 2 - Sub Indikator</option>
+                                    </select>
+                                    <label for="ddl_tahap">Tahap</label>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="token_display" class="form-label">Token</label>
                                 <div class="input-group">
@@ -75,7 +86,7 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div>   
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="url_display" class="form-label">URL Lockscreen</label>
@@ -86,7 +97,7 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                     <div class="modal-footer">
                         <div class="hstack gap-2 justify-content-end">

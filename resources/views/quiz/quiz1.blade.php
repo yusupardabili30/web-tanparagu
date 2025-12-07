@@ -70,7 +70,11 @@
                                 <!-- Judul Soal -->
                                 <h5 class="box-title studi-title">
                                     <i class="ri-question-line me-1 text-primary"></i>
-                                    <span style="color:#1a4d8e; font-weight:700;">Soal</span>
+                                    {{-- <span style="color:#1a4d8e; font-weight:700;">Soal</span> --}}
+                                    <span style="color:#1a4d8e; font-weight:700;">
+                                        Jawaban terjawab:
+                                    </span>
+                                    @dump(session('answered_' . $encoded_indikator_id))
                                 </h5>
 
                                 <!-- Teks Soal -->
@@ -78,16 +82,18 @@
                                     {!! nl2br(e($soal->soal)) !!}
                                 </p>
 
-                                <form action="{{ route('quiz.submit') }}" method="POST">
+                                <form action="{{ route('quiz1.submit') }}" method="POST">
                                     @csrf
 
                                     <!-- Hidden Inputs -->
+                                    {{-- {{ dd(session('answered_questions')) }} --}}
                                     <input type="hidden" name="soal_id" value="{{ $soal->soal_id }}">
+                                    <input type="hidden" name="tahap" value="{{ $tahap }}">
                                     <input type="hidden" name="indikator_id" value="{{ $indikator_id }}"> <!-- ID ASLI -->
-                                    <input type="text" name="encoded_kegiatan_id" value="{{ $encoded_kegiatan_id }}">
-                                    <input type="text" name="encoded_indikator_id" value="{{ $encoded_indikator_id }}">
-                                    <input type="text" name="encoded_no_urut" value="{{ $encoded_no_urut }}">
-                                    <input type="text" name="nip" value="{{ $nip }}">
+                                    <input type="hidden" name="encoded_kegiatan_id" value="{{ $encoded_kegiatan_id }}">
+                                    <input type="hidden" name="encoded_indikator_id" value="{{ $encoded_indikator_id }}">
+                                    <input type="hidden" name="encoded_no_urut" value="{{ $encoded_no_urut }}">
+                                    <input type="hidden" name="nip" value="{{ $nip }}">
                                     <input type="text" name="bobot" id="bobot">
 
                                     <!-- Pilihan Jawaban -->
@@ -107,19 +113,15 @@
                                     </label>
                                     @endforeach
 
-                                    <button type="submit" class="btn btn-primary btn-lg mt-4 btn-jawab">
-                                        <i class="ri-checkbox-circle-line me-2"></i> Submit
+                                    <button type="submit" class="btn btn-primary btn-lg mt-4 btn-jawab w-100 btn-jawab">
+                                        <i class="ri-checkbox-circle-line me-2"></i> Kirim Jawaban
                                     </button>
                                 </form>
-
                             </div>
                         </div>
-
                     </div>
-
                 </div>
             </div>
-
         </div>
     </div>
 

@@ -18,6 +18,7 @@ class Soal extends Model
         'soal_id',
         'sub_indikator_id',
         'soal_case_id',
+        'entity',
         'no_urut',
         'level',
         'soal'

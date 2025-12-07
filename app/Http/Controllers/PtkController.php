@@ -47,6 +47,8 @@ class PtkController extends Controller
         $soal = Soal::where('entity', $kegiatan->entity)
             ->where('tahap', $kegiatan->tahap)
             ->first();
+        $encoded_sub_indikator_id = Hashids::encode($soal->sub_indikator_id);
+
 
         // Periksa apakah kegiatan masih aktif
         if ($kegiatan->status !== 'Active') {
@@ -86,7 +88,8 @@ class PtkController extends Controller
             'current_nip' => $nip,
             'current_encode_kegiatan_id' => $encode_kegiatan_id,
             'current_kegiatan_id' => $kegiatan_id,
-            'data' => $soal
+            'data' => $soal,
+            'encoded_sub_indikator_id' => $encoded_sub_indikator_id
         ]);
     }
 

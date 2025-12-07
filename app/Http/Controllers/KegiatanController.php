@@ -31,6 +31,7 @@ class KegiatanController extends Controller
             ], [
                 'kegiatan_name' => $request->kegiatan,
                 'entity' => $request->entity,
+                'tahap' => $request->ddl_tahap,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'status' => $request->status_id,
