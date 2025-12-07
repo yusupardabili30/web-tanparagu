@@ -42,7 +42,7 @@
 
                 <div class="card-header baduy-bg">
                     <h5 class="mb-0 text-white" style="font-size:20px; font-weight:700;">
-                        Profil PTK
+                        Profil PTK 
                     </h5>
                 </div>
 
@@ -267,6 +267,7 @@
                     <div class="text-center mt-4">
                         @if($kegiatan->tahap)
                         @php
+<<<<<<< HEAD
                         // Gunakan tahap dari kegiatan
                         $tahap = $kegiatan->tahap;
 
@@ -276,10 +277,14 @@
                         $encoded_no_urut = Hashids::encode(1);
                         } else {
                         $encoded_sub_indikator_id = Hashids::encode(1);
+=======
+                        //$encoded_sub_indikator_id = Hashids::encode(1);
+>>>>>>> b3fd5e1e9a285c5fb1bc00eb563a1eccf724fc29
                         $encoded_no_urut = Hashids::encode(1);
                         }
                         @endphp
 
+<<<<<<< HEAD
                         @if($tahap == 1)
                         <a href="{{ route('quiz1.show', [
                 'tahap' => $tahap,
@@ -308,6 +313,49 @@
                             <i class="ri-forbid-line me-2"></i> Tahap Belum Ditentukan
                         </button>
                         @endif
+=======
+                        @switch($kegiatan->tahap)
+                            @case(1)
+                                @php
+                                    //$encoded_indikator_id = Hashids::encode($data->indikator_id);
+                                    $encoded_no_urut = Hashids::encode(1);
+                                @endphp
+                                <a href="{{ route('quiz1.show', [
+                                    'tahap' => $kegiatan->tahap,
+                                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                                    'nip' => $current_nip,
+                                    'encoded_indikator_id' => $encoded_indikator_id,
+                                    'encoded_no_urut' => $encoded_no_urut
+                                ]) }}" 
+                                class="btn btn-primary btn-lg px-5" style="border-radius:10px;">
+                                    <i class="ri-play-line me-2"></i> Mulai Quiz
+                                </a>
+                                @break
+
+                            @case(2)
+                                @php
+                                    
+                                    //$encoded_sub_indikator_id = Hashids::encode(1);
+                                    $encoded_no_urut = Hashids::encode(1);
+                                @endphp
+                                <a href="{{ route('quiz2.show', [
+                                    'tahap' => $kegiatan->tahap,
+                                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                                    'nip' => $current_nip,
+                                    'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                                    'encoded_no_urut' => $encoded_no_urut
+                                ]) }}" 
+                                class="btn btn-primary btn-lg px-5" style="border-radius:10px;">
+                                    <i class="ri-play-line me-2"></i> Mulai Quiz
+                                </a>
+                                @break
+
+                            @default
+                                {{-- Optional: tampilkan fallback --}}
+                                {{-- Tidak ada quiz untuk tahap ini --}}
+                        @endswitch
+
+>>>>>>> b3fd5e1e9a285c5fb1bc00eb563a1eccf724fc29
                     </div>
 
                 </div>

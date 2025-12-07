@@ -15,12 +15,15 @@ class PtkJawaban extends Model
 
     protected $fillable = [
         'kegiatan_id',
+        'tahap',
         'ptk_id',
         'instrumen_id',
         'indikator_id',
+        'indikator_code',
         'sub_indikator_id',
         'sub_indikator_code',
         'level',
+        'bobot',
         'created_at',
         'updated_at'
     ];

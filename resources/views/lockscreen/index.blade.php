@@ -303,12 +303,12 @@
 
                         <div class="row">
                             <!-- Data Identitas -->
-                            <div class="col-md-6 mb-3">
+                            {{-- <div class="col-md-6 mb-3">
                                 <label class="form-label">NIK</label>
                                 <input type="text" name="nik" class="form-control"
                                     placeholder="16 digit NIK"
                                     maxlength="16">
-                            </div>
+                            </div> --}}
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">NUPTK</label>
@@ -317,12 +317,12 @@
                                     maxlength="16">
                             </div>
 
-                            <div class="col-md-6 mb-3">
+                            {{-- <div class="col-md-6 mb-3">
                                 <label class="form-label">NPWP</label>
                                 <input type="text" name="npwp" class="form-control"
                                     placeholder="15 digit NPWP"
                                     maxlength="20">
-                            </div>
+                            </div> --}}
 
                             <!-- Data Pribadi -->
                             <div class="col-md-6 mb-3">
@@ -401,18 +401,18 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-6 mb-3">
+                            {{-- <div class="col-md-6 mb-3">
                                 <label class="form-label">Pendidikan Terakhir</label>
                                 <input type="text" name="pendidikan" class="form-control"
                                     placeholder="Contoh: S1 Pendidikan Matematika">
-                            </div>
+                            </div> --}}
 
                             <!-- Alamat Rumah -->
-                            <div class="col-12 mb-3">
+                            {{-- <div class="col-12 mb-3">
                                 <label class="form-label">Alamat Rumah</label>
                                 <textarea name="alamat_rumah" class="form-control" rows="2"
                                     placeholder="Alamat lengkap tempat tinggal"></textarea>
-                            </div>
+                            </div> --}}
 
                             <!-- KOTA -->
                             <div class="col-md-6 mb-3">
@@ -492,11 +492,11 @@
                                     placeholder="Alamat lengkap tempat kerja"></textarea>
                             </div>
 
-                            <div class="col-md-6 mb-4">
+                            {{-- <div class="col-md-6 mb-4">
                                 <label class="form-label">Nomor Rekening</label>
                                 <input type="text" name="no_rekening" class="form-control"
                                     placeholder="Nomor rekening bank">
-                            </div>
+                            </div> --}}
                         </div>
 
                         <!-- Informasi Form -->
