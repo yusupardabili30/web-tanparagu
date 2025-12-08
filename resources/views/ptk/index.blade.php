@@ -265,11 +265,55 @@
                     </div>
 
                     <div class="text-center mt-4">
+                        @if($kegiatan->tahap)
                         @php
-                        //$encoded_sub_indikator_id = Hashids::encode(1);
+<<<<<<< HEAD
+                        // Gunakan tahap dari kegiatan
+                        $tahap = $kegiatan->tahap;
+
+                        // Tentukan encoded parameter berdasarkan tahap
+                        if($tahap == 1) {
+                        $encoded_indikator_id = Hashids::encode($data->indikator_id ?? 1);
                         $encoded_no_urut = Hashids::encode(1);
+                        } else {
+                        $encoded_sub_indikator_id = Hashids::encode(1);
+=======
+                        //$encoded_sub_indikator_id = Hashids::encode(1);
+>>>>>>> b3fd5e1e9a285c5fb1bc00eb563a1eccf724fc29
+                        $encoded_no_urut = Hashids::encode(1);
+                        }
                         @endphp
 
+<<<<<<< HEAD
+                        @if($tahap == 1)
+                        <a href="{{ route('quiz1.show', [
+                'tahap' => $tahap,
+                'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                'nip' => $current_nip,
+                'encoded_indikator_id' => $encoded_indikator_id,
+                'encoded_no_urut' => $encoded_no_urut
+            ]) }}"
+                            class="btn btn-primary btn-lg px-5" style="border-radius:10px;">
+                            <i class="ri-play-line me-2"></i> Mulai Quiz (Tahap {{ $tahap }})
+                        </a>
+                        @else
+                        <a href="{{ route('quiz2.show', [
+                'tahap' => $tahap,
+                'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                'nip' => $current_nip,
+                'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                'encoded_no_urut' => $encoded_no_urut
+            ]) }}"
+                            class="btn btn-primary btn-lg px-5" style="border-radius:10px;">
+                            <i class="ri-play-line me-2"></i> Mulai Quiz (Tahap {{ $tahap }})
+                        </a>
+                        @endif
+                        @else
+                        <button class="btn btn-secondary btn-lg px-5" disabled>
+                            <i class="ri-forbid-line me-2"></i> Tahap Belum Ditentukan
+                        </button>
+                        @endif
+=======
                         @switch($kegiatan->tahap)
                             @case(1)
                                 @php
@@ -311,6 +355,7 @@
                                 {{-- Tidak ada quiz untuk tahap ini --}}
                         @endswitch
 
+>>>>>>> b3fd5e1e9a285c5fb1bc00eb563a1eccf724fc29
                     </div>
 
                 </div>

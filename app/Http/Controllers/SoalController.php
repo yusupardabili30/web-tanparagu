@@ -55,7 +55,7 @@ class SoalController extends Controller
         // Ambil SOAL
         $soal = Soal::where('indikator_id', $indikator_id)
             ->where('no_urut', $no_urut)
-            ->first(); 
+            ->first();
 
         if (!$soal) {
             return redirect()->route('quiz.finish', [
@@ -362,7 +362,7 @@ class SoalController extends Controller
                             'encoded_no_urut' => $next_encoded_no_urut
                         ]);
                     }
-                }else{
+                } else {
                     //do simpan jawaban ptk
                     if($soal->level==2){
                         $level_kompetensi = 2;
@@ -421,7 +421,7 @@ class SoalController extends Controller
                             'encoded_no_urut' => $next_encoded_no_urut
                         ]);
                     }
-                }else{
+                } else {
                     //do simpan jawaban ptk
                     $level_kompetensi = $soal->level - 1;
                     

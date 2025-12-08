@@ -246,6 +246,7 @@
         $('input[name="kegiatan_id"]').val('');
         $('input[name="kegiatan"]').val('');
         $('#entity').val('');
+        $('#tahap').val(''); // Reset tahap
         $('#status_id').val('Active');
         $('#start_date').val('');
         $('#end_date').val('');
@@ -265,7 +266,7 @@
         $('#copy-token-btn, #copy-url-btn').prop('disabled', true);
 
         // Aktifkan semua field
-        $('#entity, #status_id, #start_date, #end_date, input[name="kegiatan"]').prop('disabled', false);
+        $('#entity, #tahap, #status_id, #start_date, #end_date, input[name="kegiatan"]').prop('disabled', false);
     });
 
     // start btn-view
@@ -279,6 +280,7 @@
             $('input[name="kegiatan_id"]').val(data.kegiatan_id);
             $('input[name="kegiatan"]').val(data.kegiatan_name);
             $('#entity').val(data.entity).prop('disabled', true);
+            $('#tahap').val(data.tahap).prop('disabled', true); // Tambahkan tahap
             $('#status_id').val(data.status).prop('disabled', true);
             $('#start_date').val(data.start_date).prop('disabled', true);
             $('#end_date').val(data.end_date).prop('disabled', true);
@@ -286,7 +288,7 @@
             // Tampilkan token yang sudah ada
             $('#token_display').val(data.instrumen_token || 'Token tidak tersedia');
 
-            // Generate URL untuk view - PAKAI CARA SAMA DENGAN TABLE
+            // Generate URL untuk view
             const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
             const baseUrl = window.location.origin;
             $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
@@ -322,6 +324,7 @@
             $('input[name="kegiatan_id"]').val(data.kegiatan_id);
             $('input[name="kegiatan"]').val(data.kegiatan_name);
             $('#entity').val(data.entity).prop('disabled', false);
+            $('#tahap').val(data.tahap).prop('disabled', false); // Tambahkan tahap
             $('#status_id').val(data.status).prop('disabled', false);
             $('#start_date').val(data.start_date).prop('disabled', false);
             $('#end_date').val(data.end_date).prop('disabled', false);
@@ -329,7 +332,7 @@
             // Tampilkan token yang sudah ada
             $('#token_display').val(data.instrumen_token || 'Token tidak tersedia');
 
-            // Generate URL untuk edit - PAKAI CARA SAMA DENGAN TABLE
+            // Generate URL untuk edit
             const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
             const baseUrl = window.location.origin;
             $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
