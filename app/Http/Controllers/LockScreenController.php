@@ -38,11 +38,11 @@ class LockScreenController extends Controller
         }
 
         // Ambil data untuk dropdown
-        $pangkatJabatans = PangkatJabatan::orderBy('jenjang_jabatan')->get();
+        $pangkatJabatans = PangkatJabatan::orderBy('pangkat_jabatan_id')->get(); 
         $kotas = Kota::orderBy('nama_kota')->get();
 
         // Ambil 10 sekolah pertama untuk inisialisasi
-        $sekolahs = Sekolah::orderBy('nama_sekolah')->limit(10)->get();
+        $sekolahs = Sekolah::orderBy('nama_sekolah')->limit(100)->get();
 
         return view('lockscreen.index', [
             'title' => 'Lock Screen',

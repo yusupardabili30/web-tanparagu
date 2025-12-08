@@ -76,6 +76,12 @@
                                             <a href="{{ route('kegiatan.index') }}" class="nav-link" data-key="t-chat"> Kegiatan </a>
                                         </li>
                                     </ul>
+                                    <ul class="nav nav-sm flex-column">
+                                        <li class="nav-item">
+                                            {{-- Menjadi: --}}
+                                            <a href="{{ route('hasil-instrumen.index') }}" class="nav-link">Hasil Instrumen</a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </li>
                             <li class="nav-item">

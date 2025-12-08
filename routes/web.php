@@ -2,12 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UiController;
+use App\Http\Controllers\PtkController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SoalController;
-use App\Http\Controllers\PtkController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\LockScreenController;
+use App\Http\Controllers\HasilInstrumenController;
 
 
 /*
@@ -86,8 +87,10 @@ Route::get('/ptk/continue/{encode_kegiatan_id}/{nip}', [PtkController::class, 'c
 // Quiz Routes (encoded_kegiatan_id)
 Route::get('/quiz/tahap/{tahap}/kegiatan/{encoded_kegiatan_id}/user/{nip}/ind/{encoded_indikator_id}/no/{encoded_no_urut}', [SoalController::class, 'quiz1'])->name('quiz1.show');
 Route::get('/quiz/tahap/{tahap}/kegiatan/{encoded_kegiatan_id}/user/{nip}/sub/{encoded_sub_indikator_id}/no/{encoded_no_urut}', [SoalController::class, 'quiz2'])->name('quiz2.show');
+Route::get('/quiz/tahap/{tahap}/kegiatan/{encoded_kegiatan_id}/user/{nip}/sub/{encoded_sub_indikator_id}/no/{encoded_no_urut}/review/{token}', [SoalController::class, 'quiz2_review'])->name('quiz2review.show');
 Route::post('/quiz1/submit', [SoalController::class, 'submitq1'])->name('quiz1.submit');
 Route::post('/quiz2/submit', [SoalController::class, 'submitq2'])->name('quiz2.submit');
+Route::post('/submitq2_review/submit', [SoalController::class, 'submitq2_review'])->name('submitq2_review.submit');
 
 Route::get('/quiz/finish/{encoded_kegiatan_id}/{nip}', [SoalController::class, 'finish'])->name('quiz.finish');
 
@@ -105,3 +108,9 @@ Route::post('/submit-jawaban', [SoalController::class, 'submitJawaban']);
 
 // API Routes untuk lockscreen
 Route::get('/api/search-sekolah', [LockScreenController::class, 'searchSekolah'])->name('api.search-sekolah');
+
+Route::get('/hasil-instrumen', [HasilInstrumenController::class, 'index'])->name('hasil-instrumen.index');
+Route::get('/hasil-instrumen/export/{ptk_id}', [HasilInstrumenController::class, 'export'])->name('hasil-instrumen.export');
+Route::get('/hasil-instrumen/export-all', [HasilInstrumenController::class, 'exportAllPdf'])->name('hasil-instrumen.export-all');
+Route::get('/hasil-instrumen/export-excel', [HasilInstrumenController::class, 'exportExcel'])->name('hasil-instrumen.export-excel');
+Route::delete('/ptk-jawaban/delete/{id}', [HasilInstrumenController::class, 'destroy'])->name('ptk-jawaban.destroy');
