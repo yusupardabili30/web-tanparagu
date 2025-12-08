@@ -44,10 +44,8 @@ class PtkController extends Controller
             return redirect()->route('lockscreen', ['encode_kegiatan_id' => $encode_kegiatan_id])
                 ->with('error', 'Kegiatan tidak ditemukan');
         }
-
-        // Ambil soal berdasarkan entity dan tahap dari kegiatan
         $soal = Soal::where('entity', $kegiatan->entity)
-            ->where('tahap', $kegiatan->tahap) // Gunakan tahap dari kegiatan
+            ->where('tahap', $kegiatan->tahap)
             ->first();
         $encoded_sub_indikator_id = Hashids::encode($soal->sub_indikator_id);
 

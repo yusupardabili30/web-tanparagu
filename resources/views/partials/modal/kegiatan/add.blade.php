@@ -38,30 +38,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Tambahkan dropdown tahap di sini -->
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <div class="form-floating">
-                                    <select class="form-select" name="tahap" id="tahap" required>
-                                        <option value="">Pilih Tahap</option>
-                                        <?php
-
-                                        use Illuminate\Support\Facades\DB;
-                                        // Ambil data tahap unik dari tabel soal
-                                        $tahapList = DB::table('soal')
-                                            ->select('tahap')
-                                            ->distinct()
-                                            ->orderBy('tahap')
-                                            ->get();
-                                        ?>
-                                        @foreach($tahapList as $tahapItem)
-                                        <option value="{{ $tahapItem->tahap }}">Tahap {{ $tahapItem->tahap }}</option>
-                                        @endforeach
-                                    </select>
-                                    <label for="tahap">Tahap Soal</label>
-                                </div>
-                            </div>
-                        </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <div class="form-floating">
