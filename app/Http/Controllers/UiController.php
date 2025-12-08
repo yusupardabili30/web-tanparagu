@@ -8,7 +8,7 @@ class UiController extends Controller
 {
     public function index()
     {
-        return view('ui.profil', [
+        return view('ui.quiz', [
             'tittle' => 'User Interface',
             'kegiatan' => null, // atau tidak kirim sekalian
         ]);
