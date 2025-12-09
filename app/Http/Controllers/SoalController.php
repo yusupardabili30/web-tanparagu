@@ -57,7 +57,7 @@ class SoalController extends Controller
         // Ambil SOAL
         $soal = Soal::where('indikator_id', $indikator_id)
             ->where('no_urut', $no_urut)
-            ->first(); 
+            ->first();
 
         if (!$soal) {
             return redirect()->route('quiz.finish', [
@@ -92,10 +92,10 @@ class SoalController extends Controller
     {
         session(['timesoal' => now()->format('H:i:s')]);
         if (!session()->has('timestart')) {
-            session(['timestart' => now()->format('H:i:s')]);            
+            session(['timestart' => now()->format('H:i:s')]);
         }
         //setiap no urut 1 session akan diupdate
-        if(Hashids::decode($encoded_no_urut)[0]==1){
+        if (Hashids::decode($encoded_no_urut)[0] == 1) {
             session(['timestart' => now()->format('H:i:s')]);
         }
 
@@ -115,7 +115,7 @@ class SoalController extends Controller
         }
 
         $no_urut = request()->get('no_urut', $no_urut);
-        if($no_urut==1){
+        if ($no_urut == 1) {
             session(['timestart' => now()->format('H:i:s')]);
         }
 
@@ -158,7 +158,7 @@ class SoalController extends Controller
 
     public function quiz2_review($tahap, $encoded_kegiatan_id, $nip, $encoded_sub_indikator_id, $encoded_no_urut, $token)
     {
-        
+
         if (!session()->has('timestart')) {
             session(['timestart' => now()->format('H:i:s')]);
         }
@@ -179,7 +179,7 @@ class SoalController extends Controller
         }
 
         $no_urut = request()->get('no_urut', $no_urut);
-        if($no_urut==1){
+        if ($no_urut == 1) {
             session(['timestart' => now()->format('H:i:s')]);
         }
 
@@ -253,9 +253,9 @@ class SoalController extends Controller
         $ptk = Ptk::where('nip', $nip)->first();
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)->first();
         $nextSoal = Soal::where('indikator_id', Hashids::decode($encoded_indikator_id)[0])
-                        ->where('no_urut', $current_no_urut + 1)
-                        ->first();
-        
+            ->where('no_urut', $current_no_urut + 1)
+            ->first();
+
 
         // start insert db
         //--------------------
@@ -267,7 +267,7 @@ class SoalController extends Controller
             //soal sudah dijawab
             $next_encoded_no_urut = Hashids::encode($current_no_urut + 1);
             return redirect()->route('quiz1.show', [
-                'tahap' => $tahap, 
+                'tahap' => $tahap,
                 'encoded_kegiatan_id' => $encoded_kegiatan_id,
                 'nip' => $nip,
                 'encoded_indikator_id' => $encoded_indikator_id,
@@ -307,12 +307,12 @@ class SoalController extends Controller
         // end insert db
         $next_encoded_no_urut = Hashids::encode($current_no_urut + 1);
         return redirect()->route('quiz1.show', [
-            'tahap' => $tahap, 
+            'tahap' => $tahap,
             'encoded_kegiatan_id' => $encoded_kegiatan_id,
             'nip' => $nip,
             'encoded_indikator_id' => $encoded_indikator_id,
             'encoded_no_urut' => $next_encoded_no_urut
-        ]);        
+        ]);
     }
 
     public function submitq2(Request $request)
@@ -372,7 +372,7 @@ class SoalController extends Controller
             'level' => $soal->level,
             'bobot' => $bobot
         ]);
-        
+
 
 
 
@@ -396,11 +396,11 @@ class SoalController extends Controller
                             'encoded_no_urut' => $next_encoded_no_urut
                         ]);
                     }
-                }else{
+                } else {
                     //do simpan jawaban ptk
-                    if($soal->level==2){
+                    if ($soal->level == 2) {
                         $level_kompetensi = 2;
-                    }else{
+                    } else {
                         $level_kompetensi = $soal->level - 1;
                     }
                     //return $level_kompetensi;
@@ -420,10 +420,10 @@ class SoalController extends Controller
                 }
                 break;
             case 4:
-            case 5 :
-                if ($bobot == 4) {   
+            case 5:
+                if ($bobot == 4) {
                     //do insert ke level 5
-                    if($soal->level==5){
+                    if ($soal->level == 5) {
                         $level_kompetensi = 5;
                         //return $level_kompetensi;
                         PtkJawaban::updateOrCreate([
@@ -438,11 +438,11 @@ class SoalController extends Controller
                             'selisih' => $selisih_time_sub,
                             'level' => $level_kompetensi
                         ]);
-                    }              
+                    }
                     $nextSoal = Soal::where('sub_indikator_id', Hashids::decode($encoded_sub_indikator_id)[0])
                         ->where('no_urut', $current_no_urut + 1)
                         ->first();
-                    
+
                     if ($nextSoal) {
                         // Encode next no_urut
                         $next_encoded_no_urut = Hashids::encode($current_no_urut + 1);
@@ -455,10 +455,10 @@ class SoalController extends Controller
                             'encoded_no_urut' => $next_encoded_no_urut
                         ]);
                     }
-                }else{
+                } else {
                     //do simpan jawaban ptk
                     $level_kompetensi = $soal->level - 1;
-                    
+
                     //return $level_kompetensi;
                     PtkJawaban::updateOrCreate([
                         'kegiatan_id' => Hashids::decode($encoded_kegiatan_id)[0],
@@ -557,11 +557,11 @@ class SoalController extends Controller
                             'token' => 123,
                         ]);
                     }
-                }else{
+                } else {
                     //do simpan jawaban ptk
-                    if($soal->level==2){
+                    if ($soal->level == 2) {
                         $level_kompetensi = 2;
-                    }else{
+                    } else {
                         $level_kompetensi = $soal->level - 1;
                     }
                     //return $level_kompetensi;
@@ -580,10 +580,10 @@ class SoalController extends Controller
                 }
                 break;
             case 4:
-            case 5 :
-                if ($bobot == 4) {   
+            case 5:
+                if ($bobot == 4) {
                     //do insert ke level 5
-                    if($soal->level==5){
+                    if ($soal->level == 5) {
                         $level_kompetensi = 5;
                         //return $level_kompetensi;
                         PtkJawaban::updateOrCreate([
@@ -597,11 +597,11 @@ class SoalController extends Controller
                         ], [
                             'level' => $level_kompetensi
                         ]);
-                    }              
+                    }
                     $nextSoal = Soal::where('sub_indikator_id', Hashids::decode($encoded_sub_indikator_id)[0])
                         ->where('no_urut', $current_no_urut + 1)
                         ->first();
-                    
+
                     if ($nextSoal) {
                         // Encode next no_urut
                         $next_encoded_no_urut = Hashids::encode($current_no_urut + 1);
@@ -615,10 +615,10 @@ class SoalController extends Controller
                             'token' => 123
                         ]);
                     }
-                }else{
+                } else {
                     //do simpan jawaban ptk
                     $level_kompetensi = $soal->level - 1;
-                    
+
                     //return $level_kompetensi;
                     PtkJawaban::updateOrCreate([
                         'kegiatan_id' => Hashids::decode($encoded_kegiatan_id)[0],
