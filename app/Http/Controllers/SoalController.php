@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use DB;
+use Carbon\Carbon;
 use App\Models\Ptk;
 use App\Models\Soal;
 use App\Models\Kegiatan;
@@ -12,6 +13,7 @@ use App\Models\PtkJawaban;
 use App\Models\SoalJawaban;
 use App\Models\SubIndikator;
 use Illuminate\Http\Request;
+use App\Models\PtkJawabanDetail;
 use Vinkla\Hashids\Facades\Hashids;
 
 class SoalController extends Controller
@@ -88,8 +90,12 @@ class SoalController extends Controller
 
     public function quiz2($tahap, $encoded_kegiatan_id, $nip, $encoded_sub_indikator_id, $encoded_no_urut)
     {
-        
+        session(['timesoal' => now()->format('H:i:s')]);
         if (!session()->has('timestart')) {
+            session(['timestart' => now()->format('H:i:s')]);            
+        }
+        //setiap no urut 1 session akan diupdate
+        if(Hashids::decode($encoded_no_urut)[0]==1){
             session(['timestart' => now()->format('H:i:s')]);
         }
 
@@ -342,6 +348,34 @@ class SoalController extends Controller
 
         // start logic algoritma
         $ptk = Ptk::where('nip', $nip)->first();
+        //simpan setiap jawaban user
+        $start = Carbon::createFromFormat('H:i:s', session('timestart'));
+        $startsoal = Carbon::createFromFormat('H:i:s', session('timesoal'));
+        $end   = Carbon::createFromFormat('H:i:s', now()->format('H:i:s'));
+        $diffInSeconds_soal = $startsoal->diffInSeconds($end);
+        $selisih_time_soal = gmdate('H:i:s', $diffInSeconds_soal);
+
+        $diffInSeconds_sub = $start->diffInSeconds($end);
+        $selisih_time_sub = gmdate('H:i:s', $diffInSeconds_sub);
+
+        PtkJawabanDetail::updateOrCreate([
+            'kegiatan_id' => Hashids::decode($encoded_kegiatan_id)[0],
+            'sub_indikator_id' => Hashids::decode($encoded_sub_indikator_id)[0],
+            'sub_indikator_code' => $sub_indikator->sub_indikator_code,
+            'tahap' => $tahap,
+            'ptk_id' => $ptk->ptk_id,
+            'soal_id' => $soal_id,
+        ], [
+            'time_start' => session('timesoal'),
+            'time_end' => now()->format('H:i:s'),
+            'selisih' => $selisih_time_soal,
+            'level' => $soal->level,
+            'bobot' => $bobot
+        ]);
+        
+
+
+
         switch ($soal->level) {
             case 2:
             case 3:
@@ -376,11 +410,11 @@ class SoalController extends Controller
                         'sub_indikator_id' => Hashids::decode($encoded_sub_indikator_id)[0],
                         'sub_indikator_code' => $sub_indikator->sub_indikator_code,
                         'tahap' => $tahap,
-                        'time_start' => session('timestart'),
-                        'time_end' => now()->format('H:i:s'),
-                        'selisih' => now()->format('H:i:s'),
                         'ptk_id' => $ptk->ptk_id
                     ], [
+                        'time_start' => session('timestart'),
+                        'time_end' => now()->format('H:i:s'),
+                        'selisih' => $selisih_time_sub,
                         'level' => $level_kompetensi
                     ]);
                 }
@@ -397,11 +431,11 @@ class SoalController extends Controller
                             'sub_indikator_id' => Hashids::decode($encoded_sub_indikator_id)[0],
                             'sub_indikator_code' => $sub_indikator->sub_indikator_code,
                             'tahap' => $tahap,
-                            'time_start' => session('timestart'),
-                            'time_end' => now()->format('H:i:s'),
-                            'selisih' => now()->format('H:i:s'),
                             'ptk_id' => $ptk->ptk_id
                         ], [
+                            'time_start' => session('timestart'),
+                            'time_end' => now()->format('H:i:s'),
+                            'selisih' => $selisih_time_sub,
                             'level' => $level_kompetensi
                         ]);
                     }              
@@ -431,10 +465,11 @@ class SoalController extends Controller
                         'sub_indikator_id' => Hashids::decode($encoded_sub_indikator_id)[0],
                         'sub_indikator_code' => $sub_indikator->sub_indikator_code,
                         'tahap' => $tahap,
-                        'time_start' => session('timestart'),
-                        'time_end' => now()->format('H:i:s'),
                         'ptk_id' => $ptk->ptk_id
                     ], [
+                        'time_start' => session('timestart'),
+                        'time_end' => now()->format('H:i:s'),
+                        'selisih' => $selisih_time_sub,
                         'level' => $level_kompetensi
                     ]);
                 }

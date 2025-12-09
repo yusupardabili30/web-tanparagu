@@ -5,18 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PtkJawaban extends Model
+class PtkJawabanDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'ptk_jawaban';
-    protected $primaryKey = 'ptk_jawaban_id';
+    protected $table = 'ptk_jawaban_detail';
+    protected $primaryKey = 'ptk_jawaban_detail_id';
     public $timestamps = true;
 
     protected $fillable = [
         'kegiatan_id',
         'tahap',
         'ptk_id',
+        'soal_id',
         'instrumen_id',
         'indikator_id',
         'indikator_code',

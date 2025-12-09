@@ -89,7 +89,7 @@
                                     <input type="hidden" name="encoded_sub_indikator_id" value="{{ $encoded_sub_indikator_id }}">
                                     <input type="hidden" name="encoded_no_urut" value="{{ $encoded_no_urut }}">
                                     <input type="hidden" name="nip" value="{{ $nip }}">
-                                    <input type="hidden" name="bobot" id="bobot">
+                                    <input type="text" name="bobot" id="bobot">
 
                                     <!-- Pilihan Jawaban -->
                                     @foreach ($choices as $c)
