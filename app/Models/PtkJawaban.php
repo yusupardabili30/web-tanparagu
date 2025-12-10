@@ -24,6 +24,7 @@ class PtkJawaban extends Model
         'sub_indikator_code',
         'level',
         'bobot',
+        'selisih',
         'time_start',
         'time_end',
         'created_at',
