@@ -90,7 +90,6 @@ class SoalController extends Controller
             ->where('no_urut', $no_urut)
             ->where('entity', $kegiatan->entity)
             ->first();
-
         if (!$soal) {
             return redirect()->route('quiz.finish', [
                 'encoded_kegiatan_id' => $encoded_kegiatan_id,
@@ -409,5 +408,4 @@ class SoalController extends Controller
             'nip' => $nip
         ]);
     }
-
 }

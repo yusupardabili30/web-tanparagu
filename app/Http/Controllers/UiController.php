@@ -10,7 +10,7 @@ class UiController extends Controller
     {
         // ====== HALAMAN MANA YANG MAU DITAMPILKAN ======
         // Tinggal ubah "ui.grafik" → "ui.quiz" → "ui.profil" → dll.
-        $page = 'ui.quiz';   // <<< GANTI INI 
+        $page = 'ui.form';   // <<< GANTI INI 
 
         // ====== DATA DUMMY GRAFIK (TETAP ADA, TAPI HANYA DIKIRIM KE VIEW GRAFIK) ======
         $daerahList = ['Bandung', 'Bogor', 'Cimahi', 'Bekasi', 'Serang'];

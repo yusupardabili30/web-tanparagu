@@ -1,213 +1,416 @@
 @extends('layouts.main-user')
 
 @section('mycontent')
-<div class="container-fluid">
 
-    <!-- CSS EXISTING -->
-    <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
-    <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
+<!-- ============================================ -->
+<!-- FLOATING NAVBAR + SLIDE PANEL -->
+<!-- ============================================ -->
 
-    <!-- PAGE TITLE -->
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                <h4 class="mb-sm-0">Quiz</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0" style="font-size:15px; font-weight:400;">
-                        <li class="breadcrumb-item">
-                            <a href="#" class="text-primary">
-                                Quiz
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            Soal
-                        </li>
-                    </ol>
-                </div>
-            </div>
-        </div>
+<!-- TOGGLE BUTTON HALF OVAL -->
+<div id="floatingNav">
+    <!-- TIMER NAV -->
+    <div id="quizTimer">
+        <i class="ri-timer-line me-1"></i>
+        <span id="timerText">00:00</span>
     </div>
 
-    <!-- QUIZ CARD -->
-    <div class="row">
-        <div class="col-xl-12">
+    <button id="toggleFloating" class="floating-toggle half-oval-btn">
+        <i class="ri-arrow-right-s-line"></i>
+    </button>
+</div>
 
-            <div class="card border-0 shadow-sm" style="border-radius:14px;">
+<!-- SLIDE PANEL -->
+<div id="floatingPanel" class="floating-panel">
 
-                <!-- HEADER BADUY -->
-                <div class="card-header baduy-bg" style="border-radius:14px 14px 0 0;">
-                    <h5 class="mb-0 text-white d-flex align-items-center" style="font-size:20px; font-weight:700;">
-                        <i class="ri-book-open-line me-2"></i> Quiz
-                    </h5>
-                </div>
+    <!-- CLOSE BUTTON -->
+    <button class="close-panel-btn" id="closePanelBtn">
+        <i class="ri-close-line"></i>
+    </button>
 
-                <div class="card-body p-4">
+    <h4 class="floating-title">
+        <i class="ri-stack-line me-1"></i> Daftar Studi Kasus
+    </h4>
 
-                    <div class="row">
-
-                        <!-- ================================== -->
-                        <!-- STUDI KASUS DALAM BOX -->
-                        <!-- ================================== -->
-                        <div class="col-12 mb-3">
-                            <div class="big-box">
-                                <h5 class="box-title studi-title">
-                                    <i class="ri-article-line me-1" style="color:#1a4d8e;"></i>
-                                    <span style="color:#1a4d8e; font-weight:700;">Studi Kasus</span>
-                                </h5>
-
-                                <p class="box-text" style="font-size:19px; line-height:1.6;">
-                                    {!! nl2br(e($case->case)) !!}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- ================================== -->
-                        <!-- SOAL + PILIHAN JAWABAN DALAM 1 BOX -->
-                        <!-- ================================== -->
-                        <div class="col-12">
-                            <div class="big-box">
-
-                                <!-- Judul Soal -->
-                                <h5 class="box-title studi-title">
-                                    <i class="ri-question-line me-1 text-primary"></i>
-                                    <span style="color:#1a4d8e; font-weight:700;">Soal</span>
-                                </h5>
-
-                                <!-- Teks Soal -->
-                                <p class="soal-text mb-4">
-                                    {{ $soal->soal }}
-                                </p>
-
-                                <form action="{{ route('quiz.submit') }}" method="POST">
-                                    @csrf
-
-                                    <!-- Hidden Inputs -->
-                                    <input type="hidden" name="soal_id" value="{{ $soal->soal_id }}">
-                                    <input type="hidden" name="sub_indikator_id" value="{{ $sub_indikator_id }}"> <!-- ID ASLI -->
-                                    <input type="text" name="encoded_kegiatan_id" value="{{ $encoded_kegiatan_id }}">
-                                    <input type="text" name="encoded_sub_indikator_id" value="{{ $encoded_sub_indikator_id }}">
-                                    <input type="text" name="encoded_no_urut" value="{{ $encoded_no_urut }}">
-                                    <input type="text" name="nip" value="{{ $nip }}">
-                                    <input type="text" name="bobot" id="bobot">
-
-                                    <!-- Pilihan Jawaban -->
-                                    @foreach ($choices as $c)
-                                    <label class="quiz-choice">
-                                        <input
-                                            type="radio"
-                                            name="pilihan_jawaban_id"
-                                            class="form-check-input pilihan radio-inside"
-                                            value="{{ $c->soal_jawaban_id }}"
-                                            data-bobot="{{ $c->bobot }}"
-                                            id="choice{{ $c->soal_jawaban_id }}"
-                                            required>
-                                        <span class="choice-text">
-                                            {{ $c->pilihan_jawaban }}
-                                        </span>
-                                    </label>
-                                    @endforeach
-
-                                    <button type="submit" class="btn btn-primary btn-lg mt-4 btn-jawab">
-                                        <i class="ri-checkbox-circle-line me-2"></i> Submit
-                                    </button>
-                                </form>
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
+    <div class="nav-case-item">
+        <span>Studi Kasus 1</span>
+        <i class="ri-checkbox-circle-line text-success"></i>
+    </div>
+    <div class="nav-case-item">
+        <span>Studi Kasus 2</span>
+        <i class="ri-checkbox-blank-circle-line text-secondary"></i>
+    </div>
+    <div class="nav-case-item">
+        <span>Studi Kasus 3</span>
+        <i class="ri-checkbox-blank-circle-line text-secondary"></i>
+    </div>
+    <div class="nav-case-item">
+        <span>Studi Kasus 4</span>
+        <i class="ri-checkbox-circle-line text-success"></i>
     </div>
 
 </div>
 
-<!-- ========================= -->
-<!-- LOCAL CSS -->
-<!-- ========================= -->
-<style>
-    /* BOX BESAR UMUM */
-    .big-box {
-        background: #f6f8ff;
-        border: 1px solid #d7e2ff;
-        border-radius: 12px;
-        padding: 20px 22px;
-    }
 
-    .box-title {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 12px;
-    }
 
-    .box-text {
-        font-size: 17px;
-        line-height: 1.6;
-        text-align: justify;
-    }
+<!-- ============================================ -->
+<!-- CONTENT WRAPPER ALLOW SHIFT -->
+<!-- ============================================ -->
 
-    /* BOX SOAL DI DALAM BIG BOX */
-    .soal-text {
-        font-size: 19px;
-        font-weight: 700;
-        line-height: 1.6;
-    }
+<div class="content-wrapper">
 
-    /* PILIHAN JAWABAN BOX */
-    .quiz-choice {
-        background: #f4f7ff;
-        border: 1px solid #d6e4ff;
-        border-radius: 10px;
-        padding: 14px 18px;
-        transition: 0.2s;
-        margin-bottom: 12px;
-        cursor: pointer;
+    <div class="container-fluid">
 
-        display: flex;
-        align-items: center;
-    }
+        <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
+        <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
 
-    .quiz-choice:hover {
-        background: #e8f0ff;
-        border-color: #b7d0ff;
-    }
 
-    /* RADIO KIRI DALAM BOX */
-    .radio-inside {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-        margin: 0;
-        flex-shrink: 0;
-    }
+        <!-- PAGE TITLE -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+                    <h4 class="mb-sm-0">Quiz</h4>
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0" style="font-size:15px; font-weight:400;">
+                            <li class="breadcrumb-item"><a href="#" class="text-primary">Quiz</a></li>
+                            <li class="breadcrumb-item active">Soal</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    /* TEKS JAWABAN */
-    .choice-text {
-        margin-left: 12px;
-        font-size: 17px;
-        font-weight: 500;
-        text-align: justify;
-    }
 
-    /* BUTTON */
-    .btn-jawab {
-        border-radius: 10px;
-        padding-left: 40px;
-        padding-right: 40px;
-    }
-</style>
+        <!-- QUIZ CARD -->
+        <div class="row">
+            <div class="col-xl-12">
 
-@endsection
+                <div class="card border-0 shadow-sm" style="border-radius:14px;">
 
-@section('sipproja-js')
-<script>
-    document.querySelectorAll('.pilihan').forEach(radio => {
-        radio.addEventListener('change', function() {
-            document.getElementById('bobot').value = this.dataset.bobot;
+                    <!-- HEADER BADUY -->
+                    <div class="card-header baduy-bg" style="border-radius:14px 14px 0 0;">
+                        <h5 class="mb-0 text-white d-flex align-items-center" style="font-size:20px; font-weight:700;">
+                            <i class="ri-book-open-line me-2"></i> Quiz
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        <div class="row">
+
+                            <!-- ================================== -->
+                            <!-- STUDI KASUS DALAM BOX -->
+                            <!-- ================================== -->
+                            <div class="col-12 mb-3">
+                                <div class="big-box">
+                                    <h5 class="box-title studi-title">
+                                        <i class="ri-article-line me-1" style="color:#1a4d8e;"></i>
+                                        <span style="color:#1a4d8e; font-weight:700;">Studi Kasus</span>
+                                    </h5>
+
+                                    <p class="box-text" style="font-size:19px; line-height:1.6;">
+                                        {!! nl2br(e($case->case)) !!}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- ================================== -->
+                            <!-- SOAL + PILIHAN JAWABAN DALAM 1 BOX -->
+                            <!-- ================================== -->
+                            <div class="col-12">
+                                <div class="big-box">
+
+                                    <!-- Judul Soal -->
+                                    <h5 class="box-title studi-title">
+                                        <i class="ri-question-line me-1 text-primary"></i>
+                                        <span style="color:#1a4d8e; font-weight:700;">Soal</span>
+                                    </h5>
+
+                                    <!-- Teks Soal -->
+                                    <p class="soal-text mb-4">
+                                        {{ $soal->soal }}
+                                    </p>
+
+                                    <form action="{{ route('quiz.submit') }}" method="POST">
+                                        @csrf
+
+                                        <!-- Hidden Inputs -->
+                                        <input type="hidden" name="soal_id" value="{{ $soal->soal_id }}">
+                                        <input type="hidden" name="sub_indikator_id" value="{{ $sub_indikator_id }}">
+                                        <!-- ID ASLI -->
+                                        <input type="text" name="encoded_kegiatan_id" value="{{ $encoded_kegiatan_id }}">
+                                        <input type="text" name="encoded_sub_indikator_id"
+                                            value="{{ $encoded_sub_indikator_id }}">
+                                        <input type="text" name="encoded_no_urut" value="{{ $encoded_no_urut }}">
+                                        <input type="text" name="nip" value="{{ $nip }}">
+                                        <input type="text" name="bobot" id="bobot">
+
+                                        <!-- Pilihan Jawaban -->
+                                        @foreach ($choices as $c)
+                                        <label class="quiz-choice">
+                                            <input type="radio" name="pilihan_jawaban_id"
+                                                class="form-check-input pilihan radio-inside" value="{{ $c->soal_jawaban_id }}"
+                                                data-bobot="{{ $c->bobot }}" id="choice{{ $c->soal_jawaban_id }}" required>
+                                            <span class="choice-text">
+                                                {{ $c->pilihan_jawaban }}
+                                            </span>
+                                        </label>
+                                        @endforeach
+
+                                        <button type="submit" class="btn btn-primary btn-lg mt-4 btn-jawab">
+                                            <i class="ri-checkbox-circle-line me-2"></i> Submit
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <!-- ============================================ -->
+    <!-- FULL CSS (HALF OVAL BUTTON + RESPONSIVE) -->
+    <!-- ============================================ -->
+
+    <style>
+        .big-box {
+            background: #f6f8ff;
+            border: 1px solid #d7e2ff;
+            border-radius: 12px;
+            padding: 20px 22px;
+        }
+
+        .quiz-choice {
+            background: #f4f7ff;
+            border: 1px solid #d6e4ff;
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .radio-inside {
+            width: 20px;
+            height: 20px;
+        }
+
+        .choice-text {
+            margin-left: 12px;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        /* ======================================== */
+        /* DESKTOP HALF OVAL BUTTON */
+        /* ======================================== */
+        #floatingNav {
+            position: fixed;
+            top: 142px;
+            /* sejajar dengan teks QUIZ */
+            left: 0;
+            z-index: 2000;
+            transition: .2s;
+        }
+
+        #floatingNav.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @media(min-width: 769px) {
+            .half-oval-btn {
+                position: relative;
+                left: -28px;
+                /* muncul dari sisi kiri */
+                width: 58px;
+                height: 50px;
+                background: #1a4d8e;
+                border: none;
+                color: #fff;
+                border-radius: 0 30px 30px 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                cursor: pointer;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+                transition: .25s ease;
+                transform: translateX(20px);
+
+            }
+
+            .half-oval-btn:hover {
+                left: -20px;
+                background: #163f74;
+            }
+        }
+
+        /* ======================================== */
+        /* MOBILE BUTTON (BULAT KANAN) */
+        /* ======================================== */
+        @media(max-width: 768px) {
+
+            #floatingNav {
+                top: 70px;
+                right: 18px;
+                left: auto;
+            }
+
+            .floating-toggle {
+                width: 42px;
+                height: 42px;
+                background: #1a4d8e;
+                color: white;
+                border-radius: 50%;
+                font-size: 22px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
+            }
+        }
+
+        /* ======================================== */
+        /* SLIDE PANEL */
+        /* ======================================== */
+        .floating-panel {
+            position: fixed;
+            top: 0;
+            left: -260px;
+            width: 260px;
+            height: 100vh;
+            background: white;
+            padding: 20px;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.15);
+            overflow-y: auto;
+            transition: 0.3s ease;
+            z-index: 3000;
+        }
+
+        @media(max-width: 768px) {
+            .floating-panel {
+                width: 100%;
+                left: -100%;
+            }
+        }
+
+        .floating-panel.open {
+            left: 0;
+        }
+
+        .close-panel-btn {
+            position: absolute;
+            right: 1px;
+            top: 15px !important;
+            /* turun 10px dari posisi sebelumnya */
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            color: #1a4d8e;
+            cursor: pointer;
+        }
+
+        .nav-case-item {
+            padding: 12px;
+            background: #f5f7ff;
+            border: 1px solid #e0e6ff;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 17px !important;
+            margin-top: 18px;
+        }
+
+        /* ======================================== */
+        /* SHIFT CONTENT (DESKTOP ONLY) */
+        /* ======================================== */
+        .content-wrapper {
+            transition: 0.3s ease;
+        }
+
+        @media(min-width: 769px) {
+            .content-wrapper.shift {
+                margin-left: 260px;
+            }
+        }
+
+        /* =============================== */
+        /* MINI NAV TIMER – LEBIH PENDEK  */
+        /* =============================== */
+
+        #quizTimer {
+            position: fixed;
+            top: 200px;
+            left: -6px;
+            /* DITARIK KE KIRI BIAR GA NEMPEL CARD */
+            background: #1a4d8e;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 0 20px 20px 0;
+            font-size: 15px;
+            font-weight: 600;
+            z-index: 2100;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: fit-content;
+            max-width: 120px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        #quizTimer i {
+            font-size: 18px;
+        }
+
+        /* MOBILE FIX */
+        @media(max-width: 768px) {
+            #quizTimer {
+                top: 115px;
+                right: 18px;
+                left: auto;
+                border-radius: 16px;
+                padding: 7px 10px;
+                font-size: 14px;
+                max-width: 120px;
+            }
+        }
+    </style>
+
+
+
+    @endsection
+
+
+
+    @section('sipproja-js')
+    <script>
+        // OPEN PANEL
+        document.getElementById("toggleFloating").addEventListener("click", function() {
+            document.getElementById("floatingPanel").classList.add("open");
+            document.querySelector(".content-wrapper").classList.add("shift");
+            document.getElementById("floatingNav").classList.add("hide");
         });
-    });
-</script>
-@endsection
+
+        // CLOSE PANEL
+        document.getElementById("closePanelBtn").addEventListener("click", function() {
+            document.getElementById("floatingPanel").classList.remove("open");
+            document.querySelector(".content-wrapper").classList.remove("shift");
+            document.getElementById("floatingNav").classList.remove("hide");
+        });
+    </script>
+    <script>
+        document.querySelectorAll('.pilihan').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('bobot').value = this.dataset.bobot;
+            });
+        });
+    </script>
+    @endsection
