@@ -167,6 +167,7 @@
     <!-- ============================================ -->
 
     <style>
+        /* BOX BESAR UMUM */
         .big-box {
             background: #f6f8ff;
             border: 1px solid #d7e2ff;
@@ -174,199 +175,66 @@
             padding: 20px 22px;
         }
 
+        .box-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .box-text {
+            font-size: 17px;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        /* BOX SOAL DI DALAM BIG BOX */
+        .soal-text {
+            font-size: 19px;
+            font-weight: 700;
+            line-height: 1.6;
+        }
+
+        /* PILIHAN JAWABAN BOX */
         .quiz-choice {
             background: #f4f7ff;
             border: 1px solid #d6e4ff;
             border-radius: 10px;
             padding: 14px 18px;
+            transition: 0.2s;
+            margin-bottom: 12px;
+            cursor: pointer;
+
             display: flex;
             align-items: center;
-            margin-bottom: 12px;
         }
 
+        .quiz-choice:hover {
+            background: #e8f0ff;
+            border-color: #b7d0ff;
+        }
+
+        /* RADIO KIRI DALAM BOX */
         .radio-inside {
             width: 20px;
             height: 20px;
+            cursor: pointer;
+            margin: 0;
+            flex-shrink: 0;
         }
 
+        /* TEKS JAWABAN */
         .choice-text {
             margin-left: 12px;
             font-size: 17px;
             font-weight: 500;
+            text-align: justify;
         }
 
-        /* ======================================== */
-        /* DESKTOP HALF OVAL BUTTON */
-        /* ======================================== */
-        #floatingNav {
-            position: fixed;
-            top: 142px;
-            /* sejajar dengan teks QUIZ */
-            left: 0;
-            z-index: 2000;
-            transition: .2s;
-        }
-
-        #floatingNav.hide {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        @media(min-width: 769px) {
-            .half-oval-btn {
-                position: relative;
-                left: -28px;
-                /* muncul dari sisi kiri */
-                width: 58px;
-                height: 50px;
-                background: #1a4d8e;
-                border: none;
-                color: #fff;
-                border-radius: 0 30px 30px 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 28px;
-                cursor: pointer;
-                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-                transition: .25s ease;
-                transform: translateX(20px);
-
-            }
-
-            .half-oval-btn:hover {
-                left: -20px;
-                background: #163f74;
-            }
-        }
-
-        /* ======================================== */
-        /* MOBILE BUTTON (BULAT KANAN) */
-        /* ======================================== */
-        @media(max-width: 768px) {
-
-            #floatingNav {
-                top: 70px;
-                right: 18px;
-                left: auto;
-            }
-
-            .floating-toggle {
-                width: 42px;
-                height: 42px;
-                background: #1a4d8e;
-                color: white;
-                border-radius: 50%;
-                font-size: 22px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
-            }
-        }
-
-        /* ======================================== */
-        /* SLIDE PANEL */
-        /* ======================================== */
-        .floating-panel {
-            position: fixed;
-            top: 0;
-            left: -260px;
-            width: 260px;
-            height: 100vh;
-            background: white;
-            padding: 20px;
-            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.15);
-            overflow-y: auto;
-            transition: 0.3s ease;
-            z-index: 3000;
-        }
-
-        @media(max-width: 768px) {
-            .floating-panel {
-                width: 100%;
-                left: -100%;
-            }
-        }
-
-        .floating-panel.open {
-            left: 0;
-        }
-
-        .close-panel-btn {
-            position: absolute;
-            right: 1px;
-            top: 15px !important;
-            /* turun 10px dari posisi sebelumnya */
-            background: transparent;
-            border: none;
-            font-size: 20px;
-            color: #1a4d8e;
-            cursor: pointer;
-        }
-
-        .nav-case-item {
-            padding: 12px;
-            background: #f5f7ff;
-            border: 1px solid #e0e6ff;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 17px !important;
-            margin-top: 18px;
-        }
-
-        /* ======================================== */
-        /* SHIFT CONTENT (DESKTOP ONLY) */
-        /* ======================================== */
-        .content-wrapper {
-            transition: 0.3s ease;
-        }
-
-        @media(min-width: 769px) {
-            .content-wrapper.shift {
-                margin-left: 260px;
-            }
-        }
-
-        /* =============================== */
-        /* MINI NAV TIMER – LEBIH PENDEK  */
-        /* =============================== */
-
-        #quizTimer {
-            position: fixed;
-            top: 200px;
-            left: -6px;
-            /* DITARIK KE KIRI BIAR GA NEMPEL CARD */
-            background: #1a4d8e;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 0 20px 20px 0;
-            font-size: 15px;
-            font-weight: 600;
-            z-index: 2100;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            width: fit-content;
-            max-width: 120px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
-        }
-
-        #quizTimer i {
-            font-size: 18px;
-        }
-
-        /* MOBILE FIX */
-        @media(max-width: 768px) {
-            #quizTimer {
-                top: 115px;
-                right: 18px;
-                left: auto;
-                border-radius: 16px;
-                padding: 7px 10px;
-                font-size: 14px;
-                max-width: 120px;
-            }
+        /* BUTTON */
+        .btn-jawab {
+            border-radius: 10px;
+            padding-left: 40px;
+            padding-right: 40px;
         }
     </style>
 
