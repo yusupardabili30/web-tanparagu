@@ -274,7 +274,7 @@ class SoalController extends Controller
 
                     if ($next) {
                         return redirect()->route('quiz2.show', [
-                            'tahap' => 2,
+                            'tahap' => $tahap,
                             'encoded_kegiatan_id' => $encoded_kegiatan_id,
                             'nip' => $nip,
                             'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
@@ -282,7 +282,8 @@ class SoalController extends Controller
                         ]);
                     }
                 } else {
-                    $level_final = $soal->level == 2 ? 2 : $soal->level - 1;
+                    //$level_final = $soal->level == 2 ? 2 : $soal->level - 1;
+                    $level_final = $soal->level - 1;
 
                     PtkJawaban::updateOrCreate([
                         'kegiatan_id' => $kegiatan_id,
