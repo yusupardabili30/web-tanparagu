@@ -253,7 +253,7 @@
 
                     <div class="text-center mt-4">
                         @php
-                        $encoded_sub_indikator_id = Hashids::encode(1);
+                        //$encoded_sub_indikator_id = Hashids::encode(1);
                         $encoded_no_urut = Hashids::encode(1);
                         @endphp
 
@@ -277,7 +277,7 @@
 
                             @case(2)
                                 @php
-                                    $encoded_sub_indikator_id = Hashids::encode(1);
+                                    //$encoded_sub_indikator_id = Hashids::encode(1);
                                     $encoded_no_urut = Hashids::encode(1);
                                 @endphp
                                 <a href="{{ route('quiz2.show', [
