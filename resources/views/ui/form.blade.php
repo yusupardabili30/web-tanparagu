@@ -3,6 +3,33 @@
 @section('mycontent')
 
 <style>
+    /* Warna placeholder jadi biru Baduy */
+.form-control::placeholder,
+.form-select::placeholder,
+textarea::placeholder {
+    color: #1a3f6b !important;       /* biru baduy */
+    opacity: 1 !important;
+    font-weight: 500 !important;
+}
+
+/* Warna teks input */
+.form-control,
+textarea.form-control {
+    color: #1a3f6b !important;
+    font-weight: 600 !important;
+}
+
+/* Warna teks dalam select */
+.form-select {
+    color: #1a3f6b !important;
+    font-weight: 600 !important;
+}
+
+/* Saat user ngeklik select, tetap warna biru */
+.form-select option {
+    color: #1a3f6b !important;
+}
+
 /* Sembunyikan header utama layout, TAPI JANGAN card-header */
 .navbar,
 .topbar,
@@ -213,11 +240,9 @@ header:not(.card-header) {
                 <!-- Nama & NIK -->
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required">Nama</label>
                         <input required class="form-control form-control-lg" placeholder="Nama lengkap">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required">NIK KTP</label>
                         <input required class="form-control form-control-lg" placeholder="Masukkan NIK">
                     </div>
                 </div>
@@ -225,20 +250,17 @@ header:not(.card-header) {
                 <!-- Jabatan -->
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required">NIP / NI PPPK</label>
-                        <input required class="form-control form-control-lg">
+                        <input required class="form-control form-control-lg" placeholder="Masukkan NIP / NI PPPK">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required">Jabatan</label>
-                        <input required class="form-control form-control-lg">
+                        <input required class="form-control form-control-lg" placeholder="Masukkan Jabatan">
                     </div>
                 </div>
 
                 <!-- Agama & Jenis Kelamin -->
                 <div class="row mb-3">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label required">Agama</label>
-                        <select required class="form-select form-select-lg">
+                    <div class="col-md-6 mb-3"> 
+                        <select required class="form-select form-select-lg" placeholder="Pilih agama">
                             <option value="">-- Pilih Agama --</option>
                             <option>Islam</option>
                             <option>Kristen</option>
@@ -250,9 +272,8 @@ header:not(.card-header) {
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required">Jenis Kelamin</label>
-                        <select required class="form-select form-select-lg">
-                            <option value="">-- Pilih --</option>
+                        <select required class="form-select form-select-lg" placeholder="Jenis Kelamin">
+                            <option value="">-- Pilih Jenis Kelamin--</option>
                             <option>Laki-laki</option>
                             <option>Perempuan</option>
                         </select>
@@ -262,13 +283,11 @@ header:not(.card-header) {
                 <!-- Tempat & Tanggal Lahir -->
                 <div class="row mb-3 align-items-end">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required">Tempat Lahir</label>
-                        <input required class="form-control form-control-lg" placeholder="Contoh: Serang">
+                        <input required class="form-control form-control-lg" placeholder="Tempat Lahir">
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label required">Tanggal Lahir</label>
-                        <input id="tanggal_lahir" required autocomplete="off" class="form-control form-control-lg" placeholder="Pilih tanggal lahir">
+                        <input id="tanggal_lahir" required autocomplete="off" class="form-control form-control-lg" placeholder="Pilih Tanggal Lahir">
                     </div>
                 </div>
 
@@ -276,8 +295,7 @@ header:not(.card-header) {
 
                 <!-- Pendidikan -->
                 <div class="mb-3">
-                    <label class="form-label required">Pendidikan Terakhir</label>
-                    <input required class="form-control form-control-lg">
+                    <input required class="form-control form-control-lg" placeholder="Pendidikan Terakhir">
                 </div>
 
 
@@ -287,24 +305,19 @@ header:not(.card-header) {
                         <i class="ri-school-line me-1 text-primary"></i> Informasi Unit Kerja
                     </h5>
 
-                    <label class="form-label required">Unit Kerja</label>
-                    <input required class="form-control form-control-lg mb-3">
+                    <input required class="form-control form-control-lg mb-3" placeholder="Unit Kerja">
 
-                    <label class="form-label ">Alamat Unit Kerja</label>
-                    <textarea required class="form-control form-control-lg mb-3"></textarea>
+                    <textarea required class="form-control form-control-lg mb-3" placeholder= "Alamat Unit Kerja"></textarea>
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label ">Kabupaten/Kota</label>
-                            <input required class="form-control form-control-lg">
+                            <input required class="form-control form-control-lg" placeholder= "Kabupaten/Kota">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label ">Provinsi</label>
-                            <input required class="form-control form-control-lg">
+                            <input required class="form-control form-control-lg" placeholder= "Provinsi">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Kode Pos</label>
-                            <input required class="form-control form-control-lg">
+                            <input required class="form-control form-control-lg" placeholder= "Kode Pos">
                         </div>
                     </div>
                 </div>
@@ -315,17 +328,14 @@ header:not(.card-header) {
                         <i class="ri-map-pin-line me-1 text-primary"></i> Alamat Rumah
                     </h5>
 
-                    <label class="form-label required">Alamat Rumah</label>
-                    <textarea required class="form-control form-control-lg mb-3"></textarea>
+                    <textarea required class="form-control form-control-lg mb-3" placeholder= "Alamat Rumah"></textarea>
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label required">Kabupaten/Kota</label>
-                            <input required class="form-control form-control-lg">
+                            <input required class="form-control form-control-lg" placeholder= "Kabupaten/Kota">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label required">Provinsi</label>
-                            <input required class="form-control form-control-lg">
+                            <input required class="form-control form-control-lg" placeholder= "Provinsi">
                         </div>
                     </div>
                 </div>
@@ -339,20 +349,16 @@ header:not(.card-header) {
 
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label required">Website / Email</label>
-                            <input required class="form-control form-control-lg">
+                            <input required class="form-control form-control-lg" placeholder= "Website/Email">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label required">No. Telp / HP</label>
-                            <input required class="form-control form-control-lg">
+                            <input required class="form-control form-control-lg" placeholder= "No. Telp / HP">
                         </div>
                     </div>
 
-                    <label class="form-label required">Email</label>
-                    <input type="email" required class="form-control form-control-lg mb-3">
+                    <input type="email" required class="form-control form-control-lg mb-3"placeholder= "Email">
 
-                    <label class="form-label required">NPWP</label>
-                    <input required class="form-control form-control-lg">
+                    <input required class="form-control form-control-lg"placeholder= "NPWP">
                 </div>
 
                 <!-- BUTTON -->
