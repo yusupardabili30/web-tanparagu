@@ -190,9 +190,15 @@
 
                 <div class="login-logo">
                     <h2 class="login-title">
-                        <img src="{{ asset('build/images/tanparagu2.png') }}" class="login-title-icon">
+                        <img src="{{ asset('build/images/tanparagu.png') }}" class="login-title-icon">
                     </h2>
                 </div>
+
+                <p class="login-subtitle"
+                    style="margin-bottom: 10px; font-size: 22px; font-weight: 600; text-align:center; width:100%;">
+                    Silahkan Masuk
+                </p>
+
                 <!-- Info Kegiatan Aktif -->
                 <div class="kegiatan-info mb-3">
                     <h6 class="mb-1 text-primary">
@@ -297,12 +303,26 @@
 
                         <div class="row">
                             <!-- Data Identitas -->
+                            {{-- <div class="col-md-6 mb-3">
+                                <label class="form-label">NIK</label>
+                                <input type="text" name="nik" class="form-control"
+                                    placeholder="16 digit NIK"
+                                    maxlength="16">
+                            </div> --}}
+
                             <div class="col-md-6 mb-3">
+                                <label class="form-label">NUPTK</label>
+                                <input type="text" name="nuptk" class="form-control"
+                                    placeholder="16 digit NUPTK"
+                                    maxlength="16">
+                            </div>
+
+                            {{-- <div class="col-md-6 mb-3">
                                 <label class="form-label">NPWP</label>
                                 <input type="text" name="npwp" class="form-control"
                                     placeholder="15 digit NPWP"
                                     maxlength="20">
-                            </div>
+                            </div> --}}
 
                             <!-- Data Pribadi -->
                             <div class="col-md-6 mb-3">
@@ -335,9 +355,9 @@
 
                             <!-- Data Jabatan -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Jabatan</label>
+                                <label class="form-label required-field">Pangkat/Jabatan</label>
                                 <select name="pangkat_jabatan_id" class="form-control" required>
-                                    <option value="">Pilih Jabatan</option>
+                                    <option value="">Pilih Pangkat/Jabatan</option>
                                     @foreach($pangkatJabatans as $pangkatJabatan)
                                     <option value="{{ $pangkatJabatan->pangkat_jabatan_id }}">
                                         {{ $pangkatJabatan->jenjang_jabatan }}
@@ -381,18 +401,18 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-6 mb-3">
+                            {{-- <div class="col-md-6 mb-3">
                                 <label class="form-label">Pendidikan Terakhir</label>
                                 <input type="text" name="pendidikan" class="form-control"
                                     placeholder="Contoh: S1 Pendidikan Matematika">
-                            </div>
+                            </div> --}}
 
                             <!-- Alamat Rumah -->
-                            <div class="col-12 mb-3">
+                            {{-- <div class="col-12 mb-3">
                                 <label class="form-label">Alamat Rumah</label>
                                 <textarea name="alamat_rumah" class="form-control" rows="2"
                                     placeholder="Alamat lengkap tempat tinggal"></textarea>
-                            </div>
+                            </div> --}}
 
                             <!-- KOTA -->
                             <div class="col-md-6 mb-3">
@@ -472,11 +492,11 @@
                                     placeholder="Alamat lengkap tempat kerja"></textarea>
                             </div>
 
-                            <div class="col-md-6 mb-4">
+                            {{-- <div class="col-md-6 mb-4">
                                 <label class="form-label">Nomor Rekening</label>
                                 <input type="text" name="no_rekening" class="form-control"
                                     placeholder="Nomor rekening bank">
-                            </div>
+                            </div> --}}
                         </div>
 
                         <!-- Informasi Form -->
