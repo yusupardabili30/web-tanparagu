@@ -6,27 +6,13 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
     <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
+    <!-- Reset timer JavaScript -->
+    <script>
+        // Reset timer saat halaman finish diakses
+        localStorage.removeItem("quiz_start_time");
+        localStorage.removeItem("quiz2_start_time"); // tambahan untuk quiz2 jika ada
+    </script>
 
-    <!-- PAGE TITLE -->
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                <h4 class="mb-sm-0">Quiz Selesai</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0" style="font-size:15px; font-weight:400;">
-                        <li class="breadcrumb-item">
-                            <a href="#" class="text-primary">
-                                Quiz
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active">
-                            Selesai
-                        </li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- FINISH CARD -->
     <div class="row justify-content-center">
@@ -37,7 +23,7 @@
                 <!-- HEADER -->
                 <div class="card-header baduy-bg text-center" style="border-radius:14px 14px 0 0;">
                     <h5 class="mb-0 text-white" style="font-size:20px; font-weight:700;">
-                        <i class="ri-checkbox-circle-line me-2"></i> Quiz Telah Selesai
+                        <i class="ri-checkbox-circle-line me-2"></i> Instrumen Telah Selesai
                     </h5>
                 </div>
 
@@ -52,7 +38,7 @@
 
                     <!-- TITLE -->
                     <h3 class="mb-3" style="color: #1a4d8e; font-weight: 700;">
-                        Selamat! Anda Telah Menyelesaikan Instrumen Pemetaan Pembelajaran Guru 
+                        Selamat! Anda Telah Menyelesaikan Instrumen Pemetaan Pembelajaran Guru
                     </h3>
 
                     <!-- DETAILS -->
@@ -68,7 +54,7 @@
                     <!-- MESSAGE -->
                     <div class="alert alert-success" role="alert" style="font-size: 16px; border-radius: 10px;">
                         <i class="ri-information-line me-2"></i>
-                        Terima kasih telah mengikuti quiz. Jawaban Anda telah tersimpan dengan baik.
+                        Terima kasih telah mengikuti instrumen. Jawaban Anda telah tersimpan dengan baik.
                     </div>
                 </div>
 
@@ -104,4 +90,24 @@
     }
 </style>
 
+@section('sipproja-js')
+<script>
+    // Clear semua data timer dari localStorage
+    localStorage.removeItem("quiz_start_time");
+    localStorage.removeItem("quiz2_start_time");
+    localStorage.removeItem("timestart_quiz2");
+    localStorage.removeItem("timesoal_quiz2");
+
+    // Clear session timer jika ada
+    if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem("quiz_start_time");
+        sessionStorage.removeItem("quiz2_start_time");
+    }
+
+    // Juga clear cookie timer jika menggunakan cookie
+    document.cookie = "quiz_start_time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "quiz2_start_time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+    console.log("Timer telah direset untuk sesi berikutnya.");
+</script>
 @endsection
