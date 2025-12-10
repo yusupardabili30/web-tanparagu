@@ -8,6 +8,12 @@
 
     <!-- TOGGLE BUTTON HALF OVAL -->
     <div id="floatingNav">
+        <!-- TIMER NAV -->
+            <div id="quizTimer">
+                <i class="ri-timer-line me-1"></i>
+                <span id="timerText">00:00</span>
+            </div>
+
         <button id="toggleFloating" class="floating-toggle half-oval-btn">
             <i class="ri-arrow-right-s-line"></i>
         </button>
@@ -329,6 +335,45 @@
             margin-left: 260px;
         }
     }
+    /* =============================== */
+/* MINI NAV TIMER – LEBIH PENDEK  */
+/* =============================== */
+
+#quizTimer {
+    position: fixed;
+    top: 200px;
+    left: -6px; /* DITARIK KE KIRI BIAR GA NEMPEL CARD */
+    background: #1a4d8e;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 0 20px 20px 0;
+    font-size: 15px;
+    font-weight: 600;
+    z-index: 2100;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    max-width: 120px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+}
+
+#quizTimer i {
+    font-size: 18px;
+}
+
+/* MOBILE FIX */
+@media(max-width: 768px) {
+    #quizTimer {
+        top: 115px;
+        right: 18px;
+        left: auto;
+        border-radius: 16px;
+        padding: 7px 10px;
+        font-size: 14px;
+        max-width: 120px;
+    }
+}
 
     </style>
 

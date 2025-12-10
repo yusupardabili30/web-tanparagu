@@ -3,34 +3,31 @@
 @section('mycontent')
 
 <style>
-    /* Warna placeholder jadi biru Baduy */
+/* ============================================
+   WARNA BIRU BADUY FORM
+============================================ */
 .form-control::placeholder,
 .form-select::placeholder,
 textarea::placeholder {
-    color: #1a3f6b !important;       /* biru baduy */
+    color: #1a3f6b !important;
     opacity: 1 !important;
     font-weight: 500 !important;
 }
 
-/* Warna teks input */
 .form-control,
-textarea.form-control {
-    color: #1a3f6b !important;
-    font-weight: 600 !important;
-}
-
-/* Warna teks dalam select */
+textarea.form-control,
 .form-select {
     color: #1a3f6b !important;
     font-weight: 600 !important;
 }
 
-/* Saat user ngeklik select, tetap warna biru */
 .form-select option {
     color: #1a3f6b !important;
 }
 
-/* Sembunyikan header utama layout, TAPI JANGAN card-header */
+/* ============================================
+   HIDE HEADER DEFAULT LAYOUT
+============================================ */
 .navbar,
 .topbar,
 footer,
@@ -43,9 +40,8 @@ header:not(.card-header) {
 .page-title-box { margin-top: -100px !important; }
 
 /* ============================================
-   KALENDER SUPER PREMIUM ELEGAN
-   ============================================ */
-
+   LITEPICKER DESKTOP
+============================================ */
 .litepicker {
     border-radius: 18px !important;
     padding: 20px !important;
@@ -54,14 +50,12 @@ header:not(.card-header) {
     box-shadow: 0 12px 30px rgba(0,40,120,0.12) !important;
 }
 
-/* header bulan */
 .litepicker .month-item-header {
     font-size: 18px !important;
     font-weight: 700 !important;
     color: #1a3f6b !important;
 }
 
-/* arrow */
 .litepicker .button-previous,
 .litepicker .button-next {
     background: #ebf0ff !important;
@@ -69,18 +63,17 @@ header:not(.card-header) {
     padding: 6px 10px !important;
     transition: 0.2s ease-in-out;
 }
+
 .litepicker .button-previous:hover,
 .litepicker .button-next:hover {
     background: #cfdcff !important;
 }
 
-/* nama hari */
 .litepicker .container__days-of-week > div {
     font-weight: 600 !important;
     color: #55639a !important;
 }
 
-/* hari */
 .litepicker .day-item {
     border-radius: 10px !important;
     padding: 7px 0 !important;
@@ -90,14 +83,12 @@ header:not(.card-header) {
     transition: 0.15s;
 }
 
-/* hover */
 .litepicker .day-item:hover {
     background: #edf3ff !important;
     color: #1a3f6b !important;
     transform: translateY(-2px);
 }
 
-/* today */
 .litepicker .day-item.is-today {
     background: #dfe8ff !important;
     border: 1px solid #b7c7ff !important;
@@ -105,7 +96,6 @@ header:not(.card-header) {
     font-weight: 700 !important;
 }
 
-/* selected */
 .litepicker .day-item.is-start-date,
 .litepicker .day-item.is-end-date {
     background: linear-gradient(135deg, #4169ff, #2040cc) !important;
@@ -114,47 +104,32 @@ header:not(.card-header) {
     box-shadow: 0 3px 10px rgba(60, 90, 255, 0.4);
 }
 
-/* range */
 .litepicker .day-item.is-in-range {
     background: #e7edff !important;
     color: #1a3f6b !important;
 }
-/* HILANGKAN BORDER / KOTAK PADA DROPDOWN BULAN & TAHUN */
+
+/* Remove border dropdown year & month */
 .litepicker .month-item-header select {
     border: none !important;
     background: transparent !important;
     font-size: 18px !important;
     font-weight: 700 !important;
     color: #1a3f6b !important;
-    padding: 2px 4px !important;
     outline: none !important;
     box-shadow: none !important;
     appearance: none !important;
     -webkit-appearance: none !important;
 }
 
-/* Hilangkan outline saat klik */
-.litepicker .month-item-header select:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* Hapus border kotak bulan/tahun */
-.litepicker .month-item-header .month,
-.litepicker .month-item-header .year {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
-
-/* Hilangkan background putih saat open */
 .litepicker select option {
     background: white !important;
     color: #1a3f6b !important;
 }
 
-/* FORM */
+/* ============================================
+   FORM BOX
+============================================ */
 .big-box {
     background: #f6f8ff;
     border: 1px solid #d7e2ff;
@@ -162,17 +137,15 @@ header:not(.card-header) {
     padding: 22px;
     margin-bottom: 20px;
 }
-.form-label.required::after {
-    content: " *";
-    color: red;
-    font-weight: bold;
-}
+
 .is-invalid {
     border-color: red !important;
     background: #ffecec !important;
 }
 
-/* FLOATING MODAL */
+/* ============================================
+   MODAL UI
+============================================ */
 .floating-modal {
     position: fixed;
     inset: 0;
@@ -196,10 +169,91 @@ header:not(.card-header) {
     animation: fadeInUp .35s ease;
 }
 
-@keyframes fadeInUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+/* ============================================
+   100% RESPONSIVE MOBILE FIX
+============================================ */
+@media (max-width: 576px) {
+
+    /* Box lebih compact */
+    .big-box { padding: 15px !important; }
+
+    .big-box h5 { font-size: 17px !important; }
+
+    /* Semua kolom jadi 1 */
+    .row .col-md-6,
+    .row .col-md-4,
+    .row .col-md-3,
+    .row .col-md-8,
+    .row .col-md-12 {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Input nyaman buat jempol */
+    .form-control-lg,
+    .form-select-lg {
+        font-size: 15px !important;
+        padding: 11px 13px !important;
+    }
+
+    ::placeholder { font-size: 14px !important; }
+
+    .card-body { padding: 15px !important; }
+
+    .big-box { margin-bottom: 15px !important; }
+
+    .page-title-box { margin-top: -40px !important; }
+
+    /* SELECT (Jenis Kelamin / Agama) */
+    .form-select {
+        background-position: right 10px center !important;
+        padding-right: 35px !important;
+        font-size: 15px !important;
+    }
+
+    .form-select option { font-size: 15px !important; }
+
+    /* LITEPICKER RESPONSIVE */
+    .litepicker {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 10px !important;
+        transform: scale(0.95) !important;
+    }
+
+    .litepicker .month-item-header {
+        font-size: 14px !important;
+    }
+
+    .litepicker .month-item-header select {
+        font-size: 13px !important;
+        padding: 1px !important;
+    }
+
+    .litepicker .button-previous,
+    .litepicker .button-next {
+        padding: 4px 5px !important;
+        border-radius: 8px !important;
+    }
+
+    .litepicker .day-item {
+        padding: 5px 0 !important;
+        margin: 1px !important;
+        font-size: 12.5px !important;
+    }
+
+    .litepicker .container__days-of-week > div {
+        font-size: 12px !important;
+    }
+
+    /* Kalender muat layar */
+    .litepicker .container,
+    .litepicker .container__main {
+        width: 100% !important;
+    }
 }
+
 </style>
 
 
