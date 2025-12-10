@@ -5,31 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-<<<<<<< HEAD
 class PtkJawaban extends Model
 {
     use HasFactory;
 
     protected $table = 'ptk_jawaban';
     protected $primaryKey = 'ptk_jawaban_id';
-=======
-class PtkJawabanDetail extends Model
-{
-    use HasFactory;
-
-    protected $table = 'ptk_jawaban_detail';
-    protected $primaryKey = 'ptk_jawaban_detail_id';
->>>>>>> 21196f5bd8d01ac3e3b616010d17ac560644310f
     public $timestamps = true;
 
     protected $fillable = [
         'kegiatan_id',
         'tahap',
         'ptk_id',
-<<<<<<< HEAD
-=======
-        'soal_id',
->>>>>>> 21196f5bd8d01ac3e3b616010d17ac560644310f
         'instrumen_id',
         'indikator_id',
         'indikator_code',
@@ -39,10 +26,6 @@ class PtkJawabanDetail extends Model
         'bobot',
         'time_start',
         'time_end',
-<<<<<<< HEAD
-=======
-        'selisih',
->>>>>>> 21196f5bd8d01ac3e3b616010d17ac560644310f
         'created_at',
         'updated_at'
     ];
