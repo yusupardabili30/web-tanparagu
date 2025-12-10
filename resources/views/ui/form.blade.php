@@ -4,12 +4,11 @@
 
 <style>
 /* ============================================
-   WARNA BIRU BADUY FORM
+WARNA BIRU BADUY FORM
 ============================================ */
 .form-control::placeholder,
 .form-select::placeholder,
 textarea::placeholder {
-    color: #1a3f6b !important;
     opacity: 1 !important;
     font-weight: 500 !important;
 }
@@ -17,7 +16,6 @@ textarea::placeholder {
 .form-control,
 textarea.form-control,
 .form-select {
-    color: #1a3f6b !important;
     font-weight: 600 !important;
 }
 
@@ -26,7 +24,53 @@ textarea.form-control,
 }
 
 /* ============================================
-   HIDE HEADER DEFAULT LAYOUT
+FLOATING LABEL FIX
+============================================ */
+.form-control-lg,
+.form-select-lg {
+    font-size: 15px !important;
+    padding-top: 18px !important;
+    padding-bottom: 18px !important;
+    height: 60px !important;
+}
+
+.form-select option[value=""] {
+    color: #888 !important;
+}
+
+.form-floating > label {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #888 !important;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select:focus ~ label,
+.form-floating > .form-select:not([value=""]) ~ label {
+    font-size: 14px !important;
+    transform: translateY(-14px) scale(.9) !important;
+    opacity: .85;
+    color: #6e6e6e !important;
+}
+
+/* ============================================
+BOX & FORM SPACING
+============================================ */
+.big-box {
+    background: #f6f8ff;
+    border: 1px solid #d7e2ff;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+}
+
+.mb-3 {
+    margin-bottom: 10px !important;
+}
+
+/* ============================================
+HIDE HEADER DEFAULT
 ============================================ */
 .navbar,
 .topbar,
@@ -37,10 +81,9 @@ header:not(.card-header) {
 }
 
 .content-wrapper { padding-top: 5px !important; }
-.page-title-box { margin-top: -100px !important; }
 
 /* ============================================
-   LITEPICKER DESKTOP
+LITEPICKER
 ============================================ */
 .litepicker {
     border-radius: 18px !important;
@@ -50,467 +93,395 @@ header:not(.card-header) {
     box-shadow: 0 12px 30px rgba(0,40,120,0.12) !important;
 }
 
-.litepicker .month-item-header {
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    color: #1a3f6b !important;
-}
-
-.litepicker .button-previous,
-.litepicker .button-next {
-    background: #ebf0ff !important;
-    border-radius: 10px !important;
-    padding: 6px 10px !important;
-    transition: 0.2s ease-in-out;
-}
-
-.litepicker .button-previous:hover,
-.litepicker .button-next:hover {
-    background: #cfdcff !important;
-}
-
-.litepicker .container__days-of-week > div {
-    font-weight: 600 !important;
-    color: #55639a !important;
-}
-
-.litepicker .day-item {
-    border-radius: 10px !important;
-    padding: 7px 0 !important;
-    margin: 2px !important;
-    color: #2d3a55 !important;
-    font-weight: 500 !important;
-    transition: 0.15s;
-}
-
-.litepicker .day-item:hover {
-    background: #edf3ff !important;
-    color: #1a3f6b !important;
-    transform: translateY(-2px);
-}
-
-.litepicker .day-item.is-today {
-    background: #dfe8ff !important;
-    border: 1px solid #b7c7ff !important;
-    color: #1a3f6b !important;
-    font-weight: 700 !important;
-}
-
-.litepicker .day-item.is-start-date,
-.litepicker .day-item.is-end-date {
-    background: linear-gradient(135deg, #4169ff, #2040cc) !important;
-    color: #fff !important;
-    font-weight: 700 !important;
-    box-shadow: 0 3px 10px rgba(60, 90, 255, 0.4);
-}
-
-.litepicker .day-item.is-in-range {
-    background: #e7edff !important;
-    color: #1a3f6b !important;
-}
-
-/* Remove border dropdown year & month */
-.litepicker .month-item-header select {
-    border: none !important;
-    background: transparent !important;
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    color: #1a3f6b !important;
-    outline: none !important;
-    box-shadow: none !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-}
-
-.litepicker select option {
-    background: white !important;
-    color: #1a3f6b !important;
-}
-
 /* ============================================
-   FORM BOX
-============================================ */
-.big-box {
-    background: #f6f8ff;
-    border: 1px solid #d7e2ff;
-    border-radius: 12px;
-    padding: 22px;
-    margin-bottom: 20px;
-}
-
-.is-invalid {
-    border-color: red !important;
-    background: #ffecec !important;
-}
-
-/* ============================================
-   MODAL UI
-============================================ */
-.floating-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(4px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
-}
-.floating-modal.show { display: flex; }
-
-.floating-modal-content {
-    background: #ffffff;
-    padding: 30px 34px;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 420px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    animation: fadeInUp .35s ease;
-}
-
-/* ============================================
-   100% RESPONSIVE MOBILE FIX
+RESPONSIVE MOBILE HP
 ============================================ */
 @media (max-width: 576px) {
 
-    /* Box lebih compact */
-    .big-box { padding: 15px !important; }
-
-    .big-box h5 { font-size: 17px !important; }
-
-    /* Semua kolom jadi 1 */
-    .row .col-md-6,
-    .row .col-md-4,
-    .row .col-md-3,
-    .row .col-md-8,
-    .row .col-md-12 {
-        width: 100% !important;
-        flex: 0 0 100% !important;
-        max-width: 100% !important;
+        /* HIDE LOGO DI HP */
+    .header-logo-container img {
+        display: none !important;
     }
 
-    /* Input nyaman buat jempol */
-    .form-control-lg,
-    .form-select-lg {
-        font-size: 15px !important;
-        padding: 11px 13px !important;
+    /* HEADER LOGO + TITLE */
+    .header-logo-container {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 5px !important;
+        margin-top: -20px !important;
     }
 
-    ::placeholder { font-size: 14px !important; }
-
-    .card-body { padding: 15px !important; }
-
-    .big-box { margin-bottom: 15px !important; }
-
-    .page-title-box { margin-top: -40px !important; }
-
-    /* SELECT (Jenis Kelamin / Agama) */
-    .form-select {
-        background-position: right 10px center !important;
-        padding-right: 35px !important;
-        font-size: 15px !important;
+    .header-logo-container img {
+        width: 130px !important;
+        margin-left: 0 !important;
+        margin-top: 0 !important;
     }
 
-    .form-select option { font-size: 15px !important; }
-
-    /* LITEPICKER RESPONSIVE */
-    .litepicker {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 10px !important;
-        transform: scale(0.95) !important;
+    .header-info {
+        margin-top: -5px !important;
+        margin-left: 0 !important;
     }
 
-    .litepicker .month-item-header {
+    .header-info h4 {
+        font-size: 20px !important;
+    }
+
+    .header-info div {
         font-size: 14px !important;
     }
 
-    .litepicker .month-item-header select {
-        font-size: 13px !important;
-        padding: 1px !important;
+    .card {
+        margin-top: 10px !important;
     }
 
-    .litepicker .button-previous,
-    .litepicker .button-next {
-        padding: 4px 5px !important;
-        border-radius: 8px !important;
+    .form-control-lg,
+    .form-select-lg {
+        height: 55px !important;
+        font-size: 15px !important;
     }
 
-    .litepicker .day-item {
-        padding: 5px 0 !important;
-        margin: 1px !important;
-        font-size: 12.5px !important;
+    .form-floating > label {
+        font-size: 14px !important;
     }
 
-    .litepicker .container__days-of-week > div {
-        font-size: 12px !important;
+    .big-box {
+        padding: 15px !important;
+        margin-bottom: 10px !important;
     }
 
-    /* Kalender muat layar */
-    .litepicker .container,
-    .litepicker .container__main {
+    /* GRID AUTO STACK */
+    .col-md-6,
+    .col-md-4 {
         width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .btn-lg {
+        width: 100% !important;
+        font-size: 18px !important;
     }
 }
-
 </style>
-
 
 <div class="content-wrapper">
 <div class="container-fluid">
-    <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
+<link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
 
-<!-- PAGE TITLE -->
-<div class="row">
-    <div class="col-12">
-        <div class="page-title-box bg-galaxy-transparent">
-            <h4 class="fw-bold mb-0" style="font-size:32px; color:#1a3f6b;">Form Data Diri</h4>
+<!-- ========================================================= -->
+<!-- HEADER: LOGO + JUDUL + TANGGAL + LOKASI -->
+<!-- ========================================================= -->
+<div class="d-flex align-items-center mb-3 header-logo-container" style="gap:15px; margin-top:-10px;">
+
+    <!-- LOGO -->
+    <img src="{{ asset('build/images/logotutwuri.png') }}"
+        alt="Tut Wuri Handayani"
+        style="width:180px; height:auto; margin-left:-30px; margin-top:-40px;">
+
+    <!-- TEXT -->
+    <div class="header-info" style="line-height:1.3; margin-top:-40px;">
+        <h4 class="fw-bold mb-1" style="color:#1a3f6b; font-size:26px;">
+            Pelatihan Pembelajaran Mendalam (PM) Provinsi Banten Batch 1
+        </h4>
+
+        <div class="text-muted" style="font-size:16px;">
+            <div><i class="ri-calendar-line me-1"></i> 12 – 14 Februari 2025</div>
+            <div><i class="ri-map-pin-line me-1"></i> Kota Serang, Provinsi Banten</div>
         </div>
     </div>
 </div>
 
+
+<!-- ========================================================= -->
 <!-- FORM CARD -->
-<div class="row">
+<!-- ========================================================= -->
+<div class="row" style="margin-top:15px;">
 <div class="col-xl-12">
 
 <div class="card border-0 shadow-sm">
 
     <div class="card-header baduy-bg">
         <h5 class="mb-0 text-white fw-bold" style="font-size:22px;">
-            <i class="ri-profile-line me-2"></i> Form Data Diri
+            <i class="ri-profile-line me-2"></i> Biodata Peserta
         </h5>
     </div>
 
     <div class="card-body">
 
-        <div class="big-box mb-4">
+        <!-- BOX 1 -->
+        <div class="big-box mb-3">
             <h5 class="fw-bold mb-2" style="color:#1a3f6b;">
-                <i class="ri-information-line me-1 text-primary"></i> Biodata Peserta
+                <i class="ri-information-line me-1 text-primary"></i> Informasi Peserta
             </h5>
 
-            <form id="profilForm">
+        <form id="profilForm">
 
-                <!-- Nama & NIK -->
-                <div class="row mb-3">
-                    <div class="col-md-6 mb-3">
-                        <input required class="form-control form-control-lg" placeholder="Nama lengkap">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <input required class="form-control form-control-lg" placeholder="Masukkan NIK">
-                    </div>
-                </div>
-
-                <!-- Jabatan -->
-                <div class="row mb-3">
-                    <div class="col-md-6 mb-3">
-                        <input required class="form-control form-control-lg" placeholder="Masukkan NIP / NI PPPK">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <input required class="form-control form-control-lg" placeholder="Masukkan Jabatan">
-                    </div>
-                </div>
-
-                <!-- Agama & Jenis Kelamin -->
-                <div class="row mb-3">
-                    <div class="col-md-6 mb-3"> 
-                        <select required class="form-select form-select-lg" placeholder="Pilih agama">
-                            <option value="">-- Pilih Agama --</option>
-                            <option>Islam</option>
-                            <option>Kristen</option>
-                            <option>Katolik</option>
-                            <option>Hindu</option>
-                            <option>Buddha</option>
-                            <option>Konghucu</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <select required class="form-select form-select-lg" placeholder="Jenis Kelamin">
-                            <option value="">-- Pilih Jenis Kelamin--</option>
-                            <option>Laki-laki</option>
-                            <option>Perempuan</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Tempat & Tanggal Lahir -->
-                <div class="row mb-3 align-items-end">
-                    <div class="col-md-6 mb-3">
-                        <input required class="form-control form-control-lg" placeholder="Tempat Lahir">
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <input id="tanggal_lahir" required autocomplete="off" class="form-control form-control-lg" placeholder="Pilih Tanggal Lahir">
-                    </div>
-                </div>
-
-                <input type="hidden" id="umur">
-
-                <!-- Pendidikan -->
-                <div class="mb-3">
-                    <input required class="form-control form-control-lg" placeholder="Pendidikan Terakhir">
-                </div>
-
-
-                <!-- ================= UNIT KERJA ================= -->
-                <div class="big-box mt-4">
-                    <h5 class="fw-bold mb-2" style="color:#1a3f6b;">
-                        <i class="ri-school-line me-1 text-primary"></i> Informasi Unit Kerja
-                    </h5>
-
-                    <input required class="form-control form-control-lg mb-3" placeholder="Unit Kerja">
-
-                    <textarea required class="form-control form-control-lg mb-3" placeholder= "Alamat Unit Kerja"></textarea>
-
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <input required class="form-control form-control-lg" placeholder= "Kabupaten/Kota">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <input required class="form-control form-control-lg" placeholder= "Provinsi">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <input required class="form-control form-control-lg" placeholder= "Kode Pos">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ================= ALAMAT RUMAH ================= -->
-                <div class="big-box mt-4">
-                    <h5 class="fw-bold mb-2" style="color:#1a3f6b;">
-                        <i class="ri-map-pin-line me-1 text-primary"></i> Alamat Rumah
-                    </h5>
-
-                    <textarea required class="form-control form-control-lg mb-3" placeholder= "Alamat Rumah"></textarea>
-
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <input required class="form-control form-control-lg" placeholder= "Kabupaten/Kota">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <input required class="form-control form-control-lg" placeholder= "Provinsi">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ================= KONTAK ================= -->
-                <div class="big-box mt-4">
-                    <h5 class="fw-bold mb-2" style="color:#1a3f6b;">
-                        <i class="ri-contacts-book-line me-1 text-primary"></i>
-                        Kontak & Informasi Tambahan
-                    </h5>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <input required class="form-control form-control-lg" placeholder= "Website/Email">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <input required class="form-control form-control-lg" placeholder= "No. Telp / HP">
-                        </div>
-                    </div>
-
-                    <input type="email" required class="form-control form-control-lg mb-3"placeholder= "Email">
-
-                    <input required class="form-control form-control-lg"placeholder= "NPWP">
-                </div>
-
-                <!-- BUTTON -->
-                <button type="button" onclick="validateForm()" class="btn btn-primary btn-lg mt-4">
-                    <i class="ri-check-double-line me-2"></i> Simpan Data
-                </button>
-
-            </form>
+<!-- ===================== ROW 1 ===================== -->
+<div class="row mb-2">
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder=" ">
+            <label>Nama Lengkap</label>
         </div>
-
     </div>
 
-</div>
-</div>
-</div>
-</div>
-
-
-<!-- ======================== MODALS ======================== -->
-
-<!-- Warning Form Kosong -->
-<div id="warningModal" class="floating-modal">
-    <div class="floating-modal-content">
-        <i class="ri-error-warning-fill text-warning" style="font-size:48px;"></i>
-        <h4 class="fw-bold mb-2" style="color:#b8860b;">Form Belum Lengkap!</h4>
-        <p>Harap lengkapi semua kolom wajib.</p>
-        <button class="btn btn-warning closeModalBtn">Oke</button>
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder=" ">
+            <label>NIK</label>
+        </div>
     </div>
 </div>
 
-<!-- Warning Umur -->
-<div id="warningAge" class="floating-modal">
-    <div class="floating-modal-content">
-        <i class="ri-error-warning-fill text-danger" style="font-size:48px;"></i>
-        <h4 class="fw-bold mb-2" style="color:#c0392b;">Umur Tidak Memenuhi</h4>
-        <p>Pendaftar harus berusia minimal 18 tahun.</p>
-        <button class="btn btn-danger closeModalBtn">Oke</button>
+<!-- ===================== ROW 2 ===================== -->
+<div class="row mb-2">
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder=" ">
+            <label>NIP / NI PPPK</label>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder=" ">
+            <label>Jabatan</label>
+        </div>
     </div>
 </div>
 
-<!-- Success -->
-<div id="successModal" class="floating-modal">
-    <div class="floating-modal-content">
-        <i class="ri-checkbox-circle-fill text-success" style="font-size:48px;"></i>
-        <h4 class="fw-bold mb-2" style="color:#1a3f6b;">Data Berhasil Disimpan</h4>
-        <p>Form berhasil diproses.</p>
-        <button class="btn btn-primary closeModalBtn">Oke</button>
+<!-- ===================== AGAMA + JK ===================== -->
+<div class="row mb-2">
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <select class="form-select" required style="font-size:16px; color:#6e6e6e !important;">
+                <option value="">Pilih Agama</option>
+                <option>Islam</option>
+                <option>Kristen</option>
+                <option>Katolik</option>
+                <option>Hindu</option>
+                <option>Buddha</option>
+                <option>Konghucu</option>
+            </select>
+            <label>Agama</label>
+        </div>
     </div>
+
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <select class="form-select" required style="font-size:16px; color:#6e6e6e !important;">
+                <option value="">Pilih Jenis Kelamin</option>
+                <option>Laki-laki</option>
+                <option>Perempuan</option>
+            </select>
+            <label>Jenis Kelamin</label>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== TTL ===================== -->
+<div class="row mb-2">
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder=" ">
+            <label>Tempat Lahir</label>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input id="tanggal_lahir" required class="form-control form-control-lg" placeholder=" ">
+            <label>Tanggal Lahir</label>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="umur">
+
+<!-- ===================== PENDIDIKAN ===================== -->
+<div class="form-floating mb-2">
+    <input required class="form-control form-control-lg" placeholder=" ">
+    <label>Pendidikan Terakhir</label>
+</div>
+
+<!-- ===================== UNIT KERJA ===================== -->
+<div class="big-box mt-3">
+    <h5 class="fw-bold mb-2" style="color:#1a3f6b;">
+        <i class="ri-school-line me-1 text-primary"></i> Informasi Unit Kerja
+    </h5>
+
+<div class="row mb-2">
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <select class="form-select" required>
+                <option value="">Pilih Sekolah</option>
+                <option>SD Negeri 1</option>
+                <option>SD Negeri 2</option>
+                <option>SMP Negeri 1</option>
+                <option>SMP Negeri 2</option>
+                <option>SMA Negeri 1</option>
+                <option>SMA Negeri 2</option>
+                <option>SMK Negeri 1</option>
+                <option>SMK Negeri 2</option>
+            </select>
+            <label>Nama Sekolah</label>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder=" ">
+            <label>Unit Kerja</label>
+        </div>
+    </div>
+</div>
+
+<div class="form-floating mb-2">
+    <textarea class="form-control form-control-lg" placeholder=" " style="height:110px;"></textarea>
+    <label>Alamat Unit Kerja</label>
+</div>
+
+<div class="row mb-2">
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input class="form-control form-control-lg" placeholder=" ">
+            <label>Kabupaten/Kota</label>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input class="form-control form-control-lg" placeholder=" ">
+            <label>Provinsi</label>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- ===================== KONTAK ===================== -->
+<div class="big-box mt-3">
+    <h5 class="fw-bold mb-2" style="color:#1a3f6b;">
+        <i class="ri-contacts-book-line me-1 text-primary"></i> Kontak & Informasi Tambahan
+    </h5>
+
+<div class="row mb-2">
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder=" ">
+            <label>Website / Email</label>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder=" ">
+            <label>No. Telp / HP</label>
+        </div>
+    </div>
+</div>
+
+<div class="form-floating mb-2">
+    <input type="email" required class="form-control form-control-lg" placeholder=" ">
+    <label>Email</label>
+</div>
+
+<div class="form-floating mb-2">
+    <input required class="form-control form-control-lg" placeholder=" ">
+    <label>NPWP</label>
+</div>
+
+<!-- ===================== BANK ===================== -->
+<div class="row mb-2">
+    <div class="col-md-4">
+        <div class="form-floating mb-2">
+            <select class="form-select" required>
+                <option value="">Pilih Bank</option>
+                <option>Bank BRI</option>
+                <option>Bank BCA</option>
+                <option>Bank BNI</option>
+                <option>Bank Mandiri</option>
+            </select>
+            <label>Nama Bank</label>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder="">
+            <label>No. Rekening</label>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="form-floating mb-2">
+            <input required class="form-control form-control-lg" placeholder="">
+            <label>Atas Nama Rekening</label>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<button type="button" onclick="validateForm()" class="btn btn-primary btn-lg mt-3">
+    <i class="ri-check-double-line me-2"></i> Simpan Data
+</button>
+
+</form>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===================== MODAL SUKSES ===================== -->
+<div class="modal fade" id="modalSukses" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:18px;">
+      <div class="modal-body text-center p-4">
+        <i class="ri-checkbox-circle-line text-success" style="font-size:60px;"></i>
+        <h4 class="mt-3 fw-bold" style="color:#1a3f6b;">Data Berhasil Disimpan</h4>
+        <p class="text-muted mt-2">Semua data sudah tersimpan dengan aman.</p>
+        <button class="btn btn-primary mt-3 px-4" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL GAGAL ===================== -->
+<div class="modal fade" id="modalGagal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:18px;">
+      <div class="modal-body text-center p-4">
+        <i class="ri-error-warning-line text-danger" style="font-size:60px;"></i>
+        <h4 class="mt-3 fw-bold text-danger">Form Belum Lengkap</h4>
+        <p class="text-muted mt-2">Mohon lengkapi semua kolom wajib terlebih dahulu.</p>
+        <button class="btn btn-danger mt-3 px-4" data-bs-dismiss="modal">Oke</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 @endsection
 
+
 @section('sipproja-js')
 
-<!-- LITEPICKER -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css" />
 <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
 
 <script>
-/* INIT KALENDER */
 const picker = new Litepicker({
     element: document.getElementById('tanggal_lahir'),
     format: 'DD/MM/YYYY',
-    autoApply: true,
-    numberOfMonths: 1,
-    numberOfColumns: 1,
-    dropdowns: {
-        minYear: 1950,
-        maxYear: new Date().getFullYear(),
-        months: true,
-        years: true
-    },
-    resetButton: false
+    autoApply: true
 });
 
-/* HITUNG UMUR */
-picker.on('selected', (date) => {
-    let today = new Date();
-    let birth = new Date(date.format('YYYY-MM-DD'));
-    let age = today.getFullYear() - birth.getFullYear();
-    let mdiff = today.getMonth() - birth.getMonth();
-
-    if (mdiff < 0 || (mdiff === 0 && today.getDate() < birth.getDate()))
-        age--;
-
-    document.getElementById('umur').value = age;
-
-    if (age < 18)
-        showWarningAge();
-});
-
-/* VALIDASI FORM */
 function validateForm() {
-    let form = document.getElementById("profilForm");
-    let required = form.querySelectorAll("[required]");
+    let q = document.querySelectorAll("[required]");
     let valid = true;
 
-    required.forEach(f => {
+    q.forEach(f => {
         if (!f.value.trim()) {
             f.classList.add("is-invalid");
             valid = false;
@@ -519,23 +490,13 @@ function validateForm() {
         }
     });
 
-    if (!valid) return showWarningModal();
+    if (!valid) {
+        new bootstrap.Modal(document.getElementById('modalGagal')).show();
+        return;
+    }
 
-    let umur = parseInt(document.getElementById("umur").value);
-    if (umur < 18 || isNaN(umur)) return showWarningAge();
-
-    showSuccessModal();
+    new bootstrap.Modal(document.getElementById('modalSukses')).show();
 }
-
-/* MODAL CONTROLS */
-function showWarningModal() { document.getElementById("warningModal").classList.add("show"); }
-function showWarningAge() { document.getElementById("warningAge").classList.add("show"); }
-function showSuccessModal() { document.getElementById("successModal").classList.add("show"); }
-function closeModal() { document.querySelectorAll(".floating-modal").forEach(m => m.classList.remove("show")); }
-
-document.querySelectorAll(".closeModalBtn").forEach(btn =>
-    btn.addEventListener("click", closeModal)
-);
 </script>
 
 @endsection
