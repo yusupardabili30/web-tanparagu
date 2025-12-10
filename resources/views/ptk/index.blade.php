@@ -42,7 +42,7 @@
 
                 <div class="card-header baduy-bg">
                     <h5 class="mb-0 text-white" style="font-size:20px; font-weight:700;">
-                        Profil PTK 
+                        Profil PTK
                     </h5>
                 </div>
 
@@ -168,12 +168,13 @@
                     </table>
 
                     <!-- BUTTON LIHAT RIWAYAT -->
-                    <div class="text-end mt-4">
+                    <div class="mt-4">
                         <a href="{{ route('ptk.riwayat', [
                             'encode_kegiatan_id' => $current_encode_kegiatan_id,
                             'nip' => $current_nip
                         ]) }}"
-                            class="btn btn-primary btn-lg" style="border-radius:10px;">
+                            class="btn btn-primary btn-lg w-100 d-block text-center" 
+                            style="border-radius:10px;">
                             <i class="ri-book-open-line me-1"></i> Lihat Riwayat Kegiatan
                         </a>
                     </div>
@@ -232,48 +233,34 @@
                         </tbody>
                     </table>
 
-                    <div class="row mt-4">
+                    <!-- CARD DURASI PENGERJAAN (TAMBAHAN) -->
+                    @php
+                        $durasiFormat = "2 Jam";
+                    @endphp
 
-                        <div class="col-md-6">
-                            <div class="card bg-light border-0">
-                                <div class="card-body text-center detail-stat-box">
-                                    <h6 class="card-title">Durasi</h6>
-                                    <h3 class="text-primary">{{ $duration }}</h3>
-                                    <small>Hari</small>
+                    <div class="mt-5 mb-3 px-3 py-2" 
+                        style="background:#f4f6ff; border-radius:10px; border:1px solid #e0e6ff;">
+                        <div class="d-flex align-items-center">
+                            <i class="ri-timer-line me-3" style="font-size:35px; color:#1a4cbc;"></i>
+                            <div>
+                                <div class="fw-semibold" style="font-size:18px;">Durasi Pengerjaan :</div>
+                                <div class="text-primary fw-bold" style="font-size:18px; margin-top:-2px;">
+                                    {{ $durasiFormat }}
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="card bg-light border-0">
-                                <div class="card-body text-center detail-stat-box">
-                                    <h6 class="card-title">Sisa Waktu</h6>
-                                    @if($remaining > 0)
-                                    <h3 class="text-success">{{ $remaining }}</h3>
-                                    <small>Hari lagi</small>
-                                    @elseif($remaining == 0)
-                                    <h3 class="text-warning">0</h3>
-                                    <small>Berakhir hari ini</small>
-                                    @else
-                                    <h3 class="text-danger">0</h3>
-                                    <small>Sudah berakhir</small>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
 
                     <div class="text-center mt-4">
                         @php
-                        //$encoded_sub_indikator_id = Hashids::encode(1);
+                        $encoded_sub_indikator_id = Hashids::encode(1);
                         $encoded_no_urut = Hashids::encode(1);
                         @endphp
 
                         @switch($kegiatan->tahap)
                             @case(1)
                                 @php
-                                    //$encoded_indikator_id = Hashids::encode($data->indikator_id);
+                                    $encoded_indikator_id = Hashids::encode($data->indikator_id);
                                     $encoded_no_urut = Hashids::encode(1);
                                 @endphp
                                 <a href="{{ route('quiz1.show', [
@@ -284,14 +271,13 @@
                                     'encoded_no_urut' => $encoded_no_urut
                                 ]) }}" 
                                 class="btn btn-primary btn-lg px-5" style="border-radius:10px;">
-                                    <i class="ri-play-line me-2"></i> Mulai Quiz
+                                    <i class="ri-play-line me-2"></i> Mulai
                                 </a>
                                 @break
 
                             @case(2)
                                 @php
-                                    
-                                    //$encoded_sub_indikator_id = Hashids::encode(1);
+                                    $encoded_sub_indikator_id = Hashids::encode(1);
                                     $encoded_no_urut = Hashids::encode(1);
                                 @endphp
                                 <a href="{{ route('quiz2.show', [
@@ -301,14 +287,13 @@
                                     'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
                                     'encoded_no_urut' => $encoded_no_urut
                                 ]) }}" 
-                                class="btn btn-primary btn-lg px-5" style="border-radius:10px;">
-                                    <i class="ri-play-line me-2"></i> Mulai Quiz
+                                class="btn btn-primary btn-lg px-5 w-100 d-block text-center" 
+                                style="border-radius:10px;">
+                                    <i class="ri-play-line me-2"></i> Mulai
                                 </a>
                                 @break
 
                             @default
-                                {{-- Optional: tampilkan fallback --}}
-                                {{-- Tidak ada quiz untuk tahap ini --}}
                         @endswitch
 
                     </div>
@@ -473,16 +458,7 @@
     });
 </script>
 
-
-
-
-<!-- ========================================== -->
-<!--   RESPONSIVE FIX TOTAL – NO CENTER MOBILE -->
-<!-- ========================================== -->
 <style>
-    /* ===================================== */
-    /*    PROFIL PTK — MOBILE FIX            */
-    /* ===================================== */
     @media (max-width: 768px) {
 
         .profile-card-body {
@@ -514,10 +490,6 @@
         }
     }
 
-
-    /* ===================================== */
-    /*   DETAIL KEGIATAN — MOBILE FIX        */
-    /* ===================================== */
     @media (max-width: 768px) {
 
         .detail-card-body {
@@ -545,6 +517,5 @@
         }
     }
 </style>
-
 
 @endsection

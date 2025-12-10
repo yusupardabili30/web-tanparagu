@@ -190,14 +190,9 @@
 
                 <div class="login-logo">
                     <h2 class="login-title">
-                        <img src="{{ asset('build/images/tanparagu.png') }}" class="login-title-icon">
+                        <img src="{{ asset('build/images/tanparagu2.png') }}" class="login-title-icon">
                     </h2>
                 </div>
-
-                <p class="login-subtitle"
-                    style="margin-bottom: 10px; font-size: 22px; font-weight: 600; text-align:center; width:100%;">
-                    Silahkan Masuk
-                </p>
 
                 <!-- Info Kegiatan Aktif -->
                 <div class="kegiatan-info mb-3">
