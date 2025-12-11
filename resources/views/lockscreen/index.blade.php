@@ -5,20 +5,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lock Screen - {{ $kegiatan->kegiatan_name }}</title>
+
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <!-- IMPORT CSS LOGIN + PROFIL -->
+
+    <!-- CSS LOGIN + PROFIL (INI YG BAWA .baduy-bg ASLI) -->
     <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
     <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
+
     <style>
-        /* Hilangkan semua rounded */
+        /* =======================================================
+           REGISTER MODAL - INPUT STYLE (NGIKUT BIODATA PAGE)
+           ======================================================= */
+
+        #registerModal .form-control,
+        #registerModal select,
+        #registerModal textarea {
+            background: #ffffff !important;
+            border: 1px solid #d7e2ff !important;
+            border-radius: 12px !important;
+            padding-top: 20px !important;
+            padding-bottom: 12px !important;
+            height: 58px !important;
+            font-size: 15px !important;
+            color: #555555 !important;
+            font-weight: 600 !important;
+        }
+
+        #registerModal .form-control::placeholder,
+        #registerModal select::placeholder,
+        #registerModal textarea::placeholder {
+            color: #555555 !important;
+            font-weight: 500 !important;
+        }
+
+        #registerModal .form-control:focus,
+        #registerModal select:focus,
+        #registerModal textarea:focus {
+            border-color: #1a5bb8 !important;
+            box-shadow: 0 0 0 2px rgba(26, 91, 184, 0.2) !important;
+        }
+
+        #registerModal label.form-label {
+            display: none !important;
+        }
+
+        #registerModal .col-md-6,
+        #registerModal .col-12 {
+            margin-bottom: 16px !important;
+        }
+
+        #registerModal textarea.form-control {
+            height: auto !important;
+            padding-top: 14px !important;
+        }
+
+        #registerModal .form-check-label {
+            color: #1a3f6b !important;
+            font-weight: 600 !important;
+        }
+
+        /* Tombol di register modal (sama kayak biodata) */
+        #registerModal .btn-primary {
+            background-color: #133d78 !important;
+            border-color: #133d78 !important;
+            color: #fff !important;
+            font-weight: 600 !important;
+            border-radius: 10px !important;
+        }
+
+        #registerModal .btn-secondary {
+            border-radius: 10px !important;
+        }
+
+        /* =======================================================
+           GLOBAL MODAL WRAPPER
+           ======================================================= */
+
+        /* Hilangkan rounded di layout lockscreen */
         .no-radius,
         .no-radius * {
             border-radius: 0 !important;
         }
 
-
-        /* ===== MODAL WRAPPER ===== */
         .custom-modal .modal-content {
             border-radius: 10px !important;
             border: none !important;
@@ -27,10 +97,9 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* ===== HEADER ===== */
-        .custom-modal .modal-header {
+        /* Header untuk modal yg BUKAN baduy (contoh: Cari Sekolah kalau dipakai custom-modal juga) */
+        .custom-modal .modal-header:not(.baduy-bg) {
             background: #dff1ff !important;
-            /* biru muda seperti gambar */
             padding: 18px 22px !important;
             border-bottom: 1px solid #e7edf3 !important;
         }
@@ -43,17 +112,33 @@
             font-family: 'Inter', sans-serif;
         }
 
+        /* Register modal header pakai .baduy-bg dari profil.css
+           Di sini cuma tambahin radius + warna teks, tanpa utak-atik background */
+        #registerModal .modal-header.baduy-bg {
+            border-radius: 14px 14px 0 0 !important;
+        }
+
+        #registerModal .modal-header.baduy-bg * {
+            position: relative;
+            z-index: 2;
+            color: #fff !important;
+            font-weight: 700 !important;
+        }
+
+        #registerModal .modal-header .btn-close {
+            filter: brightness(10) !important;
+        }
+
         .custom-modal .btn-close {
             filter: invert(0.4);
             transform: scale(1.2);
         }
 
-        /* ===== MODAL BODY ===== */
+        /* Body & footer spacing */
         .custom-modal .modal-body {
             padding: 28px 26px !important;
         }
 
-        /* ===== LABEL ===== */
         .custom-modal .form-label {
             font-weight: 600 !important;
             color: #555 !important;
@@ -61,7 +146,6 @@
             margin-bottom: 6px !important;
         }
 
-        /* ===== INPUT / SELECT ===== */
         .custom-modal .form-control,
         .custom-modal select,
         .custom-modal textarea {
@@ -81,7 +165,6 @@
             box-shadow: 0 0 0 2px rgba(120, 160, 255, 0.25) !important;
         }
 
-        /* ===== INPUT GROUP COPY BUTTON ===== */
         .custom-modal .input-group-text {
             background: #fff !important;
             border-left: none !important;
@@ -95,7 +178,6 @@
             border-right: none !important;
         }
 
-        /* ===== FOOTER ===== */
         .custom-modal .modal-footer {
             padding: 18px 26px !important;
             border-top: 1px solid #eaeaea !important;
@@ -112,7 +194,6 @@
 
         .custom-modal .btn-primary {
             background: #1db5a6 !important;
-            /* hijau seperti gambar */
             border: none !important;
             padding: 9px 22px !important;
             font-size: 15px !important;
@@ -128,15 +209,15 @@
             <div class="carousel-container" style="position: relative; z-index: 1;">
                 <div class="carousel-content">
 
-                    <h1 class="system-name"> <!-- margin-bottom: 0 -->
+                    <h1 class="system-name">
                         <img src="{{ asset('build/images/logobgtkPutih.png') }}"
-                            class="system-logo"
-                            style="width: 250px; height: auto; margin-bottom: 10px;"> <!-- margin-bottom kecil -->
+                             class="system-logo"
+                             style="width: 250px; height: auto; margin-bottom: 10px;">
                     </h1>
 
                     <div id="infoCarousel" class="carousel slide" data-bs-ride="carousel" style="margin-bottom: 77px;">
 
-                        <div class=" carousel-indicators">
+                        <div class="carousel-indicators">
                             <button type="button" data-bs-target="#infoCarousel" data-bs-slide-to="0" class="active"></button>
                             <button type="button" data-bs-target="#infoCarousel" data-bs-slide-to="1"></button>
                             <button type="button" data-bs-target="#infoCarousel" data-bs-slide-to="2"></button>
@@ -184,7 +265,7 @@
             </div>
         </div>
 
-        <!-- Bagian Kanan - Form Login (UPDATED DESIGN) -->
+        <!-- Bagian Kanan - Form Login -->
         <div class="login-section" style="margin-top:40px;">
             <div class="login-form-container">
 
@@ -211,7 +292,6 @@
                 <!-- Form Login -->
                 <form id="login-form" method="POST">
                     @csrf
-                    <!-- Kirim kegiatan_id ASLI (decoded) -->
                     <input type="hidden" id="kegiatan_id" name="kegiatan_id" value="{{ $kegiatan_id }}">
 
                     <!-- Field NIP -->
@@ -220,13 +300,13 @@
                             <i></i> Nomor Induk Pegawai (NIP)
                         </label>
                         <input type="text" name="nip" id="nip" class="form-control"
-                            value="{{ old('nip', session('preserve_nip') ?? '') }}"
-                            placeholder="Masukkan 18 digit NIP Anda"
-                            required
-                            autofocus
-                            maxlength="18"
-                            pattern="\d{18}"
-                            title="Masukkan 18 digit NIP">
+                               value="{{ old('nip', session('preserve_nip') ?? '') }}"
+                               placeholder="Masukkan 18 digit NIP Anda"
+                               required
+                               autofocus
+                               maxlength="18"
+                               pattern="\d{18}"
+                               title="Masukkan 18 digit NIP">
                         <small class="form-text text-muted mt-1">Contoh: 197010021990092010</small>
                     </div>
 
@@ -237,10 +317,10 @@
                         </label>
                         <div class="input-group">
                             <input type="password" name="token" id="tokenInput"
-                                class="form-control"
-                                value="{{ old('token', '') }}"
-                                placeholder="Masukkan token yang diberikan"
-                                required>
+                                   class="form-control"
+                                   value="{{ old('token', '') }}"
+                                   placeholder="Masukkan token yang diberikan"
+                                   required>
                             <span class="input-group-text password-toggle" onclick="togglePassword()">
                                 <i class="ri-eye-fill" id="passwordIcon"></i>
                             </span>
@@ -265,70 +345,59 @@
         </div>
     </div>
 
-    <!-- Modal Registrasi -->
-    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <!-- ==========================
+         MODAL REGISTRASI
+         ========================== -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
+         aria-hidden="true" data-bs-backdrop="static">
+
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content custom-modal">
-                <!-- Modal Header -->
-                <div class="modal-header">
+
+                <!-- HEADER BADUY: SEKARANG NGIKUT .baduy-bg DARI profil.css -->
+                <div class="modal-header baduy-bg">
                     <h5 class="modal-title">Form Biodata</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <!-- Modal Body -->
+                <!-- BODY -->
                 <div class="modal-body">
+
+                    <!-- ALERT -->
                     <div class="alert alert-info mb-4">
                         <div class="d-flex align-items-center">
                             <i class="ri-information-line fs-4 me-3"></i>
                             <div>
                                 <h6 class="mb-1">NIP Belum Terdaftar</h6>
-                                <p class="mb-0" id="modal-info-text">
-                                    <!-- Akan diisi oleh JavaScript -->
-                                </p>
+                                <p class="mb-0" id="modal-info-text"></p>
                             </div>
                         </div>
                     </div>
 
+                    <!-- FORM -->
                     <form id="register-form">
                         @csrf
-                        <!-- Data akan diisi oleh JavaScript -->
+
                         <input type="hidden" id="reg_nip" name="nip">
                         <input type="hidden" id="reg_kegiatan_id" name="kegiatan_id">
                         <input type="hidden" id="reg_token" name="token">
 
                         <div class="row">
-                            <!-- Data Identitas -->
-                            {{-- <div class="col-md-6 mb-3">
-                                <label class="form-label">NIK</label>
-                                <input type="text" name="nik" class="form-control"
-                                    placeholder="16 digit NIK"
-                                    maxlength="16">
-                            </div> --}}
 
+                            <!-- IDENTITAS -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">NUPTK</label>
                                 <input type="text" name="nuptk" class="form-control"
-                                    placeholder="16 digit NUPTK"
-                                    maxlength="16">
+                                       placeholder="16 digit NUPTK" maxlength="16">
                             </div>
 
-                            {{-- <div class="col-md-6 mb-3">
-                                <label class="form-label">NPWP</label>
-                                <input type="text" name="npwp" class="form-control"
-                                    placeholder="15 digit NPWP"
-                                    maxlength="20">
-                            </div> --}}
-
-                            <!-- Data Pribadi -->
+                            <!-- Nama -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Nama Lengkap</label>
                                 <input type="text" name="nama" class="form-control"
-                                    placeholder="Nama lengkap sesuai ijazah"
-                                    required>
+                                       placeholder="Nama Lengkap" required>
                             </div>
 
+                            <!-- Jenis Kelamin -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Jenis Kelamin</label>
                                 <select name="jenis_kelamin" class="form-control" required>
                                     <option value="">Pilih Jenis Kelamin</option>
                                     <option value="L">Laki-Laki</option>
@@ -336,55 +405,45 @@
                                 </select>
                             </div>
 
+                            <!-- Tempat Lahir -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Tempat Lahir</label>
                                 <input type="text" name="tempat_lahir" class="form-control"
-                                    placeholder="Kota tempat lahir"
-                                    required>
+                                       placeholder="Tempat Lahir" required>
                             </div>
 
+                            <!-- Tanggal Lahir -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Tanggal Lahir</label>
                                 <input type="date" name="tgl_lahir" class="form-control" required>
                             </div>
 
-                            <!-- Data Jabatan -->
+                            <!-- Jabatan -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Pangkat/Jabatan</label>
                                 <select name="pangkat_jabatan_id" class="form-control" required>
-                                    <option value="">Pilih Pangkat/Jabatan</option>
+                                    <option value="">Pilih Jabatan</option>
                                     @foreach($pangkatJabatans as $pangkatJabatan)
-                                    <option value="{{ $pangkatJabatan->pangkat_jabatan_id }}">
-                                        {{ $pangkatJabatan->jenjang_jabatan }}
-                                        @if($pangkatJabatan->pangkat)
-                                        - {{ $pangkatJabatan->pangkat }}
-                                        @endif
-                                        @if($pangkatJabatan->golongan_ruang)
-                                        ({{ $pangkatJabatan->golongan_ruang }})
-                                        @endif
-                                    </option>
+                                        <option value="{{ $pangkatJabatan->pangkat_jabatan_id }}">
+                                            {{ $pangkatJabatan->jenjang_jabatan }}
+                                            @if($pangkatJabatan->pangkat) - {{ $pangkatJabatan->pangkat }} @endif
+                                            @if($pangkatJabatan->golongan_ruang) ({{ $pangkatJabatan->golongan_ruang }}) @endif
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
 
-                            <!-- Kontak -->
+                            <!-- Email -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Email</label>
                                 <input type="email" name="email" class="form-control"
-                                    placeholder="email@contoh.com"
-                                    required>
+                                       placeholder="Email" required>
                             </div>
 
+                            <!-- No HP -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Nomor HP</label>
                                 <input type="text" name="no_hp" class="form-control"
-                                    placeholder="081234567890"
-                                    required>
+                                       placeholder="No. HP" required>
                             </div>
 
-                            <!-- Data Tambahan -->
+                            <!-- Agama -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Agama</label>
                                 <select name="agama" class="form-control">
                                     <option value="">Pilih Agama</option>
                                     <option value="Islam">Islam</option>
@@ -396,129 +455,104 @@
                                 </select>
                             </div>
 
-                            {{-- <div class="col-md-6 mb-3">
-                                <label class="form-label">Pendidikan Terakhir</label>
-                                <input type="text" name="pendidikan" class="form-control"
-                                    placeholder="Contoh: S1 Pendidikan Matematika">
-                            </div> --}}
-
-                            <!-- Alamat Rumah -->
-                            {{-- <div class="col-12 mb-3">
-                                <label class="form-label">Alamat Rumah</label>
-                                <textarea name="alamat_rumah" class="form-control" rows="2"
-                                    placeholder="Alamat lengkap tempat tinggal"></textarea>
-                            </div> --}}
-
-                            <!-- KOTA -->
+                            <!-- Kota -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Kota</label>
-                                <select name="kota_id" class="form-control" id="kotaSelect" required>
+                                <select name="kota_id" id="kotaSelect" class="form-control" required>
                                     <option value="">Pilih Kota</option>
                                     @foreach($kotas as $kota)
-                                    <option value="{{ $kota->kota_id }}">
-                                        {{ $kota->nama_kota }}
-                                    </option>
+                                        <option value="{{ $kota->kota_id }}">{{ $kota->nama_kota }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
-                            <!-- Sekolah/Instansi -->
+                            <!-- SEKOLAH / INSTANSI -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label required-field">Sekolah/Instansi</label>
 
-                                <!-- Pilihan: Sekolah dari database atau input manual -->
                                 <div class="mb-2">
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="sekolah_option" id="optionSekolah" value="sekolah" checked>
-                                        <label class="form-check-label" for="optionSekolah">Pilih Sekolah</label>
+                                        <input class="form-check-input" type="radio"
+                                               name="sekolah_option" id="optionSekolah"
+                                               value="sekolah" checked>
+                                        <label class="form-check-label">Pilih Sekolah</label>
                                     </div>
+
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="sekolah_option" id="optionManual" value="manual">
-                                        <label class="form-check-label" for="optionManual">Input Manual</label>
+                                        <input class="form-check-input" type="radio"
+                                               name="sekolah_option" id="optionManual"
+                                               value="manual">
+                                        <label class="form-check-label">Input Manual</label>
                                     </div>
                                 </div>
 
-                                <!-- Dropdown Sekolah -->
-                                <div id="sekolahDropdownSection" class="mt-2">
+                                <!-- Dropdown sekolah -->
+                                <div id="sekolahDropdownSection">
                                     <div class="input-group">
                                         <select name="sekolah_id" class="form-control" id="sekolahSelect">
                                             <option value="">Pilih Sekolah</option>
                                             @foreach($sekolahs as $sekolah)
-                                            <option value="{{ $sekolah->sekolah_id }}"
-                                                data-nama="{{ $sekolah->nama_sekolah }}"
-                                                data-npsn="{{ $sekolah->npsn }}"
-                                                data-alamat="{{ $sekolah->alamat }}">
-                                                {{ $sekolah->nama_sekolah }}
-                                                @if($sekolah->npsn)
-                                                (NPSN: {{ $sekolah->npsn }})
-                                                @endif
-                                            </option>
+                                                <option value="{{ $sekolah->sekolah_id }}"
+                                                        data-nama="{{ $sekolah->nama_sekolah }}"
+                                                        data-alamat="{{ $sekolah->alamat }}">
+                                                    {{ $sekolah->nama_sekolah }}
+                                                </option>
                                             @endforeach
                                         </select>
-                                        <button class="btn btn-outline-primary" type="button" id="openSearchModalBtn">
+                                        <button class="btn btn-outline-primary" type="button"
+                                                id="openSearchModalBtn">
                                             <i class="ri-search-line"></i>
                                         </button>
                                     </div>
 
-                                    <!-- Info sekolah yang dipilih -->
                                     <div id="sekolahInfo" class="mt-2 p-2 bg-light rounded d-none">
                                         <small>
                                             <i class="ri-building-2-line me-1"></i>
-                                            <span id="selectedSekolahName"></span>
-                                            <br>
+                                            <span id="selectedSekolahName"></span><br>
                                             <i class="ri-map-pin-line me-1"></i>
                                             <span id="selectedSekolahAlamat"></span>
                                         </small>
                                     </div>
                                 </div>
 
-                                <!-- Input Manual Instansi -->
-                                <div id="instansiManualSection" class="mt-2 d-none">
-                                    <input type="text" name="instansi" class="form-control" id="instansiInput"
-                                        placeholder="Nama instansi/lembaga tempat bertugas">
-                                    <small class="text-muted">Isi jika sekolah tidak ada dalam daftar</small>
+                                <!-- Input manual -->
+                                <div id="instansiManualSection" class="d-none">
+                                    <input type="text" name="instansi" id="instansiInput" class="form-control"
+                                           placeholder="Nama Instansi">
                                 </div>
                             </div>
 
                             <!-- Alamat Kantor -->
                             <div class="col-12 mb-3">
-                                <label class="form-label">Alamat Kantor</label>
                                 <textarea name="alamat_kantor" class="form-control" rows="2"
-                                    placeholder="Alamat lengkap tempat kerja"></textarea>
+                                          placeholder="Alamat Kantor"></textarea>
                             </div>
-
-                            {{-- <div class="col-md-6 mb-4">
-                                <label class="form-label">Nomor Rekening</label>
-                                <input type="text" name="no_rekening" class="form-control"
-                                    placeholder="Nomor rekening bank">
-                            </div> --}}
                         </div>
 
-                        <!-- Informasi Form -->
+                        <!-- ALERT PERHATIAN -->
                         <div class="alert alert-warning">
                             <div class="d-flex align-items-center">
                                 <i class="ri-alert-line me-3"></i>
                                 <div>
                                     <h6 class="mb-1">Perhatian!</h6>
                                     <p class="mb-0">
-                                        Data yang ditandai dengan <span class="text-danger">*</span> wajib diisi.
-                                        Pastikan data yang dimasukkan akurat dan valid.
+                                        Data bertanda * wajib diisi. Pastikan data benar.
                                     </p>
                                 </div>
                             </div>
                         </div>
+
                     </form>
                 </div>
 
-                <!-- Modal Footer -->
+                <!-- FOOTER -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i></i> Close
+                        Tutup
                     </button>
                     <button type="button" class="btn btn-primary" id="submit-register">
-                        <i></i> Simpan Data
+                        Simpan Data
                     </button>
                 </div>
+
             </div>
         </div>
     </div>
@@ -535,7 +569,7 @@
                     <div class="mb-3">
                         <div class="input-group">
                             <input type="text" id="modalSearchInput" class="form-control"
-                                placeholder="Masukkan nama sekolah, NPSN, atau alamat...">
+                                   placeholder="Masukkan nama sekolah, NPSN, atau alamat...">
                             <button class="btn btn-primary" type="button" id="modalSearchBtn">
                                 <i class="ri-search-line"></i> Cari
                             </button>
@@ -563,8 +597,11 @@
             </div>
         </div>
     </div>
+
+    <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         // ============================================
         // 1. FUNGSI UTAMA
@@ -585,7 +622,7 @@
         }
 
         // Format NIP input (hanya angka, maks 18 digit)
-        document.getElementById('nip')?.addEventListener('input', function(e) {
+        document.getElementById('nip')?.addEventListener('input', function (e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 18) {
                 value = value.substring(0, 18);
@@ -594,7 +631,7 @@
         });
 
         // Format No HP input (hanya angka)
-        document.querySelector('input[name="no_hp"]')?.addEventListener('input', function(e) {
+        document.querySelector('input[name="no_hp"]')?.addEventListener('input', function (e) {
             e.target.value = e.target.value.replace(/\D/g, '');
         });
 
@@ -624,7 +661,7 @@
 
         // Toggle antara pilihan sekolah dan input manual
         document.querySelectorAll('input[name="sekolah_option"]').forEach(radio => {
-            radio.addEventListener('change', function(e) {
+            radio.addEventListener('change', function (e) {
                 const sekolahDropdownSection = document.getElementById('sekolahDropdownSection');
                 const instansiManualSection = document.getElementById('instansiManualSection');
                 const sekolahSelect = document.getElementById('sekolahSelect');
@@ -635,12 +672,10 @@
                 instansiInput.classList.remove('is-invalid');
 
                 if (e.target.value === 'sekolah') {
-                    // Tampilkan dropdown sekolah, sembunyikan input manual
                     sekolahDropdownSection.classList.remove('d-none');
                     instansiManualSection.classList.add('d-none');
                     instansiInput.value = '';
                 } else {
-                    // Tampilkan input manual, sembunyikan dropdown sekolah
                     sekolahDropdownSection.classList.add('d-none');
                     instansiManualSection.classList.remove('d-none');
                     sekolahSelect.value = '';
@@ -650,7 +685,7 @@
         });
 
         // Handle sekolah dropdown change (menampilkan info)
-        document.getElementById('sekolahSelect')?.addEventListener('change', function(e) {
+        document.getElementById('sekolahSelect')?.addEventListener('change', function (e) {
             const sekolahId = e.target.value;
             const selectedOption = e.target.options[e.target.selectedIndex];
             const sekolahInfo = document.getElementById('sekolahInfo');
@@ -670,25 +705,19 @@
                 sekolahAlamat.textContent = sekolahAlamatText || 'Alamat tidak tersedia';
                 sekolahInfo.classList.remove('d-none');
 
-                // Pastikan radio button "sekolah" terpilih
                 document.getElementById('optionSekolah').checked = true;
                 document.getElementById('optionSekolah').dispatchEvent(new Event('change'));
             }
         });
 
-        // Function untuk memilih sekolah dari modal search
+        // Pilih sekolah dari modal search
         function handlePilihSekolah(sekolahId, sekolahNama, sekolahAlamat) {
-            console.log('Memilih sekolah:', sekolahId, sekolahNama);
-
-            // 1. Pilih radio button sekolah
             const sekolahOption = document.getElementById('optionSekolah');
             sekolahOption.checked = true;
             sekolahOption.dispatchEvent(new Event('change'));
 
-            // 2. Update dropdown sekolah
             const sekolahSelect = document.getElementById('sekolahSelect');
 
-            // Cek apakah sekolah sudah ada di dropdown
             let optionExists = false;
             for (let i = 0; i < sekolahSelect.options.length; i++) {
                 if (sekolahSelect.options[i].value === sekolahId) {
@@ -697,7 +726,6 @@
                 }
             }
 
-            // Jika belum ada, tambahkan option baru
             if (!optionExists) {
                 const newOption = new Option(
                     `${sekolahNama}`,
@@ -710,10 +738,8 @@
                 sekolahSelect.add(newOption);
             }
 
-            // Set value dropdown
             sekolahSelect.value = sekolahId;
 
-            // 3. Update info sekolah
             const sekolahName = document.getElementById('selectedSekolahName');
             const sekolahAlamatSpan = document.getElementById('selectedSekolahAlamat');
             const sekolahInfo = document.getElementById('sekolahInfo');
@@ -722,24 +748,19 @@
             sekolahAlamatSpan.textContent = sekolahAlamat || 'Alamat tidak tersedia';
             sekolahInfo.classList.remove('d-none');
 
-            // 4. Trigger change event
             sekolahSelect.dispatchEvent(new Event('change'));
-
-            console.log('Sekolah berhasil dipilih:', sekolahSelect.value);
         }
 
         // ============================================
         // 3. MODAL SEARCH SEKOLAH
         // ============================================
 
-        // Open search sekolah modal
-        document.getElementById('openSearchModalBtn')?.addEventListener('click', function() {
+        document.getElementById('openSearchModalBtn')?.addEventListener('click', function () {
             const searchModal = new bootstrap.Modal(document.getElementById('searchSekolahModal'));
             searchModal.show();
         });
 
-        // Search button in modal
-        document.getElementById('modalSearchBtn')?.addEventListener('click', function() {
+        document.getElementById('modalSearchBtn')?.addEventListener('click', function () {
             const keyword = document.getElementById('modalSearchInput').value.trim();
             if (keyword.length >= 2) {
                 searchSekolahModal(keyword);
@@ -748,8 +769,7 @@
             }
         });
 
-        // Enter key in search input
-        document.getElementById('modalSearchInput')?.addEventListener('keypress', function(e) {
+        document.getElementById('modalSearchInput')?.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 const keyword = this.value.trim();
                 if (keyword.length >= 2) {
@@ -760,7 +780,6 @@
             }
         });
 
-        // Function untuk search sekolah di modal
         function searchSekolahModal(keyword) {
             const searchResults = document.getElementById('searchResults');
             const loadingIndicator = document.getElementById('modalSearchLoading');
@@ -769,12 +788,12 @@
             searchResults.innerHTML = '';
 
             fetch(`/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     loadingIndicator.classList.add('d-none');
@@ -783,42 +802,41 @@
                         let resultsHTML = '';
                         data.data.forEach(sekolah => {
                             resultsHTML += `
-                        <div class="card mb-2 sekolah-item">
-                            <div class="card-body">
-                                <h6 class="card-title mb-1">${sekolah.nama_sekolah}</h6>
-                                ${sekolah.npsn ? `<p class="card-text mb-1"><small><strong>NPSN:</strong> ${sekolah.npsn}</small></p>` : ''}
-                                ${sekolah.alamat ? `<p class="card-text mb-1"><small><i class="ri-map-pin-line"></i> ${sekolah.alamat}</small></p>` : ''}
-                                <button class="btn btn-sm btn-primary mt-2 pilih-sekolah-btn" 
-                                        data-id="${sekolah.sekolah_id}"
-                                        data-nama="${sekolah.nama_sekolah}"
-                                        data-alamat="${sekolah.alamat || ''}">
-                                    <i class="ri-check-line"></i> Pilih Sekolah Ini
-                                </button>
-                            </div>
-                        </div>`;
+                                <div class="card mb-2 sekolah-item">
+                                    <div class="card-body">
+                                        <h6 class="card-title mb-1">${sekolah.nama_sekolah}</h6>
+                                        ${sekolah.npsn ? `<p class="card-text mb-1"><small><strong>NPSN:</strong> ${sekolah.npsn}</small></p>` : ''}
+                                        ${sekolah.alamat ? `<p class="card-text mb-1"><small><i class="ri-map-pin-line"></i> ${sekolah.alamat}</small></p>` : ''}
+                                        <button class="btn btn-sm btn-primary mt-2 pilih-sekolah-btn" 
+                                                data-id="${sekolah.sekolah_id}"
+                                                data-nama="${sekolah.nama_sekolah}"
+                                                data-alamat="${sekolah.alamat || ''}">
+                                            <i class="ri-check-line"></i> Pilih Sekolah Ini
+                                        </button>
+                                    </div>
+                                </div>`;
                         });
                         searchResults.innerHTML = resultsHTML;
                     } else {
                         searchResults.innerHTML = `
-                    <div class="text-center text-muted py-4">
-                        <i class="ri-search-line fs-4"></i>
-                        <p class="mt-2">Sekolah tidak ditemukan</p>
-                    </div>`;
+                            <div class="text-center text-muted py-4">
+                                <i class="ri-search-line fs-4"></i>
+                                <p class="mt-2">Sekolah tidak ditemukan</p>
+                            </div>`;
                     }
                 })
                 .catch(error => {
                     console.error('Error searching sekolah:', error);
                     loadingIndicator.classList.add('d-none');
                     searchResults.innerHTML = `
-                <div class="text-center text-danger py-4">
-                    <i class="ri-error-warning-line fs-4"></i>
-                    <p class="mt-2">Gagal mencari sekolah. Silakan coba lagi.</p>
-                </div>`;
+                        <div class="text-center text-danger py-4">
+                            <i class="ri-error-warning-line fs-4"></i>
+                            <p class="mt-2">Gagal mencari sekolah. Silakan coba lagi.</p>
+                        </div>`;
                 });
         }
 
-        // Event delegation untuk tombol pilih sekolah di modal
-        document.getElementById('searchResults')?.addEventListener('click', function(e) {
+        document.getElementById('searchResults')?.addEventListener('click', function (e) {
             if (e.target.classList.contains('pilih-sekolah-btn') ||
                 e.target.closest('.pilih-sekolah-btn')) {
 
@@ -829,65 +847,58 @@
                 const sekolahNama = button.getAttribute('data-nama');
                 const sekolahAlamat = button.getAttribute('data-alamat');
 
-                // Pilih sekolah
                 handlePilihSekolah(sekolahId, sekolahNama, sekolahAlamat);
 
-                // Tutup modal
                 const searchModal = bootstrap.Modal.getInstance(document.getElementById('searchSekolahModal'));
                 searchModal.hide();
 
-                // Reset search
                 document.getElementById('modalSearchInput').value = '';
             }
         });
 
-        // Reset modal saat dibuka
-        document.getElementById('searchSekolahModal')?.addEventListener('show.bs.modal', function() {
+        document.getElementById('searchSekolahModal')?.addEventListener('show.bs.modal', function () {
             document.getElementById('modalSearchInput').value = '';
             document.getElementById('searchResults').innerHTML = `
-            <div class="text-center text-muted">
-                <i class="ri-search-line fs-4"></i>
-                <p class="mt-2">Masukkan kata kunci untuk mencari sekolah</p>
-            </div>`;
+                <div class="text-center text-muted">
+                    <i class="ri-search-line fs-4"></i>
+                    <p class="mt-2">Masukkan kata kunci untuk mencari sekolah</p>
+                </div>`;
         });
 
         // ============================================
         // 4. LOGIN FORM
         // ============================================
 
-        document.getElementById('login-form')?.addEventListener('submit', function(e) {
+        document.getElementById('login-form')?.addEventListener('submit', function (e) {
             e.preventDefault();
 
             const nip = document.getElementById('nip').value.trim();
             const token = document.getElementById('tokenInput').value.trim();
             const kegiatan_id = document.getElementById('kegiatan_id').value;
 
-            // Validasi NIP
             if (nip.length !== 18) {
                 showAlert('error', 'Kesalahan', 'NIP harus terdiri dari 18 digit angka!');
                 return false;
             }
 
-            // Show loading
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="ri-loader-4-line me-2"></i> MEMPROSES...';
             submitBtn.disabled = true;
 
-            // Send AJAX request
             fetch("{{ route('lockscreen.authenticate') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nip: nip,
-                        token: token,
-                        kegiatan_id: kegiatan_id
-                    })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    nip: nip,
+                    token: token,
+                    kegiatan_id: kegiatan_id
                 })
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -903,7 +914,6 @@
                         });
                     } else {
                         if (data.show_register_modal) {
-                            // Show registration modal
                             document.getElementById('modal-info-text').innerHTML =
                                 `NIP <strong>${data.nip}</strong> belum terdaftar dalam sistem. Silakan lengkapi data diri Anda.`;
 
@@ -914,7 +924,6 @@
                             const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
                             registerModal.show();
 
-                            // Reset form modal
                             setTimeout(() => {
                                 document.getElementById('optionSekolah').checked = true;
                                 document.getElementById('optionSekolah').dispatchEvent(new Event('change'));
@@ -923,7 +932,6 @@
                                 document.getElementById('sekolahInfo').classList.add('d-none');
                                 document.getElementById('kotaSelect').value = '';
 
-                                // Reset validasi
                                 document.querySelectorAll('.is-invalid').forEach(el => {
                                     el.classList.remove('is-invalid');
                                 });
@@ -947,21 +955,18 @@
         // 5. REGISTER FORM
         // ============================================
 
-        document.getElementById('submit-register')?.addEventListener('click', function() {
+        document.getElementById('submit-register')?.addEventListener('click', function () {
             const form = document.getElementById('register-form');
             const formData = new FormData(form);
 
-            // 1. Validasi required fields dasar
             const requiredFields = ['nama', 'jenis_kelamin', 'tempat_lahir', 'tgl_lahir', 'pangkat_jabatan_id', 'email', 'no_hp'];
             let isValid = true;
             let errorMessages = [];
 
-            // Reset semua validasi
             document.querySelectorAll('.is-invalid').forEach(el => {
                 el.classList.remove('is-invalid');
             });
 
-            // Validasi field dasar
             requiredFields.forEach(field => {
                 const input = form.querySelector(`[name="${field}"]`);
                 if (!input.value.trim()) {
@@ -973,7 +978,6 @@
                 }
             });
 
-            // 2. Validasi Kota
             const kotaSelect = document.getElementById('kotaSelect');
             if (!kotaSelect.value) {
                 isValid = false;
@@ -981,38 +985,32 @@
                 kotaSelect.classList.add('is-invalid');
             }
 
-            // 3. Validasi Sekolah/Instansi
             const sekolahOption = document.querySelector('input[name="sekolah_option"]:checked');
             if (!sekolahOption) {
                 isValid = false;
                 errorMessages.push('Pilih opsi sekolah atau input manual');
             } else if (sekolahOption.value === 'sekolah') {
-                // Validasi pilih sekolah dari dropdown
                 const sekolahSelect = document.getElementById('sekolahSelect');
                 if (!sekolahSelect.value) {
                     isValid = false;
                     errorMessages.push('Pilih sekolah dari daftar');
                     sekolahSelect.classList.add('is-invalid');
                 } else {
-                    // Pastikan sekolah_id ada di formData
                     formData.set('sekolah_id', sekolahSelect.value);
-                    formData.delete('instansi'); // Hapus instansi jika sekolah dipilih
+                    formData.delete('instansi');
                 }
             } else if (sekolahOption.value === 'manual') {
-                // Validasi input manual instansi
                 const instansiInput = document.getElementById('instansiInput');
                 if (!instansiInput.value.trim()) {
                     isValid = false;
                     errorMessages.push('Isi nama instansi/lembaga');
                     instansiInput.classList.add('is-invalid');
                 } else {
-                    // Pastikan instansi ada di formData
                     formData.set('instansi', instansiInput.value);
-                    formData.delete('sekolah_id'); // Hapus sekolah_id jika manual dipilih
+                    formData.delete('sekolah_id');
                 }
             }
 
-            // 4. Validasi Email
             const emailInput = form.querySelector('[name="email"]');
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (emailInput.value.trim() && !emailRegex.test(emailInput.value.trim())) {
@@ -1021,7 +1019,6 @@
                 errorMessages.push('Format email tidak valid');
             }
 
-            // 5. Validasi Nomor HP
             const phoneInput = form.querySelector('[name="no_hp"]');
             const phoneValue = phoneInput.value.replace(/\D/g, '');
             if (phoneInput.value.trim() && phoneValue.length < 10) {
@@ -1030,7 +1027,6 @@
                 errorMessages.push('Nomor HP minimal 10 digit');
             }
 
-            // 6. Validasi Tanggal Lahir (minimal 17 tahun)
             const dobInput = form.querySelector('[name="tgl_lahir"]');
             if (dobInput.value) {
                 const dob = new Date(dobInput.value);
@@ -1044,7 +1040,6 @@
                 }
             }
 
-            // Tampilkan error jika ada
             if (!isValid) {
                 Swal.fire({
                     icon: 'warning',
@@ -1056,7 +1051,6 @@
                 return;
             }
 
-            // 7. Kirim data ke server
             Swal.fire({
                 title: 'Menyimpan Data...',
                 text: 'Mohon tunggu sebentar',
@@ -1067,17 +1061,16 @@
             });
 
             fetch("{{ route('lockscreen.register') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Hide modal
                         const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                         registerModal.hide();
 
@@ -1116,7 +1109,7 @@
 
         // Clear validation on input
         document.querySelectorAll('#register-form input, #register-form select').forEach(input => {
-            input.addEventListener('input', function() {
+            input.addEventListener('input', function () {
                 if (this.classList.contains('is-invalid')) {
                     this.classList.remove('is-invalid');
                 }
@@ -1127,8 +1120,7 @@
         // 6. INITIALIZATION
         // ============================================
 
-        // Auto focus NIP field on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const nipField = document.getElementById('nip');
             if (nipField) {
                 nipField.focus();
