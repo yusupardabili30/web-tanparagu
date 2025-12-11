@@ -35,13 +35,13 @@ FLOATING LABEL FIX
 }
 
 .form-select option[value=""] {
-    color: #888 !important;
+    color: #555555 !important;
 }
 
 .form-floating > label {
     font-size: 15px !important;
     font-weight: 600 !important;
-    color: #888 !important;
+    color: #555555 !important;
 }
 
 .form-floating > .form-control:focus ~ label,
@@ -51,7 +51,7 @@ FLOATING LABEL FIX
     font-size: 14px !important;
     transform: translateY(-14px) scale(.9) !important;
     opacity: .85;
-    color: #6e6e6e !important;
+    color: #555555 !important;
 }
 
 /* ============================================
@@ -175,10 +175,10 @@ RESPONSIVE MOBILE HP
     <!-- LOGO -->
     <img src="{{ asset('build/images/logotutwuri.png') }}"
         alt="Tut Wuri Handayani"
-        style="width:180px; height:auto; margin-left:-30px; margin-top:-40px;">
+        style="width:180px; height:auto; margin-left:-30px; margin-top:-100px;">
 
     <!-- TEXT -->
-    <div class="header-info" style="line-height:1.3; margin-top:-40px;">
+    <div class="header-info" style="line-height:1.3; margin-top:-100px;">
         <h4 class="fw-bold mb-1" style="color:#1a3f6b; font-size:26px;">
             Pelatihan Pembelajaran Mendalam (PM) Provinsi Banten Batch 1
         </h4>
@@ -253,7 +253,7 @@ RESPONSIVE MOBILE HP
 <div class="row mb-2">
     <div class="col-md-6">
         <div class="form-floating mb-2">
-            <select class="form-select" required style="font-size:16px; color:#6e6e6e !important;">
+            <select class="form-select" required style="font-size:16px; color:#555555 !important;">
                 <option value="">Pilih Agama</option>
                 <option>Islam</option>
                 <option>Kristen</option>
@@ -268,7 +268,7 @@ RESPONSIVE MOBILE HP
 
     <div class="col-md-6">
         <div class="form-floating mb-2">
-            <select class="form-select" required style="font-size:16px; color:#6e6e6e !important;">
+            <select class="form-select" required style="font-size:16px; color:#555555 !important;">
                 <option value="">Pilih Jenis Kelamin</option>
                 <option>Laki-laki</option>
                 <option>Perempuan</option>
@@ -312,7 +312,7 @@ RESPONSIVE MOBILE HP
 <div class="row mb-2">
     <div class="col-md-6">
         <div class="form-floating mb-2">
-            <select class="form-select" required>
+            <select class="form-select"style="color: #555555" required>
                 <option value="">Pilih Sekolah</option>
                 <option>SD Negeri 1</option>
                 <option>SD Negeri 2</option>
@@ -394,7 +394,7 @@ RESPONSIVE MOBILE HP
 <div class="row mb-2">
     <div class="col-md-4">
         <div class="form-floating mb-2">
-            <select class="form-select" required>
+            <select class="form-select"style="color: #555555" required>
                 <option value="">Pilih Bank</option>
                 <option>Bank BRI</option>
                 <option>Bank BCA</option>
