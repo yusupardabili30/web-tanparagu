@@ -228,7 +228,7 @@
                         </h6>
                         <div class="ps-3">
                             <ul class="mb-0" style="line-height: 1.7; font-size:14px;">
-                                <li>Memetakan <strong>tingkat kompetensi</strong> Kepala Sekolah</li>
+                                <li>Memetakan <strong>tingkat kompetensi</strong> {{ $kegiatan->entity }}</li>
                                 <li>Mengidentifikasi <strong>kebutuhan pengembangan profesional</strong></li>
                                 <li>Memberikan <strong>rekomendasi program penguatan kapasitas</strong></li>
                                 <li>Mendukung <strong>perencanaan pengembangan karir</strong> yang terarah</li>
