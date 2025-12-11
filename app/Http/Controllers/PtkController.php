@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ptk;
 use App\Models\Kota;
 use App\Models\Soal;
+use App\Models\SoalCase;
 use App\Models\Sekolah;
 use App\Models\Kegiatan;
 use Illuminate\Http\Request;
@@ -56,6 +57,51 @@ class PtkController extends Controller
                 ->with('error', 'Kegiatan sudah tidak aktif');
         }
 
+
+
+        // ============================================
+        // CEK APAKAH SUDAH SELESAI INSTRUMEN
+        // ============================================
+        $isFinished = false;
+
+        if ($kegiatan->tahap == 2) {
+            // Untuk Quiz 2: Hitung total soal case berdasarkan entity
+            $totalCases = SoalCase::where('entity', $kegiatan->entity)->count();
+
+            // Hitung jawaban yang sudah selesai
+            $completedCases = DB::table('ptk_jawaban as pj')
+                ->join('soal as s', 's.sub_indikator_id', '=', 'pj.sub_indikator_id')
+                ->join('soal_case as sc', 'sc.soal_case_id', '=', 's.soal_case_id')
+                ->where('pj.kegiatan_id', $kegiatan_id)
+                ->where('pj.ptk_id', $ptk->ptk_id)
+                ->where('pj.tahap', 2)
+                ->where('sc.entity', $kegiatan->entity)
+                ->whereNotNull('pj.level')
+                ->distinct('sc.soal_case_id')
+                ->count('sc.soal_case_id');
+
+            $isFinished = ($completedCases >= $totalCases);
+        } else {
+            // Untuk Quiz 1
+            $totalIndicators = DB::table('soal')
+                ->where('entity', $kegiatan->entity)
+                ->where('tahap', 1)
+                ->distinct('indikator_id')
+                ->count('indikator_id');
+
+            $completedIndicators = DB::table('ptk_jawaban')
+                ->where('kegiatan_id', $kegiatan_id)
+                ->where('ptk_id', $ptk->ptk_id)
+                ->where('tahap', 1)
+                ->whereNotNull('bobot')
+                ->distinct('indikator_id')
+                ->count('indikator_id');
+
+            $isFinished = ($completedIndicators >= $totalIndicators);
+        }
+
+
+
         // Ambil data untuk dropdown (jika diperlukan untuk edit)
         $pangkatJabatans = PangkatJabatan::orderBy('jenjang_jabatan')->get();
         $kotas = Kota::orderBy('nama_kota')->get();
@@ -89,7 +135,8 @@ class PtkController extends Controller
             'current_encode_kegiatan_id' => $encode_kegiatan_id,
             'current_kegiatan_id' => $kegiatan_id,
             'data' => $soal,
-            'encoded_sub_indikator_id' => $encoded_sub_indikator_id
+            'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+            'isFinished' => $isFinished // TAMBAHKAN INI
         ]);
     }
 

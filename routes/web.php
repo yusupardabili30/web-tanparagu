@@ -10,6 +10,7 @@ use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\LockScreenController;
 use App\Http\Controllers\HasilInstrumenController;
 use App\Http\Controllers\InstrumenController;
+use App\Http\Controllers\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +56,26 @@ Route::get('/kegiatan/get/{kegiatan_id}', [KegiatanController::class, 'get'])->n
 Route::delete('/kegiatan/delete/{kegiatan_id}', [KegiatanController::class, 'delete'])->name('kegiatan.delete');
 Route::post('/kegiatan/submit', [KegiatanController::class, 'store'])->name('kegiatan.store');
 
+
+
+/*
+|--------------------------------------------------------------------------
+| Register Routes
+|--------------------------------------------------------------------------
+*/
+
+// Route untuk register peserta
+// Tambahkan route ini di bawah route register yang sudah ada
+Route::get('/register/{encode_kegiatan_id}', [RegisterController::class, 'index'])->name('register.index');
+Route::post('/register/{encode_kegiatan_id}', [RegisterController::class, 'store'])->name('register.store');
+Route::get('/register/{encode_kegiatan_id}/success', [RegisterController::class, 'success'])->name('register.success');
+
+// Route untuk search sekolah (AJAX)
+Route::get('/search/sekolah', [RegisterController::class, 'searchSekolah'])->name('search.sekolah');
+
+// Route untuk mendapatkan alamat sekolah
+Route::get('/api/sekolah/{id}/alamat', [RegisterController::class, 'getSekolahAlamat']);
+
 /*
 |--------------------------------------------------------------------------
 | Lockscreen Routes
@@ -82,7 +103,6 @@ Route::get('/error/inactive-kegiatan', function () {
 Route::get('/ptk/riwayat/kegiatan/{encode_kegiatan_id}/user/{nip}', [PtkController::class, 'riwayatKegiatan'])->name('ptk.riwayat');
 
 Route::get('/ptk/detail-riwayat/{encode_kegiatan_id}/user/{nip}', [PtkController::class, 'detailRiwayat'])->name('ptk.detailriwayat');
-
 Route::get('/ptk/kegiatan/{encode_kegiatan_id}/user/{nip}', [PtkController::class, 'index'])->name('ptk.show');
 Route::get('/ptk/start/{encode_kegiatan_id}/{nip}', [PtkController::class, 'startQuiz'])->name('ptk.start-quiz');
 Route::get('/ptk/continue/{encode_kegiatan_id}/{nip}', [PtkController::class, 'continueQuiz'])->name('ptk.continue-quiz');
@@ -152,3 +172,9 @@ Route::get('/hasil-instrumen/export/{ptk_id}', [HasilInstrumenController::class,
 Route::get('/hasil-instrumen/export-all', [HasilInstrumenController::class, 'exportAllPdf'])->name('hasil-instrumen.export-all');
 Route::get('/hasil-instrumen/export-excel', [HasilInstrumenController::class, 'exportExcel'])->name('hasil-instrumen.export-excel');
 Route::delete('/ptk-jawaban/delete/{id}', [HasilInstrumenController::class, 'destroy'])->name('ptk-jawaban.destroy');
+
+
+Route::get(
+    '/quiz/case-list/{encoded_kegiatan_id}/{nip}',
+    [SoalController::class, 'getCaseList']
+)->name('quiz.case.list');

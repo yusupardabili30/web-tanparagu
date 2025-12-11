@@ -12,6 +12,10 @@
         localStorage.removeItem("quiz_start_time");
         localStorage.removeItem("quiz2_start_time"); // tambahan untuk quiz2 jika ada
     </script>
+    <br>
+    <br>
+    <br>
+    <br>
 
 
     <!-- FINISH CARD -->
@@ -38,7 +42,10 @@
 
                     <!-- TITLE -->
                     <h3 class="mb-3" style="color: #1a4d8e; font-weight: 700;">
-                        Selamat! Anda Telah Menyelesaikan Instrumen Pemetaan Pembelajaran Guru
+                        Terima Kasih! Anda Telah Menyelesaikan @php
+                        $kegiatan = \App\Models\Kegiatan::find(Hashids::decode($encoded_kegiatan_id)[0] ?? 0);
+                        @endphp
+                        {{ $kegiatan->kegiatan_name ?? 'Instrumen' }}
                     </h3>
 
                     <!-- DETAILS -->

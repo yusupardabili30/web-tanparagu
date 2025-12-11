@@ -20,6 +20,7 @@ class Kegiatan extends Model
         'entity',
         'tahap',
         'instrumen_url',
+        'register_url',
         'instrumen_token',
         'status', // Tetap pakai 'status'
         'start_date',

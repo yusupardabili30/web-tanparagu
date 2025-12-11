@@ -3,6 +3,12 @@
 
 <div class="container-fluid">
     <!-- Jika belum ada Font Awesome -->
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
     <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
@@ -17,7 +23,7 @@
                     <ol class="breadcrumb m-0" style="font-size:15px; font-weight:400;">
                         <li class="breadcrumb-item">
                             <a href="javascript:history.back();" class="text-primary fw-bold">
-                                <i class="ri-arrow-left-line me-1"></i> Detail
+                                <i class="ri-arrow-left-line me-1"></i> Riwayat
                             </a>
                         </li>
                         <li class="breadcrumb-item active">Kegiatan</li>
@@ -182,9 +188,9 @@
             <div class="card border-0 shadow-sm" style="border-radius:14px; height:100%;">
 
                 <div class="card-header baduy-bg py-2">
-                    <div class="text-white">
+                    <h5 class="mb-0 text-white" style="font-size:18px; font-weight:700;">
                         {{-- Nama Kegiatan (lebih besar) --}}
-                        <div class="d-flex align-items-center mb-1" style="font-size: 18px; font-weight: 700;">
+                        <div class="d-flex align-items-center mb-1">
                             <i class="fas fa-calendar-alt me-2"></i>
                             {{ $kegiatan->kegiatan_name }}
                         </div>
@@ -194,8 +200,8 @@
                             <i class="fa-solid fa-user me-2"></i>
                             {{ $kegiatan->entity }}
                         </div>
-                    </div>
                 </div>
+
 
                 <div class="card-body p-4 detail-card-body">
 
@@ -259,12 +265,33 @@
                         </div>
                     </div>
 
-                    <!-- TOMBOL MULAI (DINONAKTIFKAN AWALNYA) -->
+                    <!-- TOMBOL MULAI -->
                     <div class="text-center mt-4">
                         @php
                         $encoded_no_urut = Hashids::encode(1);
                         @endphp
 
+                        @if($isFinished)
+                        <!-- Jika sudah selesai -->
+                        <div class="alert alert-success mb-3" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="ri-checkbox-circle-fill fs-4 me-2"></i>
+                                <div class="text-start">
+                                    <h6 class="mb-1">Instumen Selesai</h6>
+                                    <small>Anda telah menyelesaikan instrumen ini.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button"
+                            class="btn btn-success btn-lg px-5 w-100 d-block text-center"
+                            style="border-radius:10px; font-size:16px; padding:10px;"
+                            onclick="showFinishedAlert()">
+                            <i class="ri-check-double-line me-2"></i> Lihat Hasil
+                        </button>
+
+                        @else
+                        <!-- Jika belum selesai -->
                         @switch($kegiatan->tahap)
                         @case(1)
                         @php
@@ -272,31 +299,30 @@
                         $encoded_no_urut = Hashids::encode(1);
                         @endphp
                         <a href="{{ route('quiz1.show', [
-                            'tahap' => $kegiatan->tahap,
-                            'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-                            'nip' => $current_nip,
-                            'encoded_indikator_id' => $encoded_indikator_id,
-                            'encoded_no_urut' => $encoded_no_urut
-                        ]) }}"
+        'tahap' => $kegiatan->tahap,
+        'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+        'nip' => $current_nip,
+        'encoded_indikator_id' => $encoded_indikator_id,
+        'encoded_no_urut' => $encoded_no_urut
+    ]) }}"
                             id="btnMulai"
-                            class="btn btn-primary btn-lg px-5 disabled"
-                            style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px 30px;">
+                            class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
+                            style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
                             <i class="ri-play-line me-2"></i> Mulai
                         </a>
                         @break
 
                         @case(2)
                         @php
-                        //$encoded_sub_indikator_id = Hashids::encode(1);
                         $encoded_no_urut = Hashids::encode(1);
                         @endphp
                         <a href="{{ route('quiz2.show', [
-                            'tahap' => $kegiatan->tahap,
-                            'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-                            'nip' => $current_nip,
-                            'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
-                            'encoded_no_urut' => $encoded_no_urut
-                        ]) }}"
+        'tahap' => $kegiatan->tahap,
+        'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+        'nip' => $current_nip,
+        'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+        'encoded_no_urut' => $encoded_no_urut
+    ]) }}"
                             id="btnMulai"
                             class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
                             style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
@@ -306,6 +332,7 @@
 
                         @default
                         @endswitch
+                        @endif
                     </div>
 
                 </div>
@@ -543,9 +570,54 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(44, 123, 229, 0.3);
     }
+
+
+
+
+
+    <style>
+
+    /* Style untuk tombol */
+    .btn-success {
+        cursor: pointer !important;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    /* Pastikan tombol disabled tidak bisa diklik */
+    .btn.disabled {
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+    }
+
+    /* Style untuk popup SweetAlert2 */
+    .swal2-popup {
+        border-radius: 12px !important;
+        font-family: inherit !important;
+    }
+
+    .swal2-title {
+        font-size: 22px !important;
+        font-weight: 600 !important;
+    }
+
+    .swal2-confirm {
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+    }
+
+    .swal2-cancel {
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+    }
+</style>
 </style>
 
-<script>
+<!-- <script>
     document.addEventListener('DOMContentLoaded', function() {
         const checkbox = document.getElementById('konfirmasiCheckbox');
         const btnMulai = document.getElementById('btnMulai');
@@ -564,6 +636,113 @@
             });
         }
     });
+</script> -->
+
+<script>
+    // Reset checkbox setiap halaman dimuat
+    window.onload = function() {
+        const checkbox = document.getElementById('konfirmasiCheckbox');
+        const btnMulai = document.getElementById('btnMulai');
+
+        // Reset checkbox
+        if (checkbox) {
+            checkbox.checked = false;
+        }
+
+        // Reset tombol ke disabled
+        if (btnMulai) {
+            btnMulai.classList.add('disabled');
+            btnMulai.style.opacity = '0.6';
+            btnMulai.style.pointerEvents = 'none';
+        }
+
+        // Event untuk toggle tombol
+        if (checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (btnMulai) {
+                    if (this.checked) {
+                        btnMulai.classList.remove('disabled');
+                        btnMulai.style.opacity = '1';
+                        btnMulai.style.pointerEvents = 'auto';
+                    } else {
+                        btnMulai.classList.add('disabled');
+                        btnMulai.style.opacity = '0.6';
+                        btnMulai.style.pointerEvents = 'none';
+                    }
+                }
+            });
+        }
+    };
 </script>
 
+<script>
+    // Fungsi untuk alert selesai dengan SweetAlert2
+    function showFinishedAlert() {
+        // URL untuk redirect
+        const riwayatUrl = "{{ route('ptk.riwayat', ['encode_kegiatan_id' => $current_encode_kegiatan_id, 'nip' => $current_nip]) }}";
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Instumen Selesai',
+            html: `
+            <div class="text-center">
+                <i style="font-size: 48px; margin-bottom: 15px;"></i>
+                <p>Anda telah menyelesaikan {{ $kegiatan->kegiatan_name }}.</p>
+            
+            </div>
+        `,
+            showCancelButton: true,
+            confirmButtonText: '<i class="ri-book-open-line me-1"></i> Lihat Riwayat',
+            cancelButtonText: '<i class="ri-close-line me-1"></i> Tutup',
+            confirmButtonColor: '#1a4d8e',
+            cancelButtonColor: '#6c757d',
+            reverseButtons: true,
+            allowOutsideClick: false,
+            allowEscapeKey: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = riwayatUrl;
+            }
+        });
+    }
+
+    // Inisialisasi tombol mulai jika belum selesai
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cek apakah sudah selesai
+        const isFinished = @json($isFinished ?? false);
+
+        if (!isFinished) {
+            const checkbox = document.getElementById('konfirmasiCheckbox');
+            const btnMulai = document.getElementById('btnMulai');
+
+            if (checkbox && btnMulai) {
+                // Reset checkbox
+                checkbox.checked = false;
+
+                // Reset tombol ke disabled
+                btnMulai.classList.add('disabled');
+                btnMulai.style.opacity = '0.6';
+                btnMulai.style.pointerEvents = 'none';
+
+                // Event untuk toggle tombol
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        btnMulai.classList.remove('disabled');
+                        btnMulai.style.opacity = '1';
+                        btnMulai.style.pointerEvents = 'auto';
+                    } else {
+                        btnMulai.classList.add('disabled');
+                        btnMulai.style.opacity = '0.6';
+                        btnMulai.style.pointerEvents = 'none';
+                    }
+                });
+            }
+        }
+
+        // Debug info
+        console.log('Status selesai:', isFinished);
+        console.log('Checkbox ditemukan:', !!document.getElementById('konfirmasiCheckbox'));
+        console.log('Tombol Mulai ditemukan:', !!document.getElementById('btnMulai'));
+    });
+</script>
 @endsection

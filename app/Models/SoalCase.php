@@ -18,7 +18,9 @@ class SoalCase extends Model
         'soal_case_id',
         'sub_indikator_id',
         'sub_indikator_code',
-        'tittle',
+        'entity',        // ← Tambahkan ini
+        'no_urut',       // ← Tambahkan ini
+        'title',
         'case'
     ];
 

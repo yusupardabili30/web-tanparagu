@@ -24,6 +24,59 @@ class SoalController extends Controller
         return $soal;
     }
 
+    // ======================
+    // GET STUDI KASUS LIST DENGAN STATUS BENAR
+    // ======================
+    public function getCaseList($encoded_kegiatan_id, $nip)
+    {
+        $kegiatan_id = Hashids::decode($encoded_kegiatan_id)[0] ?? 0;
+        $ptk = Ptk::where('nip', $nip)->first();
+
+        if (!$ptk || !$kegiatan_id) {
+            return response()->json([]);
+        }
+
+        $kegiatan = Kegiatan::find($kegiatan_id);
+        $entity = $kegiatan->entity ?? null;
+
+        // Ambil semua studi kasus berdasarkan entity
+        $cases = SoalCase::where('entity', $entity)
+            ->orderBy('sub_indikator_id')
+            ->orderBy('no_urut')
+            ->get();
+
+        // Ambil data jawaban user dengan status "sudah melewati"
+        $passedCases = DB::table('ptk_jawaban as pj')
+            ->join('sub_indikator as si', 'si.sub_indikator_id', '=', 'pj.sub_indikator_id')
+            ->join('soal_case as sc', 'sc.sub_indikator_id', '=', 'si.sub_indikator_id')
+            ->where('pj.kegiatan_id', $kegiatan_id)
+            ->where('pj.ptk_id', $ptk->ptk_id)
+            ->where('pj.tahap', 2) // Quiz 2
+            ->where('sc.entity', $entity)
+            ->whereNotNull('pj.level') // Sudah mendapatkan level final
+            ->select('sc.soal_case_id')
+            ->distinct()
+            ->pluck('soal_case_id')
+            ->toArray();
+
+        $formattedCases = [];
+        foreach ($cases as $case) {
+            $formattedCases[] = [
+                'soal_case_id' => $case->soal_case_id,
+                'title' => $case->tittle ?? "Studi Kasus " . $case->no_urut,
+                'sub_indikator_id' => $case->sub_indikator_id,
+                'no_urut' => $case->no_urut,
+                'is_passed' => in_array($case->soal_case_id, $passedCases),
+                'status_icon' => in_array($case->soal_case_id, $passedCases)
+                    ? 'ri-checkbox-circle-line text-success'
+                    : 'ri-checkbox-blank-circle-line text-secondary'
+            ];
+        }
+
+        return response()->json($formattedCases);
+    }
+
+
     public function quiz1($tahap, $encoded_kegiatan_id, $nip, $encoded_indikator_id, $encoded_no_urut)
     {
         $indikator_id = Hashids::decode($encoded_indikator_id)[0] ?? 0;
@@ -100,6 +153,46 @@ class SoalController extends Controller
         $case = SoalCase::where('soal_case_id', $soal->soal_case_id)->first();
         $choices = SoalJawaban::where('soal_id', $soal->soal_id)->inRandomOrder()->get();
 
+        // ====================================================
+        // AMBIL DATA CASE LIST DARI METHOD getCaseList
+        // ====================================================
+        // Ambil semua studi kasus berdasarkan entity
+        $entity = $kegiatan->entity ?? null;
+        $cases = SoalCase::where('entity', $entity)
+            ->orderBy('sub_indikator_id')
+            ->orderBy('no_urut')
+            ->get();
+
+        // Ambil data jawaban user dengan status "sudah melewati"
+        $passedCases = DB::table('ptk_jawaban as pj')
+            ->join('sub_indikator as si', 'si.sub_indikator_id', '=', 'pj.sub_indikator_id')
+            ->join('soal_case as sc', 'sc.sub_indikator_id', '=', 'si.sub_indikator_id')
+            ->where('pj.kegiatan_id', $kegiatan_id)
+            ->where('pj.ptk_id', $ptk->ptk_id)
+            ->where('pj.tahap', 2) // Quiz 2
+            ->where('sc.entity', $entity)
+            ->whereNotNull('pj.level') // Sudah mendapatkan level final
+            ->select('sc.soal_case_id')
+            ->distinct()
+            ->pluck('soal_case_id')
+            ->toArray();
+
+        $caseList = [];
+        foreach ($cases as $caseItem) {
+            $caseList[] = [
+                'soal_case_id' => $caseItem->soal_case_id,
+                'title' => !empty($caseItem->tittle) ? $caseItem->tittle : "Studi Kasus " . $caseItem->no_urut,
+                'sub_indikator_id' => $caseItem->sub_indikator_id,
+                'no_urut' => $caseItem->no_urut,
+                'is_passed' => in_array($caseItem->soal_case_id, $passedCases),
+                'is_current' => $caseItem->soal_case_id == ($soal->soal_case_id ?? 0),
+                'status_icon' => in_array($caseItem->soal_case_id, $passedCases)
+                    ? 'ri-checkbox-circle-line text-success'
+                    : 'ri-checkbox-blank-circle-line text-secondary'
+            ];
+        }
+
+
         return view('quiz.quiz2', [
             'soal' => $soal,
             'tahap' => $tahap,
@@ -111,7 +204,10 @@ class SoalController extends Controller
             'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
             'encoded_no_urut' => $encoded_no_urut,
             'nip' => $nip,
-            'ptk' => $ptk
+            'ptk' => $ptk,
+
+            'caseList' => $caseList,
+            'currentCaseId' => $soal->soal_case_id ?? 0
         ]);
     }
 
