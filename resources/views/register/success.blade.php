@@ -47,12 +47,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="d-grid gap-2">
-                        <a href="{{ url('/') }}" class="btn btn-primary btn-lg">
-                            <i class="ri-home-line me-2"></i> Kembali ke Halaman Utama
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

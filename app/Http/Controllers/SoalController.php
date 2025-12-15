@@ -77,10 +77,12 @@ class SoalController extends Controller
     }
 
 
+    // Modifikasi method quiz1 untuk menambahkan caseList
     public function quiz1($tahap, $encoded_kegiatan_id, $nip, $encoded_indikator_id, $encoded_no_urut)
     {
         $indikator_id = Hashids::decode($encoded_indikator_id)[0] ?? 0;
         $no_urut = Hashids::decode($encoded_no_urut)[0] ?? 0;
+        $kegiatan_id = Hashids::decode($encoded_kegiatan_id)[0] ?? 0;
 
         if (!$indikator_id || !$no_urut) {
             abort(404, 'Parameter tidak valid');
@@ -89,20 +91,80 @@ class SoalController extends Controller
         $ptk = Ptk::where('nip', $nip)->first();
         if (!$ptk) abort(404, 'Data PTK tidak ditemukan');
 
-        $no_urut = request()->get('no_urut', $no_urut);
-
+        $kegiatan = Kegiatan::find($kegiatan_id);
         $soal = Soal::where('indikator_id', $indikator_id)
             ->where('no_urut', $no_urut)
+            ->where('tahap', 1)
+            ->where('entity', $kegiatan->entity)
             ->first();
 
         if (!$soal) {
-            return redirect()->route('quiz.finish', [
-                'encoded_kegiatan_id' => $encoded_kegiatan_id,
-                'nip' => $nip
-            ]);
+            // Cek apakah ada indikator berikutnya
+            $currentIndikator = Indikator::find($indikator_id);
+            $nextIndikator = Indikator::where('tahap', 1)
+                ->where('no_urut', '>', $currentIndikator->no_urut ?? 0)
+                ->orderBy('no_urut')
+                ->first();
+
+            if ($nextIndikator) {
+                // Pindah ke indikator berikutnya
+                return redirect()->route('quiz1.show', [
+                    'tahap' => $tahap,
+                    'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                    'nip' => $nip,
+                    'encoded_indikator_id' => Hashids::encode($nextIndikator->indikator_id),
+                    'encoded_no_urut' => Hashids::encode(1)
+                ]);
+            } else {
+                // Semua indikator selesai
+                return redirect()->route('quiz.finish', [
+                    'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                    'nip' => $nip
+                ]);
+            }
         }
 
-        $choices = SoalJawaban::where('soal_id', $soal->soal_id)->get();
+        $choices = SoalJawaban::where('soal_id', $soal->soal_id)->inRandomOrder()->get();
+
+        // ====================================================
+        // AMBIL DATA INDIKATOR LIST UNTUK QUIZ 1
+        // ====================================================
+        $indikators = Indikator::where('tahap', 1)
+            ->orderBy('no_urut')
+            ->get();
+
+        // Ambil data jawaban user yang sudah selesai
+        $passedIndikators = DB::table('ptk_jawaban')
+            ->where('kegiatan_id', $kegiatan_id)
+            ->where('ptk_id', $ptk->ptk_id)
+            ->where('tahap', 1)
+            ->whereNotNull('bobot')
+            ->pluck('indikator_id')
+            ->toArray();
+
+        $indikatorList = [];
+        foreach ($indikators as $item) {
+            // Cek apakah indikator ini memiliki soal untuk entity ini
+            $hasSoal = Soal::where('indikator_id', $item->indikator_id)
+                ->where('tahap', 1)
+                ->where('entity', $kegiatan->entity)
+                ->exists();
+
+            if (!$hasSoal) {
+                continue;
+            }
+
+            $indikatorList[] = [
+                'indikator_id' => $item->indikator_id,
+                'title' => $item->indikator_name ?? "Indikator " . $item->no_urut,
+                'no_urut' => $item->no_urut,
+                'is_passed' => in_array($item->indikator_id, $passedIndikators),
+                'is_current' => $item->indikator_id == $indikator_id,
+                'status_icon' => in_array($item->indikator_id, $passedIndikators)
+                    ? 'ri-checkbox-circle-line text-success'
+                    : 'ri-checkbox-blank-circle-line text-secondary'
+            ];
+        }
 
         return view('quiz.quiz1', [
             'soal' => $soal,
@@ -114,7 +176,11 @@ class SoalController extends Controller
             'encoded_indikator_id' => $encoded_indikator_id,
             'encoded_no_urut' => $encoded_no_urut,
             'nip' => $nip,
-            'ptk' => $ptk
+            'ptk' => $ptk,
+            'kegiatan' => $kegiatan,
+
+            'indikatorList' => $indikatorList,
+            'currentIndikatorId' => $indikator_id
         ]);
     }
 
@@ -481,6 +547,66 @@ class SoalController extends Controller
     // ======================
     // FINISH PAGE
     // ======================
+
+
+
+    // Di dalam class SoalController.php
+
+    // ======================
+    // GET STUDI KASUS LIST UNTUK QUIZ 1
+    // ======================
+    public function getCaseListQuiz1($encoded_kegiatan_id, $nip)
+    {
+        $kegiatan_id = Hashids::decode($encoded_kegiatan_id)[0] ?? 0;
+        $ptk = Ptk::where('nip', $nip)->first();
+
+        if (!$ptk || !$kegiatan_id) {
+            return response()->json([]);
+        }
+
+        $kegiatan = Kegiatan::find($kegiatan_id);
+        $entity = $kegiatan->entity ?? null;
+
+        // Ambil semua indikator berdasarkan entity dan tahap 1
+        $indikators = Indikator::where('tahap', 1)
+            ->orderBy('no_urut')
+            ->get();
+
+        // Ambil data jawaban user yang sudah selesai
+        $passedIndikators = DB::table('ptk_jawaban')
+            ->where('kegiatan_id', $kegiatan_id)
+            ->where('ptk_id', $ptk->ptk_id)
+            ->where('tahap', 1)
+            ->whereNotNull('bobot') // Sudah menyelesaikan 5 soal
+            ->pluck('indikator_id')
+            ->toArray();
+
+        $formattedIndikators = [];
+        foreach ($indikators as $indikator) {
+            // Cek apakah indikator ini sudah memiliki soal untuk entity ini
+            $hasSoal = Soal::where('indikator_id', $indikator->indikator_id)
+                ->where('tahap', 1)
+                ->where('entity', $entity)
+                ->exists();
+
+            if (!$hasSoal) {
+                continue;
+            }
+
+            $formattedIndikators[] = [
+                'indikator_id' => $indikator->indikator_id,
+                'title' => $indikator->indikator_name ?? "Indikator " . $indikator->no_urut,
+                'no_urut' => $indikator->no_urut,
+                'is_passed' => in_array($indikator->indikator_id, $passedIndikators),
+                'is_current' => false, // Akan diupdate di quiz1 method
+                'status_icon' => in_array($indikator->indikator_id, $passedIndikators)
+                    ? 'ri-checkbox-circle-line text-success'
+                    : 'ri-checkbox-blank-circle-line text-secondary'
+            ];
+        }
+
+        return response()->json($formattedIndikators);
+    }
 
     public function finish($encoded_kegiatan_id, $nip)
     {
