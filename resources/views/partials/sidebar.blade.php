@@ -82,6 +82,13 @@
                                             <a href="{{ route('hasil-instrumen.index') }}" class="nav-link">Hasil Instrumen</a>
                                         </li>
                                     </ul>
+
+                                    <ul class="nav nav-sm flex-column">
+                                        <li class="nav-item">
+                                            {{-- Menjadi: --}}
+                                            <a href="{{ route('biodata.index') }}" class="nav-link">Register Peserta</a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </li>
                             <li class="nav-item">

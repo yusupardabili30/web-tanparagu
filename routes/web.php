@@ -10,6 +10,8 @@ use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\LockScreenController;
 use App\Http\Controllers\HasilInstrumenController;
 use App\Http\Controllers\InstrumenController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\BiodataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,6 +59,59 @@ Route::post('/kegiatan/submit', [KegiatanController::class, 'store'])->name('keg
 
 /*
 |--------------------------------------------------------------------------
+| Biodata Regiester Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('biodata')->name('biodata.')->group(function () {
+    Route::get('/', [BiodataController::class, 'index'])->name('index');
+    Route::get('/pdf/{id}', [BiodataController::class, 'exportPdf'])->name('exportPdf');
+    Route::get('/pdf-all/export', [BiodataController::class, 'exportAllPdf'])->name('exportAllPdf');
+});
+/*
+|--------------------------------------------------------------------------
+| Register Routes
+|--------------------------------------------------------------------------
+*/
+
+// Route untuk register peserta
+// Tambahkan route ini di bawah route register yang sudah ada
+Route::get('/register/{encode_kegiatan_id}', [RegisterController::class, 'index'])->name('register.index');
+Route::post('/register/{encode_kegiatan_id}', [RegisterController::class, 'store'])->name('register.store');
+Route::get('/register/{encode_kegiatan_id}/success', [RegisterController::class, 'success'])->name('register.success');
+
+// Cek NIP + kegiatan_id (untuk autofill & double reg)
+Route::get('/register/{encode_kegiatan_id}/cek-nip', [RegisterController::class, 'cekNipKegiatan'])
+    ->name('register.cek-nip');
+
+
+// Route untuk info sekolah lengkap
+Route::get('/api/sekolah/{id}/info', function ($id) {
+    $sekolah = \App\Models\Sekolah::find($id);
+
+    if (!$sekolah) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Sekolah tidak ditemukan'
+        ], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'nama_sekolah' => $sekolah->nama_sekolah,
+        'npsn' => $sekolah->npsn,
+        'alamat' => $sekolah->alamat,
+        'kota' => $sekolah->kab_kota,
+        'data' => $sekolah
+    ]);
+});
+
+// Route untuk search sekolah (AJAX)
+Route::get('/search/sekolah', [RegisterController::class, 'searchSekolah'])->name('search.sekolah');
+// Route untuk mendapatkan alamat sekolah
+Route::get('/api/sekolah/{id}/alamat', [RegisterController::class, 'getSekolahAlamat']);
+
+/*
+|--------------------------------------------------------------------------
 | Lockscreen Routes
 |--------------------------------------------------------------------------
 */
@@ -82,7 +137,6 @@ Route::get('/error/inactive-kegiatan', function () {
 Route::get('/ptk/riwayat/kegiatan/{encode_kegiatan_id}/user/{nip}', [PtkController::class, 'riwayatKegiatan'])->name('ptk.riwayat');
 
 Route::get('/ptk/detail-riwayat/{encode_kegiatan_id}/user/{nip}', [PtkController::class, 'detailRiwayat'])->name('ptk.detailriwayat');
-
 Route::get('/ptk/kegiatan/{encode_kegiatan_id}/user/{nip}', [PtkController::class, 'index'])->name('ptk.show');
 Route::get('/ptk/start/{encode_kegiatan_id}/{nip}', [PtkController::class, 'startQuiz'])->name('ptk.start-quiz');
 Route::get('/ptk/continue/{encode_kegiatan_id}/{nip}', [PtkController::class, 'continueQuiz'])->name('ptk.continue-quiz');
@@ -152,3 +206,14 @@ Route::get('/hasil-instrumen/export/{ptk_id}', [HasilInstrumenController::class,
 Route::get('/hasil-instrumen/export-all', [HasilInstrumenController::class, 'exportAllPdf'])->name('hasil-instrumen.export-all');
 Route::get('/hasil-instrumen/export-excel', [HasilInstrumenController::class, 'exportExcel'])->name('hasil-instrumen.export-excel');
 Route::delete('/ptk-jawaban/delete/{id}', [HasilInstrumenController::class, 'destroy'])->name('ptk-jawaban.destroy');
+
+
+Route::get(
+    '/quiz/case-list/{encoded_kegiatan_id}/{nip}',
+    [SoalController::class, 'getCaseList']
+)->name('quiz.case.list');
+
+// Route untuk mendapatkan list indikator dengan status
+// Route untuk mendapatkan list indikator quiz 1
+Route::get('/quiz1/case-list/{encoded_kegiatan_id}/{nip}', [SoalController::class, 'getCaseListQuiz1'])
+    ->name('quiz1.case-list');

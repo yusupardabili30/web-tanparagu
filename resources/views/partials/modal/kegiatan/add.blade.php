@@ -98,14 +98,26 @@
                                 </div>
                             </div>
                         </div> --}}
-                    </div>
-                    <div class="modal-footer">
-                        <div class="hstack gap-2 justify-content-end">
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-success" id="add-btn">Tambah {{ $tittle }}</button>
+                        {{-- </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="url_register" class="form-label">URL Register</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="url_register" id="url_register" placeholder="Akan digenerate otomatis" readonly>
+                                <button type="button" class="btn btn-outline-secondary" id="copy-url-btn" title="Salin URL" disabled>
+                                    <i class="ri-file-copy-line"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </div>--}}
+                        <div class="modal-footer">
+                            <div class="hstack gap-2 justify-content-end">
+                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-success" id="add-btn">Tambah {{ $tittle }}</button>
+                            </div>
+                        </div>
+                    </div>
             </form>
         </div>
     </div>

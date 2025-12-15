@@ -20,7 +20,6 @@
     </button>
 </div>
 
-
 <!-- SLIDE PANEL -->
 <div id="floatingPanel" class="floating-panel">
 
@@ -110,11 +109,20 @@
                         <i class="ri-checkbox-blank-circle-line text-secondary fs-5" title="Belum melewati"></i>
                         @endif
                     </div>
+
+                    <!-- DETAIL INFO -->
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted">
+                            <i class="ri-list-check me-1"></i>Sub {{ $caseItem['sub_indikator_id'] }}
+                        </small>
+                        <small class="text-muted">
+                            <i class="ri-sort-number me-1"></i>Urut {{ $caseItem['no_urut'] }}
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
         @endforeach
-
 
         @if(count($caseList) === 0)
         <div class="text-center py-4">
@@ -123,7 +131,10 @@
         </div>
         @endif
     </div>
+
 </div>
+
+
 
 <!-- ============================================ -->
 <!-- CONTENT WRAPPER ALLOW SHIFT -->
@@ -165,7 +176,7 @@
                             <!-- STUDI KASUS DALAM BOX -->
                             <!-- ================================== -->
                             <div class="col-12 mb-3">
-                                <div class="big-box no-select prevent-copy">
+                                <div class="big-box">
                                     <h5 class="box-title studi-title">
                                         <i class="ri-article-line me-1" style="color:#1a4d8e;"></i>
                                         <span style="color:#1a4d8e; font-weight:700;">
@@ -190,7 +201,7 @@
                             <!-- SOAL + PILIHAN JAWABAN DALAM 1 BOX -->
                             <!-- ================================== -->
                             <div class="col-12">
-                                <div class="big-box no-select prevent-copy">
+                                <div class="big-box">
 
                                     <!-- Judul Soal -->
                                     <h5 class="box-title studi-title">
@@ -583,95 +594,6 @@
         .fs-5 {
             font-size: 1.25rem !important;
         }
-
-
-        /* CSS untuk mencegah seleksi teks TANPA mengganggu interaksi */
-        .no-select {
-            -webkit-user-select: none;
-            /* Safari */
-            -moz-user-select: none;
-            /* Firefox */
-            -ms-user-select: none;
-            /* IE10+/Edge */
-            user-select: none;
-            /* Standard */
-        }
-
-        /* Style hanya untuk teks yang dilindungi, bukan elemen interaktif */
-        .protected-text {
-            cursor: default;
-            position: relative;
-        }
-
-        /* JANGAN gunakan overlay untuk elemen interaktif */
-        .protected-text::after {
-            display: none;
-            /* Nonaktifkan overlay */
-        }
-
-        /* Style untuk konten yang dilindungi */
-        .case-content,
-        .soal-content,
-        .answer-text {
-            position: relative;
-        }
-
-        /* Pastikan elemen interaktif tetap bisa diklik */
-        .quiz-choice,
-        .btn-jawab,
-        .form-check-input,
-        .radio-inside,
-        button,
-        input[type="radio"],
-        input[type="submit"] {
-            cursor: pointer !important;
-            user-select: none !important;
-            /* Boleh user-select none tapi tetap bisa diklik */
-        }
-
-        /* Overlay hanya untuk teks, bukan untuk container penuh */
-        .text-protector {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-            pointer-events: none;
-            /* Tidak mengganggu klik elemen di bawahnya */
-        }
-
-        /* Container teks yang dilindungi */
-        .protected-container {
-            position: relative;
-        }
-
-        /* Pesan peringatan */
-        .copy-warning {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #dc3545;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            animation: slideIn 0.3s ease;
-            display: none;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
     </style>
 
 
@@ -767,8 +689,6 @@
             });
         });
     </script>
-
-
     <script>
         // Durasi timer (120 menit = 7200 detik)
         const TOTAL_TIME = 120 * 60;
@@ -806,443 +726,5 @@
         // Update setiap 1 detik
         setInterval(updateTimer, 1000);
         updateTimer();
-    </script>
-
-
-    <script>
-        // ============================================
-        // FUNGSI UTAMA: MENCEGAH COPY-PASTE TANPA MENGANGGU INTERAKSI
-        // ============================================
-
-        document.addEventListener('DOMContentLoaded', function() {
-
-            // 1. Tampilkan pesan peringatan
-            function showWarning(message, type = 'warning') {
-                // Hapus pesan lama
-                const oldWarning = document.querySelector('.copy-warning');
-                if (oldWarning) oldWarning.remove();
-
-                // Buat pesan baru
-                const warning = document.createElement('div');
-                warning.className = 'copy-warning';
-                warning.innerHTML = `
-            <i class="ri-error-warning-line me-2"></i>
-            <span>${message}</span>
-        `;
-                warning.style.backgroundColor = type === 'warning' ? '#dc3545' : '#1a4d8e';
-
-                document.body.appendChild(warning);
-
-                // Tampilkan
-                warning.style.display = 'block';
-
-                // Sembunyikan setelah 3 detik
-                setTimeout(() => {
-                    warning.style.opacity = '0';
-                    warning.style.transition = 'opacity 0.3s';
-                    setTimeout(() => {
-                        if (warning.parentNode) {
-                            warning.parentNode.removeChild(warning);
-                        }
-                    }, 300);
-                }, 3000);
-            }
-
-            // 2. Proteksi teks studi kasus
-            function protectCaseText() {
-                const caseBox = document.querySelector('.big-box:first-child');
-                if (!caseBox) return;
-
-                const caseText = caseBox.querySelector('.box-text');
-                if (!caseText) return;
-
-                // Tambahkan proteksi hanya pada teks
-                caseText.classList.add('protected-text', 'no-select');
-
-                // Tambahkan container untuk teks
-                const originalHtml = caseText.innerHTML;
-                caseText.innerHTML = `
-            <div class="protected-container">
-                <div class="text-protector"></div>
-                <div class="case-content">${originalHtml}</div>
-            </div>
-        `;
-
-                // Blokir copy pada teks ini
-                caseText.addEventListener('copy', function(e) {
-                    e.preventDefault();
-                    showWarning('Teks studi kasus tidak dapat disalin');
-                    return false;
-                });
-
-                caseText.addEventListener('cut', function(e) {
-                    e.preventDefault();
-                    showWarning('Teks studi kasus tidak dapat dipotong');
-                    return false;
-                });
-
-                caseText.addEventListener('contextmenu', function(e) {
-                    e.preventDefault();
-                    showWarning('Menu konteks tidak tersedia untuk teks ini');
-                    return false;
-                });
-
-                // Blokir seleksi teks
-                caseText.addEventListener('selectstart', function(e) {
-                    e.preventDefault();
-                    return false;
-                });
-            }
-
-            // 3. Proteksi teks soal
-            function protectQuestionText() {
-                const questionBox = document.querySelector('.big-box:nth-child(2)');
-                if (!questionBox) return;
-
-                const questionText = questionBox.querySelector('.soal-text');
-                if (!questionText) return;
-
-                // Tambahkan proteksi hanya pada teks
-                questionText.classList.add('protected-text', 'no-select');
-
-                // Tambahkan container untuk teks
-                const originalHtml = questionText.innerHTML;
-                questionText.innerHTML = `
-            <div class="protected-container">
-                <div class="text-protector"></div>
-                <div class="soal-content">${originalHtml}</div>
-            </div>
-        `;
-
-                // Blokir copy pada teks ini
-                questionText.addEventListener('copy', function(e) {
-                    e.preventDefault();
-                    showWarning('Teks soal tidak dapat disalin');
-                    return false;
-                });
-
-                questionText.addEventListener('cut', function(e) {
-                    e.preventDefault();
-                    showWarning('Teks soal tidak dapat dipotong');
-                    return false;
-                });
-
-                questionText.addEventListener('contextmenu', function(e) {
-                    e.preventDefault();
-                    showWarning('Menu konteks tidak tersedia untuk teks ini');
-                    return false;
-                });
-
-                // Blokir seleksi teks
-                questionText.addEventListener('selectstart', function(e) {
-                    e.preventDefault();
-                    return false;
-                });
-            }
-
-            // 4. Proteksi teks pilihan jawaban (TANPA mengganggu radio button)
-            function protectAnswerText() {
-                const answerChoices = document.querySelectorAll('.quiz-choice .choice-text');
-
-                answerChoices.forEach((choiceText, index) => {
-                    // Tambahkan proteksi hanya pada teks
-                    choiceText.classList.add('protected-text', 'no-select', 'answer-text');
-
-                    // Tambahkan container untuk teks
-                    const originalHtml = choiceText.innerHTML;
-                    choiceText.innerHTML = `
-                <div class="protected-container">
-                    <div class="text-protector"></div>
-                    <div class="answer-content">${originalHtml}</div>
-                </div>
-            `;
-
-                    // Blokir copy pada teks ini
-                    choiceText.addEventListener('copy', function(e) {
-                        e.preventDefault();
-                        showWarning('Teks jawaban tidak dapat disalin');
-                        return false;
-                    });
-
-                    choiceText.addEventListener('cut', function(e) {
-                        e.preventDefault();
-                        showWarning('Teks jawaban tidak dapat dipotong');
-                        return false;
-                    });
-
-                    choiceText.addEventListener('contextmenu', function(e) {
-                        e.preventDefault();
-                        showWarning('Menu konteks tidak tersedia untuk teks ini');
-                        return false;
-                    });
-
-                    // Blokir seleksi teks
-                    choiceText.addEventListener('selectstart', function(e) {
-                        e.preventDefault();
-                        return false;
-                    });
-
-                    // Pastikan radio button masih bisa diklik
-                    const radioButton = choiceText.closest('.quiz-choice').querySelector('input[type="radio"]');
-                    if (radioButton) {
-                        // Tambahkan event listener untuk memastikan radio bisa diklik
-                        choiceText.addEventListener('click', function(e) {
-                            // Jika yang diklik adalah teks, trigger klik pada radio button
-                            if (e.target.closest('.answer-content') || e.target.closest('.choice-text')) {
-                                radioButton.click();
-                                radioButton.focus();
-                            }
-                        });
-                    }
-                });
-            }
-
-            // 5. Fungsi untuk mengizinkan interaksi pada elemen penting
-            function allowInteractiveElements() {
-                // Pastikan semua elemen interaktif bisa diklik
-                const interactiveElements = [
-                    '.btn-jawab',
-                    '.form-check-input',
-                    '.radio-inside',
-                    'input[type="radio"]',
-                    'input[type="submit"]',
-                    'button'
-                ];
-
-                interactiveElements.forEach(selector => {
-                    document.querySelectorAll(selector).forEach(el => {
-                        // Pastikan pointer events diizinkan
-                        el.style.pointerEvents = 'auto';
-                        el.style.cursor = 'pointer';
-
-                        // Izinkan klik kanan pada elemen interaktif (kecuali untuk copy)
-                        el.addEventListener('contextmenu', function(e) {
-                            // Izinkan menu konteks default kecuali jika mencoba copy teks
-                            return true;
-                        });
-                    });
-                });
-            }
-
-            // 6. Blokir keyboard shortcuts hanya untuk elemen yang dilindungi
-            function setupKeyboardProtection() {
-                document.addEventListener('keydown', function(e) {
-                    const target = e.target;
-
-                    // Cek jika target berada dalam elemen yang dilindungi
-                    const isProtectedText = target.closest('.protected-text') ||
-                        target.closest('.case-content') ||
-                        target.closest('.soal-content') ||
-                        target.closest('.answer-text');
-
-                    // Hanya blokir jika berada dalam teks yang dilindungi
-                    if (isProtectedText) {
-                        // Ctrl+C atau Cmd+C
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-                            e.preventDefault();
-                            showWarning('Salin teks tidak diizinkan');
-                            return false;
-                        }
-
-                        // Ctrl+X atau Cmd+X
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'x') {
-                            e.preventDefault();
-                            showWarning('Potong teks tidak diizinkan');
-                            return false;
-                        }
-
-                        // Ctrl+A (Select All) dalam teks yang dilindungi
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-                            e.preventDefault();
-                            showWarning('Seleksi semua tidak diizinkan');
-                            return false;
-                        }
-                    }
-
-                    // Ctrl+V (paste) - izinkan di mana saja kecuali di teks yang dilindungi
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-                        const isProtectedTextForPaste = target.closest('.protected-text');
-                        if (isProtectedTextForPaste) {
-                            e.preventDefault();
-                            showWarning('Tempel teks tidak diizinkan di sini');
-                            return false;
-                        }
-                    }
-
-                    // F12 - blokir di mana saja
-                    if (e.key === 'F12') {
-                        e.preventDefault();
-                        showWarning('Developer tools tidak dapat diakses');
-                        return false;
-                    }
-
-                    // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
-                    if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) {
-                        e.preventDefault();
-                        showWarning('Developer tools tidak dapat diakses');
-                        return false;
-                    }
-                });
-            }
-
-            // 7. Blokir drag teks dari elemen yang dilindungi
-            function setupDragProtection() {
-                document.addEventListener('dragstart', function(e) {
-                    const target = e.target;
-                    const isProtectedText = target.closest('.protected-text') ||
-                        target.closest('.case-content') ||
-                        target.closest('.soal-content') ||
-                        target.closest('.answer-text');
-
-                    if (isProtectedText) {
-                        e.preventDefault();
-                        return false;
-                    }
-                });
-            }
-
-            // 8. Mencegah seleksi teks dengan mouse pada elemen yang dilindungi
-            function setupSelectionProtection() {
-                document.addEventListener('selectstart', function(e) {
-                    const target = e.target;
-                    const isProtectedText = target.closest('.protected-text') ||
-                        target.closest('.case-content') ||
-                        target.closest('.soal-content') ||
-                        target.closest('.answer-text');
-
-                    if (isProtectedText) {
-                        e.preventDefault();
-                        return false;
-                    }
-                });
-            }
-
-            // 9. Tambahkan CSS inline untuk mencegah seleksi
-            function addInlineProtectionStyles() {
-                const style = document.createElement('style');
-                style.textContent = `
-            /* Mencegah seleksi pada teks yang dilindungi */
-            .protected-text * {
-                -webkit-user-select: none !important;
-                -moz-user-select: none !important;
-                -ms-user-select: none !important;
-                user-select: none !important;
-            }
-            
-            /* Izinkan seleksi pada elemen interaktif jika diperlukan */
-            input, button, .quiz-choice {
-                user-select: none !important;
-            }
-            
-            /* Efek visual saat mencoba seleksi */
-            .protected-text::selection {
-                background: transparent !important;
-                color: inherit !important;
-            }
-            
-            .protected-text::-moz-selection {
-                background: transparent !important;
-                color: inherit !important;
-            }
-        `;
-                document.head.appendChild(style);
-            }
-
-            // 10. Inisialisasi semua proteksi
-            function initializeProtection() {
-                console.log('Mengaktifkan proteksi copy-paste...');
-
-                // Tambahkan style inline
-                addInlineProtectionStyles();
-
-                // Proteksi konten teks
-                protectCaseText();
-                protectQuestionText();
-                protectAnswerText();
-
-                // Izinkan elemen interaktif
-                allowInteractiveElements();
-
-                // Setup proteksi lainnya
-                setupKeyboardProtection();
-                setupDragProtection();
-                setupSelectionProtection();
-
-                console.log('Proteksi copy-paste aktif. Radio button dan tombol tetap bisa diklik.');
-            }
-
-            // 11. Jalankan inisialisasi dengan delay kecil
-            setTimeout(initializeProtection, 500);
-
-            // 12. Pastikan event submit form tetap bekerja
-            document.querySelector('form')?.addEventListener('submit', function(e) {
-                // Tidak ada blokir di sini, biarkan form submit normal
-                console.log('Form akan disubmit...');
-            });
-
-            // 13. Handle klik pada pilihan jawaban - versi lebih sederhana
-            document.querySelectorAll('.quiz-choice').forEach(choice => {
-                choice.addEventListener('click', function(e) {
-                    // Cari radio button di dalam choice ini
-                    const radio = this.querySelector('input[type="radio"]');
-                    if (radio && !radio.checked) {
-                        radio.checked = true;
-                        radio.dispatchEvent(new Event('change', {
-                            bubbles: true
-                        }));
-                    }
-                });
-
-                // Pastikan klik pada teks tidak menghalangi radio button
-                const choiceText = choice.querySelector('.choice-text');
-                if (choiceText) {
-                    choiceText.addEventListener('click', function(e) {
-                        e.stopPropagation(); // Jangan biarkan event bubble ke choice
-                    });
-                }
-            });
-        });
-
-        // 14. Backup protection: Cek jika user mencoba bypass
-        window.addEventListener('load', function() {
-            // Deteksi jika user mencoba inspect element
-            setInterval(function() {
-                // Cek jika elemen proteksi dihapus
-                const caseText = document.querySelector('.case-content');
-                if (caseText && window.getSelection().toString().includes(caseText.textContent)) {
-                    // Clear selection
-                    window.getSelection().removeAllRanges();
-
-                    // Tampilkan warning
-                    const warning = document.createElement('div');
-                    warning.style.position = 'fixed';
-                    warning.style.top = '10px';
-                    warning.style.right = '10px';
-                    warning.style.background = '#ff4444';
-                    warning.style.color = 'white';
-                    warning.style.padding = '10px';
-                    warning.style.borderRadius = '5px';
-                    warning.style.zIndex = '10000';
-                    warning.textContent = 'Teks tidak dapat disalin';
-                    document.body.appendChild(warning);
-
-                    setTimeout(() => warning.remove(), 2000);
-                }
-            }, 1000);
-        });
-
-        // 15. Pastikan radio button tetap berfungsi dengan baik
-        document.addEventListener('change', function(e) {
-            if (e.target.type === 'radio') {
-                console.log('Radio button dipilih:', e.target.value);
-
-                // Update bobot hidden input
-                const bobot = e.target.getAttribute('data-bobot');
-                const bobotInput = document.getElementById('bobot');
-                if (bobotInput && bobot) {
-                    bobotInput.value = bobot;
-                }
-            }
-        });
     </script>
     @endsection

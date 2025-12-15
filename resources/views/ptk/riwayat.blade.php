@@ -143,11 +143,6 @@
                         Kegiatan saat ini: <b>{{ $kegiatan->kegiatan_name }}</b>
                     </small>
                 </div>
-                <div class="ms-auto">
-                    <a class="btn btn-outline-danger btn-sm" href="{{ route('lockscreen.logout') }}">
-                        Logout
-                    </a>
-                </div>
             </div>
         </div>
 

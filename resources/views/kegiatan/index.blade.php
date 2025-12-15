@@ -51,6 +51,7 @@
                                     <th class="sort" data-sort="kegiatan">Tahap Soal</th>
                                     <th class="sort" data-sort="kegiatan">Token</th>
                                     <th class="sort" data-sort="kegiatan">url</th>
+                                    <th class="sort" data-sort="kegiatan">url Register</th>
                                     <th class="sort" data-sort="kegiatan">status</th>
                                     <th class="sort" data-sort="action">Action</th>
                                 </tr>
@@ -75,6 +76,11 @@
                                     <td class="client_name">
                                         <a href="{{ route('lockscreen', ['encode_kegiatan_id' => $encoded_kegiatan_id]) }}" target="_blank">
                                             {{ route('lockscreen', ['encode_kegiatan_id' => $encoded_kegiatan_id]) }}
+                                        </a>
+                                    </td>
+                                    <td class="client_name">
+                                        <a href="{{ route('register.index', ['encode_kegiatan_id' => $encoded_kegiatan_id]) }}" target="_blank">
+                                            {{ route('register.index', ['encode_kegiatan_id' => $encoded_kegiatan_id]) }}
                                         </a>
                                     </td>
                                     <td class="client_name">
@@ -234,6 +240,13 @@
             copyToClipboard(urlValue, this);
         }
     });
+    // Event listener untuk tombol copy URL
+    $(document).on('click', '#copy-url-btn', function() {
+        const urlValue = $('#url_register').val();
+        if (urlValue && urlValue !== 'Akan digenerate otomatis') {
+            copyToClipboard(urlValue, this);
+        }
+    });
 
     //start add btn
     $('.add-btn').on('click', function() {
@@ -290,12 +303,16 @@
             const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
             const baseUrl = window.location.origin;
             $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
+            ('#url_register').val(baseUrl + '/Register/' + encoded_kegiatan_id);
 
             // Aktifkan tombol copy jika ada data
             if (data.instrumen_token && data.instrumen_token !== '') {
                 $('#copy-token-btn').prop('disabled', false);
             }
             if ($('#url_display').val() && $('#url_display').val() !== '') {
+                $('#copy-url-btn').prop('disabled', false);
+            }
+            if ($('#url_register').val() && $('#url_register').val() !== '') {
                 $('#copy-url-btn').prop('disabled', false);
             }
 
@@ -333,12 +350,16 @@
             const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
             const baseUrl = window.location.origin;
             $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
+            $('#url_register').val(baseUrl + '/register/' + encoded_kegiatan_id);
 
             // Aktifkan tombol copy jika ada data
             if (data.instrumen_token && data.instrumen_token !== '') {
                 $('#copy-token-btn').prop('disabled', false);
             }
             if ($('#url_display').val() && $('#url_display').val() !== '') {
+                $('#copy-url-btn').prop('disabled', false);
+            }
+            if ($('#url_register').val() && $('#url_register').val() !== '') {
                 $('#copy-url-btn').prop('disabled', false);
             }
 
