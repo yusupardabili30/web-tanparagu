@@ -98,7 +98,7 @@
 </style>
 
 @section('sipproja-js')
-<script>
+<!-- <script>
     // Clear semua data timer dari localStorage
     localStorage.removeItem("quiz_start_time");
     localStorage.removeItem("quiz2_start_time");
@@ -116,5 +116,55 @@
     document.cookie = "quiz2_start_time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
     console.log("Timer telah direset untuk sesi berikutnya.");
+</script> -->
+
+<script>
+    // Reset semua timer saat halaman finish diakses
+    document.addEventListener('DOMContentLoaded', function() {
+        // Clear semua data timer dari localStorage
+        const timerKeys = [
+            "quiz_start_time",
+            "quiz1_start_time", // Timer untuk quiz1
+            "quiz2_start_time", // Timer untuk quiz2
+            "timestart_quiz2",
+            "timesoal_quiz2",
+            "quiz_timer_start", // Backup key jika ada
+            "quiz1_timer_start", // Backup untuk quiz1
+            "quiz2_timer_start" // Backup untuk quiz2
+        ];
+
+        timerKeys.forEach(key => {
+            localStorage.removeItem(key);
+        });
+
+        // Clear session timer jika ada
+        if (typeof sessionStorage !== 'undefined') {
+            timerKeys.forEach(key => {
+                sessionStorage.removeItem(key);
+            });
+        }
+
+        // Clear cookies timer jika ada
+        timerKeys.forEach(key => {
+            document.cookie = key + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        });
+
+        console.log("✅ Semua timer telah direset:");
+        console.log("- Timer Quiz 1 (Indikator) dihapus");
+        console.log("- Timer Quiz 2 (Studi Kasus) dihapus");
+        console.log("- Backup timer juga dihapus");
+
+        // Tampilkan pesan konfirmasi di console
+        console.log("Timer siap untuk sesi berikutnya. User dapat memulai quiz dari awal dengan timer 2 jam lagi.");
+    });
+
+    // Juga panggil saat halaman dimuat (backup)
+    window.onload = function() {
+        // Hapus kembali untuk memastikan
+        localStorage.removeItem("quiz1_start_time");
+        localStorage.removeItem("quiz2_start_time");
+
+        console.log("🔄 Timer di-reset ulang saat onload");
+    };
 </script>
 @endsection
