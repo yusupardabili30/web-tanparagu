@@ -21,30 +21,40 @@ class KegiatanController extends Controller
     public function store(Request $request)
     {
         date_default_timezone_set('Asia/Jakarta');
-        $token = Kegiatan::generateToken();
 
         try {
             $isUpdate = $request->has('kegiatan_id') && !empty($request->kegiatan_id);
+
+            // Generate token hanya untuk data baru
+            $token = $isUpdate ?
+                Kegiatan::where('kegiatan_id', $request->kegiatan_id)->first()->instrumen_token :
+                Kegiatan::generateToken();
 
             Kegiatan::updateOrCreate([
                 'kegiatan_id' => $request->kegiatan_id
             ], [
                 'kegiatan_name' => $request->kegiatan,
                 'entity' => $request->entity,
-                'tahap' => $request->ddl_tahap,
+                'tahap' => $request->ddl_tahap, // Pastikan ini sesuai dengan name di form
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'status' => $request->status_id,
                 'instrumen_token' => $token,
-                'created_at' => $isUpdate ? Kegiatan::where('kegiatan_id', $request->kegiatan_id)->first()->created_at : Carbon::now()->format('Y-m-d H:i:s'),
+                'created_at' => $isUpdate ?
+                    Kegiatan::where('kegiatan_id', $request->kegiatan_id)->first()->created_at :
+                    Carbon::now()->format('Y-m-d H:i:s'),
                 'modified_at' => Carbon::now()->format('Y-m-d H:i:s')
             ]);
 
             $message = $isUpdate ? 'Data berhasil diperbarui' : 'Data berhasil ditambahkan';
             return redirect()->route('kegiatan.index')->with('success', $message);
         } catch (\Throwable $e) {
-            $errorMessage = 'Terjadi kesalahan saat menyimpan data';
-            return redirect()->back()->with('error', $errorMessage);
+            // Tambahkan logging untuk debug
+            \Log::error('Error saving kegiatan: ' . $e->getMessage());
+            \Log::error('Request data: ', $request->all());
+
+            $errorMessage = 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage();
+            return redirect()->back()->with('error', $errorMessage)->withInput();
         }
     }
 

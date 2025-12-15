@@ -40,10 +40,11 @@ class Peserta extends Model
         'nama',
         'nik',
         'nip',
+        'kegiatan_id',
         'email',
         'no_hp',
         'npwp',
-        'nama_bank',
+        'ms_bank_id',
         'no_rekening',
         'atas_nama_rekening',
         'pangkat_jabatan_id',
@@ -244,7 +245,7 @@ class Peserta extends Model
             'email' => 'required|email|max:25',
             'no_hp' => 'required|string|max:20',
             'npwp' => 'required|string|max:30',
-            'nama_bank' => 'required|string|max:255',
+            'no_rekening' => 'required|string|max:45',
             'no_rekening' => 'required|string|max:45',
             'atas_nama_rekening' => 'required|string|max:255',
             'pangkat_jabatan_id' => 'required|integer',
@@ -292,11 +293,12 @@ class Peserta extends Model
             'email.unique' => 'Email sudah terdaftar.',
             'no_hp.required' => 'Nomor HP wajib diisi.',
             'npwp.required' => 'NPWP wajib diisi.',
-            'nama_bank.required' => 'Nama bank wajib diisi.',
+            'ms_bank_id.required' => 'Nama bank wajib diisi.',
             'no_rekening.required' => 'Nomor rekening wajib diisi.',
             'atas_nama_rekening.required' => 'Atas nama rekening wajib diisi.',
             'pangkat_jabatan_id.required' => 'Pangkat/jabatan wajib dipilih.',
             'agama.required' => 'Agama wajib diisi.',
+            'ms_bank_id.required' => 'Bank wajib diisi.',
             'jenis_kelamin.required' => 'Jenis kelamin wajib dipilih.',
             'tempat_lahir.required' => 'Tempat lahir wajib diisi.',
             'tgl_lahir.required' => 'Tanggal lahir wajib diisi.',
@@ -308,6 +310,13 @@ class Peserta extends Model
             'provinsi.required' => 'Provinsi wajib diisi.',
         ];
     }
+
+    // Relasi ke tabel ms_bank
+    public function bank()
+    {
+        return $this->belongsTo(Bank::class, 'ms_bank_id', 'ms_bank_id');
+    }
+
 
     public function scopeSearch($query, $search)
     {
