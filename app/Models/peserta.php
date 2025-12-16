@@ -44,6 +44,7 @@ class Peserta extends Model
         'email',
         'no_hp',
         'npwp',
+        'ttd_base64',
         'ms_bank_id',
         'no_rekening',
         'atas_nama_rekening',
