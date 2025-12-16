@@ -46,15 +46,6 @@
             color: #999;
         }
 
-        .info-box {
-            background: #eaf2ff;
-            border-left: 4px solid #4a90e2;
-            padding: 12px 15px;
-            border-radius: 5px;
-            margin-bottom: 25px;
-            font-size: 13px;
-        }
-
         .section {
             margin-bottom: 30px;
         }
@@ -67,22 +58,17 @@
             color: white;
             border-radius: 5px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         th,
         td {
-            border-bottom: 1px solid #e6e6e6;
+            border: 1px solid #e6e6e6;
             padding: 10px 12px;
             vertical-align: top;
         }
@@ -91,32 +77,83 @@
             width: 32%;
             background: #f7fbff;
             font-weight: 600;
-            color: #2c3e50;
         }
 
         tr:nth-child(even) td {
             background: #fafafa;
         }
 
+        /* ===================== */
+        /* BAGIAN TANDA TANGAN */
+        /* ===================== */
+        .signature-section {
+            margin-top: 30px;
+            text-align: right;
+        }
+
+        .signature-box {
+            min-height: 70px;
+            margin-bottom: 5px;
+        }
+
+        .signature-container {
+            text-align: right;
+        }
+
+        .signature-name {
+            font-weight: 600;
+            font-size: 14px;
+            border-top: 1px solid #000;
+            padding-top: 4px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .signature-title {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .no-signature {
+            color: #999;
+            font-style: italic;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            display: inline-block;
+        }
+
         .footer {
-            text-align: center;
-            font-size: 11px;
-            color: #777;
             margin-top: 40px;
-            border-top: 1px solid #ddd;
             padding-top: 12px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+        }
+
+        .watermark {
+            opacity: 0.1;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            color: #ccc;
+            z-index: -1;
         }
     </style>
 </head>
 
 <body>
+    <!-- Watermark -->
+    <div class="watermark">
+        BIODATA PESERTA
+    </div>
+
     <div class="container">
         <div class="header">
             <div class="title">BIODATA PESERTA</div>
             <div class="subtitle">{{ $data->kegiatan_name ?? 'Kegiatan' }}</div>
             <div class="print-date">Dicetak: {{ date('d-m-Y H:i:s') }}</div>
         </div>
-
 
         <div class="section">
             <div class="section-title">IDENTITAS PRIBADI</div>
@@ -252,14 +289,35 @@
             </table>
         </div>
 
+
+        <!-- TTD -->
+        <div class="signature-section">
+            @php
+            $signatureName = $data->nama ?? 'Peserta';
+            @endphp
+
+            <div>Peserta Kegiatan,</div>
+
+            <div class="signature-box">
+                @if($data->has_signature && !empty($data->ttd_base64))
+                <img src="{{ $data->ttd_base64 }}" style="max-width:200px; max-height:70px;">
+                @else
+                <div class="no-signature">Tanda tangan tidak tersedia</div>
+                @endif
+            </div>
+
+            <div class="signature-container">
+                <div class="signature-name">{{ $signatureName }}</div><br>
+                <div class="signature-title">NIP. {{ $data->nip ?? '-' }}</div>
+            </div>
+        </div>
+
+
         <div class="footer">
             Dokumen ini dicetak otomatis oleh sistem<br>
             © {{ date('Y') }} - Sistem TanpaRagu
-            <div style="margin-top:40px; text-align:right; font-size:13px; line-height:1.4;">
-                <div>Mengetahui,</div>
-                <div style="margin-top:60px; font-weight:600;">Apriana Anggraini, M.Pd.</div>
-            </div>
         </div>
+    </div>
 </body>
 
 </html>

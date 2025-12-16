@@ -103,6 +103,7 @@
 
                     <!-- Table -->
                     <div class="table-responsive">
+                        <!-- Di dalam tabel, tambahkan kolom TTD -->
                         <table class="table table-bordered table-hover">
                             <thead class="table-light">
                                 <tr>
@@ -112,6 +113,7 @@
                                     <th>Jabatan</th>
                                     <th>Unit Kerja</th>
                                     <th>Kegiatan</th>
+                                    <th width="100">TTD</th>
                                     <th width="120">Aksi</th>
                                 </tr>
                             </thead>
@@ -133,18 +135,54 @@
                                         @endif
                                     </td>
                                     <td>{{ $item->kegiatan_name ?? '-' }}</td>
+                                    <td class="text-center">
+                                        @php
+                                        // Cek apakah peserta memiliki TTD
+                                        $hasSignature = isset($item->ttd_base64) && !empty($item->ttd_base64);
+
+                                        // Jika tidak ada di peserta, cek di PTK
+                                        if (!$hasSignature && $item->nip) {
+                                        $ptkTtd = DB::table('ptk')->where('nip', $item->nip)->value('ttd_base64');
+                                        $hasSignature = !empty($ptkTtd);
+                                        }
+                                        @endphp
+
+                                        @if($hasSignature)
+                                        <span class="badge bg-success" data-bs-toggle="tooltip" title="Tanda tangan tersedia">
+                                            <i class="ri-check-line"></i> Ada
+                                        </span>
+                                        @else
+                                        <span class="badge bg-secondary" data-bs-toggle="tooltip" title="Tanda tangan belum tersedia">
+                                            <i class="ri-close-line"></i> Tidak
+                                        </span>
+                                        @endif
+                                    </td>
                                     <td>
                                         <div class="d-flex gap-1">
                                             <a href="{{ route('biodata.exportPdf', $item->peserta_id) }}"
-                                                class="btn btn-sm btn-danger" title="PDF" onclick="return confirmExportSingle(event)">
-                                                <i class="ri-file-pdf-line"></i>
+                                                class="btn btn-sm btn-danger"
+                                                title="Export PDF"
+                                                onclick="return confirmExportSingle(event)">
+                                                <i class="ri-file-pdf-line"></i> PDF
                                             </a>
+
+                                            @if($hasSignature)
+                                            <button type="button"
+                                                class="btn btn-sm btn-info view-signature-btn"
+                                                title="Lihat Tanda Tangan"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#viewSignatureModal"
+                                                data-nama="{{ $item->nama }}"
+                                                data-ttd-base64="{{ $item->ttd_base64 ?? $ptkTtd ?? '' }}">
+                                                <i class="ri-eye-line"></i>
+                                            </button>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-4">
+                                    <td colspan="8" class="text-center py-4">
                                         <div class="text-muted">
                                             <i class="ri-search-line fs-4"></i>
                                             <p class="mt-2">Tidak ada data ditemukan</p>
@@ -164,6 +202,52 @@
                     </div>
                     @endif
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal untuk Melihat Tanda Tangan -->
+<div class="modal fade" id="viewSignatureModal" tabindex="-1" aria-labelledby="viewSignatureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewSignatureModalLabel">
+                    <i class="ri-signature-line me-2"></i> Tanda Tangan Digital
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <h6 id="signatureOwnerName" class="mb-3">Nama Peserta</h6>
+                </div>
+
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div id="signatureImageContainer" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                            <div id="signaturePlaceholder" class="text-muted">
+                                <i class="ri-signature-line fs-1"></i>
+                                <p class="mt-2">Tanda tangan tidak tersedia</p>
+                            </div>
+                            <img id="signatureImage"
+                                src=""
+                                alt="Tanda Tangan"
+                                style="max-width: 100%; max-height: 150px; display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="ri-information-line me-2"></i>
+                    Tanda tangan digital ini disimpan dalam format base64 dan dapat digunakan untuk dokumen resmi.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="ri-close-line me-1"></i> Tutup
+                </button>
+                <button type="button" class="btn btn-primary" id="downloadSignatureBtn">
+                    <i class="ri-download-line me-1"></i> Download Gambar
+                </button>
             </div>
         </div>
     </div>
@@ -458,8 +542,118 @@
         });
     });
 </script>
+<script>
+    // Script untuk modal lihat tanda tangan
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Modal lihat tanda tangan
+        const viewSignatureModal = document.getElementById('viewSignatureModal');
+        if (viewSignatureModal) {
+            viewSignatureModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const nama = button.getAttribute('data-nama');
+                const ttdBase64 = button.getAttribute('data-ttd-base64');
+
+                // Update modal content
+                document.getElementById('signatureOwnerName').textContent = nama;
+
+                const signatureImage = document.getElementById('signatureImage');
+                const signaturePlaceholder = document.getElementById('signaturePlaceholder');
+
+                if (ttdBase64 && ttdBase64.trim() !== '') {
+                    // Show signature image
+                    signatureImage.src = ttdBase64;
+                    signatureImage.style.display = 'block';
+                    signaturePlaceholder.style.display = 'none';
+
+                    // Enable download button
+                    document.getElementById('downloadSignatureBtn').disabled = false;
+                } else {
+                    // Show placeholder
+                    signatureImage.style.display = 'none';
+                    signaturePlaceholder.style.display = 'block';
+
+                    // Disable download button
+                    document.getElementById('downloadSignatureBtn').disabled = true;
+                }
+            });
+
+            // Clear modal when hidden
+            viewSignatureModal.addEventListener('hidden.bs.modal', function() {
+                document.getElementById('signatureImage').src = '';
+                document.getElementById('signatureImage').style.display = 'none';
+                document.getElementById('signaturePlaceholder').style.display = 'block';
+            });
+        }
+
+        // Download signature button
+        document.getElementById('downloadSignatureBtn')?.addEventListener('click', function() {
+            const signatureImage = document.getElementById('signatureImage');
+            const nama = document.getElementById('signatureOwnerName').textContent;
+
+            if (signatureImage.src) {
+                // Create a temporary link
+                const link = document.createElement('a');
+                link.href = signatureImage.src;
+                link.download = 'ttd-' + nama.replace(/\s+/g, '-').toLowerCase() + '.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+    });
+</script>
 
 <style>
+    /* TTD Badge styling */
+    .badge.bg-success {
+        background-color: #198754 !important;
+        color: white !important;
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .badge.bg-secondary {
+        background-color: #6c757d !important;
+        color: white !important;
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    /* View signature button */
+    .btn-sm.btn-info {
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+        color: white;
+        transition: all 0.3s;
+    }
+
+    .btn-sm.btn-info:hover {
+        background-color: #0ba8ca;
+        border-color: #0a9dbe;
+        transform: translateY(-1px);
+    }
+
+    /* Signature modal */
+    #signatureImageContainer {
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px dashed #dee2e6;
+    }
+
+    #signaturePlaceholder i {
+        font-size: 3rem;
+        color: #adb5bd;
+    }
+
+
+
+
     /* Custom Toast Styling */
     .toast {
         margin-bottom: 10px;

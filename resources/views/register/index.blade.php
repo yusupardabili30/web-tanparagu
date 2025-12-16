@@ -1,7 +1,10 @@
 @extends('layouts.main-user')
 
 @section('mycontent')
-
+<!-- Tambahkan di head atau sebelum script section -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature-pad.css">
+<!-- GANTI library di head -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <style>
     /* ============================================
     WARNA BIRU BADUY FORM
@@ -677,6 +680,76 @@
 
                                 </div>
 
+                        </div>
+                        <!-- ===================== TANDA TANGAN DIGITAL ===================== -->
+                        <div class="big-box mt-3">
+                            <h5 class="fw-bold mb-2" style="color:#1a3f6b;">
+                                <i class="ri-edit-line me-1 text-primary"></i> Tanda Tangan Digital
+                            </h5>
+
+                            <div class="alert alert-info mb-3">
+                                <i class="ri-information-line me-1"></i> Silakan buat tanda tangan Anda di area di bawah ini
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <!-- Canvas untuk tanda tangan -->
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div id="signature-pad" class="signature-pad" style="border: 1px solid #ddd; border-radius: 4px;">
+                                                <canvas id="signature-canvas"
+                                                    style="width: 100%; height: 200px; touch-action: none;"></canvas>
+                                            </div>
+                                            <div class="mt-2 text-center">
+                                                <small class="text-muted">Gunakan mouse atau jari untuk membuat tanda tangan</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tombol aksi tanda tangan -->
+                                    <div class="d-flex gap-2 mt-3">
+                                        <button type="button" id="clear-signature" class="btn btn-outline-danger">
+                                            <i class="ri-eraser-line me-1"></i> Hapus
+                                        </button>
+                                        <button type="button" id="undo-signature" class="btn btn-outline-warning">
+                                            <i class="ri-arrow-go-back-line me-1"></i> Undo
+                                        </button>
+                                        <button type="button" id="save-signature" class="btn btn-outline-success">
+                                            <i class="ri-check-line me-1"></i> Simpan TTD
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <!-- Preview tanda tangan -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Preview Tanda Tangan</h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <div id="signature-preview" class="mb-3"
+                                                style="min-height: 150px; border: 1px dashed #ddd; display: flex; align-items: center; justify-content: center;">
+                                                <div class="text-muted">
+                                                    <i class="ri-signature-line fs-4"></i>
+                                                    <p class="mt-2 mb-0 small">Tanda tangan akan muncul di sini</p>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted d-block">
+                                                Status: <span id="signature-status" class="badge bg-secondary">Belum ada</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Input hidden untuk menyimpan base64 -->
+                            <input type="hidden" name="ttd_base64" id="ttd_base64" value="{{ old('ttd_base64') }}">
+
+                            @error('ttd_base64')
+                            <div class="alert alert-danger mt-2">
+                                <i class="ri-error-warning-line me-1"></i> {{ $message }}
+                            </div>
+                            @enderror
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-lg mt-3">
@@ -2157,6 +2230,274 @@
     }
 `;
         document.head.appendChild(style);
+    </script>
+    <script>
+        // ============================================
+        // SIGNATURE PAD FUNCTIONALITY
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            let signaturePad = null;
+            let isSignatureSaved = false;
+
+            // Initialize signature pad
+            function initSignaturePad() {
+                const canvas = document.getElementById('signature-canvas');
+                if (!canvas) return;
+
+                // Clear any existing instance
+                if (signaturePad) {
+                    signaturePad.off();
+                }
+
+                // Setup canvas
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+
+                // Initialize SignaturePad
+                signaturePad = new SignaturePad(canvas, {
+                    backgroundColor: 'rgb(255, 255, 255)',
+                    penColor: 'rgb(0, 0, 0)',
+                    minWidth: 1,
+                    maxWidth: 3,
+                    throttle: 16,
+                    velocityFilterWeight: 0.7
+                });
+
+                // Clear signature status
+                isSignatureSaved = false;
+                updateSignatureStatus();
+
+                // Add event listeners
+                signaturePad.addEventListener('beginStroke', () => {
+                    console.log('Stroke began');
+                });
+
+                signaturePad.addEventListener('endStroke', () => {
+                    console.log('Stroke ended');
+                });
+            }
+
+            // Update signature status display
+            function updateSignatureStatus() {
+                const statusElement = document.getElementById('signature-status');
+                const previewElement = document.getElementById('signature-preview');
+                const ttdBase64Input = document.getElementById('ttd_base64');
+
+                if (isSignatureSaved && ttdBase64Input.value) {
+                    // Show saved signature
+                    statusElement.textContent = 'Tersimpan';
+                    statusElement.className = 'badge bg-success';
+
+                    // Show preview
+                    previewElement.innerHTML = `<img src="${ttdBase64Input.value}" 
+                style="max-width: 100%; max-height: 140px;" 
+                alt="Tanda Tangan">`;
+                } else if (signaturePad && !signaturePad.isEmpty()) {
+                    // Show unsaved signature
+                    statusElement.textContent = 'Belum disimpan';
+                    statusElement.className = 'badge bg-warning';
+
+                    // Show temporary preview
+                    const dataUrl = signaturePad.toDataURL();
+                    previewElement.innerHTML = `<img src="${dataUrl}" 
+                style="max-width: 100%; max-height: 140px;" 
+                alt="Tanda Tangan Sementara">`;
+                } else {
+                    // Show no signature
+                    statusElement.textContent = 'Belum ada';
+                    statusElement.className = 'badge bg-secondary';
+                    previewElement.innerHTML = `
+                <div class="text-muted">
+                    <i class="ri-signature-line fs-4"></i>
+                    <p class="mt-2 mb-0 small">Tanda tangan akan muncul di sini</p>
+                </div>`;
+                }
+            }
+
+            // Clear signature
+            document.getElementById('clear-signature')?.addEventListener('click', function() {
+                if (signaturePad) {
+                    signaturePad.clear();
+                    document.getElementById('ttd_base64').value = '';
+                    isSignatureSaved = false;
+                    updateSignatureStatus();
+                }
+            });
+
+            // Undo last stroke
+            document.getElementById('undo-signature')?.addEventListener('click', function() {
+                if (signaturePad) {
+                    const data = signaturePad.toData();
+                    if (data) {
+                        data.pop(); // Remove the last stroke
+                        signaturePad.fromData(data);
+                        isSignatureSaved = false;
+                        updateSignatureStatus();
+                    }
+                }
+            });
+
+            // Save signature
+            document.getElementById('save-signature')?.addEventListener('click', function() {
+                if (!signaturePad || signaturePad.isEmpty()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Tanda Tangan Kosong',
+                        text: 'Silakan buat tanda tangan terlebih dahulu',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                // Convert to base64
+                const dataUrl = signaturePad.toDataURL();
+                document.getElementById('ttd_base64').value = dataUrl;
+                isSignatureSaved = true;
+
+                // Update status
+                updateSignatureStatus();
+
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tanda Tangan Tersimpan',
+                    text: 'Tanda tangan berhasil disimpan',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+
+            // Form validation for signature
+            document.getElementById('profilForm')?.addEventListener('submit', function(e) {
+                const ttdBase64 = document.getElementById('ttd_base64').value;
+
+                if (!ttdBase64 || ttdBase64.trim() === '') {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Tanda Tangan Diperlukan',
+                        html: `
+                    <p>Anda harus membuat dan menyimpan tanda tangan digital.</p>
+                    <p>Silakan:</p>
+                    <ol class="text-start">
+                        <li>Buat tanda tangan di area yang disediakan</li>
+                        <li>Klik tombol "Simpan TTD"</li>
+                        <li>Pastikan status berubah menjadi "Tersimpan"</li>
+                    </ol>
+                `,
+                        confirmButtonText: 'OK'
+                    });
+
+                    // Scroll to signature section
+                    document.querySelector('.big-box:last-child').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Handle window resize
+            let resizeTimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    if (signaturePad) {
+                        const canvas = document.getElementById('signature-canvas');
+                        canvas.width = canvas.offsetWidth;
+                        canvas.height = canvas.offsetHeight;
+                        signaturePad.clear(); // Clear on resize
+                    }
+                }, 250);
+            });
+
+            // Initialize on page load
+            setTimeout(() => {
+                initSignaturePad();
+
+                // Check if there's existing signature from autofill
+                const existingSignature = document.getElementById('ttd_base64').value;
+                if (existingSignature) {
+                    isSignatureSaved = true;
+                    updateSignatureStatus();
+                }
+            }, 500);
+
+            // Add signature pad to autofill handler
+            const originalBtnOkeAutofill = document.getElementById('btnOkeAutofill');
+            if (originalBtnOkeAutofill) {
+                originalBtnOkeAutofill.addEventListener('click', function() {
+                    // If autofill data includes signature
+                    if (afData && afData.ttd_base64) {
+                        setTimeout(() => {
+                            document.getElementById('ttd_base64').value = afData.ttd_base64;
+                            isSignatureSaved = true;
+                            updateSignatureStatus();
+
+                            // Also update preview
+                            const previewElement = document.getElementById('signature-preview');
+                            if (previewElement && afData.ttd_base64) {
+                                previewElement.innerHTML = `<img src="${afData.ttd_base64}" 
+                            style="max-width: 100%; max-height: 140px;" 
+                            alt="Tanda Tangan">`;
+                            }
+                        }, 100);
+                    }
+                });
+            }
+        });
+
+        // ============================================
+        // STYLING FOR SIGNATURE PAD
+        // ============================================
+        const signatureStyles = document.createElement('style');
+        signatureStyles.textContent = `
+    .signature-pad {
+        position: relative;
+        background-color: #fff;
+    }
+    
+    #signature-canvas {
+        cursor: crosshair;
+        touch-action: none;
+    }
+    
+    .signature-pad canvas {
+        border-radius: 4px;
+    }
+    
+    #signature-preview {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 10px;
+    }
+    
+    #signature-preview img {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        background: white;
+    }
+    
+    @media (max-width: 768px) {
+        #signature-canvas {
+            height: 180px !important;
+        }
+        
+        .d-flex.gap-2 {
+            flex-wrap: wrap;
+        }
+        
+        .d-flex.gap-2 button {
+            flex: 1;
+            min-width: 120px;
+        }
+    }
+`;
+        document.head.appendChild(signatureStyles);
     </script>
 
     @endsection

@@ -95,13 +95,21 @@ class BiodataController extends Controller
                 'ms_bank.kode_bank',
                 'kegiatan.kegiatan_name',
                 'kegiatan.start_date',
-                'kegiatan.end_date'
+                'kegiatan.end_date',
+                // Ambil TTD dari peserta jika ada, jika tidak dari ptk
+                DB::raw('COALESCE(peserta.ttd_base64, ptk.ttd_base64) as ttd_base64'),
+                'peserta.nama as peserta_nama' // Nama untuk bagian mengetahui
             )
             ->join('kegiatan', 'peserta.kegiatan_id', '=', 'kegiatan.kegiatan_id')
             ->leftJoin('pangkat_jabatan', 'peserta.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
             ->leftJoin('kota', 'peserta.kota_id', '=', 'kota.kota_id')
             ->leftJoin('sekolah', 'peserta.sekolah_id', '=', 'sekolah.sekolah_id')
             ->leftJoin('ms_bank', 'peserta.ms_bank_id', '=', 'ms_bank.ms_bank_id')
+            // Join dengan ptk untuk ambil TTD jika tidak ada di peserta
+            ->leftJoin('ptk', function ($join) {
+                $join->on('peserta.nip', '=', 'ptk.nip')
+                    ->orWhere('peserta.nik', '=', 'ptk.nik');
+            })
             ->where('peserta.peserta_id', $id)
             ->first();
 
@@ -116,6 +124,9 @@ class BiodataController extends Controller
         $data->start_date_formatted = $data->start_date ? date('d-m-Y', strtotime($data->start_date)) : '-';
         $data->end_date_formatted = $data->end_date ? date('d-m-Y', strtotime($data->end_date)) : '-';
 
+        // Cek jika ada TTD
+        $data->has_signature = !empty($data->ttd_base64);
+
         $pdf = Pdf::loadView('biodata.pdf-single', compact('data'))
             ->setPaper('a4', 'portrait')
             ->setOptions([
@@ -127,7 +138,6 @@ class BiodataController extends Controller
         $filename = 'biodata-' . $data->nip . '-' . date('YmdHis') . '.pdf';
         return $pdf->download($filename);
     }
-
     /**
      * Export PDF semua data DENGAN FILTER
      */
