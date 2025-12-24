@@ -13,7 +13,9 @@ class BiodataController extends Controller
      */
     public function index(Request $request)
     {
-        $tittle = 'Biodata PTK';
+
+
+        // $tittle = 'Biodata PTK';
 
         // Query dengan JOIN
         $query = DB::table('peserta')
@@ -25,6 +27,7 @@ class BiodataController extends Controller
                 'peserta.email',
                 'peserta.no_hp',
                 'peserta.npwp',
+                'peserta.ttd_base64',
                 'peserta.no_rekening',
                 'peserta.atas_nama_rekening',
                 'peserta.tempat_lahir',
@@ -67,12 +70,20 @@ class BiodataController extends Controller
             $query->where('peserta.kegiatan_id', $request->kegiatan_id);
         }
 
-        $data = $query->orderBy('peserta.nama', 'asc')->paginate(10);
+        $peserta = $query->orderBy('peserta.nama', 'asc')->paginate(10);
 
         // Data dropdown
         $kegiatans = DB::table('kegiatan')->get();
 
-        return view('biodata.index', compact('tittle', 'data', 'kegiatans'));
+        // return $data;
+        return view('biodata.index', [
+            'tittle' => 'peserta',
+            'data' => [
+                'peserta' => $peserta,
+                'kegiatans' => $kegiatans
+
+            ]
+        ]);
     }
 
 
@@ -97,7 +108,7 @@ class BiodataController extends Controller
                 'kegiatan.start_date',
                 'kegiatan.end_date',
                 // Ambil TTD dari peserta jika ada, jika tidak dari ptk
-                DB::raw('COALESCE(peserta.ttd_base64, ptk.ttd_base64) as ttd_base64'),
+                DB::raw('COALESCE(peserta.ttd_base64) as ttd_base64'),
                 'peserta.nama as peserta_nama' // Nama untuk bagian mengetahui
             )
             ->join('kegiatan', 'peserta.kegiatan_id', '=', 'kegiatan.kegiatan_id')
