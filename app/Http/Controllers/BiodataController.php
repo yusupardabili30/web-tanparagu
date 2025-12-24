@@ -155,7 +155,7 @@ class BiodataController extends Controller
     public function exportAllPdf(Request $request)
     {
         try {
-            \Log::info('Export All PDF dipanggil dengan parameter:', $request->all());
+            \Log::info('Export All PDF (Single Page Format) dipanggil dengan parameter:', $request->all());
 
             // Query dengan filter yang sama seperti index
             $query = DB::table('peserta')
@@ -167,6 +167,7 @@ class BiodataController extends Controller
                     'peserta.email',
                     'peserta.no_hp',
                     'peserta.npwp',
+                    'peserta.ttd_base64', // Pastikan ini ada
                     'peserta.no_rekening',
                     'peserta.atas_nama_rekening',
                     'peserta.tempat_lahir',
@@ -187,7 +188,9 @@ class BiodataController extends Controller
                     'sekolah.nama_sekolah',
                     'sekolah.npsn',
                     'ms_bank.nama_bank',
-                    'kegiatan.kegiatan_name'
+                    'kegiatan.kegiatan_name',
+                    'kegiatan.start_date',  // TAMBAHKAN INI
+                    'kegiatan.end_date'     // TAMBAHKAN INI
                 )
                 ->join('kegiatan', 'peserta.kegiatan_id', '=', 'kegiatan.kegiatan_id')
                 ->leftJoin('pangkat_jabatan', 'peserta.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
@@ -231,20 +234,22 @@ class BiodataController extends Controller
             $totalData = $data->count();
             $exportDate = date('d-m-Y H:i:s');
 
+            // Load view dengan format per halaman
             $pdf = Pdf::loadView('biodata.pdf-all', [
                 'data' => $data,
                 'filterInfo' => $filterInfo,
                 'totalData' => $totalData,
                 'exportDate' => $exportDate
-            ])->setPaper('a4', 'landscape')
+            ])->setPaper('a4', 'portrait') // Ubah ke portrait
                 ->setOptions([
                     'defaultFont' => 'sans-serif',
                     'isHtml5ParserEnabled' => true,
-                    'isRemoteEnabled' => true
+                    'isRemoteEnabled' => true,
+                    'isPhpEnabled' => true
                 ]);
 
             // Set nama file
-            $filename = 'biodata-ptk-' . date('Ymd-His');
+            $filename = 'biodata-perhalaman-' . date('Ymd-His');
             if ($request->filled('search')) {
                 $filename .= '-search-' . substr(str_replace(' ', '_', $request->search), 0, 20);
             }
