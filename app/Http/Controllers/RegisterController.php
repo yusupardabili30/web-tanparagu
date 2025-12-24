@@ -184,7 +184,7 @@ class RegisterController extends Controller
                     'pendidikan' => $request->pendidikan,
                     'no_hp' => $request->no_hp,
                     'npwp' => $request->npwp,
-                    'ttd_base64' => $request->ttd_base64,
+
                     'email' => $email,
                     'instansi' => $ptk_instansi,
                     'alamat_kantor' => $request->alamat_kantor,
@@ -392,7 +392,7 @@ class RegisterController extends Controller
             ->orWhere('npsn', 'like', '%' . $search . '%')
             ->orWhere('alamat', 'like', '%' . $search . '%')
             ->orderBy('nama_sekolah')
-            ->paginate(10);
+            ->paginate(50);
 
         $formattedResults = $sekolahs->map(function ($sekolah) {
             return [

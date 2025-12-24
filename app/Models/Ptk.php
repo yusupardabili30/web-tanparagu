@@ -23,7 +23,6 @@ class Ptk extends Model
         'tgl_lahir',
         'pangkat_jabatan_id',
         'agama',
-        'ttd_base64',
         'pendidikan',
         'no_hp',
         'npwp',
