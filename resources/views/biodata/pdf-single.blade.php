@@ -71,6 +71,7 @@
             border-bottom: 4px solid #1a3f6b;
             padding-bottom: 10px;
             margin-bottom: 12px;
+            width: 96% !important;
         }
 
         /* header table 3 kolom: logo - text - spacer (biar center) */
@@ -137,7 +138,7 @@
             letter-spacing: 0.3px;
 
             display: block;
-            width: 100% !important;
+            width: 94% !important;
             box-sizing: border-box;
         }
 
@@ -145,7 +146,7 @@
         TABLE (FULL LEBAR + RAPI)
         ================================ */
         table {
-            width: 100% !important;
+            width: 96% !important;
             border-collapse: collapse;
             table-layout: fixed;
             font-size: 11px;
