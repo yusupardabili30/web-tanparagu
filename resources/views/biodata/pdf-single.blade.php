@@ -21,32 +21,24 @@
             padding: 0;
         }
 
+        /* ================================
+        PAGE PDF (A4 1 LEMBAR)
+        ================================ */
+        @page {
+            size: A4;
+            margin: 8mm 10mm 8mm 10mm;
+            /* margin halaman */
+        }
+
+        html,
         body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff;
-            color: #111827;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
         }
 
-        /* ================================
-        WATERMARK
-        ================================ */
-        .watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 54px;
-            font-weight: 800;
-            color: #1a3f6b;
-            opacity: 0.05;
-            z-index: -1;
-            letter-spacing: 4px;
-            white-space: nowrap;
-        }
-
-        /* ================================
-        CONTAINER (FULL LEBAR)
-        ================================ */
         .container {
             width: 100% !important;
             max-width: none !important;
@@ -69,50 +61,11 @@
             width: 100%;
         }
 
-
-        /* ================================
-        HEADER
-        ================================ */
         .header {
-            border-bottom: 4px solid #1a3f6b;
-            padding-bottom: 10px;
-            margin-bottom: 12px;
-            width: 96% !important;
-        }
-
-        /* header table 3 kolom: logo - text - spacer (biar center) */
-        .header-table {
-            width: 100% !important;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-
-        .header-table td {
-            border: 0;
-            vertical-align: middle;
-            padding: 0;
-        }
-
-        .header-col-logo,
-        .header-col-spacer {
-            width: 150px;
-        }
-
-        .header-col-logo {
-            text-align: left;
-        }
-
-        .header-col-spacer {
-            text-align: right;
-        }
-
-        .header-col-center {
             text-align: center;
-        }
-
-        .header-col-logo img {
-            width: 130px;
-            height: auto;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #4a90e2;
+            margin-bottom: 25px;
         }
 
         .title {
@@ -136,11 +89,8 @@
             margin-top: 2px;
         }
 
-        /* ================================
-        SECTION
-        ================================ */
         .section {
-            margin-bottom: 10px;
+            margin-bottom: 30px;
         }
 
         .section-title {
@@ -170,8 +120,8 @@
 
         th,
         td {
-            border: 1px solid #cbd5e1;
-            padding: 6px 8px;
+            border: 1px solid #e6e6e6;
+            padding: 10px 12px;
             vertical-align: top;
             line-height: 1.25;
             word-wrap: break-word;
@@ -179,35 +129,20 @@
         }
 
         th {
-            width: 30%;
-            background: #f1f5f9;
-            font-weight: 800;
-            color: #1a3f6b;
-            text-align: left;
-        }
-
-        td {
-            background: #ffffff;
-            color: #111827;
+            width: 32%;
+            background: #f7fbff;
+            font-weight: 600;
         }
 
         tr:nth-child(even) td {
-            background: #fbfdff;
-        }
-
-        small {
-            font-size: 10px;
-            color: #334155;
+            background: #fafafa;
         }
 
         /* ================================
         SIGNATURE & FOOTER (FIXED BAWAH)
         ================================ */
         .signature-section {
-            position: fixed;
-            right: 14mm;
-            /* selaras dengan konten (10mm + 4mm) */
-            bottom: 20mm;
+            margin-top: 30px;
             text-align: right;
             width: 60%;
         }
@@ -227,8 +162,8 @@
         }
 
         .signature-title {
-            font-size: 10px;
-            color: #475569;
+            font-size: 12px;
+            color: #666;
         }
 
         .no-signature {
@@ -243,16 +178,12 @@
 
         .footer {
             position: fixed;
-            left: 14mm;
-            /* selaras dengan konten (10mm + 4mm) */
-            right: 14mm;
-            /* selaras dengan konten (10mm + 4mm) */
-            bottom: 8mm;
-            border-top: 1px solid #cbd5e1;
-            padding-top: 6px;
-            font-size: 10px;
-            color: #475569;
-            text-align: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            color: #ccc;
+            z-index: -1;
         }
     </style>
 </head>
@@ -282,7 +213,6 @@
                 </table>
             </div>
 
-            <!-- IDENTITAS -->
             <div class="section">
                 <div class="section-title">IDENTITAS PRIBADI</div>
                 <table>
@@ -303,8 +233,8 @@
                         <td>{{ $data->jenis_kelamin_formatted ?? ($data->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') }}</td>
                     </tr>
                     <tr>
-                        <th>Tempat / Tgl Lahir</th>
-                        <td>{{ $data->tempat_lahir ?? '-' }}, {{ isset($data->tgl_lahir) ? date('d-m-Y', strtotime($data->tgl_lahir)) : '-' }}</td>
+                        <th>Tempat/Tgl Lahir</th>
+                        <td>{{ $data->tempat_lahir ?? '-' }}, {{ $data->tgl_lahir_formatted ?? (isset($data->tgl_lahir) ? date('d-m-Y', strtotime($data->tgl_lahir)) : '-') }}</td>
                     </tr>
                     <tr>
                         <th>Agama</th>
@@ -317,7 +247,6 @@
                 </table>
             </div>
 
-            <!-- KONTAK -->
             <div class="section">
                 <div class="section-title">INFORMASI KONTAK</div>
                 <table>
@@ -336,7 +265,6 @@
                 </table>
             </div>
 
-            <!-- JABATAN -->
             <div class="section">
                 <div class="section-title">JABATAN DAN UNIT KERJA</div>
                 <table>
@@ -344,13 +272,14 @@
                         <th>Jenjang Jabatan</th>
                         <td>{{ $data->jenjang_jabatan ?? '-' }}</td>
                     </tr>
-
                     @if($data->nama_sekolah)
                     <tr>
                         <th>Sekolah</th>
                         <td>
-                            {{ $data->nama_sekolah }}
-                            @if($data->npsn)<br><small>NPSN: {{ $data->npsn }}</small>@endif
+                            {{ $data->nama_sekolah ?? '-' }}<br>
+                            @if($data->npsn)
+                            <span>NPSN: {{ $data->npsn }}</span>
+                            @endif
                         </td>
                     </tr>
                     @else
@@ -359,7 +288,6 @@
                         <td>{{ $data->instansi ?? '-' }}</td>
                     </tr>
                     @endif
-
                     <tr>
                         <th>Alamat Kantor</th>
                         <td>{{ $data->alamat_kantor ?? '-' }}</td>
@@ -375,7 +303,6 @@
                 </table>
             </div>
 
-            <!-- BANK -->
             <div class="section">
                 <div class="section-title">INFORMASI BANK</div>
                 <table>
@@ -400,7 +327,6 @@
                 </table>
             </div>
 
-            <!-- KEGIATAN -->
             <div class="section">
                 <div class="section-title">KEGIATAN</div>
                 <table>
@@ -411,12 +337,12 @@
                     @if($data->start_date && $data->end_date)
                     <tr>
                         <th>Periode</th>
-                        <td>{{ date('d-m-Y', strtotime($data->start_date)) }} s/d {{ date('d-m-Y', strtotime($data->end_date)) }}</td>
+                        <td>{{ $data->start_date_formatted ?? date('d-m-Y', strtotime($data->start_date)) }} s/d {{ $data->end_date_formatted ?? date('d-m-Y', strtotime($data->end_date)) }}</td>
                     </tr>
                     @endif
                     <tr>
                         <th>Terakhir Update</th>
-                        <td>{{ isset($data->last_update) ? date('d-m-Y H:i:s', strtotime($data->last_update)) : '-' }}</td>
+                        <td>{{ $data->last_update_formatted ?? (isset($data->last_update) ? date('d-m-Y H:i:s', strtotime($data->last_update)) : '-') }}</td>
                     </tr>
                 </table>
             </div>
