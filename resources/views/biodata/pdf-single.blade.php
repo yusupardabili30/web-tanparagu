@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <title>Biodata {{ $data->nama ?? 'Peserta' }}</title>
@@ -10,10 +11,15 @@
         ================================ */
         @page {
             size: A4;
-            margin: 8mm 10mm 8mm 10mm; /* margin halaman */
+            margin: 8mm 10mm 8mm 10mm;
+            /* margin halaman */
         }
 
-        html, body { margin: 0; padding: 0; }
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -62,7 +68,7 @@
             box-sizing: border-box;
             width: 100%;
         }
-        
+
 
         /* ================================
         HEADER
@@ -92,9 +98,17 @@
             width: 150px;
         }
 
-        .header-col-logo { text-align: left; }
-        .header-col-spacer { text-align: right; }
-        .header-col-center { text-align: center; }
+        .header-col-logo {
+            text-align: left;
+        }
+
+        .header-col-spacer {
+            text-align: right;
+        }
+
+        .header-col-center {
+            text-align: center;
+        }
 
         .header-col-logo img {
             width: 130px;
@@ -125,7 +139,9 @@
         /* ================================
         SECTION
         ================================ */
-        .section { margin-bottom: 10px; }
+        .section {
+            margin-bottom: 10px;
+        }
 
         .section-title {
             font-size: 12px;
@@ -152,7 +168,8 @@
             font-size: 11px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #cbd5e1;
             padding: 6px 8px;
             vertical-align: top;
@@ -169,18 +186,27 @@
             text-align: left;
         }
 
-        td { background: #ffffff; color: #111827; }
+        td {
+            background: #ffffff;
+            color: #111827;
+        }
 
-        tr:nth-child(even) td { background: #fbfdff; }
+        tr:nth-child(even) td {
+            background: #fbfdff;
+        }
 
-        small { font-size: 10px; color: #334155; }
+        small {
+            font-size: 10px;
+            color: #334155;
+        }
 
         /* ================================
         SIGNATURE & FOOTER (FIXED BAWAH)
         ================================ */
         .signature-section {
             position: fixed;
-            right: 14mm; /* selaras dengan konten (10mm + 4mm) */
+            right: 14mm;
+            /* selaras dengan konten (10mm + 4mm) */
             bottom: 20mm;
             text-align: right;
             width: 60%;
@@ -200,7 +226,10 @@
             color: #1a3f6b;
         }
 
-        .signature-title { font-size: 10px; color: #475569; }
+        .signature-title {
+            font-size: 10px;
+            color: #475569;
+        }
 
         .no-signature {
             color: #64748b;
@@ -214,8 +243,10 @@
 
         .footer {
             position: fixed;
-            left: 14mm;   /* selaras dengan konten (10mm + 4mm) */
-            right: 14mm;  /* selaras dengan konten (10mm + 4mm) */
+            left: 14mm;
+            /* selaras dengan konten (10mm + 4mm) */
+            right: 14mm;
+            /* selaras dengan konten (10mm + 4mm) */
             bottom: 8mm;
             border-top: 1px solid #cbd5e1;
             padding-top: 6px;
@@ -255,13 +286,34 @@
             <div class="section">
                 <div class="section-title">IDENTITAS PRIBADI</div>
                 <table>
-                    <tr><th>Nama Lengkap</th><td>{{ $data->nama ?? '-' }}</td></tr>
-                    <tr><th>NIP</th><td>{{ $data->nip ?? '-' }}</td></tr>
-                    <tr><th>NIK</th><td>{{ $data->nik ?? '-' }}</td></tr>
-                    <tr><th>Jenis Kelamin</th><td>{{ $data->jenis_kelamin_formatted ?? ($data->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') }}</td></tr>
-                    <tr><th>Tempat / Tgl Lahir</th><td>{{ $data->tempat_lahir ?? '-' }}, {{ isset($data->tgl_lahir) ? date('d-m-Y', strtotime($data->tgl_lahir)) : '-' }}</td></tr>
-                    <tr><th>Agama</th><td>{{ $data->agama ?? '-' }}</td></tr>
-                    <tr><th>Pendidikan</th><td>{{ $data->pendidikan ?? '-' }}</td></tr>
+                    <tr>
+                        <th>Nama Lengkap</th>
+                        <td>{{ $data->nama ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>NIP</th>
+                        <td>{{ $data->nip ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>NIK</th>
+                        <td>{{ $data->nik ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Jenis Kelamin</th>
+                        <td>{{ $data->jenis_kelamin_formatted ?? ($data->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tempat / Tgl Lahir</th>
+                        <td>{{ $data->tempat_lahir ?? '-' }}, {{ isset($data->tgl_lahir) ? date('d-m-Y', strtotime($data->tgl_lahir)) : '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Agama</th>
+                        <td>{{ $data->agama ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Pendidikan</th>
+                        <td>{{ $data->pendidikan ?? '-' }}</td>
+                    </tr>
                 </table>
             </div>
 
@@ -269,9 +321,18 @@
             <div class="section">
                 <div class="section-title">INFORMASI KONTAK</div>
                 <table>
-                    <tr><th>Email</th><td>{{ $data->email ?? '-' }}</td></tr>
-                    <tr><th>No. HP</th><td>{{ $data->no_hp ?? '-' }}</td></tr>
-                    <tr><th>NPWP</th><td>{{ $data->npwp ?? '-' }}</td></tr>
+                    <tr>
+                        <th>Email</th>
+                        <td>{{ $data->email ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>No. HP</th>
+                        <td>{{ $data->no_hp ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>NPWP</th>
+                        <td>{{ $data->npwp ?? '-' }}</td>
+                    </tr>
                 </table>
             </div>
 
@@ -279,7 +340,10 @@
             <div class="section">
                 <div class="section-title">JABATAN DAN UNIT KERJA</div>
                 <table>
-                    <tr><th>Jenjang Jabatan</th><td>{{ $data->jenjang_jabatan ?? '-' }}</td></tr>
+                    <tr>
+                        <th>Jenjang Jabatan</th>
+                        <td>{{ $data->jenjang_jabatan ?? '-' }}</td>
+                    </tr>
 
                     @if($data->nama_sekolah)
                     <tr>
@@ -290,12 +354,24 @@
                         </td>
                     </tr>
                     @else
-                    <tr><th>Instansi</th><td>{{ $data->instansi ?? '-' }}</td></tr>
+                    <tr>
+                        <th>Instansi</th>
+                        <td>{{ $data->instansi ?? '-' }}</td>
+                    </tr>
                     @endif
 
-                    <tr><th>Alamat Kantor</th><td>{{ $data->alamat_kantor ?? '-' }}</td></tr>
-                    <tr><th>Kota</th><td>{{ $data->nama_kota ?? '-' }}</td></tr>
-                    <tr><th>Provinsi</th><td>{{ $data->provinsi ?? '-' }}</td></tr>
+                    <tr>
+                        <th>Alamat Kantor</th>
+                        <td>{{ $data->alamat_kantor ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Kota</th>
+                        <td>{{ $data->nama_kota ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Provinsi</th>
+                        <td>{{ $data->provinsi ?? '-' }}</td>
+                    </tr>
                 </table>
             </div>
 
@@ -303,12 +379,24 @@
             <div class="section">
                 <div class="section-title">INFORMASI BANK</div>
                 <table>
-                    <tr><th>Nama Bank</th><td>{{ $data->nama_bank ?? '-' }}</td></tr>
+                    <tr>
+                        <th>Nama Bank</th>
+                        <td>{{ $data->nama_bank ?? '-' }}</td>
+                    </tr>
                     @if($data->kode_bank)
-                    <tr><th>Kode Bank</th><td>{{ $data->kode_bank }}</td></tr>
+                    <tr>
+                        <th>Kode Bank</th>
+                        <td>{{ $data->kode_bank }}</td>
+                    </tr>
                     @endif
-                    <tr><th>No. Rekening</th><td>{{ $data->no_rekening ?? '-' }}</td></tr>
-                    <tr><th>Atas Nama</th><td>{{ $data->atas_nama_rekening ?? '-' }}</td></tr>
+                    <tr>
+                        <th>No. Rekening</th>
+                        <td>{{ $data->no_rekening ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Atas Nama</th>
+                        <td>{{ $data->atas_nama_rekening ?? '-' }}</td>
+                    </tr>
                 </table>
             </div>
 
@@ -316,11 +404,20 @@
             <div class="section">
                 <div class="section-title">KEGIATAN</div>
                 <table>
-                    <tr><th>Nama Kegiatan</th><td>{{ $data->kegiatan_name ?? '-' }}</td></tr>
+                    <tr>
+                        <th>Nama Kegiatan</th>
+                        <td>{{ $data->kegiatan_name ?? '-' }}</td>
+                    </tr>
                     @if($data->start_date && $data->end_date)
-                    <tr><th>Periode</th><td>{{ date('d-m-Y', strtotime($data->start_date)) }} s/d {{ date('d-m-Y', strtotime($data->end_date)) }}</td></tr>
+                    <tr>
+                        <th>Periode</th>
+                        <td>{{ date('d-m-Y', strtotime($data->start_date)) }} s/d {{ date('d-m-Y', strtotime($data->end_date)) }}</td>
+                    </tr>
                     @endif
-                    <tr><th>Terakhir Update</th><td>{{ isset($data->last_update) ? date('d-m-Y H:i:s', strtotime($data->last_update)) : '-' }}</td></tr>
+                    <tr>
+                        <th>Terakhir Update</th>
+                        <td>{{ isset($data->last_update) ? date('d-m-Y H:i:s', strtotime($data->last_update)) : '-' }}</td>
+                    </tr>
                 </table>
             </div>
 
@@ -350,4 +447,5 @@
 
     </div><!-- /.container -->
 </body>
+
 </html>

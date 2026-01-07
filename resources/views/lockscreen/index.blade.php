@@ -211,8 +211,8 @@
 
                     <h1 class="system-name">
                         <img src="{{ asset('build/images/logobgtkPutih.png') }}"
-                             class="system-logo"
-                             style="width: 250px; height: auto; margin-bottom: 10px;">
+                            class="system-logo"
+                            style="width: 250px; height: auto; margin-bottom: 10px;">
                     </h1>
 
                     <div id="infoCarousel" class="carousel slide" data-bs-ride="carousel" style="margin-bottom: 77px;">
@@ -300,13 +300,13 @@
                             <i></i> Nomor Induk Pegawai (NIP)
                         </label>
                         <input type="text" name="nip" id="nip" class="form-control"
-                               value="{{ old('nip', session('preserve_nip') ?? '') }}"
-                               placeholder="Masukkan 18 digit NIP Anda"
-                               required
-                               autofocus
-                               maxlength="18"
-                               pattern="\d{18}"
-                               title="Masukkan 18 digit NIP">
+                            value="{{ old('nip', session('preserve_nip') ?? '') }}"
+                            placeholder="Masukkan 18 digit NIP Anda"
+                            required
+                            autofocus
+                            maxlength="18"
+                            pattern="\d{18}"
+                            title="Masukkan 18 digit NIP">
                         <small class="form-text text-muted mt-1">Contoh: 197010021990092010</small>
                     </div>
 
@@ -317,10 +317,10 @@
                         </label>
                         <div class="input-group">
                             <input type="password" name="token" id="tokenInput"
-                                   class="form-control"
-                                   value="{{ old('token', '') }}"
-                                   placeholder="Masukkan token yang diberikan"
-                                   required>
+                                class="form-control"
+                                value="{{ old('token', '') }}"
+                                placeholder="Masukkan token yang diberikan"
+                                required>
                             <span class="input-group-text password-toggle" onclick="togglePassword()">
                                 <i class="ri-eye-fill" id="passwordIcon"></i>
                             </span>
@@ -349,7 +349,7 @@
          MODAL REGISTRASI
          ========================== -->
     <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
-         aria-hidden="true" data-bs-backdrop="static">
+        aria-hidden="true" data-bs-backdrop="static">
 
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content custom-modal">
@@ -387,13 +387,13 @@
                             <!-- IDENTITAS -->
                             <div class="col-md-6 mb-3">
                                 <input type="text" name="nuptk" class="form-control"
-                                       placeholder="16 digit NUPTK" maxlength="16">
+                                    placeholder="16 digit NUPTK" maxlength="16">
                             </div>
 
                             <!-- Nama -->
                             <div class="col-md-6 mb-3">
                                 <input type="text" name="nama" class="form-control"
-                                       placeholder="Nama Lengkap" required>
+                                    placeholder="Nama Lengkap" required>
                             </div>
 
                             <!-- Jenis Kelamin -->
@@ -408,7 +408,7 @@
                             <!-- Tempat Lahir -->
                             <div class="col-md-6 mb-3">
                                 <input type="text" name="tempat_lahir" class="form-control"
-                                       placeholder="Tempat Lahir" required>
+                                    placeholder="Tempat Lahir" required>
                             </div>
 
                             <!-- Tanggal Lahir -->
@@ -421,11 +421,11 @@
                                 <select name="pangkat_jabatan_id" class="form-control" required>
                                     <option value="">Pilih Jabatan</option>
                                     @foreach($pangkatJabatans as $pangkatJabatan)
-                                        <option value="{{ $pangkatJabatan->pangkat_jabatan_id }}">
-                                            {{ $pangkatJabatan->jenjang_jabatan }}
-                                            @if($pangkatJabatan->pangkat) - {{ $pangkatJabatan->pangkat }} @endif
-                                            @if($pangkatJabatan->golongan_ruang) ({{ $pangkatJabatan->golongan_ruang }}) @endif
-                                        </option>
+                                    <option value="{{ $pangkatJabatan->pangkat_jabatan_id }}">
+                                        {{ $pangkatJabatan->jenjang_jabatan }}
+                                        @if($pangkatJabatan->pangkat) - {{ $pangkatJabatan->pangkat }} @endif
+                                        @if($pangkatJabatan->golongan_ruang) ({{ $pangkatJabatan->golongan_ruang }}) @endif
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -433,34 +433,33 @@
                             <!-- Email -->
                             <div class="col-md-6 mb-3">
                                 <input type="email" name="email" class="form-control"
-                                       placeholder="Email" required>
+                                    placeholder="Email" required>
                             </div>
 
                             <!-- No HP -->
                             <div class="col-md-6 mb-3">
                                 <input type="text" name="no_hp" class="form-control"
-                                       placeholder="No. HP" required>
+                                    placeholder="No. HP" required>
                             </div>
 
                             <!-- Agama -->
+                            <!-- Agama -->
                             <div class="col-md-6 mb-3">
-                                <select name="agama" class="form-control">
+                                <select name="agama" class="form-control" required>
                                     <option value="">Pilih Agama</option>
-                                    <option value="Islam">Islam</option>
-                                    <option value="Kristen">Kristen</option>
-                                    <option value="Katolik">Katolik</option>
-                                    <option value="Hindu">Hindu</option>
-                                    <option value="Buddha">Buddha</option>
-                                    <option value="Konghucu">Konghucu</option>
+                                    @foreach($agamas as $agama)
+                                    <option value="{{ $agama->nama_agama }}">
+                                        {{ $agama->nama_agama }}
+                                    </option>
+                                    @endforeach
                                 </select>
                             </div>
-
                             <!-- Kota -->
                             <div class="col-md-6 mb-3">
                                 <select name="kota_id" id="kotaSelect" class="form-control" required>
                                     <option value="">Pilih Kota</option>
                                     @foreach($kotas as $kota)
-                                        <option value="{{ $kota->kota_id }}">{{ $kota->nama_kota }}</option>
+                                    <option value="{{ $kota->kota_id }}">{{ $kota->nama_kota }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -471,15 +470,15 @@
                                 <div class="mb-2">
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio"
-                                               name="sekolah_option" id="optionSekolah"
-                                               value="sekolah" checked>
+                                            name="sekolah_option" id="optionSekolah"
+                                            value="sekolah" checked>
                                         <label class="form-check-label">Pilih Sekolah</label>
                                     </div>
 
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio"
-                                               name="sekolah_option" id="optionManual"
-                                               value="manual">
+                                            name="sekolah_option" id="optionManual"
+                                            value="manual">
                                         <label class="form-check-label">Input Manual</label>
                                     </div>
                                 </div>
@@ -490,15 +489,15 @@
                                         <select name="sekolah_id" class="form-control" id="sekolahSelect">
                                             <option value="">Pilih Sekolah</option>
                                             @foreach($sekolahs as $sekolah)
-                                                <option value="{{ $sekolah->sekolah_id }}"
-                                                        data-nama="{{ $sekolah->nama_sekolah }}"
-                                                        data-alamat="{{ $sekolah->alamat }}">
-                                                    {{ $sekolah->nama_sekolah }}
-                                                </option>
+                                            <option value="{{ $sekolah->sekolah_id }}"
+                                                data-nama="{{ $sekolah->nama_sekolah }}"
+                                                data-alamat="{{ $sekolah->alamat }}">
+                                                {{ $sekolah->nama_sekolah }}
+                                            </option>
                                             @endforeach
                                         </select>
                                         <button class="btn btn-outline-primary" type="button"
-                                                id="openSearchModalBtn">
+                                            id="openSearchModalBtn">
                                             <i class="ri-search-line"></i>
                                         </button>
                                     </div>
@@ -516,14 +515,14 @@
                                 <!-- Input manual -->
                                 <div id="instansiManualSection" class="d-none">
                                     <input type="text" name="instansi" id="instansiInput" class="form-control"
-                                           placeholder="Nama Instansi">
+                                        placeholder="Nama Instansi">
                                 </div>
                             </div>
 
                             <!-- Alamat Kantor -->
                             <div class="col-12 mb-3">
                                 <textarea name="alamat_kantor" class="form-control" rows="2"
-                                          placeholder="Alamat Kantor"></textarea>
+                                    placeholder="Alamat Kantor"></textarea>
                             </div>
                         </div>
 
@@ -569,7 +568,7 @@
                     <div class="mb-3">
                         <div class="input-group">
                             <input type="text" id="modalSearchInput" class="form-control"
-                                   placeholder="Masukkan nama sekolah, NPSN, atau alamat...">
+                                placeholder="Masukkan nama sekolah, NPSN, atau alamat...">
                             <button class="btn btn-primary" type="button" id="modalSearchBtn">
                                 <i class="ri-search-line"></i> Cari
                             </button>
@@ -622,7 +621,7 @@
         }
 
         // Format NIP input (hanya angka, maks 18 digit)
-        document.getElementById('nip')?.addEventListener('input', function (e) {
+        document.getElementById('nip')?.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 18) {
                 value = value.substring(0, 18);
@@ -631,7 +630,7 @@
         });
 
         // Format No HP input (hanya angka)
-        document.querySelector('input[name="no_hp"]')?.addEventListener('input', function (e) {
+        document.querySelector('input[name="no_hp"]')?.addEventListener('input', function(e) {
             e.target.value = e.target.value.replace(/\D/g, '');
         });
 
@@ -661,7 +660,7 @@
 
         // Toggle antara pilihan sekolah dan input manual
         document.querySelectorAll('input[name="sekolah_option"]').forEach(radio => {
-            radio.addEventListener('change', function (e) {
+            radio.addEventListener('change', function(e) {
                 const sekolahDropdownSection = document.getElementById('sekolahDropdownSection');
                 const instansiManualSection = document.getElementById('instansiManualSection');
                 const sekolahSelect = document.getElementById('sekolahSelect');
@@ -685,7 +684,7 @@
         });
 
         // Handle sekolah dropdown change (menampilkan info)
-        document.getElementById('sekolahSelect')?.addEventListener('change', function (e) {
+        document.getElementById('sekolahSelect')?.addEventListener('change', function(e) {
             const sekolahId = e.target.value;
             const selectedOption = e.target.options[e.target.selectedIndex];
             const sekolahInfo = document.getElementById('sekolahInfo');
@@ -755,12 +754,12 @@
         // 3. MODAL SEARCH SEKOLAH
         // ============================================
 
-        document.getElementById('openSearchModalBtn')?.addEventListener('click', function () {
+        document.getElementById('openSearchModalBtn')?.addEventListener('click', function() {
             const searchModal = new bootstrap.Modal(document.getElementById('searchSekolahModal'));
             searchModal.show();
         });
 
-        document.getElementById('modalSearchBtn')?.addEventListener('click', function () {
+        document.getElementById('modalSearchBtn')?.addEventListener('click', function() {
             const keyword = document.getElementById('modalSearchInput').value.trim();
             if (keyword.length >= 2) {
                 searchSekolahModal(keyword);
@@ -769,7 +768,7 @@
             }
         });
 
-        document.getElementById('modalSearchInput')?.addEventListener('keypress', function (e) {
+        document.getElementById('modalSearchInput')?.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const keyword = this.value.trim();
                 if (keyword.length >= 2) {
@@ -788,12 +787,12 @@
             searchResults.innerHTML = '';
 
             fetch(`/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
                 .then(response => response.json())
                 .then(data => {
                     loadingIndicator.classList.add('d-none');
@@ -836,7 +835,7 @@
                 });
         }
 
-        document.getElementById('searchResults')?.addEventListener('click', function (e) {
+        document.getElementById('searchResults')?.addEventListener('click', function(e) {
             if (e.target.classList.contains('pilih-sekolah-btn') ||
                 e.target.closest('.pilih-sekolah-btn')) {
 
@@ -856,7 +855,7 @@
             }
         });
 
-        document.getElementById('searchSekolahModal')?.addEventListener('show.bs.modal', function () {
+        document.getElementById('searchSekolahModal')?.addEventListener('show.bs.modal', function() {
             document.getElementById('modalSearchInput').value = '';
             document.getElementById('searchResults').innerHTML = `
                 <div class="text-center text-muted">
@@ -869,7 +868,7 @@
         // 4. LOGIN FORM
         // ============================================
 
-        document.getElementById('login-form')?.addEventListener('submit', function (e) {
+        document.getElementById('login-form')?.addEventListener('submit', function(e) {
             e.preventDefault();
 
             const nip = document.getElementById('nip').value.trim();
@@ -887,18 +886,18 @@
             submitBtn.disabled = true;
 
             fetch("{{ route('lockscreen.authenticate') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    nip: nip,
-                    token: token,
-                    kegiatan_id: kegiatan_id
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nip: nip,
+                        token: token,
+                        kegiatan_id: kegiatan_id
+                    })
                 })
-            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -955,7 +954,7 @@
         // 5. REGISTER FORM
         // ============================================
 
-        document.getElementById('submit-register')?.addEventListener('click', function () {
+        document.getElementById('submit-register')?.addEventListener('click', function() {
             const form = document.getElementById('register-form');
             const formData = new FormData(form);
 
@@ -1061,13 +1060,13 @@
             });
 
             fetch("{{ route('lockscreen.register') }}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: formData
-            })
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1109,7 +1108,7 @@
 
         // Clear validation on input
         document.querySelectorAll('#register-form input, #register-form select').forEach(input => {
-            input.addEventListener('input', function () {
+            input.addEventListener('input', function() {
                 if (this.classList.contains('is-invalid')) {
                     this.classList.remove('is-invalid');
                 }
@@ -1120,7 +1119,7 @@
         // 6. INITIALIZATION
         // ============================================
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const nipField = document.getElementById('nip');
             if (nipField) {
                 nipField.focus();

@@ -6,6 +6,7 @@ use App\Models\Kegiatan;
 use App\Models\Ptk;
 use App\Models\PangkatJabatan;
 use App\Models\Kota;
+use App\Models\Agama;
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
 use Vinkla\Hashids\Facades\Hashids;
@@ -38,11 +39,13 @@ class LockScreenController extends Controller
         }
 
         // Ambil data untuk dropdown
-        $pangkatJabatans = PangkatJabatan::orderBy('pangkat_jabatan_id')->get(); 
+        $pangkatJabatans = PangkatJabatan::orderBy('pangkat_jabatan_id')->get();
         $kotas = Kota::orderBy('nama_kota')->get();
 
         // Ambil 10 sekolah pertama untuk inisialisasi
         $sekolahs = Sekolah::orderBy('nama_sekolah')->limit(100)->get();
+        // AMBIL DATA AGAMA DARI DATABASE
+        $agamas = Agama::orderBy('nama_agama')->get();
 
         return view('lockscreen.index', [
             'title' => 'Lock Screen',
@@ -51,7 +54,8 @@ class LockScreenController extends Controller
             'kegiatan' => $kegiatan,
             'pangkatJabatans' => $pangkatJabatans,
             'kotas' => $kotas,
-            'sekolahs' => $sekolahs
+            'sekolahs' => $sekolahs,
+            'agamas' => $agamas
         ]);
     }
 

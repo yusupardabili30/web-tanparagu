@@ -7,6 +7,7 @@ use App\Models\Ptk;
 use App\Models\Peserta;
 use App\Models\PangkatJabatan;
 use App\Models\Kota;
+use App\Models\Agama;
 use App\Models\Bank;
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
@@ -42,7 +43,9 @@ class RegisterController extends Controller
 
         // Ambil semua bank - HAPUS active() karena tidak ada kolom status
         $banks = Bank::orderBy('nama_bank')->get();
+        // Di dalam method index() RegisterController
 
+        $agamas = Agama::all(); // TANPA STATUS
         $sekolahs = Sekolah::orderBy('nama_sekolah')->limit(100)->get();
 
         return view('register.index', [
@@ -53,6 +56,7 @@ class RegisterController extends Controller
             'pangkatJabatans' => $pangkatJabatans,
             'kotas' => $kotas,
             'banks' => $banks,
+            'agamas' => $agamas,
             'sekolahs' => $sekolahs
         ]);
     }
@@ -392,7 +396,7 @@ class RegisterController extends Controller
             ->orWhere('npsn', 'like', '%' . $search . '%')
             ->orWhere('alamat', 'like', '%' . $search . '%')
             ->orderBy('nama_sekolah')
-            ->paginate(50);
+            ->paginate(10);
 
         $formattedResults = $sekolahs->map(function ($sekolah) {
             return [
@@ -479,12 +483,30 @@ class RegisterController extends Controller
                 $data->tgl_lahir = Carbon::parse($data->tgl_lahir)->format('d-m-Y');
             }
 
+            // PERBAIKI: Pastikan agama diambil dari database jika ada
+            $agamaValue = $data->agama;
+
+            // Validasi agama ada di tabel agama
+            if ($agamaValue) {
+                $agamaExists = Agama::where('nama_agama', $agamaValue)->exists();
+                if (!$agamaExists) {
+                    // Jika agama tidak ada di tabel, kosongkan atau set ke default
+                    $agamaValue = null;
+                }
+            }
+
+            \Log::info('Data agama untuk autofill', [
+                'nilai_agama' => $data->agama,
+                'agama_diset' => $agamaValue,
+                'agama_valid' => $agamaExists ?? false
+            ]);
+
             // Gabungkan data dari PTK/Peserta dengan data bank
             $autofillData = [
                 'nama' => $data->nama,
                 'nik' => $data->nik,
                 'pangkat_jabatan_id' => $data->pangkat_jabatan_id,
-                'agama' => $data->agama,
+                'agama' => $agamaValue, // GUNAKAN YANG SUDAH DICEK
                 'jenis_kelamin' => $data->jenis_kelamin,
                 'tempat_lahir' => $data->tempat_lahir,
                 'tgl_lahir' => $data->tgl_lahir ?? null,
@@ -497,7 +519,7 @@ class RegisterController extends Controller
                 'no_hp' => $data->no_hp,
                 'email' => $data->email,
                 'npwp' => $data->npwp,
-                'ms_bank_id' => $bankData ? $bankData->ms_bank_id : null, // Ambil dari bankData
+                'ms_bank_id' => $bankData ? $bankData->ms_bank_id : null,
                 'no_rekening' => $bankData ? $bankData->no_rekening : ($data->no_rekening ?? ''),
                 'atas_nama_rekening' => $bankData ? $bankData->atas_nama_rekening : $data->nama,
             ];
@@ -505,8 +527,7 @@ class RegisterController extends Controller
             \Log::info('Data autofill gabungan', [
                 'nip' => $nip,
                 'source' => $source,
-                'bank_data' => $bankData ? 'found' : 'not found',
-                'ms_bank_id' => $autofillData['ms_bank_id']
+                'agama' => $autofillData['agama']
             ]);
 
             return response()->json([

@@ -415,18 +415,16 @@
                                     </div>
                                 </div>
 
-                                <!-- ===================== AGAMA + JK ===================== -->
                                 <div class="row mb-2">
                                     <div class="col-md-6">
                                         <div class="form-floating mb-2">
                                             <select name="agama" class="form-select" required style="font-size:16px; color:#555555 !important;">
                                                 <option value="">Pilih Agama</option>
-                                                <option value="Islam" {{ old('agama') == 'Islam' ? 'selected' : '' }}>Islam</option>
-                                                <option value="Kristen" {{ old('agama') == 'Kristen' ? 'selected' : '' }}>Kristen</option>
-                                                <option value="Katolik" {{ old('agama') == 'Katolik' ? 'selected' : '' }}>Katolik</option>
-                                                <option value="Hindu" {{ old('agama') == 'Hindu' ? 'selected' : '' }}>Hindu</option>
-                                                <option value="Buddha" {{ old('agama') == 'Buddha' ? 'selected' : '' }}>Buddha</option>
-                                                <option value="Konghucu" {{ old('agama') == 'Konghucu' ? 'selected' : '' }}>Konghucu</option>
+                                                @foreach($agamas as $agama)
+                                                <option value="{{ $agama->nama_agama }}" {{ old('agama') == $agama->nama_agama ? 'selected' : '' }}>
+                                                    {{ $agama->nama_agama }}
+                                                </option>
+                                                @endforeach
                                             </select>
                                             <label>Agama</label>
                                             @error('agama')
@@ -434,7 +432,6 @@
                                             @enderror
                                         </div>
                                     </div>
-
                                     <div class="col-md-6">
                                         <div class="form-floating mb-2">
                                             <select name="jenis_kelamin" class="form-select" required style="font-size:16px; color:#555555 !important;">
@@ -1865,65 +1862,124 @@
                     return;
                 }
 
-                if (field.value && !el.value.trim()) {
-                    if (field.type === 'select') {
-                        // Untuk select element
-                        console.log(`Setting select ${field.name} to value:`, field.value);
+                // Skip jika value kosong
+                if (!field.value && field.value !== 0) {
+                    console.log(`Field ${field.name} memiliki value kosong:`, field.value);
+                    return;
+                }
 
-                        // Coba set langsung
-                        el.value = field.value;
+                // Jika field sudah terisi, skip
+                if (el.value.trim() !== '') {
+                    console.log(`Field ${field.name} sudah terisi: ${el.value}`);
+                    return;
+                }
 
-                        // Cek apakah value berhasil diset
-                        if (el.value != field.value) {
-                            // Jika tidak berhasil, coba cari option
-                            console.log(`Value tidak langsung match, mencari option...`);
+                console.log(`Processing field ${field.name} with value:`, field.value);
 
-                            // Cara 1: Cari exact match by value
-                            let found = false;
-                            for (let i = 0; i < el.options.length; i++) {
-                                if (el.options[i].value == field.value) {
-                                    el.options[i].selected = true;
-                                    found = true;
-                                    console.log(`Found exact match for ${field.name}: value=${field.value}`);
-                                    break;
-                                }
+                if (field.type === 'select') {
+                    // Untuk select element
+                    console.log(`Setting select ${field.name} to value:`, field.value);
+
+                    // Method 1: Coba set langsung dulu
+                    el.value = field.value;
+
+                    // Cek apakah value berhasil diset
+                    if (el.value != field.value) {
+                        console.log(`Value mismatch, trying different approach for ${field.name}`);
+
+                        // Method 2: Cari exact match by value (case sensitive)
+                        let found = false;
+                        for (let i = 0; i < el.options.length; i++) {
+                            const option = el.options[i];
+                            if (option.value == field.value) {
+                                option.selected = true;
+                                found = true;
+                                console.log(`Found exact match for ${field.name}: value=${field.value}`);
+                                break;
                             }
+                        }
 
-                            // Cara 2: Jika tidak ditemukan exact value, coba cari by text
-                            if (!found && field.name === 'ms_bank_id') {
-                                // Untuk bank, kita bisa coba cari nama bank dari data
-                                const bankName = getBankNameFromData(field.value);
-                                if (bankName) {
-                                    for (let i = 0; i < el.options.length; i++) {
-                                        if (el.options[i].text.toLowerCase().includes(bankName.toLowerCase())) {
-                                            el.options[i].selected = true;
-                                            found = true;
-                                            console.log(`Found bank by name: ${bankName}`);
-                                            break;
-                                        }
-                                    }
+                        // Method 3: Jika tidak ditemukan, cari by text (case insensitive)
+                        if (!found) {
+                            console.log(`No exact value match, trying text match...`);
+                            const searchValue = String(field.value).toLowerCase().trim();
+                            for (let i = 0; i < el.options.length; i++) {
+                                const option = el.options[i];
+                                const optionText = option.text.toLowerCase().trim();
+                                if (optionText === searchValue) {
+                                    option.selected = true;
+                                    found = true;
+                                    console.log(`Found text match for ${field.name}: "${option.text}" = "${field.value}"`);
+                                    break;
                                 }
                             }
                         }
 
-                        // Trigger events
-                        el.dispatchEvent(new Event('change', {
-                            bubbles: true
-                        }));
-                        el.dispatchEvent(new Event('input', {
-                            bubbles: true
-                        }));
+                        // Method 4: Untuk agama, coba cek partial match
+                        if (!found && field.name === 'agama') {
+                            console.log(`Trying partial match for agama...`);
+                            const agamaValue = String(field.value).toLowerCase().trim();
+                            for (let i = 0; i < el.options.length; i++) {
+                                const option = el.options[i];
+                                const optionText = option.text.toLowerCase().trim();
 
+                                // Cek partial match (contoh: "Islam" mungkin match "Islam" dari database)
+                                if (optionText.includes(agamaValue) || agamaValue.includes(optionText)) {
+                                    option.selected = true;
+                                    found = true;
+                                    console.log(`Found partial agama match: "${option.text}" for "${field.value}"`);
+                                    break;
+                                }
+                            }
+
+                            if (!found) {
+                                console.warn(`Tidak bisa menemukan agama: "${field.value}" dalam dropdown`);
+                                console.log('Available agama options:',
+                                    Array.from(el.options).map(o => o.text).join(', ')
+                                );
+                            }
+                        }
+
+                        // Method 5: Untuk bank, coba cari nama bank
+                        if (!found && field.name === 'ms_bank_id') {
+                            const bankName = getBankNameFromData(field.value);
+                            if (bankName) {
+                                const bankSearch = bankName.toLowerCase();
+                                for (let i = 0; i < el.options.length; i++) {
+                                    if (el.options[i].text.toLowerCase().includes(bankSearch)) {
+                                        el.options[i].selected = true;
+                                        found = true;
+                                        console.log(`Found bank by name: ${bankName}`);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     } else {
-                        // Untuk input text
-                        el.value = field.value;
-                        el.dispatchEvent(new Event('change', {
-                            bubbles: true
-                        }));
-                        el.dispatchEvent(new Event('input', {
-                            bubbles: true
-                        }));
+                        console.log(`Successfully set ${field.name} to value:`, field.value);
                     }
+
+                    // Trigger events
+                    el.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
+                    el.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+
+                    // Log hasil
+                    console.log(`Final value for ${field.name}:`, el.value);
+
+                } else {
+                    // Untuk input text
+                    el.value = field.value;
+                    el.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
+                    el.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                    console.log(`Set ${field.name} to:`, field.value);
                 }
             });
 
