@@ -205,37 +205,61 @@
 
                 <div class="card-body p-4 detail-card-body">
 
-                    <!-- PEDOMAN APLIKASI -->
-                    <div class="mb-3">
-                        <h6 class="fw-bold text-primary mb-2" style="font-size:16px;">
-                            <i class="fas fa-book me-2"></i>Pedoman Aplikasi
-                        </h6>
-                        <div class="ps-3">
-                            <ol class="mb-0" style="line-height: 1.7; font-size:14px;">
-                                <li>Jawablah semua pertanyaan dengan <strong>jujur dan sesuai kondisi sebenarnya</strong></li>
-                                <li>Setiap pertanyaan hanya memiliki <strong>satu jawaban yang paling tepat</strong></li>
-                                <li>Durasi pengerjaan adalah <strong>2 jam</strong> sejak dimulai</li>
-                                <li>Pastikan koneksi internet stabil selama mengerjakan</li>
-                                <li>Hasil ini akan digunakan untuk pemetaan kebutuhan belajar</li>
-                            </ol>
+                    <div class="guideline-body">
+                        <div class="mb-3">
+                            <h6 class="fw-semibold text-dark mb-2">
+                                <i class="fas fa-clipboard-list me-2 text-primary"></i>
+                                Tentang Soal
+                            </h6>
+                            <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
+                                Bapak dan Ibu akan mengerjakan sejumlah soal berbasis studi kasus yang menggambarkan situasi nyata dalam pelaksanaan tugas sehari-hari. Setiap kasus dapat terdiri dari satu atau lebih pertanyaan, sehingga mohon dibaca dengan saksama sebelum menjawab.
+                            </p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-semibold text-dark mb-2">
+                                <i class="fas fa-user-check me-2 text-primary"></i>
+                                Cara Menjawab
+                            </h6>
+                            <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
+                                Dalam menjawab pertanyaan, jawablah berdasarkan apa yang benar-benar akan Bapak dan Ibu lakukan ketika menghadapi situasi tersebut, bukan berdasarkan jawaban yang dianggap paling ideal atau paling baik secara teori. Tidak ada jawaban benar atau salah dalam arti normatif—yang terpenting adalah kejujuran dan kesesuaian dengan pengalaman serta praktik yang selama ini Bapak dan Ibu jalani.
+                            </p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-semibold text-dark mb-2">
+                                <i class="fas fa-bullseye me-2 text-primary"></i>
+                                Tujuan Kuesioner
+                            </h6>
+                            <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
+                                Instrumen ini dirancang untuk memahami cara berpikir, pengambilan keputusan, dan tindakan nyata dalam konteks pekerjaan. Oleh karena itu, tidak perlu merasa khawatir atau ragu dalam menjawab. Isilah setiap pertanyaan sesuai dengan pengalaman, pertimbangan pribadi, dan tindakan yang kemungkinan besar akan Bapak dan Ibu ambil dalam situasi tersebut.
+                            </p>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-semibold text-dark mb-2">
+                                <i class="fas fa-clock me-2 text-primary"></i>
+                                Waktu Pengerjaan
+                            </h6>
+                            <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
+                                Waktu yang dibutuhkan untuk mengerjakan setiap 1 (satu) soal, biasanya memakan waktu sebanyak 1 (satu) menit per soal. Mohon membaca dengan seksama dan pastikan seluruh jawaban terisi serta mohon menjawab seluruh pertanyaan dengan tenang dan reflektif agar hasil yang diperoleh dapat memberikan gambaran yang akurat dan bermakna.
+                            </p>
+                        </div>
+
+                        <div class="alert alert-light border-start border-primary border-3 ps-4 py-3 mt-4">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-hand-point-right me-3 mt-1 text-primary"></i>
+                                <div>
+                                    <strong class="d-block mb-1 text-dark">Inti Pedoman:</strong>
+                                    <span class="d-block text-dark" style="text-align: justify;">
+                                        Jawablah sesuai dengan pengalaman nyata Anda, bukan teori ideal. Kejujuran adalah kunci untuk mendapatkan gambaran yang akurat tentang pola pikir dan pengambilan keputusan dalam pekerjaan.
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- TUJUAN APLIKASI -->
-                    <div class="mb-3">
-                        <h6 class="fw-bold text-primary mb-2" style="font-size:16px;">
-                            <i class="fas fa-bullseye me-2"></i>Tujuan Aplikasi
-                        </h6>
-                        <div class="ps-3">
-                            <ul class="mb-0" style="line-height: 1.7; font-size:14px;">
-                                <li>Memetakan <strong>tingkat kompetensi</strong> {{ $kegiatan->entity }}</li>
-                                <li>Mengidentifikasi <strong>kebutuhan pengembangan profesional</strong></li>
-                                <li>Memberikan <strong>rekomendasi program penguatan kapasitas</strong></li>
-                                <li>Mendukung <strong>perencanaan pengembangan karir</strong> yang terarah</li>
-                                <li>Sebagai <strong>dasar evaluasi</strong> kinerja dan potensi</li>
-                            </ul>
-                        </div>
-                    </div>
+
 
                     <!-- DURASI PENGERJAAN -->
                     <div class="mb-3 px-3 py-2" style="background:#f4f6ff; border-radius:10px; border:1px solid #e0e6ff;">
