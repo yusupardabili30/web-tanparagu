@@ -697,52 +697,50 @@
         });
 
         // Navigasi untuk studi kasus yang sudah passed
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.nav-case-item.passed-case').forEach(item => {
-                item.style.cursor = 'pointer';
 
-                item.addEventListener('click', function(e) {
-                    // Jangan trigger jika klik icon
-                    if (e.target.tagName === 'I' || e.target.classList.contains('badge')) {
-                        return;
-                    }
 
-                    const subId = this.dataset.subId;
-                    const caseId = this.dataset.caseId;
+        item.addEventListener('click', function(e) {
+            // Jangan trigger jika klik icon
+            if (e.target.tagName === 'I' || e.target.classList.contains('badge')) {
+                return;
+            }
 
-                    // Hanya navigasi jika bukan case yang sedang aktif
-                    if (!this.classList.contains('active-case')) {
-                        if (confirm('Pindah ke studi kasus ini?')) {
-                            // Encode sub_id dan redirect ke soal pertama dari sub_indikator ini
-                            const encodedSubId = btoa(subId);
-                            const encodedNoUrut = btoa(1);
+            const subId = this.dataset.subId;
+            const caseId = this.dataset.caseId;
 
-                            window.location.href = `{{ route('quiz2.show', [
+            // Hanya navigasi jika bukan case yang sedang aktif
+            if (!this.classList.contains('active-case')) {
+                if (confirm('Pindah ke studi kasus ini?')) {
+                    // Encode sub_id dan redirect ke soal pertama dari sub_indikator ini
+                    const encodedSubId = btoa(subId);
+                    const encodedNoUrut = btoa(1);
+
+                    window.location.href = `{{ route('quiz2.show', [
                             'tahap' => $tahap,
                             'encoded_kegiatan_id' => $encoded_kegiatan_id,
                             'nip' => $nip,
                             'encoded_sub_indikator_id' => 'SUB_ID_PLACEHOLDER',
                             'encoded_no_urut' => 'NO_URUT_PLACEHOLDER'
                         ]) }}`
-                                .replace('SUB_ID_PLACEHOLDER', encodedSubId)
-                                .replace('NO_URUT_PLACEHOLDER', encodedNoUrut);
-                        }
-                    }
-                });
+                        .replace('SUB_ID_PLACEHOLDER', encodedSubId)
+                        .replace('NO_URUT_PLACEHOLDER', encodedNoUrut);
+                }
+            }
+        });
 
-                // Efek hover
-                item.addEventListener('mouseenter', function() {
-                    if (!this.classList.contains('active-case')) {
-                        this.style.transform = 'translateY(-3px)';
-                        this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
-                    }
-                });
+        // Efek hover
+        item.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('active-case')) {
+                this.style.transform = 'translateY(-3px)';
+                this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+            }
+        });
 
-                item.addEventListener('mouseleave', function() {
-                    this.style.transform = '';
-                    this.style.boxShadow = '';
-                });
-            });
+        item.addEventListener('mouseleave', function() {
+        this.style.transform = '';
+        this.style.boxShadow = '';
+        });
+        });
         });
     </script>
     <script>
