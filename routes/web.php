@@ -12,6 +12,7 @@ use App\Http\Controllers\HasilInstrumenController;
 use App\Http\Controllers\InstrumenController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\BiodataController;
+use App\Http\Controllers\AnalisisController;
 
 /*
 |--------------------------------------------------------------------------
@@ -217,3 +218,11 @@ Route::get(
 // Route untuk mendapatkan list indikator quiz 1
 Route::get('/quiz1/case-list/{encoded_kegiatan_id}/{nip}', [SoalController::class, 'getCaseListQuiz1'])
     ->name('quiz1.case-list');
+
+
+
+
+
+
+// web.php - tambahkan route ini
+Route::get('/analisis', [AnalisisController::class, 'index'])->name('analisis.index');

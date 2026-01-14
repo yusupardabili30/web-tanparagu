@@ -89,6 +89,12 @@
                                             <a href="{{ route('biodata.index') }}" class="nav-link">Register Peserta</a>
                                         </li>
                                     </ul>
+                                    <ul class="nav nav-sm flex-column">
+                                        <li class="nav-item">
+                                            {{-- Menjadi: --}}
+                                            <a href="{{ route('analisis.index') }}" class="nav-link">Laporan</a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </li>
                             <li class="nav-item">
