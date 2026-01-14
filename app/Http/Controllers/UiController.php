@@ -10,7 +10,7 @@ class UiController extends Controller
     {
         // ====== HALAMAN MANA YANG MAU DITAMPILKAN ======
         // Tinggal ubah "ui.grafik" → "ui.quiz" → "ui.profil" → dll.
-        $page = 'ui.observasi';   // <<< GANTI INI 
+        $page = 'ui.grafik';   // <<< GANTI INI 
 
         // ====== DATA DUMMY GRAFIK (TETAP ADA, TAPI HANYA DIKIRIM KE VIEW GRAFIK) ======
         $daerahList = ['Bandung', 'Bogor', 'Cimahi', 'Bekasi', 'Serang'];
@@ -32,7 +32,7 @@ class UiController extends Controller
         ];
 
         // Jika halaman yang dibuka BUKAN ui.grafik → langsung load view lain tanpa data
-        if ($page !== 'ui.hasil') {
+        if ($page !== 'ui.grafik') {
             return view($page);
         }
 

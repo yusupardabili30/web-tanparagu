@@ -17,6 +17,11 @@
         4 => 'warning',
         5 => 'success'
     ];
+
+    // ✅ Grouping per NIP (di page ini saja, karena paginator)
+    $groups = $data->getCollection()->groupBy(function($r){
+        return (string)($r->nip ?? 'tanpa_nip');
+    });
 @endphp
 
 <style>
@@ -32,7 +37,6 @@
         --radius: 16px;
     }
 
-    /* ✅ NO GRADIENT */
     .hi-wrap{
         background: #f3f7ff;
         border-radius: 18px;
@@ -40,7 +44,7 @@
     }
 
     /* =========================
-       HEADER: motif baduy repeat + overlay SOLID
+       HEADER PAGE
        ========================= */
     .hi-head{
         position: relative;
@@ -48,12 +52,10 @@
         border-radius: 22px;
         padding: 22px 24px;
         margin-bottom: 14px;
-
         background: var(--mm-blue);
         border: 1px solid rgba(255,255,255,.20);
         box-shadow: 0 10px 24px rgba(17,24,39,.12);
     }
-
     .hi-head::before{
         content:"";
         position:absolute;
@@ -66,7 +68,6 @@
         filter: grayscale(100%) contrast(1.15);
         z-index: 0;
     }
-
     .hi-head::after{
         content:"";
         position:absolute;
@@ -74,20 +75,16 @@
         background: rgba(26,91,184,.45);
         z-index: 1;
     }
-
     .hi-head > *{ position: relative; z-index: 2; }
-
-    /* ✅ teks header putih */
     .hi-head, .hi-head *{ color:#fff !important; }
 
     .hi-head h5{
         margin:0;
-        font-size: 18px !important;   /* ✅ judul lebih besar */
+        font-size: 18px !important;
         font-weight: 900;
         letter-spacing:.2px;
         text-shadow: 0 2px 12px rgba(0,0,0,.35) !important;
     }
-
     .hi-head .meta{
         font-size: 12.5px;
         opacity: .95;
@@ -96,7 +93,6 @@
         text-shadow: 0 2px 12px rgba(0,0,0,.35) !important;
     }
 
-    /* ✅ ICON JUDUL: jangan bg putih (ganti jadi glass/transparent) */
     .hi-title-icon{
         width: 40px;
         height: auto;
@@ -110,7 +106,9 @@
     }
     .hi-title-icon i{ font-size: 18px; }
 
-    /* Filter card */
+    /* =========================
+       FILTER
+       ========================= */
     .hi-filter{
         border-radius: var(--radius);
         background: var(--mm-card);
@@ -136,27 +134,19 @@
         height: 44px;
         font-weight: 900;
     }
-
-    /* Tombol Cari jadi warna #1a5bb8 */
     .btn-cari{
         background: #1a5bb8 !important;
         border-color: #1a5bb8 !important;
         color: #fff !important;
     }
-
-    /* Hover */
     .btn-cari:hover{
         background: #154a93 !important;
         border-color: #154a93 !important;
         color: #fff !important;
     }
-
-    /* Focus */
     .btn-cari:focus{
         box-shadow: 0 0 0 .25rem rgba(26,91,184,.25) !important;
     }
-
-    /* ✅ Export pill (dibikin gede & rounded) */
     .btn-export-pill{
         border-radius: 18px !important;
         padding: 12px 18px !important;
@@ -164,149 +154,244 @@
         box-shadow: 0 10px 18px rgba(0,0,0,.10);
     }
 
-    /* List cards */
-    .hi-list{ display:flex; flex-direction:column; gap:12px; }
+    /* =========================
+       LIST PER PTK
+       ========================= */
+    .hi-list{ display:flex; flex-direction:column; gap:14px; }
 
-    .hi-item{
-        border-radius: var(--radius);
-        background: var(--mm-card);
+    .ptk-card{
+        border-radius: 18px;
+        background: #fff;
         border: 1px solid rgba(229,231,235,.95);
         box-shadow: var(--mm-shadow);
         overflow: hidden;
     }
 
-    .hi-item-top{
-        display:flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 14px;
+    /* =========================
+       ✅ PROFIL CARD (NAMA JADI CARD)
+       ========================= */
+    .ptk-head{
+        padding: 14px;
+        background: #fff;
         border-bottom: 1px solid rgba(229,231,235,.9);
-        background: #f6f9ff;
-        gap: 12px;
-        flex-wrap: wrap;
     }
 
-    .hi-no{
-        width: 42px; height: 42px;
-        border-radius: 14px;
-        background: rgba(26,91,184,.12);
-        color: var(--mm-blue);
-        display:flex; align-items:center; justify-content:center;
-        font-weight: 900;
-        flex: 0 0 auto;
-    }
-
-    .hi-status{
-        display:flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 4px;
-        min-width: 170px;
-    }
-    .hi-status .badge{
-        border-radius: 999px;
-        padding: 8px 12px;
-        font-weight: 900;
-        font-size: 12px;
-        white-space: nowrap;
-    }
-    .hi-status small{
-        color: var(--mm-muted);
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .hi-item-body{ padding: 14px; }
-
-    .hi-identity{
+    .ptk-profile{
         border: 1px solid rgba(229,231,235,.95);
-        border-radius: 14px;
-        background: var(--mm-soft);
-        padding: 12px 12px;
-        height: 100%;
+        background: #f6f9ff;
+        border-radius: 16px;
+        padding: 14px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
     }
-    .hi-identity .nm{
-        font-weight: 900;
-        color: var(--mm-text);
-        font-size: 15px;
-        line-height: 1.25;
-        margin-bottom: 8px;
-    }
-    .hi-identity .kv{
-        display:flex;
-        gap: 10px;
-        padding: 6px 0;
-        border-top: 1px dashed rgba(107,114,128,.25);
-    }
-    .hi-identity .kv:first-of-type{ border-top:none; padding-top:0; }
-    .hi-identity .k{
-        width: 62px;
-        color: var(--mm-muted);
-        font-weight: 900;
-        font-size: 12px;
+
+    .ptk-avatar{
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        background: rgba(26,91,184,.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         flex: 0 0 auto;
+        color: var(--mm-blue);
     }
-    .hi-identity .v{
+    .ptk-avatar i{ font-size: 20px; }
+
+    .ptk-profile-body{ flex: 1; min-width: 0; }
+
+    .ptk-name{
+        font-size: 18px;
+        font-weight: 900;
         color: var(--mm-text);
-        font-weight: 500; /* ✅ jangan bold */
-        font-size: 12.5px;
-        flex: 1;
+        margin: 0 0 8px 0;
+        line-height: 1.2;
         word-break: break-word;
     }
-    .hi-identity .inst{
-        margin-top: 8px;
-        color: var(--mm-muted);
-        font-weight: 700;
-        font-size: 12px;
+
+    .ptk-lines{
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 14px;
     }
 
-    .hi-box{
-        border: 1px solid rgba(229,231,235,.95);
-        border-radius: 14px;
-        background: #fff;
-        padding: 12px;
-        height: 100%;
+    .ptk-line{
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        flex-wrap: wrap;
     }
-    .hi-box .ttl{
+    .ptk-line .k{
+        width: 90px;
+        color: var(--mm-muted);
+        font-weight: 800;
+    }
+    .ptk-line .v{
+        color: var(--mm-text);
+        font-weight: 800;
+        word-break: break-word;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .ptk-instansi{
+        margin-top: 10px;
+        color: var(--mm-muted);
+        font-weight: 800;
+        font-size: 12.5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        word-break: break-word;
+    }
+
+    /* BODY indikator 1 card */
+    .ptk-body{
+        padding: 14px;
+    }
+
+    .indikator-card{
+        border: 1px solid rgba(229,231,235,.95);
+        border-radius: 16px;
+        background: #fff;
+        overflow: hidden;
+    }
+    .indikator-card .head{
+        padding: 12px 14px;
+        background: var(--mm-soft);
+        border-bottom: 1px solid rgba(229,231,235,.9);
+        display:flex;
+        justify-content: space-between;
+        align-items:center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .indikator-card .head .ttl{
         font-weight: 900;
         color: var(--mm-text);
-        font-size: 12px;
-        letter-spacing: .2px;
-        margin-bottom: 8px;
+        margin: 0;
         display:flex;
         align-items:center;
         gap: 8px;
     }
-    .hi-box .subttl{
+    .indikator-card .head .count{
         color: var(--mm-muted);
-        font-weight: 700;
+        font-weight: 900;
         font-size: 12px;
-        margin-top: 6px;
+        white-space: nowrap;
     }
 
-    .hi-levels{ display:flex; flex-wrap:wrap; gap:8px; }
+    /* Baris indikator */
+    .indikator-row{
+        padding: 12px 14px;
+        border-top: 1px dashed rgba(229,231,235,.9);
+    }
+    .indikator-row:first-child{ border-top: none; }
 
-    .hi-rek{
+    .indikator-grid{
+        display:grid;
+        grid-template-columns: 80px 250px 1.1fr 1.4fr;
+        gap: 12px;
+        align-items: start;
+    }
+    @media (max-width: 1200px){
+        .indikator-grid{ grid-template-columns: 1fr; }
+        .ptk-line .k{ width: 110px; }
+        .ptk-line .v{ min-width: 0; }
+    }
+
+    .cell-title{
+        font-weight: 900;
+        color: var(--mm-muted);
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    /* Nomor */
+    .no-box{
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background: rgba(26,91,184,.12);
+        color: var(--mm-blue);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight: 900;
+        font-size: 14px;
+    }
+
+    /* Level box */
+    .lv-box{
+        border: 1px solid rgba(229,231,235,.95);
+        background: var(--mm-soft);
+        border-radius: 14px;
+        padding: 10px;
+    }
+    .lv-sub{
+        color: var(--mm-muted);
+        font-weight: 900;
+        font-size: 12px;
+        margin-top: 10px;
+        display:flex;
+        align-items:center;
+        gap: 6px;
+    }
+    .lv-badges{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px; }
+
+    /* Indikator box */
+    .ind-box{
+        border: 1px solid rgba(229,231,235,.95);
+        background: #fff;
+        border-radius: 14px;
+        padding: 10px;
+    }
+    .ind-name{
+        font-weight: 900;
+        color: var(--mm-text);
+        font-size: 13.5px;
+        line-height: 1.25;
+        margin-bottom: 6px;
+    }
+    .ind-code{
+        color: var(--mm-muted);
+        font-weight: 800;
+        font-size: 12px;
+        display:flex;
+        align-items:center;
+        gap: 8px;
+    }
+
+    /* Rekomendasi */
+    .rek-box{
+        border: 1px solid rgba(229,231,235,.95);
+        background: #fff;
+        border-radius: 14px;
+        padding: 10px;
+    }
+    .rek-item{
         border-radius: 12px;
         border: 1px solid rgba(229,231,235,.95);
         background: var(--mm-soft);
         padding: 10px;
     }
-    .hi-rek .top{
+    .rek-item + .rek-item{ margin-top: 10px; }
+    .rek-top{
         display:flex;
         justify-content: space-between;
-        align-items: flex-start;
+        align-items:flex-start;
         gap: 10px;
         margin-bottom: 6px;
     }
-    .hi-rek .desc{
+    .rek-desc{
         color: var(--mm-text);
         font-weight: 500;
         font-size: 12.5px;
         line-height: 1.35;
     }
 
-    .pagination{ margin-bottom: 0; }
     .page-link{ border-radius: 10px !important; font-weight: 800; }
 </style>
 
@@ -326,11 +411,9 @@
     </div>
 
     <div class="hi-wrap">
-        {{-- HEADER (EXPORT DIHILANGKAN DARI SINI) --}}
         <div class="hi-head d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
                 <h5 class="mb-0 d-flex align-items-center gap-2">
-                    {{-- ✅ icon ganti: no bg putih --}}
                     <span class="hi-title-icon"><i class="ri-bar-chart-2-line"></i></span>
                     {{ $tittle }}
                 </h5>
@@ -344,7 +427,7 @@
             </div>
         </div>
 
-        {{-- FILTER + EXPORT DITARO DI ATAS TOMBOL CARI --}}
+        {{-- FILTER --}}
         <div class="hi-filter">
             <form action="{{ route('hasil-instrumen.index') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-md-4">
@@ -379,15 +462,14 @@
                     </select>
                 </div>
 
-                {{-- ✅ kolom aksi: export di atas, cari di bawah --}}
                 <div class="col-md-2">
                     @if($data->isNotEmpty())
-                    <div class="w-100 mb-2">
-                        <a class="btn btn-success w-100 btn-export-pill"
-                        href="{{ route('hasil-instrumen.export-all', request()->query()) }}">
-                            <i class="ri-file-pdf-line align-bottom me-1"></i> Export PDF
-                        </a>
-                    </div>
+                        <div class="w-100 mb-2">
+                            <a class="btn btn-success w-100 btn-export-pill"
+                               href="{{ route('hasil-instrumen.export-all', request()->query()) }}">
+                                <i class="ri-file-pdf-line align-bottom me-1"></i> Export PDF
+                            </a>
+                        </div>
                     @endif
 
                     <button type="submit" class="btn btn-primary w-100 btn-cari">
@@ -417,7 +499,8 @@
                         dengan pencarian: "<strong>{{ request('search') }}</strong>"
                     @endif
                     @if(request('kegiatan_id'))
-                        | Kegiatan: <strong>{{ $kegiatans->where('kegiatan_id', request('kegiatan_id'))->first()->kegiatan_name ?? '' }}</strong>
+                        | Kegiatan:
+                        <strong>{{ $kegiatans->where('kegiatan_id', request('kegiatan_id'))->first()->kegiatan_name ?? '' }}</strong>
                     @endif
                     @if(request('tahap'))
                         | Tahap: <strong>{{ request('tahap') }}</strong>
@@ -426,174 +509,232 @@
                 </div>
             @endif
 
-            {{-- LIST CARD --}}
+            {{-- ✅ GLOBAL COUNTER BIAR NOMOR LANJUT ANTAR HALAMAN --}}
+            @php
+                $globalNo = $data->firstItem() ?? 1;
+            @endphp
+
+            {{-- ✅ LIST PER PTK --}}
             <div class="hi-list">
-                @foreach ($data as $index => $row)
+                @foreach($groups as $nipKey => $rows)
                     @php
-                        $info = $row->rekomendasi_info ?? [];
+                        $first = $rows->first();
 
-                        $jenjang = $row->jenjang_jabatan ?? '-';
-                        $levelJawaban = (int)($row->level_jawaban ?? 0);
+                        $infoFirstRaw = $first->rekomendasi_info ?? [];
+                        if (is_string($infoFirstRaw)) {
+                            $infoFirst = json_decode($infoFirstRaw, true) ?: [];
+                        } elseif (is_object($infoFirstRaw)) {
+                            $infoFirst = (array) $infoFirstRaw;
+                        } elseif ($infoFirstRaw instanceof \Illuminate\Support\Collection) {
+                            $infoFirst = $infoFirstRaw->toArray();
+                        } elseif (is_array($infoFirstRaw)) {
+                            $infoFirst = $infoFirstRaw;
+                        } else {
+                            $infoFirst = [];
+                        }
 
-                        $levelMin = (int)($info['level_min'] ?? 0);
-                        $levelMax = (int)($info['level_max'] ?? 0);
-
-                        $status = $info['status'] ?? '-';
-                        $statusClass = $info['status_class'] ?? 'secondary';
-
-                        $rekomendasiGap = $info['rekomendasi_gap'] ?? [];
-                        $cid = 'rek_' . $loop->index . '_' . preg_replace('/[^a-zA-Z0-9]/', '', (string)($row->nip ?? 'x'));
+                        $jenjang = $first->jenjang_jabatan ?? '-';
+                        $levelMinFirst = (int)($infoFirst['level_min'] ?? 0);
+                        $levelMaxFirst = (int)($infoFirst['level_max'] ?? 0);
                     @endphp
 
-                    <div class="hi-item">
-                        <div class="hi-item-top">
-                            <div class="d-flex align-items-center" style="gap:12px;">
-                                <div class="hi-no">{{ $data->firstItem() + $index }}</div>
-                                <div>
-                                    <div class="fw-bold" style="color:var(--mm-text);">
-                                        {{ $row->sub_indikator_name }}
-                                    </div>
-                                    <div class="text-muted small fw-semibold">
-                                        Kode: {{ $row->sub_indikator_code }}
-                                    </div>
+                    <div class="ptk-card">
+
+                        {{-- ✅ IDENTITAS SEKALI (JADI CARD PROFIL) --}}
+                        <div class="ptk-head">
+                            <div class="ptk-profile">
+                                <div class="ptk-avatar">
+                                    <i class="ri-user-3-line"></i>
                                 </div>
-                            </div>
 
-                            <div class="hi-status">
-                                <span class="badge bg-{{ $statusClass }}-subtle text-{{ $statusClass }}">
-                                    {{ $status }}
-                                </span>
-                                <small>
-                                    {{ (int)($info['level_dicapai_count'] ?? 0) }}/{{ (int)($info['total_level'] ?? 0) }} level
-                                </small>
-                            </div>
-                        </div>
+                                <div class="ptk-profile-body">
+                                    <div class="ptk-name">{{ $first->nama }}</div>
 
-                        <div class="hi-item-body">
-                            <div class="row g-3">
-                                <div class="col-lg-4">
-                                    <div class="hi-identity">
-                                        <div class="nm">{{ $row->nama }}</div>
-
-                                        <div class="kv">
+                                    <div class="ptk-lines">
+                                        <div class="ptk-line">
                                             <div class="k">NIP</div>
-                                            <div class="v">{{ $row->nip }}</div>
+                                            <div class="v">{{ $first->nip }}</div>
                                         </div>
-                                        <div class="kv">
+
+                                        <div class="ptk-line">
                                             <div class="k">Jenjang</div>
                                             <div class="v">{{ $jenjang }}</div>
                                         </div>
-                                        <div class="kv">
+
+                                        <div class="ptk-line">
                                             <div class="k">Target</div>
-                                            <div class="v">Level {{ $levelMin }}–{{ $levelMax }}</div>
-                                        </div>
-
-                                        <div class="inst">
-                                            <i class="ri-building-4-line me-1"></i>{{ $row->instansi }}
+                                            <div class="v">Level {{ $levelMinFirst }} – {{ $levelMaxFirst }}</div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="col-lg-4">
-                                    <div class="hi-box">
-                                        <div class="ttl">
-                                            <i class="ri-award-line"></i> Level Dicapai
-                                        </div>
-
-                                        @if($levelJawaban > 0)
-                                            <span class="badge bg-{{ $levelColors[$levelJawaban] ?? 'secondary' }}-subtle text-{{ $levelColors[$levelJawaban] ?? 'secondary' }} px-3 py-2"
-                                                  style="border-radius:999px; font-weight:900;">
-                                                Level {{ $levelJawaban }}
-                                            </span>
-                                            <div class="subttl">
-                                                {{ $levelNames[$levelJawaban] ?? '' }}
-                                            </div>
-                                        @else
-                                            <span class="badge bg-secondary px-3 py-2" style="border-radius:999px;">-</span>
-                                        @endif
-
-                                        <hr style="border-color:rgba(229,231,235,.9);">
-
-                                        <div class="ttl mb-1">
-                                            <i class="ri-flag-line"></i> Level Harus
-                                        </div>
-                                        <div class="hi-levels">
-                                            @for($i = $levelMin; $i <= $levelMax; $i++)
-                                                <span class="badge bg-{{ $levelColors[$i] ?? 'secondary' }}-subtle text-{{ $levelColors[$i] ?? 'secondary' }}"
-                                                      style="border-radius:999px; padding:8px 12px; font-weight:900;">
-                                                    Level {{ $i }}
-                                                </span>
-                                            @endfor
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-4">
-                                    <div class="hi-box">
-                                        <div class="ttl">
-                                            <i class="ri-lightbulb-flash-line"></i> Rekomendasi (GAP)
-                                        </div>
-
-                                        @if(count($rekomendasiGap) > 0)
-                                            <div class="d-grid gap-2">
-                                                @foreach($rekomendasiGap as $rkIndex => $rek)
-                                                    @php
-                                                        $rekLevel = (int)($rek['level'] ?? 0);
-                                                        $rekText  = (string)($rek['rekomendasi'] ?? '');
-                                                        $short    = \Illuminate\Support\Str::limit($rekText, 160);
-                                                        $needMore = strlen($rekText) > 160;
-                                                        $collapseId = $cid . '_' . $rkIndex;
-                                                    @endphp
-
-                                                    <div class="hi-rek">
-                                                        <div class="top">
-                                                            <span class="badge bg-danger-subtle text-danger"
-                                                                  style="border-radius:999px; font-weight:900; padding:8px 12px;">
-                                                                Gap Level {{ $rekLevel }}
-                                                            </span>
-                                                            <small class="text-muted fw-semibold">
-                                                                {{ $levelNames[$rekLevel] ?? '' }}
-                                                            </small>
-                                                        </div>
-
-                                                        <div class="desc">
-                                                            {{ $short }}
-                                                        </div>
-
-                                                        @if($needMore)
-                                                            <button type="button"
-                                                                    class="btn btn-sm btn-outline-primary mt-2"
-                                                                    data-bs-toggle="collapse"
-                                                                    data-bs-target="#{{ $collapseId }}"
-                                                                    aria-expanded="false"
-                                                                    style="border-radius:10px; font-weight:900;">
-                                                                Selengkapnya
-                                                            </button>
-                                                            <div class="collapse mt-2" id="{{ $collapseId }}">
-                                                                <div class="small text-muted fw-semibold" style="line-height:1.35;">
-                                                                    {{ $rekText }}
-                                                                </div>
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            <div class="text-center p-2">
-                                                <span class="badge bg-success-subtle text-success px-3 py-2" style="border-radius:999px; font-weight:900;">
-                                                    <i class="ri-check-line me-1"></i> Sudah mencapai semua level
-                                                </span>
-                                                @if(isset($info['rekomendasi_dicapai']) && count($info['rekomendasi_dicapai']) > 0)
-                                                    <div class="mt-2 small text-muted fw-semibold">
-                                                        <em>Telah mencapai level {{ $levelMax }}</em>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        @endif
+                                    <div class="ptk-instansi">
+                                        <i class="ri-building-4-line"></i>
+                                        <span>{{ $first->instansi }}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        {{-- ✅ SEMUA INDIKATOR JADI 1 CARD --}}
+                        <div class="ptk-body">
+                            <div class="indikator-card">
+                                <div class="head">
+                                    <p class="ttl mb-0"><i class="ri-list-check-2"></i> Indikator & Rekomendasi</p>
+                                    <div class="count">{{ $rows->count() }} indikator (di halaman ini)</div>
+                                </div>
+
+                                @foreach($rows->values() as $idx => $row)
+                                    @php
+                                        $infoRaw = $row->rekomendasi_info ?? [];
+                                        if (is_string($infoRaw)) {
+                                            $info = json_decode($infoRaw, true) ?: [];
+                                        } elseif (is_object($infoRaw)) {
+                                            $info = (array) $infoRaw;
+                                        } elseif ($infoRaw instanceof \Illuminate\Support\Collection) {
+                                            $info = $infoRaw->toArray();
+                                        } elseif (is_array($infoRaw)) {
+                                            $info = $infoRaw;
+                                        } else {
+                                            $info = [];
+                                        }
+
+                                        $levelJawaban = (int)($row->level_jawaban ?? 0);
+                                        $levelMin = (int)($info['level_min'] ?? 0);
+                                        $levelMax = (int)($info['level_max'] ?? 0);
+
+                                        $rekomendasiGap = $info['rekomendasi_gap'] ?? [];
+                                        if (is_string($rekomendasiGap)) {
+                                            $rekomendasiGap = json_decode($rekomendasiGap, true) ?: [];
+                                        } elseif (is_object($rekomendasiGap)) {
+                                            $rekomendasiGap = (array) $rekomendasiGap;
+                                        } elseif (!is_array($rekomendasiGap)) {
+                                            $rekomendasiGap = [];
+                                        }
+
+                                        // ✅ NOMOR GLOBAL: lanjut antar halaman
+                                        $nomor = $globalNo;
+                                        $globalNo++;
+
+                                        $cid = 'rek_' . preg_replace('/[^a-zA-Z0-9]/', '', (string)($row->nip ?? 'x')) . '_' . $idx;
+                                    @endphp
+
+                                    <div class="indikator-row">
+                                        <div class="indikator-grid">
+
+                                            {{-- NOMOR --}}
+                                            <div>
+                                                <div class="cell-title">Nomor</div>
+                                                <div class="no-box">{{ $nomor }}</div>
+                                            </div>
+
+                                            {{-- LEVEL (DICAPAI + HARUS) --}}
+                                            <div>
+                                                <div class="cell-title">Level yang dicapai</div>
+
+                                                <div class="lv-box">
+                                                    @if($levelJawaban > 0)
+                                                        <span class="badge bg-{{ $levelColors[$levelJawaban] ?? 'secondary' }}-subtle text-{{ $levelColors[$levelJawaban] ?? 'secondary' }}"
+                                                              style="border-radius:999px; padding:8px 12px; font-weight:900;">
+                                                            Level {{ $levelJawaban }}
+                                                        </span>
+                                                        <div class="mt-2" style="color:var(--mm-muted); font-weight:800; font-size:12px;">
+                                                            {{ $levelNames[$levelJawaban] ?? '' }}
+                                                        </div>
+                                                    @else
+                                                        <span class="badge bg-secondary"
+                                                              style="border-radius:999px; padding:8px 12px; font-weight:900;">-</span>
+                                                    @endif
+
+                                                    <div class="lv-sub">
+                                                        <i class="ri-flag-line"></i>
+                                                        <span>Level yang harus</span>
+                                                    </div>
+
+                                                    <div class="lv-badges">
+                                                        @for($i = $levelMin; $i <= $levelMax; $i++)
+                                                            <span class="badge bg-{{ $levelColors[$i] ?? 'secondary' }}-subtle text-{{ $levelColors[$i] ?? 'secondary' }}"
+                                                                  style="border-radius:999px; padding:8px 12px; font-weight:900;">
+                                                                Lv {{ $i }}
+                                                            </span>
+                                                        @endfor
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- INDIKATOR --}}
+                                            <div>
+                                                <div class="cell-title">Indikator</div>
+                                                <div class="ind-box">
+                                                    <div class="ind-name">{{ $row->sub_indikator_name }}</div>
+                                                    <div class="ind-code">
+                                                        <i class="ri-hashtag"></i>
+                                                        <span>Kode: <strong>{{ $row->sub_indikator_code }}</strong></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- REKOMENDASI GAP --}}
+                                            <div>
+                                                <div class="cell-title">Rekomendasi GAP</div>
+                                                <div class="rek-box">
+                                                    @if(count($rekomendasiGap) > 0)
+                                                        @foreach($rekomendasiGap as $rkIndex => $rek)
+                                                            @php
+                                                                $rekLevel = (int)($rek['level'] ?? 0);
+                                                                $rekText  = (string)($rek['rekomendasi'] ?? '');
+                                                                $short    = \Illuminate\Support\Str::limit($rekText, 160);
+                                                                $needMore = strlen($rekText) > 160;
+                                                                $collapseId = $cid . '_' . $rkIndex;
+                                                            @endphp
+
+                                                            <div class="rek-item">
+                                                                <div class="rek-top">
+                                                                    <span class="badge bg-danger-subtle text-danger"
+                                                                          style="border-radius:999px; font-weight:900; padding:8px 12px;">
+                                                                        Gap Level {{ $rekLevel }}
+                                                                    </span>
+                                                                    <small class="text-muted fw-semibold">
+                                                                        {{ $levelNames[$rekLevel] ?? '' }}
+                                                                    </small>
+                                                                </div>
+
+                                                                <div class="rek-desc">{{ $short }}</div>
+
+                                                                @if($needMore)
+                                                                    <button type="button"
+                                                                            class="btn btn-sm btn-outline-primary mt-2"
+                                                                            data-bs-toggle="collapse"
+                                                                            data-bs-target="#{{ $collapseId }}"
+                                                                            aria-expanded="false"
+                                                                            style="border-radius:10px; font-weight:900;">
+                                                                        Selengkapnya
+                                                                    </button>
+                                                                    <div class="collapse mt-2" id="{{ $collapseId }}">
+                                                                        <div class="small text-muted fw-semibold" style="line-height:1.35;">
+                                                                            {{ $rekText }}
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        @endforeach
+                                                    @else
+                                                        <div class="text-center p-2">
+                                                            <span class="badge bg-success-subtle text-success px-3 py-2"
+                                                                  style="border-radius:999px; font-weight:900;">
+                                                                <i class="ri-check-line me-1"></i> Memenuhi standar kompetensi jabatan
+                                                            </span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                @endforeach
+
+                            </div>
+                        </div>
+
                     </div>
                 @endforeach
             </div>
