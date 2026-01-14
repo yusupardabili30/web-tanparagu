@@ -1,4 +1,16 @@
-<div class="modal fade zoomIn" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<style>
+    .btn-primary{
+    background:#1a5bb8 !important;
+    border-color:#1a5bb8 !important;
+    }
+    .btn-primary:hover{
+        background:#174fa1 !important;
+        border-color:#174fa1 !important;
+    }
+    .btn-primary:focus{
+        box-shadow: 0 0 0 .25rem rgba(26,91,184,.25) !important;
+    }
+</style><div class="modal fade zoomIn" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0">
             <div class="modal-header p-3 bg-info-subtle">
@@ -114,7 +126,7 @@
                         <div class="modal-footer">
                             <div class="hstack gap-2 justify-content-end">
                                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-success" id="add-btn">Tambah {{ $tittle }}</button>
+                                <button type="submit" class="btn btn-primary" id="add-btn">Tambah {{ $tittle }}</button>
                             </div>
                         </div>
                     </div>
