@@ -29,7 +29,7 @@ class PtkController extends Controller
         $kegiatan_id = Hashids::decode($encode_kegiatan_id)[0];
 
         // Ambil data PTK berdasarkan NIP dengan relasi
-        $ptk = Ptk::with(['pangkatJabatan', 'kota', 'sekolah'])
+        $ptk = Ptk::with(['pangkatJabatan', 'kota', 'sekolah', 'jenisPtk', 'pangkatGolongan'])
             ->where('nip', $nip)
             ->first();
 

@@ -13,7 +13,7 @@ class Ptk extends Model
     protected $primaryKey = 'ptk_id';
 
     protected $fillable = [
-        'ptk_id', // Primary key
+        'ptk_id',
         'nik',
         'nip',
         'nuptk',
@@ -35,7 +35,8 @@ class Ptk extends Model
         'alamat_kantor',
         'alamat_kantor_kota',
         'no_rekening',
-        'instansi', // TAMBAHKAN INI
+        'jenis_ptk_id', // TAMBAHKAN INI
+        'pangkat_golongan_id', // TAMBAHKAN INI
         'last_update'
     ];
 
@@ -62,6 +63,18 @@ class Ptk extends Model
     public function sekolah()
     {
         return $this->belongsTo(Sekolah::class, 'sekolah_id', 'sekolah_id');
+    }
+
+    // Relasi ke JenisPtk (TAMBAHKAN INI)
+    public function jenisPtk()
+    {
+        return $this->belongsTo(JenisPtk::class, 'jenis_ptk_id', 'jenis_ptk_id');
+    }
+
+    // Relasi ke PangkatGolongan (TAMBAHKAN INI)
+    public function pangkatGolongan()
+    {
+        return $this->belongsTo(PangkatGolongan::class, 'pangkat_golongan_id', 'pangkat_golongan_id');
     }
 
     // Accessor untuk mendapatkan nama jabatan dari relasi pangkatJabatan
@@ -94,6 +107,18 @@ class Ptk extends Model
         return $this->pangkatJabatan ? $this->pangkatJabatan->pangkat : null;
     }
 
+    // Accessor untuk mendapatkan jenis PTK (TAMBAHKAN INI)
+    public function getJenisPtkNamaAttribute()
+    {
+        return $this->jenisPtk ? $this->jenisPtk->jenis_ptk : null;
+    }
+
+    // Accessor untuk mendapatkan golongan (TAMBAHKAN INI)
+    public function getGolonganAttribute()
+    {
+        return $this->pangkatGolongan ? $this->pangkatGolongan->golongan : null;
+    }
+
     // Accessor untuk format tanggal lahir
     public function getTglLahirFormattedAttribute()
     {
@@ -114,6 +139,7 @@ class Ptk extends Model
             ->whereNotNull('email')
             ->whereNotNull('no_hp');
     }
+
     // Relasi ke PtkJawaban
     public function jawaban()
     {
