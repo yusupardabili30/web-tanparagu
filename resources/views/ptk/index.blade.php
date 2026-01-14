@@ -134,6 +134,35 @@
                                 <td>: {{ $ptk->pendidikan }}</td>
                             </tr>
                             @endif
+                            <!-- Dalam tabel profil, tambahkan setelah data agama/pendidikan -->
+@if($ptk->jenisPtk)
+<tr>
+    <td class="fw-semibold">Jenis PTK</td>
+    <td>: {{ $ptk->jenisPtk->jenis_ptk }}</td>
+</tr>
+@endif
+
+<!-- Pangkat Jabatan -->
+@if($ptk->pangkatJabatan)
+<tr>
+    <td class="fw-semibold">Jenjang Jabatan</td>
+    <td>: {{ $ptk->pangkatJabatan->jenjang_jabatan }}
+        @if($ptk->pangkatJabatan->pangkat)
+            - {{ $ptk->pangkatJabatan->pangkat }}
+        @endif
+        @if($ptk->pangkatJabatan->golongan_ruang)
+            ({{ $ptk->pangkatJabatan->golongan_ruang }})
+        @endif
+    </td>
+</tr>
+@endif
+<!-- Jika ada pangkat golongan -->
+@if($ptk->pangkatGolongan)
+<tr>
+    <td class="fw-semibold">Golongan</td>
+    <td>: {{ $ptk->pangkatGolongan->pangkat }} ({{ $ptk->pangkatGolongan->golongan }})</td>
+</tr>
+@endif
                             @if($ptk->sekolah)
                             <tr>
                                 <td class="fw-semibold">Sekolah</td>

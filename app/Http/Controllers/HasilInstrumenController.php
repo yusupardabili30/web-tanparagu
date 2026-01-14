@@ -99,13 +99,13 @@ class HasilInstrumenController extends Controller
     {
         // 1. Tentukan rentang level berdasarkan jenjang jabatan
         $levelRanges = [
-            'Guru Pertama' => ['min' => 2, 'max' => 2],  // Hanya level 2
-            'Guru Muda'    => ['min' => 2, 'max' => 3],  // Level 2-3
-            'Guru Madya'   => ['min' => 2, 'max' => 4],  // Level 2-4
-            'Guru Utama'   => ['min' => 2, 'max' => 5]   // Level 2-5
+            'Pertama' => ['min' => 2, 'max' => 2],  // Hanya level 2
+            'Muda'    => ['min' => 2, 'max' => 3],  // Level 2-3
+            'Madya'   => ['min' => 2, 'max' => 4],  // Level 2-4
+            'Utama'   => ['min' => 2, 'max' => 5]   // Level 2-5
         ];
 
-        $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Guru Pertama'];
+        $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Pertama'];
         $levelMin = $range['min'];
         $levelMax = $range['max'];
 

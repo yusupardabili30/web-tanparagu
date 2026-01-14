@@ -6,9 +6,10 @@ use App\Models\Kegiatan;
 use App\Models\Ptk;
 use App\Models\PangkatJabatan;
 use App\Models\Kota;
+use App\Models\JenisPtk; // TAMBAHKAN INI
+use App\Models\PangkatGolongan; // TAMBAHKAN INI
 use App\Models\Agama;
 use App\Models\Sekolah;
-use App\Models\PtkJabatan;
 use Illuminate\Http\Request;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -39,10 +40,15 @@ class LockScreenController extends Controller
             ]);
         }
 
+
+        // TAMBAHKAN DATA JENIS PTK DAN PANGKAT GOLONGAN
+        $jenisPtk = JenisPtk::orderBy('jenis_ptk')->get();
+        $pangkatGolongans = PangkatGolongan::orderBy('pangkat_golongan_id')->get();
+
         // Ambil data untuk dropdown
         $pangkatJabatans = PangkatJabatan::orderBy('pangkat_jabatan_id')->get();
         $kotas = Kota::orderBy('nama_kota')->get();
-        $ptkJabatans = PtkJabatan::orderBy('nama_jabatan')->get();
+
         // Ambil 10 sekolah pertama untuk inisialisasi
         $sekolahs = Sekolah::orderBy('nama_sekolah')->limit(100)->get();
         // AMBIL DATA AGAMA DARI DATABASE
@@ -55,8 +61,9 @@ class LockScreenController extends Controller
             'kegiatan' => $kegiatan,
             'pangkatJabatans' => $pangkatJabatans,
             'kotas' => $kotas,
-            'ptkJabatans' => $ptkJabatans,
             'sekolahs' => $sekolahs,
+            'jenisPtk' => $jenisPtk, // TAMBAHKAN INI
+            'pangkatGolongans' => $pangkatGolongans, // TAMBAHKAN INI
             'agamas' => $agamas
         ]);
     }
@@ -129,7 +136,8 @@ class LockScreenController extends Controller
             'tempat_lahir' => 'required|max:45',
             'tgl_lahir' => 'required|date',
             'pangkat_jabatan_id' => 'required|exists:pangkat_jabatan,pangkat_jabatan_id',
-            'id_jabatan' => 'nullable|exists:ptk_jabatan,id_jabatan',
+            'jenis_ptk_id' => 'nullable|exists:jenis_ptk,jenis_ptk_id', // TAMBAHKAN VALIDASI
+            'pangkat_golongan_id' => 'nullable|exists:pangkat_golongan,pangkat_golongan_id', // TAMBAHKAN VALIDASI
             'email' => 'required|email|max:100',
             'no_hp' => 'required|max:16',
             'agama' => 'nullable|max:45',
@@ -178,7 +186,8 @@ class LockScreenController extends Controller
                 'tempat_lahir' => $request->tempat_lahir,
                 'tgl_lahir' => $request->tgl_lahir,
                 'pangkat_jabatan_id' => $request->pangkat_jabatan_id,
-                'id_jabatan' => $request->id_jabatan,
+                'jenis_ptk_id' => $request->jenis_ptk_id, // TAMBAHKAN INI
+                'pangkat_golongan_id' => $request->pangkat_golongan_id, // TAMBAHKAN INI
                 'email' => $request->email,
                 'no_hp' => $request->no_hp,
                 'npwp' => $request->npwp,
