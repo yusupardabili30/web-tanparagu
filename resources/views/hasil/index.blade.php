@@ -566,11 +566,6 @@
                                             <div class="v">Level {{ $levelMinFirst }} – {{ $levelMaxFirst }}</div>
                                         </div>
                                     </div>
-
-                                    <div class="ptk-instansi">
-                                        <i class="ri-building-4-line"></i>
-                                        <span>{{ $first->instansi }}</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>

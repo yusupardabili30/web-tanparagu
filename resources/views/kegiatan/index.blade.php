@@ -51,12 +51,12 @@
         content:"";
         position:absolute;
         inset:0;
-        background-image: url('{{ asset('build/images/baduy.jpg') }}');
+        background-image: url("{{ asset('build/images/baduy.jpg') }}");
         background-repeat: repeat;
-        background-size: 140px auto;      /* ✅ kecil & rapet */
+        background-size: 140px auto;
         background-position: center;
-        opacity: .42;                    /* ✅ halus */
-        filter: grayscale(100%) contrast(1.05);
+        opacity: .55;
+        filter: grayscale(100%) contrast(1.15);
         z-index: 0;
     }
 
@@ -115,7 +115,7 @@
 
     .hero-sub{
         margin-top: 4px;
-        font-weight: 600;
+        font-weight: 500;
         font-size: 13px;
         color: rgba(255,255,255,.92);
         text-shadow: 0 2px 12px rgba(0,0,0,.35);
@@ -187,7 +187,7 @@
         vertical-align: middle;
         border-bottom: 1px solid rgba(229,231,235,.75);
         color: var(--ink);
-        font-weight: 600;
+        font-weight: 500;
         font-size: 13.5px;
         background: #fff;
     }
@@ -204,7 +204,7 @@
 
     .cell-small{
         color: var(--muted) !important;
-        font-weight: 600 !important;
+        font-weight: 500 !important;
     }
 
     .url-wrap{
