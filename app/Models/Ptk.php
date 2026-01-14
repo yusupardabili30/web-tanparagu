@@ -22,6 +22,7 @@ class Ptk extends Model
         'tempat_lahir',
         'tgl_lahir',
         'pangkat_jabatan_id',
+        'id_jabatan',
         'agama',
         'pendidikan',
         'no_hp',
@@ -62,6 +63,20 @@ class Ptk extends Model
     public function sekolah()
     {
         return $this->belongsTo(Sekolah::class, 'sekolah_id', 'sekolah_id');
+    }
+
+    // Relasi ke PtkJabatan (tambahkan ini)
+    public function ptkJabatan()
+    {
+        return $this->belongsTo(PtkJabatan::class, 'id_jabatan', 'id_jabatan');
+    }
+
+
+
+    // Accessor untuk mendapatkan nama jabatan dari ptk_jabatan
+    public function getNamaJabatanAttribute()
+    {
+        return $this->ptkJabatan ? $this->ptkJabatan->nama_jabatan : null;
     }
 
     // Accessor untuk mendapatkan nama jabatan dari relasi pangkatJabatan

@@ -504,7 +504,22 @@
                                 </div>
                             </div>
 
-                            <!-- Jabatan -->
+
+                            <!-- Jabatan PTK (tambahkan setelah jabatan pangkat) -->
+<div class="col-md-6 mb-3">
+    <div class="mm-float">
+        <select name="id_jabatan" class="form-control">
+            <option value="" selected hidden></option>
+            @foreach($ptkJabatans as $jabatan)
+                <option value="{{ $jabatan->id_jabatan }}">
+                    {{ $jabatan->nama_jabatan }}
+                </option>
+            @endforeach
+        </select>
+        <label class="mm-label">Jenis PTK *</label>
+    </div>
+</div>
+                            <!-- Jenjang Jabatan -->
                             <div class="col-md-6 mb-3">
                                 <div class="mm-float">
                                     <select name="pangkat_jabatan_id" class="form-control" required>
@@ -517,7 +532,7 @@
                                         </option>
                                         @endforeach
                                     </select>
-                                    <label class="mm-label">Jabatan *</label>
+                                    <label class="mm-label">Jenjang Jabatan *</label>
                                 </div>
                             </div>
 
