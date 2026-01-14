@@ -32,7 +32,7 @@ class UiController extends Controller
         ];
 
         // Jika halaman yang dibuka BUKAN ui.grafik → langsung load view lain tanpa data
-        if ($page !== 'ui.grafik') {
+        if ($page !== 'ui.hasil') {
             return view($page);
         }
 
