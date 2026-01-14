@@ -2,45 +2,49 @@
 @section('mycontent')
 @php
 $tittle = $tittle ?? 'Hasil Instrumen PTK';
-// Ambil data kegiatan untuk dropdown langsung dari database
 $kegiatans = DB::table('kegiatan')->get();
 
-// Definisikan nama level
 $levelNames = [
-1 => 'Sangat Rendah',
-2 => 'Penerapan',
-3 => 'Analisis',
-4 => 'Evaluasi',
-5 => 'Pembimbingan Rekan Sejawat'
+    2 => 'Penerapan',
+    3 => 'Analisis', 
+    4 => 'Evaluasi',
+    5 => 'Pembimbingan'
+];
+
+$levelColors = [
+    2 => 'info',
+    3 => 'primary',
+    4 => 'warning',
+    5 => 'success'
+];
+
+$statusColors = [
+    'Mencapai Semua Level' => 'success',
+    'Mendekati Target' => 'warning',
+    'Perlu Peningkatan' => 'danger'
 ];
 @endphp
 
 <div class="container-fluid">
-    <!-- start page title -->
     <div class="row">
         <div class="col-12">
             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                 <h4 class="mb-sm-0">Daftar {{ $tittle }}</h4>
-
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
                         <li class="breadcrumb-item"><a href="javascript: void(0);">{{ $tittle }}</a></li>
                         <li class="breadcrumb-item active">Daftar {{ $tittle }}</li>
                     </ol>
                 </div>
-
             </div>
         </div>
     </div>
-    <!-- end page title -->
 
     <div class="row">
         <div class="col-lg-12">
             <div class="card" id="ticketsList">
-                <!-- Card Header dengan Search Form dan Export Buttons -->
                 <div class="card-header border-0">
                     <div class="d-flex flex-column">
-                        <!-- Title dan Action Buttons -->
                         <div class="d-flex align-items-center mb-3">
                             <h5 class="card-title mb-0 flex-grow-1">{{ $tittle }}</h5>
                             <div class="flex-shrink-0">
@@ -104,7 +108,6 @@ $levelNames = [
                     </div>
                 </div>
 
-                <!--end card-body-->
                 <div class="card-body">
                     @if($data->isEmpty())
                     <div class="alert alert-info">
@@ -137,138 +140,140 @@ $levelNames = [
                         <table class="table align-middle table-nowrap mb-0" id="ticketTable">
                             <thead>
                                 <tr>
-                                    <th scope="col" style="width: 40px;">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="checkAll" value="option">
-                                        </div>
-                                    </th>
-                                    <th class="sort" data-sort="id">ID</th>
-                                    <th class="sort" data-sort="kota">Kota</th>
-                                    <th class="sort" data-sort="nama">Nama</th>
-                                    <th class="sort" data-sort="nip">NIP</th>
-                                    <th class="sort" data-sort="jabatan">Jabatan</th>
-                                    <th class="sort" data-sort="instrumen">Kegiatan/Instrumen</th>
-                                    <th class="sort" data-sort="sub_indikator_code">Sub Indikator Code</th>
-                                    <th class="sort" data-sort="sub_indikator_name">Sub Indikator Name</th>
-                                    <th class="sort" data-sort="level">Level</th>
+                                    <th width="50">No</th>
+                                    <th>Nama</th>
+                                    <th>NIP</th>
+                                    <th>Jenjang</th>
+                                    <th>Sub Indikator</th>
+                                    <th>Level Dicapai</th>
+                                    <th>Level Harus</th>
+                                    <th>Status</th>
+                                    <th>Rekomendasi (GAP)</th>
                                 </tr>
                             </thead>
-                            <tbody class="list form-check-all" id="ticket-list-data">
-                                @foreach ($data as $row)
+                            <tbody>
+                                @foreach ($data as $index => $row)
                                 @php
-                                // Data langsung dari query join
-                                $kota = $row->nama_kota ?? '-';
-                                $nama = $row->nama_ptk ?? $row->nama ?? '-';
-                                $nip = $row->nip ?? '-';
-                                $jabatan = $row->pangkat_jabatan_id ?? '-';
-                                $kegiatan_name = $row->kegiatan_name ?? '-';
-                                $tahap = $row->tahap ?? '0';
-                                $level = $row->level ?? '0';
-                                $sub_indikator_code = $row->sub_indikator_code ?? '-';
-                                $sub_indikator_name = $row->sub_indikator_name ?? '-';
-                                $levelName = $levelNames[$level] ?? 'Tidak Diketahui';
+                                $info = $row->rekomendasi_info ?? null;
+                                $jenjang = $row->jenjang_jabatan ?? '-';
+                                $levelJawaban = $row->level_jawaban ?? 0;
+                                $levelMin = $info['level_min'] ?? 0;
+                                $levelMax = $info['level_max'] ?? 0;
+                                $status = $info['status'] ?? '-';
+                                $statusClass = $info['status_class'] ?? 'secondary';
+                                $rekomendasiGap = $info['rekomendasi_gap'] ?? [];
                                 @endphp
                                 <tr>
-                                    <th scope="row">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="checkAll" value="{{ $row->ptk_jawaban_id }}">
-                                        </div>
-                                    </th>
-                                    <td class="id">
-                                        {{ $row->ptk_jawaban_id }}
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>
+                                        <strong>{{ $row->nama }}</strong><br>
+                                        <small class="text-muted">{{ $row->instansi }}</small>
                                     </td>
-                                    <td class="kota">{{ $kota }}</td>
-                                    <td class="nama">{{ $nama }}</td>
-                                    <td class="nip">{{ $nip }}</td>
-                                    <td class="jabatan">
-                                        @if(!empty($row->pangkat))
-                                        {{ $row->pangkat }}
-                                        @if(!empty($row->jenjang_jabatan))
-                                        <br><small class="text-muted">{{ $row->jenjang_jabatan }}</small>
-                                        @endif
-                                        @if(!empty($row->golongan_ruang))
-                                        <br><small class="text-muted">Gol. {{ $row->golongan_ruang }}</small>
-                                        @endif
+                                    <td>{{ $row->nip }}</td>
+                                    <td>
+                                        <span class="fw-medium">{{ $jenjang }}</span><br>
+                                        <small class="text-muted">Level {{ $levelMin }}-{{ $levelMax }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium">{{ $row->sub_indikator_name }}</div>
+                                        <small class="text-muted">{{ $row->sub_indikator_code }}</small>
+                                    </td>
+                                    <td>
+                                        @if($levelJawaban > 0)
+                                        <span class="badge bg-{{ $levelColors[$levelJawaban] ?? 'secondary' }}-subtle text-{{ $levelColors[$levelJawaban] ?? 'secondary' }}">
+                                            Level {{ $levelJawaban }}
+                                        </span><br>
+                                        <small class="text-muted">{{ $levelNames[$levelJawaban] ?? '' }}</small>
                                         @else
-                                        -
+                                        <span class="badge bg-secondary">-</span>
                                         @endif
                                     </td>
-
-                                    <td class="instrumen">{{ $kegiatan_name }}</td>
-                                    <td class="sub_indikator_code">{{ $sub_indikator_code }}</td>
-                                    <td class="sub_indikator_name">
-                                        <div class="fw-medium">{{ $sub_indikator_name }}</div>
-                                    </td>
-                                    <td class="level">
-                                        @php
-                                        $levelColors = [
-                                        1 => 'info',
-                                        2 => 'info',
-                                        3 => 'info',
-                                        4 => 'info',
-                                        5 => 'info'
-                                        ];
-                                        $color = $levelColors[$level] ?? 'secondary';
-                                        @endphp
-                                        <div class="d-flex flex-column align-items-start">
-                                            <span class="badge bg-{{ $color }}-subtle text-{{ $color }} mb-1">
-                                                Level {{ $level }}
-                                            </span>
-                                            <small class="text-muted">{{ $levelName }}</small>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            @for($i = $levelMin; $i <= $levelMax; $i++)
+                                                <span class="badge bg-{{ $levelColors[$i] ?? 'secondary' }}-subtle text-{{ $levelColors[$i] ?? 'secondary' }} mb-1" style="font-size: 0.75rem;">
+                                                    Level {{ $i }}
+                                                </span>
+                                            @endfor
                                         </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ $statusClass }}-subtle text-{{ $statusClass }}">
+                                            {{ $status }}
+                                        </span><br>
+                                        <small class="text-muted">
+                                            {{ $info['level_dicapai_count'] ?? 0 }}/{{ $info['total_level'] ?? 0 }} level
+                                        </small>
+                                    </td>
+                                    <td>
+                                        @if(count($rekomendasiGap) > 0)
+                                        <div class="rekomendasi-gap">
+                                            @foreach($rekomendasiGap as $rek)
+                                            <div class="mb-2 p-2 border rounded bg-light">
+                                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                                    <span class="badge bg-danger-subtle text-danger">
+                                                        Gap Level {{ $rek['level'] }}
+                                                    </span>
+                                                    <small class="text-muted">{{ $levelNames[$rek['level']] ?? '' }}</small>
+                                                </div>
+                                                <div class="small">
+                                                    {{ Str::limit($rek['rekomendasi'], 150) }}
+                                                    @if(strlen($rek['rekomendasi']) > 150)
+                                                    <a href="javascript:void(0);" class="text-primary" 
+                                                       data-bs-toggle="tooltip" 
+                                                       title="{{ $rek['rekomendasi'] }}">
+                                                        ...selengkapnya
+                                                    </a>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        @else
+                                        <div class="text-center">
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="ri-check-line me-1"></i> Sudah mencapai semua level
+                                            </span>
+                                            @if(isset($info['rekomendasi_dicapai']) && count($info['rekomendasi_dicapai']) > 0)
+                                            <div class="mt-2 small text-muted">
+                                                <em>Telah mencapai level {{ $levelMax }}</em>
+                                            </div>
+                                            @endif
+                                        </div>
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                        
                         {{-- Pagination --}}
                         {!! $data->withQueryString()->links('pagination::bootstrap-5') !!}
                     </div>
-
-
+                    
+                   
+                                        
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     @endif
-
-
-                    <!--end delete modal -->
                 </div>
-                <!--end card-body-->
             </div>
-            <!--end card-->
         </div>
-        <!--end col-->
     </div>
-    <!--end row-->
 </div>
 @endsection
 
 @section('sipproja-js')
 <script>
-    // NOTIFIKASI SWEETALERT DARI CONTROLLER
-    @if(session('success'))
-    Swal.fire({
-        position: 'center',
-        icon: 'success',
-        title: '{{ session("success") }}',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true
-    });
-    @endif
-
-    @if(session('error'))
-    Swal.fire({
-        position: 'center',
-        icon: 'error',
-        title: '{{ session("error") }}',
-        showConfirmButton: true
-    });
-    @endif
-
-    // Tooltip untuk level
+    // Tooltip untuk rekomendasi
     document.addEventListener('DOMContentLoaded', function() {
-        var levelBadges = document.querySelectorAll('.level .badge');
-        levelBadges.forEach(function(badge) {
-            badge.setAttribute('title', 'Klik untuk info detail');
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     });
 </script>

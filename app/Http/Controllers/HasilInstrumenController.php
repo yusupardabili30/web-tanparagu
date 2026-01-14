@@ -21,7 +21,7 @@ class HasilInstrumenController extends Controller
             ->select(
                 'ptk_jawaban.ptk_jawaban_id',
                 'ptk_jawaban.tahap',
-                'ptk_jawaban.level',
+                'ptk_jawaban.level as level_jawaban',
                 'ptk_jawaban.sub_indikator_code',
                 'ptk_jawaban.sub_indikator_id',
                 'ptk_jawaban.bobot',
@@ -35,6 +35,7 @@ class HasilInstrumenController extends Controller
                 'pangkat_jabatan.golongan_ruang',
                 'pangkat_jabatan.pangkat',
                 'pangkat_jabatan.jenjang_jabatan',
+                'pangkat_jabatan.level_kompetensi',
                 // Ambil data dari tabel kota
                 'kota.nama_kota',
                 // Ambil data dari tabel sub_indikator
@@ -46,7 +47,7 @@ class HasilInstrumenController extends Controller
             ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
             ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
             ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
-            ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id'); // JOIN ke tabel sub_indikator
+            ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id');
 
         // Filter pencarian
         if ($request->filled('search')) {
@@ -57,7 +58,7 @@ class HasilInstrumenController extends Controller
                     ->orWhere('pangkat_jabatan.pangkat', 'like', "%{$search}%")
                     ->orWhere('pangkat_jabatan.jenjang_jabatan', 'like', "%{$search}%")
                     ->orWhere('kota.nama_kota', 'like', "%{$search}%")
-                    ->orWhere('sub_indikator.sub_indikator_name', 'like', "%{$search}%"); // Tambahkan pencarian sub_indikator_name
+                    ->orWhere('sub_indikator.sub_indikator_name', 'like', "%{$search}%");
             });
         }
 
@@ -71,11 +72,113 @@ class HasilInstrumenController extends Controller
 
         $data = $query->orderBy('ptk_jawaban.ptk_jawaban_id', 'desc')->paginate(10);
 
+        // Untuk setiap data, tambahkan rekomendasi dengan gap
+        foreach ($data as $item) {
+            $rekomendasiInfo = $this->getRekomendasiWithGap(
+                $item->jenjang_jabatan,
+                $item->level_jawaban,
+                $item->sub_indikator_id,
+                $item->tahap,
+                $item->entity,
+                $item->sub_indikator_code
+            );
+
+            $item->rekomendasi_info = $rekomendasiInfo;
+        }
+
         // Ambil semua kegiatan untuk dropdown
         $kegiatans = DB::table('kegiatan')->get();
 
         return view('hasil.index', compact('tittle', 'data', 'kegiatans'));
     }
+
+    /**
+     * Fungsi utama untuk mendapatkan rekomendasi dengan GAP level
+     */
+    private function getRekomendasiWithGap($jenjangJabatan, $levelJawaban, $subIndikatorId, $tahap, $entity, $subIndikatorCode)
+    {
+        // 1. Tentukan rentang level berdasarkan jenjang jabatan
+        $levelRanges = [
+            'Guru Pertama' => ['min' => 2, 'max' => 2],  // Hanya level 2
+            'Guru Muda'    => ['min' => 2, 'max' => 3],  // Level 2-3
+            'Guru Madya'   => ['min' => 2, 'max' => 4],  // Level 2-4
+            'Guru Utama'   => ['min' => 2, 'max' => 5]   // Level 2-5
+        ];
+
+        $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Guru Pertama'];
+        $levelMin = $range['min'];
+        $levelMax = $range['max'];
+
+        // 2. Ambil semua rekomendasi untuk jenjang ini
+        $rekomendasiSemua = DB::table('ptk_rekomendasi')
+            ->where('sub_indikator_id', $subIndikatorId)
+            ->where('tahap', $tahap)
+            ->where('entity', $entity)
+            ->where('sub_indikator_code', $subIndikatorCode)
+            ->whereBetween('level', [$levelMin, $levelMax])
+            ->orderBy('level', 'asc')
+            ->get();
+
+        // 3. Pisahkan: sudah dicapai vs belum dicapai (GAP)
+        $rekomendasiDicapai = [];
+        $rekomendasiGap = []; // Level yang belum dicapai
+
+        foreach ($rekomendasiSemua as $rek) {
+            $gap = $rek->level - $levelJawaban;
+
+            if ($gap <= 0) {
+                // Sudah dicapai atau melampaui
+                $rekomendasiDicapai[] = [
+                    'level' => $rek->level,
+                    'rekomendasi' => $rek->rekomendasi,
+                    'gap' => $gap, // negatif atau 0
+                    'status' => $gap < 0 ? 'melampaui' : 'tepat'
+                ];
+            } else {
+                // Belum dicapai (GAP)
+                $rekomendasiGap[] = [
+                    'level' => $rek->level,
+                    'rekomendasi' => $rek->rekomendasi,
+                    'gap' => $gap, // positif
+                    'status' => 'belum'
+                ];
+            }
+        }
+
+        // 4. Hitung statistik
+        $totalLevelHarus = ($levelMax - $levelMin) + 1;
+        $levelDicapaiCount = count($rekomendasiDicapai);
+        $levelGapCount = count($rekomendasiGap);
+
+        // 5. Tentukan status keseluruhan
+        if ($levelGapCount == 0) {
+            $status = 'Mencapai Semua Level';
+            $statusClass = 'success';
+        } elseif ($levelGapCount == 1 && $levelMax - $levelJawaban == 1) {
+            $status = 'Mendekati Target';
+            $statusClass = 'warning';
+        } else {
+            $status = 'Perlu Peningkatan';
+            $statusClass = 'danger';
+        }
+
+        return [
+            'jenjang' => $jenjangJabatan,
+            'level_jawaban' => $levelJawaban,
+            'level_min' => $levelMin,
+            'level_max' => $levelMax,
+            'rekomendasi_dicapai' => $rekomendasiDicapai,
+            'rekomendasi_gap' => $rekomendasiGap, // Yang belum dicapai
+            'total_level' => $totalLevelHarus,
+            'level_dicapai_count' => $levelDicapaiCount,
+            'level_gap_count' => $levelGapCount,
+            'persentase' => $totalLevelHarus > 0 ? round(($levelDicapaiCount / $totalLevelHarus) * 100, 1) : 0,
+            'status' => $status,
+            'status_class' => $statusClass,
+            'gap_terbesar' => $levelGapCount > 0 ? max(array_column($rekomendasiGap, 'gap')) : 0
+        ];
+    }
+
     /**
      * Export PDF per PTK
      */
@@ -86,8 +189,9 @@ class HasilInstrumenController extends Controller
             ->select(
                 'ptk_jawaban.ptk_jawaban_id',
                 'ptk_jawaban.tahap',
-                'ptk_jawaban.level',
+                'ptk_jawaban.level as level_jawaban',
                 'ptk_jawaban.sub_indikator_code',
+                'ptk_jawaban.sub_indikator_id',
                 'ptk_jawaban.bobot',
                 'ptk_jawaban.created_at',
                 'ptk.nama',
@@ -100,12 +204,16 @@ class HasilInstrumenController extends Controller
                 'pangkat_jabatan.golongan_ruang',
                 'pangkat_jabatan.pangkat',
                 'pangkat_jabatan.jenjang_jabatan',
+                'pangkat_jabatan.level_kompetensi',
+                // Ambil data sub indikator
+                'sub_indikator.sub_indikator_name',
                 'kegiatan.kegiatan_name',
                 'kegiatan.entity'
             )
             ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
             ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
             ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
             ->where('ptk_jawaban.ptk_id', $ptk_id)
             ->get();
 
@@ -113,32 +221,49 @@ class HasilInstrumenController extends Controller
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
 
+        // Tambahkan rekomendasi dengan gap untuk setiap data
+        foreach ($data as $item) {
+            $rekomendasiInfo = $this->getRekomendasiWithGap(
+                $item->jenjang_jabatan,
+                $item->level_jawaban,
+                $item->sub_indikator_id,
+                $item->tahap,
+                $item->entity,
+                $item->sub_indikator_code
+            );
+
+            $item->rekomendasi_info = $rekomendasiInfo;
+        }
+
         $totalSkor = $data->sum('bobot');
         $totalIndikator = $data->count();
-        $ptk = $data->first(); // Ambil data PTK dari hasil pertama
+        $ptk = $data->first();
 
-        // Cek apakah DomPDF terinstall
+
+
         if (class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('hasil.export-pdf', [
                 'data' => $data,
                 'ptk' => $ptk,
                 'totalSkor' => $totalSkor,
                 'totalIndikator' => $totalIndikator,
+
                 'tanggal' => now()->format('d F Y H:i:s')
             ]);
 
             return $pdf->download('hasil-instrumen-' . ($ptk->nip ?? 'unknown') . '-' . date('Ymd-His') . '.pdf');
         } else {
-            // Jika DomPDF tidak terinstall, kembalikan ke view HTML
             return view('hasil.export-pdf', [
                 'data' => $data,
                 'ptk' => $ptk,
                 'totalSkor' => $totalSkor,
                 'totalIndikator' => $totalIndikator,
+
                 'tanggal' => now()->format('d F Y H:i:s')
             ]);
         }
     }
+
 
     /**
      * Export PDF semua data dengan filter

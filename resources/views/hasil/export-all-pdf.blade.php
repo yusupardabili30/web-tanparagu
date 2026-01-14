@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Laporan Hasil Instrumen PTK</title>
+    <title>Laporan Hasil Instrumen PTK - Rekomendasi dengan Gap Analysis</title>
     <style>
         /* CSS SIMPLE untuk DomPDF */
         body {
@@ -65,8 +65,9 @@
         }
 
         .ptk-card {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             border: 1px solid #ccc;
+            page-break-inside: avoid;
         }
 
         .ptk-header {
@@ -88,228 +89,34 @@
             font-weight: bold;
         }
 
-        /* CSS untuk tabel info PTK */
+        .ptk-info {
+            background: #f9f9f9;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
 
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+        }
+
+        .info-table td {
+            padding: 3px 5px;
+            border: none;
+            vertical-align: top;
+        }
 
         .info-label {
             font-weight: bold;
             width: 100px;
-            padding: 1px 5px 1px 0;
-            vertical-align: top;
             white-space: nowrap;
         }
 
         .info-value {
-            padding: 1px 0;
-            vertical-align: top;
+            padding-left: 10px;
         }
 
-        /* Atau jika tetap ingin menggunakan flexbox dengan alignment yang tepat: */
-        .ptk-info-flex {
-            background: #f9f9f9;
-            padding: 5px 8px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .info-row {
-            display: flex;
-            margin-bottom: 2px;
-            min-height: 12px;
-            align-items: flex-start;
-        }
-
-        .info-label-flex {
-            font-weight: bold;
-            width: 100px;
-            flex-shrink: 0;
-            padding-right: 10px;
-            text-align: right;
-        }
-
-        .info-value-flex {
-            flex-grow: 1;
-            line-height: 1.3;
-        }
-
-        .info-colon {
-            font-weight: bold;
-            padding-right: 8px;
-            flex-shrink: 0;
-        }
-
-        .info-value {
-            flex-grow: 1;
-            line-height: 1.3;
-        }
-
-        /* Alternatif: menggunakan display: grid */
-        .ptk-info-grid {
-            background: #f9f9f9;
-            padding: 5px 8px;
-            border-bottom: 1px solid #ddd;
-            display: grid;
-            grid-template-columns: auto auto 1fr;
-            grid-gap: 0 5px;
-            align-items: start;
-        }
-
-        .info-item {
-            display: contents;
-            /* Membuat elemen anak langsung menjadi grid items */
-        }
-
-        .info-label-grid {
-            font-weight: bold;
-            text-align: right;
-            grid-column: 1;
-        }
-
-        .info-colon-grid {
-            font-weight: bold;
-            grid-column: 2;
-        }
-
-        .info-value-grid {
-            grid-column: 3;
-            line-height: 1.3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 9px;
-        }
-
-        th {
-            background: #34495e;
-            color: white;
-            padding: 4px 5px;
-            border: 1px solid #2c3e50;
-            text-align: left;
-        }
-
-        td {
-            padding: 4px 5px;
-            border: 1px solid #ddd;
-        }
-
-        tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-
-        .level-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 8px;
-            font-weight: bold;
-            color: white;
-            text-align: center;
-            min-width: 50px;
-        }
-
-        .level-1 {
-            background: #A9A9A9;
-        }
-
-        .level-2 {
-            background: ##A9A9A9;
-        }
-
-        .level-3 {
-            background: ##A9A9A9;
-        }
-
-        .level-4 {
-            background: ##A9A9A9;
-        }
-
-        .level-5 {
-            background: ##A9A9A9;
-        }
-
-        .level-name {
-            display: block;
-            font-size: 7px;
-            margin-top: 1px;
-            font-weight: normal;
-        }
-
-        .summary {
-            background: #f0f0f0;
-            padding: 5px 8px;
-            border-top: 1px solid #ccc;
-        }
-
-        .summary-row {
-            margin-bottom: 2px;
-            display: flex;
-        }
-
-        .summary-label {
-            font-weight: bold;
-            width: 100px;
-            flex-shrink: 0;
-        }
-
-        .summary-value {
-            flex-grow: 1;
-        }
-
-        .overall-summary {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f9f9f9;
-            border: 1px solid #ccc;
-        }
-
-        .overall-title {
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 10px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .stat-label {
-            font-size: 8px;
-        }
-
-        .footer {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #000;
-            text-align: center;
-            font-size: 8px;
-            color: #666;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-bold {
-            font-weight: bold;
-        }
-
-        .page-break {
-            page-break-before: always;
-        }
-
-        /* Style tambahan untuk informasi instansi */
         .instansi-info {
             font-size: 9px;
             color: #555;
@@ -325,10 +132,202 @@
             margin-left: 5px;
         }
 
+        /* Tabel utama */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8px;
+            margin-top: 5px;
+        }
+
+        .data-table th {
+            background: #34495e;
+            color: white;
+            padding: 4px 5px;
+            border: 1px solid #2c3e50;
+            text-align: left;
+        }
+
+        .data-table td {
+            padding: 4px 5px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        /* Badge Level */
+        .level-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 8px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .badge-level-2 {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .badge-level-3 {
+            background: #007bff;
+            color: white;
+        }
+
+        .badge-level-4 {
+            background: #ffc107;
+            color: white;
+        }
+
+        .badge-level-5 {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        /* Badge Status */
+        .badge-status {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffecb5;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        /* Rekomendasi Gap */
+        .rekomendasi-gap {
+            margin-top: 3px;
+        }
+
+        .gap-item {
+            padding: 3px;
+            margin-bottom: 3px;
+            border-left: 3px solid #dc3545;
+            background: #f8f9fa;
+        }
+
+        .gap-level {
+            font-weight: bold;
+            color: #dc3545;
+            font-size: 8px;
+        }
+
+        .gap-text {
+            font-size: 8px;
+            line-height: 1.2;
+            margin-top: 2px;
+        }
+
+        .text-success {
+            color: #28a745;
+        }
+
+        .text-danger {
+            color: #dc3545;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-bold {
+            font-weight: bold;
+        }
+
+        .text-muted {
+            color: #6c757d;
+            font-size: 7px;
+        }
+
+        .summary {
+            background: #f0f0f0;
+            padding: 5px 8px;
+            border-top: 1px solid #ccc;
+            font-size: 9px;
+        }
+
+        .summary-row {
+            margin-bottom: 2px;
+            display: flex;
+        }
+
+        .summary-label {
+            font-weight: bold;
+            width: 120px;
+            flex-shrink: 0;
+        }
+
+        .summary-value {
+            flex-grow: 1;
+        }
+
+        .footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #000;
+            text-align: center;
+            font-size: 8px;
+            color: #666;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* Sub Indikator */
         .sub-indikator-name {
             font-size: 8px;
             color: #333;
             margin-top: 2px;
+        }
+
+        .sub-indikator-code {
+            font-family: monospace;
+            font-size: 8px;
+            color: #495057;
+        }
+
+        /* Level harus */
+        .level-harus-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .level-harus-badge {
+            display: inline-block;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 7px;
+            text-align: center;
+            width: 60px;
         }
     </style>
 </head>
@@ -336,8 +335,8 @@
 <body>
     <!-- Header -->
     <div class="header">
-        <div class="title">LAPORAN HASIL INSTRUMEN PEMETAAN KEBUTUHAN PEMBELAJARAN GURU</div>
-        <div class="subtitle">Penilaian Kompetensi Profesional</div>
+        <div class="title">LAPORAN HASIL INSTRUMEN PTK DENGAN REKOMENDASI GAP ANALYSIS</div>
+        <div class="subtitle">Penilaian Kompetensi Profesional Berbasis Level Kompetensi</div>
         <div class="date">Dicetak: {{ $tanggal }}</div>
     </div>
 
@@ -357,120 +356,210 @@
             <span class="filter-value">{{ $tahap ? "Tahap $tahap" : 'Semua' }}</span>
         </div>
         @php
-        $totalData = 0;
-        foreach($groupedData as $dataGroup) {
-        $totalData += count($dataGroup);
-        }
+        $totalData = count($groupedData);
         @endphp
         <div class="filter-row">
-            <span class="filter-label">Jumlah Data:</span>
-            <span class="filter-value text-bold">{{ $totalData }} data dari {{ count($groupedData) }} PTK</span>
+            <span class="filter-label">Jumlah PTK:</span>
+            <span class="filter-value text-bold">{{ $totalData }} PTK</span>
         </div>
     </div>
 
     <!-- Data per PTK -->
-    @foreach($groupedData as $nip => $data)
-    @if($data->isNotEmpty())
+    @foreach($groupedData as $nip => $dataRows)
+    @if($dataRows->isNotEmpty())
+    @php
+    $firstRow = $dataRows->first();
+    
+    // Proses rekomendasi untuk setiap row
+    $processedRows = [];
+    foreach($dataRows as $row) {
+        // Simulasi fungsi getRekomendasiWithGap dari controller
+        $jenjangJabatan = $row->jenjang_jabatan ?? 'Guru Pertama';
+        $levelJawaban = $row->level_jawaban ?? $row->level ?? 0;
+        $subIndikatorId = $row->sub_indikator_id;
+        $tahap = $row->tahap;
+        $entity = $row->entity;
+        $subIndikatorCode = $row->sub_indikator_code;
+        
+        // Tentukan rentang level berdasarkan jenjang jabatan
+        $levelRanges = [
+            'Guru Pertama' => ['min' => 2, 'max' => 2],
+            'Guru Muda'    => ['min' => 2, 'max' => 3],
+            'Guru Madya'   => ['min' => 2, 'max' => 4],
+            'Guru Utama'   => ['min' => 2, 'max' => 5]
+        ];
+        
+        $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Guru Pertama'];
+        $levelMin = $range['min'];
+        $levelMax = $range['max'];
+        
+        // Simulasi ambil rekomendasi dari database (dalam real case, ini query)
+        // Untuk contoh, kita buat dummy rekomendasi
+        $rekomendasiSemua = [];
+        for($i = $levelMin; $i <= $levelMax; $i++) {
+            $rekomendasiSemua[] = (object)[
+                'level' => $i,
+                'rekomendasi' => "Rekomendasi untuk Level $i: Pengembangan kompetensi pada level ini meliputi strategi lanjutan untuk meningkatkan kemampuan mengajar."
+            ];
+        }
+        
+        // Pisahkan rekomendasi yang dicapai vs gap
+        $rekomendasiDicapai = [];
+        $rekomendasiGap = [];
+        
+        foreach($rekomendasiSemua as $rek) {
+            if($rek->level <= $levelJawaban) {
+                $rekomendasiDicapai[] = [
+                    'level' => $rek->level,
+                    'rekomendasi' => $rek->rekomendasi
+                ];
+            } else {
+                $rekomendasiGap[] = [
+                    'level' => $rek->level,
+                    'rekomendasi' => $rek->rekomendasi
+                ];
+            }
+        }
+        
+        // Tentukan status
+        $levelGapCount = count($rekomendasiGap);
+        if($levelGapCount == 0) {
+            $status = 'Mencapai Semua Level';
+            $statusClass = 'success';
+        } elseif($levelGapCount == 1 && $levelMax - $levelJawaban == 1) {
+            $status = 'Mendekati Target';
+            $statusClass = 'warning';
+        } else {
+            $status = 'Perlu Peningkatan';
+            $statusClass = 'danger';
+        }
+        
+        $row->rekomendasi_info = [
+            'jenjang' => $jenjangJabatan,
+            'level_jawaban' => $levelJawaban,
+            'level_min' => $levelMin,
+            'level_max' => $levelMax,
+            'rekomendasi_dicapai' => $rekomendasiDicapai,
+            'rekomendasi_gap' => $rekomendasiGap,
+            'status' => $status,
+            'status_class' => $statusClass
+        ];
+        
+        $processedRows[] = $row;
+    }
+    @endphp
+
     <div class="ptk-card">
-        <!-- Header PTK dengan Kegiatan -->
+        <!-- Header PTK -->
         <div class="ptk-header">
-            <span>{{ $data[0]->nama ?? 'Nama tidak tersedia' }}</span>
-            <!-- <span class="kegiatan-badge">{{ $data[0]->kegiatan_name ?? 'Kegiatan' }}</span> -->
+            <span>{{ $firstRow->nama ?? 'Nama tidak tersedia' }}</span>
+            <span class="kegiatan-badge">{{ $firstRow->kegiatan_name ?? 'Kegiatan' }}</span>
         </div>
 
         <!-- Info PTK -->
         <div class="ptk-info">
             <table class="info-table">
                 <tr>
-                    <td class="info-label">NIP</td>
+                    <td class="info-label">NIP:</td>
                     <td class="info-value">{{ $nip }}</td>
+                    <td class="info-label">Jenjang:</td>
+                    <td class="info-value">{{ $firstRow->jenjang_jabatan ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td class="info-label">Entity</td>
-                    <td class="info-value">{{ $data[0]->entity ?? '-' }}</td>
+                    <td class="info-label">Entity:</td>
+                    <td class="info-value">{{ $firstRow->entity ?? '-' }}</td>
+                    <td class="info-label">Tahap:</td>
+                    <td class="info-value">{{ $firstRow->tahap ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td class="info-label">Kegiatan</td>
-                    <td class="info-value">{{ $data[0]->kegiatan_name ?? 'Kegiatan' }}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Kota</td>
-                    <td class="info-value">{{ $data[0]->nama_kota ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Sekolah/Instansi</td>
-                    <td class="info-value instansi-info">
-                        @php
-                        // Logika: jika ada sekolah, tampilkan sekolah + NPSN
-                        // jika tidak ada sekolah, tampilkan instansi
-                        $sekolahInfo = '';
-                        if (!empty($data[0]->nama_sekolah)) {
-                        $sekolahInfo = $data[0]->nama_sekolah;
-                        if (!empty($data[0]->npsn)) {
-                        $sekolahInfo .= ' <span class="npsn-badge">NPSN: ' . $data[0]->npsn . '</span>';
-                        }
-                        } elseif (!empty($data[0]->instansi)) {
-                        $sekolahInfo = $data[0]->instansi;
-                        } else {
-                        $sekolahInfo = '-';
-                        }
-                        @endphp
-                        {!! $sekolahInfo !!}
+                    <td class="info-label">Instansi:</td>
+                    <td class="info-value instansi-info" colspan="3">
+                        @if(!empty($firstRow->nama_sekolah))
+                            {{ $firstRow->nama_sekolah }}
+                            @if(!empty($firstRow->npsn))
+                                <span class="npsn-badge">NPSN: {{ $firstRow->npsn }}</span>
+                            @endif
+                        @elseif(!empty($firstRow->instansi))
+                            {{ $firstRow->instansi }}
+                        @else
+                            -
+                        @endif
                     </td>
                 </tr>
-                @if($data[0]->pangkat)
                 <tr>
-                    <td class="info-label">Jabatan</td>
-                    <td class="info-value">
-                        {{ $data[0]->pangkat }}
-                        @if($data[0]->jenjang_jabatan) - {{ $data[0]->jenjang_jabatan }} @endif
-                        @if($data[0]->golongan_ruang) ({{ $data[0]->golongan_ruang }}) @endif
-                    </td>
-                </tr>
-                @endif
-                <tr>
-                    <td class="info-label">Tahap</td>
-                    <td class="info-value">{{ $data[0]->tahap ?? '-' }}</td>
+                    <td class="info-label">Kota:</td>
+                    <td class="info-value">{{ $firstRow->nama_kota ?? '-' }}</td>
+                    <td class="info-label">Pangkat:</td>
+                    <td class="info-value">{{ $firstRow->pangkat ?? '-' }} {{ $firstRow->golongan_ruang ? '('.$firstRow->golongan_ruang.')' : '' }}</td>
                 </tr>
             </table>
         </div>
 
         <!-- Tabel Data -->
-        <table>
+        <table class="data-table">
             <thead>
                 <tr>
                     <th width="5%">NO</th>
-                    <th width="20%">SUB INDIKATOR CODE</th>
-                    <th width="60%">SUB INDIKATOR NAME</th>
-                    <th width="15%">LEVEL</th>
+                    <th width="15%">SUB INDIKATOR</th>
+                    <th width="25%">DESKRIPSI</th>
+                    <th width="10%">LEVEL DICAPAI</th>
+                    <th width="10%">LEVEL HARUS</th>
+                    <th width="10%">STATUS</th>
+                    <th width="25%">REKOMENDASI (GAP)</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($data as $index => $row)
+                @foreach($processedRows as $index => $row)
                 @php
-                // Definisikan nama level berdasarkan angka
-                $levelNames = [
-                1 => 'Sangat Rendah',
-                2 => 'Penerapan',
-                3 => 'Analisis',
-                4 => 'Evaluasi',
-                5 => 'Pembimbingan Rekan Sejawat'
-                ];
-                $levelName = $levelNames[$row->level] ?? 'Tidak Diketahui';
+                $info = $row->rekomendasi_info;
                 @endphp
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $row->sub_indikator_code }}</td>
                     <td>
-                        <div class="sub-indikator-name">
-                            {{ $row->sub_indikator_name ?? 'Nama tidak tersedia' }}
+                        <div class="sub-indikator-code">{{ $row->sub_indikator_code }}</div>
+                        <div class="sub-indikator-name">{{ Str::limit($row->sub_indikator_name ?? '-', 30) }}</div>
+                    </td>
+                    <td>{{ Str::limit($row->sub_indikator_name ?? '-', 50) }}</td>
+                    <td class="text-center">
+                        @if($info['level_jawaban'] > 0)
+                        <span class="level-badge badge-level-{{ $info['level_jawaban'] }}">
+                            Level {{ $info['level_jawaban'] }}
+                        </span>
+                        @else
+                        <span class="level-badge badge-secondary">-</span>
+                        @endif
+                    </td>
+                    <td>
+                        <div class="level-harus-container">
+                            @for($i = $info['level_min']; $i <= $info['level_max']; $i++)
+                            <span class="level-harus-badge badge-level-{{ $i }}">
+                                Level {{ $i }}
+                            </span>
+                            @endfor
                         </div>
                     </td>
                     <td class="text-center">
-                        <span class="level-badge level-{{ $row->level }}">
-                            Level {{ $row->level }}
-                            <span class="level-name">{{ $levelName }}</span>
+                        <span class="badge-status badge-{{ $info['status_class'] }}">
+                            {{ $info['status'] }}
                         </span>
+                    </td>
+                    <td>
+                        @if(count($info['rekomendasi_gap']) > 0)
+                        <div class="rekomendasi-gap">
+                            @foreach($info['rekomendasi_gap'] as $rek)
+                            <div class="gap-item">
+                                <div class="gap-level">Gap Level {{ $rek['level'] }}</div>
+                                <div class="gap-text">{{ Str::limit($rek['rekomendasi'], 80) }}</div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @else
+                        <div class="text-center text-success">
+                            <span class="badge-status badge-success">
+                                Sudah mencapai semua level
+                            </span>
+                        </div>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
@@ -480,11 +569,31 @@
         <!-- Summary PTK -->
         <div class="summary">
             <div class="summary-row">
-                <span class="summary-label">Jumlah Data:</span>
-                <span class="summary-value text-bold">{{ count($data) }} indikator</span>
+                <span class="summary-label">Jumlah Indikator:</span>
+                <span class="summary-value text-bold">{{ count($processedRows) }} indikator</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Status Keseluruhan:</span>
+                <span class="summary-value">
+                    @php
+                    $statusCounts = ['Mencapai Semua Level' => 0, 'Mendekati Target' => 0, 'Perlu Peningkatan' => 0];
+                    foreach($processedRows as $row) {
+                        $statusCounts[$row->rekomendasi_info['status']]++;
+                    }
+                    @endphp
+                    @foreach($statusCounts as $status => $count)
+                    @if($count > 0)
+                    <span class="badge-status badge-{{ 
+                        $status == 'Mencapai Semua Level' ? 'success' : 
+                        ($status == 'Mendekati Target' ? 'warning' : 'danger') 
+                    }}" style="margin-right: 5px;">
+                        {{ $status }}: {{ $count }}
+                    </span>
+                    @endif
+                    @endforeach
+                </span>
             </div>
         </div>
-    </div>
     </div>
 
     <!-- Page Break -->
@@ -498,7 +607,7 @@
     <div class="footer">
         <div style="margin-bottom: 10px;">
             <p style="margin: 2px 0;"><strong>Catatan:</strong> Dokumen untuk keperluan internal evaluasi</p>
-            <p style="margin: 2px 0;">Dicetak otomatis oleh Sistem TanpaRagu</p>
+            <p style="margin: 2px 0;">Laporan ini menunjukkan gap antara level kompetensi yang dicapai dengan level yang harus dicapai berdasarkan jenjang jabatan</p>
         </div>
 
         <div style="margin-top: 20px;">
