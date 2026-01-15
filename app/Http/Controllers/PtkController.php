@@ -9,6 +9,7 @@ use App\Models\SoalCase;
 use App\Models\Sekolah;
 use App\Models\SubIndikator;
 use App\Models\PtkJawaban;
+use App\Models\PtkJawabanDetail;
 use App\Models\Kegiatan;
 use Illuminate\Http\Request;
 use App\Models\PangkatJabatan;
@@ -507,8 +508,12 @@ class PtkController extends Controller
 
 
 
+
+
+    // App\Http\Controllers\PtkController.php - UPDATE method continueQuiz
+
     /**
-     * Melanjutkan quiz yang belum selesai (REVISED - SESUAI LOGIKA LEVEL)
+     * Melanjutkan quiz yang belum selesai dengan RESET localStorage dan ambil waktu dari database
      */
     public function continueQuiz($encode_kegiatan_id, $nip)
     {
@@ -538,7 +543,38 @@ class PtkController extends Controller
         }
 
         // ============================================
-        // LOGIKA CONTINUE QUIZ 2 (REVISED)
+        // RESET LOCALSTORAGE DAN AMBIL WAKTU DARI DATABASE
+        // ============================================
+        if ($kegiatan->tahap == 2) {
+            // Reset timer di database (ambil waktu sisa terbaru)
+            $remainingSeconds = PtkJawabanDetail::resetUserTimer($kegiatan_id, $ptk->ptk_id, 2);
+
+            // Cek apakah waktu sudah habis
+            if ($remainingSeconds <= 0) {
+                return redirect()->route('quiz.finish', [
+                    'encoded_kegiatan_id' => $encode_kegiatan_id,
+                    'nip' => $nip
+                ])->with('error', 'Waktu pengerjaan telah habis');
+            }
+
+            // Simpan flag untuk reset localStorage di halaman quiz nanti
+            session([
+                'reset_localstorage' => true,
+                'quiz2_remaining_seconds' => $remainingSeconds,
+                'quiz2_database_time' => PtkJawabanDetail::formatRemainingTime($remainingSeconds)
+            ]);
+
+            // Debug log
+            \Log::info("Continue Quiz - Reset timer", [
+                'kegiatan_id' => $kegiatan_id,
+                'ptk_id' => $ptk->ptk_id,
+                'remaining_seconds' => $remainingSeconds,
+                'formatted_time' => PtkJawabanDetail::formatRemainingTime($remainingSeconds)
+            ]);
+        }
+
+        // ============================================
+        // LOGIKA POSISI LANJUTAN (SAMA SEPERTI SEBELUMNYA)
         // ============================================
         if ($kegiatan->tahap == 2) {
             // 1. Cari semua sub_indikator yang sudah dikerjakan dan sudah dapat level final
@@ -606,55 +642,13 @@ class PtkController extends Controller
                                         'encoded_sub_indikator_id' => Hashids::encode($nextSoal->sub_indikator_id),
                                         'encoded_no_urut' => Hashids::encode($nextSoal->no_urut)
                                     ]);
-                                } else {
-                                    // Tidak ada soal lagi di sub_indikator ini
-                                    // Cek apakah sudah dapat level final
-                                    $finalLevel = DB::table('ptk_jawaban')
-                                        ->where('kegiatan_id', $kegiatan_id)
-                                        ->where('ptk_id', $ptk->ptk_id)
-                                        ->where('tahap', 2)
-                                        ->where('sub_indikator_id', $lastSoal->sub_indikator_id)
-                                        ->whereNotNull('level')
-                                        ->first();
-
-                                    if (!$finalLevel) {
-                                        // Belum dapat level final, kemungkinan perlu level_final
-                                        $level_final = $lastSoal->level == 2 ? 2 : $lastSoal->level - 1;
-
-                                        // Insert level final
-                                        PtkJawaban::updateOrCreate([
-                                            'kegiatan_id' => $kegiatan_id,
-                                            'sub_indikator_id' => $lastSoal->sub_indikator_id,
-                                            'sub_indikator_code' => $lastSoal->sub_indikator_code ?? '',
-                                            'tahap' => 2,
-                                            'ptk_id' => $ptk->ptk_id
-                                        ], [
-                                            'level' => $level_final
-                                        ]);
-                                    }
                                 }
-                            } else {
-                                // Gagal di level ini, sudah dapat level final
-                                // Langsung cari sub_indikator berikutnya
                             }
                             break;
 
                         case 4:
                         case 5:
                             if ($lastBobot == 4) {
-                                if ($lastSoal->level == 5) {
-                                    // Sudah dapat level 5
-                                    PtkJawaban::updateOrCreate([
-                                        'kegiatan_id' => $kegiatan_id,
-                                        'sub_indikator_id' => $lastSoal->sub_indikator_id,
-                                        'sub_indikator_code' => $lastSoal->sub_indikator_code ?? '',
-                                        'tahap' => 2,
-                                        'ptk_id' => $ptk->ptk_id
-                                    ], [
-                                        'level' => 5
-                                    ]);
-                                }
-
                                 // Cari soal berikutnya
                                 $nextSoal = Soal::where('sub_indikator_id', $lastSoal->sub_indikator_id)
                                     ->where('entity', $kegiatan->entity)
@@ -671,19 +665,6 @@ class PtkController extends Controller
                                         'encoded_no_urut' => Hashids::encode($nextSoal->no_urut)
                                     ]);
                                 }
-                            } else {
-                                // Gagal di level ini, sudah dapat level_final (level - 1)
-                                $level_final = $lastSoal->level - 1;
-
-                                PtkJawaban::updateOrCreate([
-                                    'kegiatan_id' => $kegiatan_id,
-                                    'sub_indikator_id' => $lastSoal->sub_indikator_id,
-                                    'sub_indikator_code' => $lastSoal->sub_indikator_code ?? '',
-                                    'tahap' => 2,
-                                    'ptk_id' => $ptk->ptk_id
-                                ], [
-                                    'level' => $level_final
-                                ]);
                             }
                             break;
                     }

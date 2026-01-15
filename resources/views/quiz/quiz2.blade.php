@@ -767,45 +767,91 @@
     </script>
 
 
-    <script>
-        // Durasi timer (120 menit = 7200 detik)
-        const TOTAL_TIME = 120 * 60;
-
-        // Ambil waktu mulai dari localStorage
-        let startTime = localStorage.getItem("quiz_start_time");
-
-        if (!startTime) {
-            // Jika belum ada, set waktu mulai sekarang
-            startTime = Date.now();
-            localStorage.setItem("quiz_start_time", startTime);
+<script>
+    // Timer yang sync dengan database
+    let remainingSeconds = {{ $remaining_seconds ?? 7200 }}; // Default 2 jam jika tidak ada data
+    
+    // ============================================
+    // RESET LOCALSTORAGE JIKA ADA FLAG
+    // ============================================
+    @if($reset_localstorage ?? false)
+        // Reset semua localStorage timer
+        localStorage.removeItem("quiz2_remaining_seconds");
+        localStorage.removeItem("quiz2_last_update");
+        localStorage.removeItem("quiz_start_time");
+        localStorage.removeItem("quiz2_start_time");
+        
+        console.log("🔄 LocalStorage timer direset untuk lanjutkan quiz");
+        console.log("⏱️ Waktu dari database: {{ $remaining_time_formatted }}");
+    @endif
+    
+    function updateTimer() {
+        if (remainingSeconds <= 0) {
+            document.getElementById("timerText").textContent = "00:00:00";
+            
+            // Redirect ke halaman finish jika waktu habis
+            setTimeout(() => {
+                window.location.href = "{{ route('quiz.finish', [
+                    'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                    'nip' => $nip
+                ]) }}";
+            }, 1000);
+            
+            return;
         }
-
-        function updateTimer() {
-            const now = Date.now();
-            const elapsed = Math.floor((now - startTime) / 1000); // detik
-            const remaining = TOTAL_TIME - elapsed;
-
-            if (remaining <= 0) {
-                document.getElementById("timerText").textContent = "00:00:00";
-                localStorage.removeItem("quiz_start_time");
-                alert("Waktu Habis!");
-                return;
+        
+        // Kurangi 1 detik
+        remainingSeconds--;
+        
+        // Hitung jam, menit & detik
+        const hours = String(Math.floor(remainingSeconds / 3600)).padStart(2, "0");
+        const minutes = String(Math.floor((remainingSeconds % 3600) / 60)).padStart(2, "0");
+        const seconds = String(remainingSeconds % 60).padStart(2, "0");
+        
+        // Tampilkan dalam format 00:00:00
+        document.getElementById("timerText").textContent = `${hours}:${minutes}:${seconds}`;
+        
+        // Simpan sisa waktu ke localStorage untuk backup
+        localStorage.setItem("quiz2_remaining_seconds", remainingSeconds);
+        localStorage.setItem("quiz2_last_update", Date.now());
+    }
+    
+    // Load sisa waktu dari localStorage jika ada (untuk handle refresh)
+    window.addEventListener('load', function() {
+        // JIKA INI LANJUTAN QUIZ, IGNORE LOCALSTORAGE
+        @if(!($reset_localstorage ?? false))
+            const savedRemaining = localStorage.getItem("quiz2_remaining_seconds");
+            const lastUpdate = localStorage.getItem("quiz2_last_update");
+            
+            if (savedRemaining && lastUpdate) {
+                const now = Date.now();
+                const elapsed = Math.floor((now - lastUpdate) / 1000);
+                const calculatedRemaining = Math.max(0, savedRemaining - elapsed);
+                
+                // Gunakan yang terkecil antara data dari database dan localStorage
+                // TAPI prioritaskan database jika perbedaan besar
+                if (Math.abs(remainingSeconds - calculatedRemaining) > 300) { // Lebih dari 5 menit beda
+                    console.log("⚠️ Perbedaan waktu besar, menggunakan data dari database");
+                    console.log(`Database: ${remainingSeconds}s, LocalStorage: ${calculatedRemaining}s`);
+                    // Tetap gunakan remainingSeconds dari database
+                } else {
+                    remainingSeconds = Math.min(remainingSeconds, calculatedRemaining);
+                }
             }
-
-            // Hitung jam, menit & detik
-            const hours = String(Math.floor(remaining / 3600)).padStart(2, "0");
-            const minutes = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
-            const seconds = String(remaining % 60).padStart(2, "0");
-
-            // Tampilkan dalam format 00:00:00
-            document.getElementById("timerText").textContent = `${hours}:${minutes}:${seconds}`;
-        }
-
-        // Update setiap 1 detik
+        @endif
+        
+        // Update timer setiap detik
         setInterval(updateTimer, 1000);
-        updateTimer();
-    </script>
-
+        updateTimer(); // Jalankan sekali langsung
+    });
+    
+    // Handle sebelum unload halaman (sebelum refresh/close)
+    window.addEventListener('beforeunload', function(e) {
+        // Simpan sisa waktu ke localStorage
+        localStorage.setItem("quiz2_remaining_seconds", remainingSeconds);
+        localStorage.setItem("quiz2_last_update", Date.now());
+    });
+</script>
 
     <script>
         // ============================================

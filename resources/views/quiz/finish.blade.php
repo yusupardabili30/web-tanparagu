@@ -125,12 +125,10 @@
         const timerKeys = [
             "quiz_start_time",
             "quiz1_start_time", // Timer untuk quiz1
-            "quiz2_start_time", // Timer untuk quiz2
-            "timestart_quiz2",
-            "timesoal_quiz2",
+ 
             "quiz_timer_start", // Backup key jika ada
             "quiz1_timer_start", // Backup untuk quiz1
-            "quiz2_timer_start" // Backup untuk quiz2
+        
         ];
 
         timerKeys.forEach(key => {
@@ -151,7 +149,7 @@
 
         console.log("✅ Semua timer telah direset:");
         console.log("- Timer Quiz 1 (Indikator) dihapus");
-        console.log("- Timer Quiz 2 (Studi Kasus) dihapus");
+ 
         console.log("- Backup timer juga dihapus");
 
         // Tampilkan pesan konfirmasi di console
@@ -162,9 +160,43 @@
     window.onload = function() {
         // Hapus kembali untuk memastikan
         localStorage.removeItem("quiz1_start_time");
-        localStorage.removeItem("quiz2_start_time");
+ 
 
         console.log("🔄 Timer di-reset ulang saat onload");
     };
+</script>
+
+
+<script>
+    // Reset semua timer saat halaman finish diakses
+    document.addEventListener('DOMContentLoaded', function() {
+        // Clear semua data timer
+        const timerKeys = [
+            "quiz2_remaining_seconds",
+            "quiz2_last_update",
+            "quiz_start_time",
+            "quiz2_start_time"
+        ];
+        
+        timerKeys.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
+        });
+        
+        // Clear session
+        if (typeof session !== 'undefined') {
+            session.removeItem('quiz2_start_time');
+            session.removeItem('quiz2_remaining');
+            session.removeItem('timesoal');
+            session.removeItem('timestart');
+        }
+        
+        // Clear cookies timer jika ada
+        timerKeys.forEach(key => {
+            document.cookie = key + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        });
+        
+        console.log("✅ Semua timer telah direset.");
+    });
 </script>
 @endsection
