@@ -7,6 +7,8 @@ use App\Models\Kota;
 use App\Models\Soal;
 use App\Models\SoalCase;
 use App\Models\Sekolah;
+use App\Models\SubIndikator;
+use App\Models\PtkJawaban;
 use App\Models\Kegiatan;
 use Illuminate\Http\Request;
 use App\Models\PangkatJabatan;
@@ -58,6 +60,39 @@ class PtkController extends Controller
         }
 
 
+
+
+        // ============================================
+        // CEK APAKAH ADA JAWABAN YANG BELUM SELESAI (SIMPLIFIED)
+        // ============================================
+        $hasUnfinishedQuiz = false;
+
+        if ($kegiatan->tahap == 2) {
+            // Cek apakah ada jawaban detail untuk quiz 2
+            $hasJawabanDetail = DB::table('ptk_jawaban_detail')
+                ->where('kegiatan_id', $kegiatan_id)
+                ->where('ptk_id', $ptk->ptk_id)
+                ->where('tahap', 2)
+                ->exists();
+
+            // Cek apakah sudah selesai semua sub indikator
+            $totalSubIndikator = DB::table('soal')
+                ->where('entity', $kegiatan->entity)
+                ->where('tahap', 2)
+                ->distinct('sub_indikator_id')
+                ->count('sub_indikator_id');
+
+            $completedSubIndikator = DB::table('ptk_jawaban')
+                ->where('kegiatan_id', $kegiatan_id)
+                ->where('ptk_id', $ptk->ptk_id)
+                ->where('tahap', 2)
+                ->whereNotNull('level')
+                ->distinct('sub_indikator_id')
+                ->count('sub_indikator_id');
+
+            // Ada jawaban detail DAN belum selesai semua sub indikator
+            $hasUnfinishedQuiz = $hasJawabanDetail && ($completedSubIndikator < $totalSubIndikator);
+        }
 
         // ============================================
         // CEK APAKAH SUDAH SELESAI INSTRUMEN
@@ -136,7 +171,9 @@ class PtkController extends Controller
             'current_kegiatan_id' => $kegiatan_id,
             'data' => $soal,
             'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
-            'isFinished' => $isFinished // TAMBAHKAN INI
+            'isFinished' => $isFinished, // TAMBAHKAN INI
+            'hasUnfinishedQuiz' => $hasUnfinishedQuiz, // TAMBAHKAN INI
+
         ]);
     }
 
@@ -466,5 +503,269 @@ class PtkController extends Controller
     public function logout()
     {
         return redirect()->route('lockscreen.logout');
+    }
+
+
+
+    /**
+     * Melanjutkan quiz yang belum selesai (REVISED - SESUAI LOGIKA LEVEL)
+     */
+    public function continueQuiz($encode_kegiatan_id, $nip)
+    {
+        // Validasi decode
+        if (count(Hashids::decode($encode_kegiatan_id)) === 0) {
+            abort(404, 'ID kegiatan tidak valid');
+        }
+
+        $kegiatan_id = Hashids::decode($encode_kegiatan_id)[0];
+
+        // Verifikasi PTK
+        $ptk = Ptk::where('nip', $nip)->first();
+        if (!$ptk) {
+            return redirect()->route('ptk.show', [
+                'encode_kegiatan_id' => $encode_kegiatan_id,
+                'nip' => $nip
+            ])->with('error', 'Data PTK tidak ditemukan');
+        }
+
+        // Verifikasi kegiatan
+        $kegiatan = Kegiatan::find($kegiatan_id);
+        if (!$kegiatan || $kegiatan->status !== 'Active') {
+            return redirect()->route('ptk.show', [
+                'encode_kegiatan_id' => $encode_kegiatan_id,
+                'nip' => $nip
+            ])->with('error', 'Kegiatan tidak valid atau tidak aktif');
+        }
+
+        // ============================================
+        // LOGIKA CONTINUE QUIZ 2 (REVISED)
+        // ============================================
+        if ($kegiatan->tahap == 2) {
+            // 1. Cari semua sub_indikator yang sudah dikerjakan dan sudah dapat level final
+            $completedSubs = DB::table('ptk_jawaban')
+                ->where('kegiatan_id', $kegiatan_id)
+                ->where('ptk_id', $ptk->ptk_id)
+                ->where('tahap', 2)
+                ->whereNotNull('level')
+                ->pluck('sub_indikator_id')
+                ->toArray();
+
+            // 2. Cari sub_indikator yang sedang dalam proses (ada di jawaban_detail tapi belum ada level final)
+            $inProgressSub = DB::table('ptk_jawaban_detail as pjd')
+                ->select('pjd.sub_indikator_id')
+                ->leftJoin('ptk_jawaban as pj', function ($join) use ($kegiatan_id, $ptk) {
+                    $join->on('pj.sub_indikator_id', '=', 'pjd.sub_indikator_id')
+                        ->where('pj.kegiatan_id', $kegiatan_id)
+                        ->where('pj.ptk_id', $ptk->ptk_id)
+                        ->where('pj.tahap', 2);
+                })
+                ->where('pjd.kegiatan_id', $kegiatan_id)
+                ->where('pjd.ptk_id', $ptk->ptk_id)
+                ->where('pjd.tahap', 2)
+                ->whereNull('pj.level')
+                ->orderBy('pjd.created_at', 'desc')
+                ->first();
+
+            // 3. Jika ada sub_indikator yang sedang dalam proses, lanjutkan dari sana
+            if ($inProgressSub) {
+                // Ambil jawaban terakhir untuk sub_indikator ini
+                $lastAnswer = DB::table('ptk_jawaban_detail as pjd')
+                    ->join('soal as s', 's.soal_id', '=', 'pjd.soal_id')
+                    ->where('pjd.kegiatan_id', $kegiatan_id)
+                    ->where('pjd.ptk_id', $ptk->ptk_id)
+                    ->where('pjd.tahap', 2)
+                    ->where('pjd.sub_indikator_id', $inProgressSub->sub_indikator_id)
+                    ->orderBy('pjd.created_at', 'desc')
+                    ->first();
+
+                if ($lastAnswer) {
+                    // Cek level soal terakhir yang dijawab
+                    $lastSoal = Soal::find($lastAnswer->soal_id);
+
+                    // Cek bobot jawaban terakhir
+                    $lastBobot = $lastAnswer->bobot ?? 0;
+
+                    // ANALISIS BERDASARKAN LEVEL TERAKHIR
+                    switch ($lastSoal->level) {
+                        case 2:
+                        case 3:
+                            if ($lastBobot >= 3) {
+                                // Berhasil di level ini, lanjut ke soal berikutnya
+                                $nextSoal = Soal::where('sub_indikator_id', $lastSoal->sub_indikator_id)
+                                    ->where('entity', $kegiatan->entity)
+                                    ->where('no_urut', '>', $lastSoal->no_urut)
+                                    ->orderBy('no_urut')
+                                    ->first();
+
+                                if ($nextSoal) {
+                                    // Masih ada soal di sub_indikator yang sama
+                                    return redirect()->route('quiz2.show', [
+                                        'tahap' => 2,
+                                        'encoded_kegiatan_id' => $encode_kegiatan_id,
+                                        'nip' => $nip,
+                                        'encoded_sub_indikator_id' => Hashids::encode($nextSoal->sub_indikator_id),
+                                        'encoded_no_urut' => Hashids::encode($nextSoal->no_urut)
+                                    ]);
+                                } else {
+                                    // Tidak ada soal lagi di sub_indikator ini
+                                    // Cek apakah sudah dapat level final
+                                    $finalLevel = DB::table('ptk_jawaban')
+                                        ->where('kegiatan_id', $kegiatan_id)
+                                        ->where('ptk_id', $ptk->ptk_id)
+                                        ->where('tahap', 2)
+                                        ->where('sub_indikator_id', $lastSoal->sub_indikator_id)
+                                        ->whereNotNull('level')
+                                        ->first();
+
+                                    if (!$finalLevel) {
+                                        // Belum dapat level final, kemungkinan perlu level_final
+                                        $level_final = $lastSoal->level == 2 ? 2 : $lastSoal->level - 1;
+
+                                        // Insert level final
+                                        PtkJawaban::updateOrCreate([
+                                            'kegiatan_id' => $kegiatan_id,
+                                            'sub_indikator_id' => $lastSoal->sub_indikator_id,
+                                            'sub_indikator_code' => $lastSoal->sub_indikator_code ?? '',
+                                            'tahap' => 2,
+                                            'ptk_id' => $ptk->ptk_id
+                                        ], [
+                                            'level' => $level_final
+                                        ]);
+                                    }
+                                }
+                            } else {
+                                // Gagal di level ini, sudah dapat level final
+                                // Langsung cari sub_indikator berikutnya
+                            }
+                            break;
+
+                        case 4:
+                        case 5:
+                            if ($lastBobot == 4) {
+                                if ($lastSoal->level == 5) {
+                                    // Sudah dapat level 5
+                                    PtkJawaban::updateOrCreate([
+                                        'kegiatan_id' => $kegiatan_id,
+                                        'sub_indikator_id' => $lastSoal->sub_indikator_id,
+                                        'sub_indikator_code' => $lastSoal->sub_indikator_code ?? '',
+                                        'tahap' => 2,
+                                        'ptk_id' => $ptk->ptk_id
+                                    ], [
+                                        'level' => 5
+                                    ]);
+                                }
+
+                                // Cari soal berikutnya
+                                $nextSoal = Soal::where('sub_indikator_id', $lastSoal->sub_indikator_id)
+                                    ->where('entity', $kegiatan->entity)
+                                    ->where('no_urut', '>', $lastSoal->no_urut)
+                                    ->orderBy('no_urut')
+                                    ->first();
+
+                                if ($nextSoal) {
+                                    return redirect()->route('quiz2.show', [
+                                        'tahap' => 2,
+                                        'encoded_kegiatan_id' => $encode_kegiatan_id,
+                                        'nip' => $nip,
+                                        'encoded_sub_indikator_id' => Hashids::encode($nextSoal->sub_indikator_id),
+                                        'encoded_no_urut' => Hashids::encode($nextSoal->no_urut)
+                                    ]);
+                                }
+                            } else {
+                                // Gagal di level ini, sudah dapat level_final (level - 1)
+                                $level_final = $lastSoal->level - 1;
+
+                                PtkJawaban::updateOrCreate([
+                                    'kegiatan_id' => $kegiatan_id,
+                                    'sub_indikator_id' => $lastSoal->sub_indikator_id,
+                                    'sub_indikator_code' => $lastSoal->sub_indikator_code ?? '',
+                                    'tahap' => 2,
+                                    'ptk_id' => $ptk->ptk_id
+                                ], [
+                                    'level' => $level_final
+                                ]);
+                            }
+                            break;
+                    }
+                }
+
+                // Setelah diproses, cari sub_indikator berikutnya
+                $nextSub = SubIndikator::where('sub_indikator_id', '>', $inProgressSub->sub_indikator_id)
+                    ->orderBy('sub_indikator_id')
+                    ->first();
+            } else {
+                // 4. Jika tidak ada yang in progress, cari sub_indikator terkecil yang belum dikerjakan
+                $allSubs = DB::table('soal')
+                    ->where('entity', $kegiatan->entity)
+                    ->where('tahap', 2)
+                    ->distinct('sub_indikator_id')
+                    ->pluck('sub_indikator_id')
+                    ->toArray();
+
+                // Cari sub_indikator pertama yang belum ada di completedSubs
+                foreach ($allSubs as $subId) {
+                    if (!in_array($subId, $completedSubs)) {
+                        $nextSub = SubIndikator::find($subId);
+                        break;
+                    }
+                }
+            }
+
+            // 5. Redirect ke sub_indikator berikutnya
+            if (isset($nextSub)) {
+                $firstSoal = Soal::where('sub_indikator_id', $nextSub->sub_indikator_id)
+                    ->where('entity', $kegiatan->entity)
+                    ->orderBy('no_urut')
+                    ->first();
+
+                if ($firstSoal) {
+                    return redirect()->route('quiz2.show', [
+                        'tahap' => 2,
+                        'encoded_kegiatan_id' => $encode_kegiatan_id,
+                        'nip' => $nip,
+                        'encoded_sub_indikator_id' => Hashids::encode($firstSoal->sub_indikator_id),
+                        'encoded_no_urut' => Hashids::encode($firstSoal->no_urut)
+                    ]);
+                }
+            }
+
+            // 6. Jika semua sub_indikator sudah selesai
+            $totalSubs = count($allSubs ?? []);
+            if ($totalSubs > 0 && count($completedSubs) >= $totalSubs) {
+                return redirect()->route('quiz.finish', [
+                    'encoded_kegiatan_id' => $encode_kegiatan_id,
+                    'nip' => $nip
+                ]);
+            }
+        }
+
+        // Jika tidak bisa continue, mulai dari awal
+        $firstSoal = Soal::where('entity', $kegiatan->entity)
+            ->where('tahap', $kegiatan->tahap)
+            ->orderBy('sub_indikator_id')
+            ->orderBy('no_urut')
+            ->first();
+
+        if (!$firstSoal) {
+            return redirect()->route('ptk.show', [
+                'encode_kegiatan_id' => $encode_kegiatan_id,
+                'nip' => $nip
+            ])->with('error', 'Tidak ada soal tersedia');
+        }
+
+        if ($kegiatan->tahap == 2) {
+            return redirect()->route('quiz2.show', [
+                'tahap' => 2,
+                'encoded_kegiatan_id' => $encode_kegiatan_id,
+                'nip' => $nip,
+                'encoded_sub_indikator_id' => Hashids::encode($firstSoal->sub_indikator_id),
+                'encoded_no_urut' => Hashids::encode($firstSoal->no_urut)
+            ]);
+        }
+
+        return redirect()->route('ptk.show', [
+            'encode_kegiatan_id' => $encode_kegiatan_id,
+            'nip' => $nip
+        ])->with('error', 'Tidak dapat melanjutkan quiz');
     }
 }

@@ -12,7 +12,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
     <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
+<style>.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+    transition: all 0.3s ease;
+}
 
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}</style>
     <!-- PAGE TITLE -->
     <div class="row mb-1 pt-0" style="margin-top:-50px;">
         <div class="col-12">
@@ -318,76 +336,142 @@
                         </div>
                     </div>
 
-                    <!-- TOMBOL MULAI -->
-                    <div class="text-center mt-4">
-                        @php
-                        $encoded_no_urut = Hashids::encode(1);
-                        @endphp
+                  <!-- TOMBOL MULAI -->
+<div class="text-center mt-4">
+    @php
+    $encoded_no_urut = Hashids::encode(1);
+    @endphp
 
-                        @if($isFinished)
-                        <!-- Jika sudah selesai -->
-                        <div class="alert alert-success mb-3" role="alert">
-                            <div class="d-flex align-items-center">
-                                <i class="ri-checkbox-circle-fill fs-4 me-2"></i>
-                                <div class="text-start">
-                                    <h6 class="mb-1">Instumen Selesai</h6>
-                                    <small>Anda telah menyelesaikan instrumen ini.</small>
-                                </div>
-                            </div>
-                        </div>
+    @if($isFinished)
+    <!-- Jika sudah selesai -->
+    <div class="alert alert-success mb-3" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="ri-checkbox-circle-fill fs-4 me-2"></i>
+            <div class="text-start">
+                <h6 class="mb-1">Instumen Selesai</h6>
+                <small>Anda telah menyelesaikan instrumen ini.</small>
+            </div>
+        </div>
+    </div>
 
-                        <button type="button"
-                            class="btn btn-success btn-lg px-5 w-100 d-block text-center"
-                            style="border-radius:10px; font-size:16px; padding:10px;"
-                            onclick="showFinishedAlert()">
-                            <i class="ri-check-double-line me-2"></i> Lihat Hasil
-                        </button>
+    <button type="button"
+        class="btn btn-success btn-lg px-5 w-100 d-block text-center"
+        style="border-radius:10px; font-size:16px; padding:10px;"
+        onclick="showFinishedAlert()">
+        <i class="ri-check-double-line me-2"></i> Lihat Hasil
+    </button>
 
-                        @else
-                        <!-- Jika belum selesai -->
-                        @switch($kegiatan->tahap)
-                        @case(1)
-                        @php
-                        $encoded_indikator_id = Hashids::encode($data->indikator_id);
-                        $encoded_no_urut = Hashids::encode(1);
-                        @endphp
-                        <a href="{{ route('quiz1.show', [
-        'tahap' => $kegiatan->tahap,
-        'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-        'nip' => $current_nip,
-        'encoded_indikator_id' => $encoded_indikator_id,
-        'encoded_no_urut' => $encoded_no_urut
-    ]) }}"
-                            id="btnMulai"
-                            class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-                            style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
-                            <i class="ri-play-line me-2"></i> Mulai
-                        </a>
-                        @break
+    @elseif($hasUnfinishedQuiz && !$isFinished)
+    <!-- Jika ada quiz yang belum selesai -->
+    <div class="alert alert-warning mb-3" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="ri-refresh-line fs-4 me-2"></i>
+            <div class="text-start">
+                <h6 class="mb-1">Quiz Belum Selesai</h6>
+                <small>Anda memiliki quiz yang belum diselesaikan.</small>
+            </div>
+        </div>
+    </div>
 
-                        @case(2)
-                        @php
-                        $encoded_no_urut = Hashids::encode(1);
-                        @endphp
-                        <a href="{{ route('quiz2.show', [
-        'tahap' => $kegiatan->tahap,
-        'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-        'nip' => $current_nip,
-        'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
-        'encoded_no_urut' => $encoded_no_urut
-    ]) }}"
-                            id="btnMulai"
-                            class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-                            style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
-                            <i class="ri-play-line me-2"></i> Mulai
-                        </a>
-                        @break
+    <div class="row">
+        <div class="col-md-6 mb-2">
+            <a href="{{ route('ptk.continue-quiz', [
+                'encode_kegiatan_id' => $current_encode_kegiatan_id,
+                'nip' => $current_nip
+            ]) }}"
+                class="btn btn-warning btn-lg px-5 w-100 d-block text-center"
+                style="border-radius:10px; font-size:16px; padding:10px;">
+                <i class="ri-play-circle-line me-2"></i> Lanjutkan Quiz
+            </a>
+        </div>
+        <div class="col-md-6 mb-2">
+            @switch($kegiatan->tahap)
+            @case(1)
+            @php
+            $encoded_indikator_id = Hashids::encode($data->indikator_id);
+            $encoded_no_urut = Hashids::encode(1);
+            @endphp
+            <a href="{{ route('quiz1.show', [
+                    'tahap' => $kegiatan->tahap,
+                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                    'nip' => $current_nip,
+                    'encoded_indikator_id' => $encoded_indikator_id,
+                    'encoded_no_urut' => $encoded_no_urut
+                ]) }}"
+                id="btnMulai"
+                class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
+                style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+                <i class="ri-play-line me-2"></i> Mulai Baru
+            </a>
+            @break
+            
+            @case(2)
+            @php
+            $encoded_no_urut = Hashids::encode(1);
+            @endphp
+            <a href="{{ route('quiz2.show', [
+                    'tahap' => $kegiatan->tahap,
+                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                    'nip' => $current_nip,
+                    'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                    'encoded_no_urut' => $encoded_no_urut
+                ]) }}"
+                id="btnMulai"
+                class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
+                style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+                <i class="ri-play-line me-2"></i> Mulai Baru
+            </a>
+            @break
+            
+            @default
+            @endswitch
+        </div>
+    </div>
 
-                        @default
-                        @endswitch
-                        @endif
-                    </div>
+    @else
+    <!-- Jika belum mulai sama sekali -->
+    @switch($kegiatan->tahap)
+    @case(1)
+    @php
+    $encoded_indikator_id = Hashids::encode($data->indikator_id);
+    $encoded_no_urut = Hashids::encode(1);
+    @endphp
+    <a href="{{ route('quiz1.show', [
+            'tahap' => $kegiatan->tahap,
+            'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+            'nip' => $current_nip,
+            'encoded_indikator_id' => $encoded_indikator_id,
+            'encoded_no_urut' => $encoded_no_urut
+        ]) }}"
+        id="btnMulai"
+        class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
+        style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+        <i class="ri-play-line me-2"></i> Mulai
+    </a>
+    @break
 
+    @case(2)
+    @php
+    $encoded_no_urut = Hashids::encode(1);
+    @endphp
+    <a href="{{ route('quiz2.show', [
+            'tahap' => $kegiatan->tahap,
+            'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+            'nip' => $current_nip,
+            'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+            'encoded_no_urut' => $encoded_no_urut
+        ]) }}"
+        id="btnMulai"
+        class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
+        style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+        <i class="ri-play-line me-2"></i> Mulai
+    </a>
+    @break
+
+    @default
+    @endswitch
+    @endif
+</div>
                 </div>
             </div>
         </div>

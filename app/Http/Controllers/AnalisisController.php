@@ -17,8 +17,23 @@ class AnalisisController extends Controller
         $jenisPtkList = DB::table('jenis_ptk')->get();
         $kotas = DB::table('kota')->orderBy('nama_kota')->get();
 
+        // Ambil data untuk dropdown baru
+        $bentukPendidikanList = DB::table('sekolah')
+            ->select('bentuk_pendidikan')
+            ->whereNotNull('bentuk_pendidikan')
+            ->distinct()
+            ->orderBy('bentuk_pendidikan')
+            ->get();
+
+        $jenisKelaminList = DB::table('ptk')
+            ->select('jenis_kelamin')
+            ->whereNotNull('jenis_kelamin')
+            ->distinct()
+            ->orderBy('jenis_kelamin')
+            ->get();
+
         // Jika ada filter, ambil data analisis
-        if ($request->hasAny(['kegiatan_id', 'pangkat_jabatan_id', 'jenis_ptk_id', 'kota_id'])) {
+        if ($request->hasAny(['kegiatan_id', 'pangkat_jabatan_id', 'jenis_ptk_id', 'kota_id', 'bentuk_pendidikan', 'jenis_kelamin'])) {
             try {
                 $analisisData = $this->getAnalisisData($request);
 
@@ -34,6 +49,8 @@ class AnalisisController extends Controller
                     'pangkatJabatans',
                     'jenisPtkList',
                     'kotas',
+                    'bentukPendidikanList',
+                    'jenisKelaminList',
                     'analisisData'
                 ));
             } catch (\Exception $e) {
@@ -59,142 +76,68 @@ class AnalisisController extends Controller
             'kegiatans',
             'pangkatJabatans',
             'jenisPtkList',
-            'kotas'
+            'kotas',
+            'bentukPendidikanList',
+            'jenisKelaminList'
         ));
     }
 
     private function getAnalisisData(Request $request)
     {
-        // Query dasar untuk analisis
-        $query = DB::table('ptk_jawaban')
+        // ========================================================
+        // QUERY UNTUK DISTRIBUSI PTK (BUKAN BERDASARKAN JAWABAN)
+        // ========================================================
+
+        // Query untuk mendapatkan PTK yang sudah menjawab dalam kegiatan tertentu
+        $ptkYangSudahMenjawabQuery = DB::table('ptk_jawaban')
+            ->select('ptk_id')
+            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                $q->where('kegiatan_id', $request->kegiatan_id);
+            })
+            ->groupBy('ptk_id');
+
+        // Ambil PTK yang memenuhi filter dan sudah menjawab
+        $ptkQuery = DB::table('ptk')
             ->select(
-                'ptk_jawaban.level',
-                'ptk_jawaban.sub_indikator_id',
-                'ptk_jawaban.sub_indikator_code',
-                'ptk.nama',
+                'ptk.ptk_id',
                 'ptk.nip',
+                'ptk.nama',
+                'ptk.jenis_kelamin',
                 'ptk.kota_id',
-                'ptk.pangkat_jabatan_id',
-                'ptk.jenis_ptk_id',
                 'pangkat_jabatan.jenjang_jabatan',
                 'kota.nama_kota',
-
-                'sub_indikator.sub_indikator_name'
+                'sekolah.bentuk_pendidikan'
             )
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
             ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
             ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
-            ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id');
-
-        // Filter berdasarkan request
-        if ($request->filled('kegiatan_id')) {
-            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-        }
-
-        if ($request->filled('pangkat_jabatan_id')) {
-            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-        }
-
-        if ($request->filled('jenis_ptk_id')) {
-            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-        }
-
-        if ($request->filled('kota_id')) {
-            $query->where('ptk.kota_id', $request->kota_id);
-        }
-
-        // Ambil data jawaban
-        $jawabanData = $query->get();
-
-        // DEBUG: Cek apakah ada data
-        if ($jawabanData->isEmpty()) {
-            // Hitung statistik dasar saja
-            $statistik = $this->getStatistik($request);
-
-            return [
-                'statistik' => $statistik,
-                'level_distribution' => [],
-                'jenjang_distribution' => [],
-                'sub_indikator_stats' => [],
-                'distribusi_kota' => [],
-                'progress_kota' => $this->getProgressKota($request),
-                'modus_per_kota' => [],
-                'all_sub_indikators_chart' => []
-            ];
-        }
-
-        // Hitung statistik
-        $statistik = $this->getStatistik($request, $jawabanData);
-
-        // Distribusi level
-        $levelDistribution = $jawabanData->where('level', '>=', 2)
-            ->groupBy('level')
-            ->map(function ($items, $level) {
-                return [
-                    'level' => (int)$level,
-                    'count' => $items->count()
-                ];
-            })
-            ->values()
-            ->sortBy('level');
-
-        // Distribusi jenjang jabatan
-        $jenjangDistribution = $jawabanData->groupBy('jenjang_jabatan')
-            ->map(function ($items, $jenjang) {
-                return [
-                    'jenjang_jabatan' => $jenjang ?: 'Tidak Diketahui',
-                    'count' => $items->count()
-                ];
-            })
-            ->values();
-
-        // Statistik per sub indikator dengan detail level
-        $subIndikatorStats = $this->getSubIndikatorStats($jawabanData);
-
-        // Data untuk chart semua sub indikator
-        $allSubIndikatorsChart = $this->getAllSubIndikatorsChartData($jawabanData);
-
-        // Distribusi per kota
-        $distribusiKota = $this->getDistribusiKota($jawabanData);
-
-        // Progress pengisian per kota
-        $progressKota = $this->getProgressKota($request);
-
-        // Modus per kota untuk semua sub indikator
-        $modusPerKota = $this->getModusPerKota($jawabanData);
-
-        return [
-            'statistik' => $statistik,
-            'level_distribution' => $levelDistribution,
-            'jenjang_distribution' => $jenjangDistribution,
-            'sub_indikator_stats' => $subIndikatorStats,
-            'all_sub_indikators_chart' => $allSubIndikatorsChart,
-            'distribusi_kota' => $distribusiKota,
-            'progress_kota' => $progressKota,
-            'modus_per_kota' => $modusPerKota
-        ];
-    }
-
-    private function getStatistik(Request $request, $jawabanData = null)
-    {
-        // Query untuk total PTK yang terdaftar berdasarkan filter
-        $ptkQuery = DB::table('ptk')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->whereIn('ptk.ptk_id', $ptkYangSudahMenjawabQuery)
             ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
-                $q->where('pangkat_jabatan_id', $request->pangkat_jabatan_id);
+                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
             })
             ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
-                $q->where('jenis_ptk_id', $request->jenis_ptk_id);
+                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
             })
             ->when($request->filled('kota_id'), function ($q) use ($request) {
-                $q->where('kota_id', $request->kota_id);
+                $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
             });
 
-        $totalPtk = $ptkQuery->count();
+        $ptkData = $ptkQuery->get();
 
-        // PTK yang sudah menjawab
-        $ptkMenjawabQuery = DB::table('ptk_jawaban')
-            ->select(DB::raw('COUNT(DISTINCT ptk_jawaban.ptk_id) as jumlah'))
+        // ========================================================
+        // QUERY UNTUK LEVEL DISTRIBUTION (BERDASARKAN JAWABAN)
+        // ========================================================
+
+        $jawabanQuery = DB::table('ptk_jawaban')
+            ->select('ptk_jawaban.level')
             ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
             ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
                 $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
             })
@@ -206,11 +149,270 @@ class AnalisisController extends Controller
             })
             ->when($request->filled('kota_id'), function ($q) use ($request) {
                 $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            });
+
+        $jawabanData = $jawabanQuery->get();
+
+        // ========================================================
+        // HITUNG STATISTIK
+        // ========================================================
+        $statistik = $this->getStatistik($request, $ptkData, $jawabanData);
+
+        // ========================================================
+        // DISTRIBUSI LEVEL (BERDASARKAN JAWABAN)
+        // ========================================================
+        $levelDistribution = $jawabanData->where('level', '>=', 2)
+            ->groupBy('level')
+            ->map(function ($items, $level) {
+                return [
+                    'level' => (int)$level,
+                    'count' => $items->count()
+                ];
+            })
+            ->values()
+            ->sortBy('level');
+
+        // ========================================================
+        // DISTRIBUSI BERDASARKAN PTK (BUKAN JAWABAN)
+        // ========================================================
+
+        // Distribusi jenjang jabatan (berdasarkan PTK, bukan jawaban)
+        $jenjangDistribution = $ptkData->groupBy('jenjang_jabatan')
+            ->map(function ($items, $jenjang) {
+                return [
+                    'jenjang_jabatan' => $jenjang ?: 'Tidak Diketahui',
+                    'count' => $items->count()
+                ];
+            })
+            ->values();
+
+        // Distribusi bentuk pendidikan (berdasarkan PTK, bukan jawaban)
+        $bentukPendidikanDistribution = $ptkData->groupBy('bentuk_pendidikan')
+            ->map(function ($items, $bentuk) {
+                return [
+                    'bentuk_pendidikan' => $bentuk ?: 'Tidak Diketahui',
+                    'count' => $items->count()
+                ];
+            })
+            ->values();
+
+        // Distribusi jenis kelamin (berdasarkan PTK, bukan jawaban)
+        $jenisKelaminDistribution = $ptkData->groupBy('jenis_kelamin')
+            ->map(function ($items, $jenis) {
+                $label = $jenis == 'L' ? 'Laki-laki' : ($jenis == 'P' ? 'Perempuan' : ($jenis ?: 'Tidak Diketahui'));
+                return [
+                    'jenis_kelamin' => $label,
+                    'count' => $items->count()
+                ];
+            })
+            ->values();
+
+        // ========================================================
+        // DATA UNTUK CHART SUB INDIKATOR
+        // ========================================================
+
+        // 1. Ambil semua sub indikator yang ada dalam kegiatan
+        $semuaSubIndikatorQuery = DB::table('ptk_jawaban')
+            ->select(
+                'ptk_jawaban.sub_indikator_id',
+                'ptk_jawaban.sub_indikator_code',
+                'sub_indikator.sub_indikator_name'
+            )
+            ->join('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            })
+            ->groupBy('ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'sub_indikator.sub_indikator_name')
+            ->orderBy('ptk_jawaban.sub_indikator_code');
+
+        $semuaSubIndikator = $semuaSubIndikatorQuery->get();
+
+        // 2. Query untuk data chart sub indikator (menggunakan DISTINCT pada ptk_id)
+        $subIndikatorQuery = DB::table('ptk_jawaban')
+            ->select(
+                'ptk_jawaban.sub_indikator_id',
+                'ptk_jawaban.sub_indikator_code',
+                'ptk_jawaban.level',
+                DB::raw('COUNT(DISTINCT ptk_jawaban.ptk_id) as ptk_count')
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            })
+            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            })
+            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            })
+            ->when($request->filled('kota_id'), function ($q) use ($request) {
+                $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            })
+            ->where('ptk_jawaban.level', '>=', 2)
+            ->groupBy('ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'ptk_jawaban.level');
+
+        $subIndikatorData = $subIndikatorQuery->get();
+
+        // Data untuk chart semua sub indikator
+        $allSubIndikatorsChart = $this->getAllSubIndikatorsChartData($semuaSubIndikator, $subIndikatorData);
+
+        // ========================================================
+        // MODUS PER KOTA - PERBAIKAN: Hitung TOTAL semua sub indikator
+        // ========================================================
+
+        // Query untuk mendapatkan TOTAL semua jawaban per kota
+        $totalJawabanPerKotaQuery = DB::table('ptk_jawaban')
+            ->select(
+                'kota.nama_kota',
+                DB::raw('COUNT(*) as total_jawaban')
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            })
+            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            })
+            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            })
+            ->when($request->filled('kota_id'), function ($q) use ($request) {
+                $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            })
+            ->where('ptk_jawaban.level', '>=', 2)
+            ->groupBy('kota.nama_kota');
+
+        $totalJawabanPerKota = $totalJawabanPerKotaQuery->get()
+            ->pluck('total_jawaban', 'nama_kota')
+            ->toArray();
+
+        // Query untuk modus per kota dengan COUNT (bukan DISTINCT) karena kita hitung semua jawaban
+        $modusKotaQuery = DB::table('ptk_jawaban')
+            ->select(
+                'kota.nama_kota',
+                'ptk_jawaban.sub_indikator_id',
+                'ptk_jawaban.sub_indikator_code',
+                'ptk_jawaban.level',
+                DB::raw('COUNT(*) as jumlah_jawaban') // COUNT biasa, bukan COUNT DISTINCT
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            })
+            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            })
+            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            })
+            ->when($request->filled('kota_id'), function ($q) use ($request) {
+                $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            })
+            ->where('ptk_jawaban.level', '>=', 2)
+            ->groupBy('kota.nama_kota', 'ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'ptk_jawaban.level');
+
+        $modusKotaData = $modusKotaQuery->get();
+
+        $modusPerKota = $this->getModusPerKota($modusKotaData, $semuaSubIndikator, $totalJawabanPerKota);
+
+        // ========================================================
+        // DATA LAINNYA
+        // ========================================================
+
+        // Progress pengisian per kota
+        $progressKota = $this->getProgressKota($request);
+
+        return [
+            'statistik' => $statistik,
+            'level_distribution' => $levelDistribution,
+            'jenjang_distribution' => $jenjangDistribution,
+            'bentuk_pendidikan_distribution' => $bentukPendidikanDistribution,
+            'jenis_kelamin_distribution' => $jenisKelaminDistribution,
+            'all_sub_indikators_chart' => $allSubIndikatorsChart,
+            'progress_kota' => $progressKota,
+            'modus_per_kota' => $modusPerKota
+        ];
+    }
+
+    private function getStatistik(Request $request, $ptkData = null, $jawabanData = null)
+    {
+        // Query untuk total PTK yang terdaftar berdasarkan filter
+        $ptkQuery = DB::table('ptk')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            })
+            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            })
+            ->when($request->filled('kota_id'), function ($q) use ($request) {
+                $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            });
+
+        $totalPtk = $ptkQuery->count();
+
+        // PTK yang sudah menjawab berdasarkan kegiatan
+        $ptkMenjawabQuery = DB::table('ptk_jawaban')
+            ->select(DB::raw('COUNT(DISTINCT ptk_jawaban.ptk_id) as jumlah'))
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            })
+            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            })
+            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            })
+            ->when($request->filled('kota_id'), function ($q) use ($request) {
+                $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
             });
 
         $ptkMenjawab = $ptkMenjawabQuery->first()->jumlah ?? 0;
 
-        // Rata-rata level
+        // Rata-rata level berdasarkan jawaban
         $rataLevel = 0;
         if ($jawabanData && $jawabanData->count() > 0) {
             $rataLevel = $jawabanData->avg('level');
@@ -229,50 +431,26 @@ class AnalisisController extends Controller
         ];
     }
 
-    private function getSubIndikatorStats($jawabanData)
+    private function getAllSubIndikatorsChartData($semuaSubIndikator, $subIndikatorData)
     {
-        return $jawabanData->groupBy('sub_indikator_id')
-            ->map(function ($items, $subIndikatorId) {
-                $firstItem = $items->first();
-                $levels = $items->pluck('level')->map(function ($level) {
-                    return (int)$level;
-                });
+        if ($semuaSubIndikator->isEmpty()) {
+            return [
+                'labels' => [],
+                'datasets' => []
+            ];
+        }
 
-                // Hitung jumlah per level
-                $levelCounts = $levels->countBy();
-
-                return (object)[
-                    'sub_indikator_id' => $subIndikatorId,
-                    'sub_indikator_code' => $firstItem->sub_indikator_code ?? '-',
-                    'sub_indikator_name' => $firstItem->sub_indikator_name ?? '-',
-                    'level_2' => $levelCounts[2] ?? 0,
-                    'level_3' => $levelCounts[3] ?? 0,
-                    'level_4' => $levelCounts[4] ?? 0,
-                    'level_5' => $levelCounts[5] ?? 0,
-                    'total' => $items->count(),
-                    'rata_level' => round($levels->avg(), 2),
-                    'modus_level' => $levelCounts->sortDesc()->keys()->first() ?? null
-                ];
-            })
-            ->values()
-            ->sortBy('sub_indikator_code');
-    }
-
-    private function getAllSubIndikatorsChartData($jawabanData)
-    {
-        // Ambil semua sub indikator yang ada
-        $subIndikators = $jawabanData->groupBy('sub_indikator_id')
-            ->map(function ($items, $subIndikatorId) {
-                $firstItem = $items->first();
+        // Ambil semua sub indikator unik (maksimal 15 untuk chart yang readable)
+        $subIndikators = $semuaSubIndikator
+            ->map(function ($item) {
                 return [
-                    'sub_indikator_id' => $subIndikatorId,
-                    'sub_indikator_code' => $firstItem->sub_indikator_code ?? 'SI-' . $subIndikatorId,
-                    'sub_indikator_name' => $firstItem->sub_indikator_name ?? 'Sub Indikator ' . $subIndikatorId
+                    'sub_indikator_id' => $item->sub_indikator_id,
+                    'sub_indikator_code' => $item->sub_indikator_code ?? 'SI-' . $item->sub_indikator_id,
+                    'sub_indikator_name' => $item->sub_indikator_name ?? 'Sub Indikator ' . $item->sub_indikator_id
                 ];
             })
             ->values()
-            ->sortBy('sub_indikator_code')
-            ->take(15); // Batasi 15 sub indikator pertama untuk chart
+            ->take(15); // Batasi 15 untuk chart yang lebih baik
 
         // Siapkan data untuk chart
         $chartData = [
@@ -295,18 +473,23 @@ class AnalisisController extends Controller
             5 => 'Level 5'
         ];
 
+        // Buat array untuk menyimpan data per level
         foreach ($levels as $level) {
             $dataPerLevel = [];
 
             foreach ($subIndikators as $subIndikator) {
-                $count = $jawabanData
+                // Cari data untuk sub indikator dan level tertentu
+                $data = $subIndikatorData
                     ->where('sub_indikator_id', $subIndikator['sub_indikator_id'])
                     ->where('level', $level)
-                    ->count();
+                    ->first();
 
-                $dataPerLevel[] = $count;
+                // Jika tidak ada data, set ke 0
+                $dataPerLevel[] = $data ? $data->ptk_count : 0;
             }
 
+            // Selalu tambahkan dataset, meskipun semua datanya 0
+            // Ini memastikan semua level muncul di legend
             $chartData['datasets'][] = [
                 'label' => $levelNames[$level],
                 'data' => $dataPerLevel,
@@ -319,26 +502,6 @@ class AnalisisController extends Controller
         return $chartData;
     }
 
-    private function getDistribusiKota($jawabanData)
-    {
-        if ($jawabanData->isEmpty()) {
-            return collect();
-        }
-
-        // Kelompokkan per kota dan hitung statistik
-        return $jawabanData->groupBy('nama_kota')
-            ->map(function ($items, $namaKota) {
-                return (object)[
-                    'nama_kota' => $namaKota ?: 'Tidak Diketahui',
-                    'jumlah_ptk' => $items->unique('nip')->count(),
-                    'rata_level' => round($items->avg('level'), 2)
-                ];
-            })
-            ->values()
-            ->sortByDesc('jumlah_ptk')
-            ->take(10);
-    }
-
     private function getProgressKota(Request $request)
     {
         return DB::table('kota')
@@ -349,6 +512,7 @@ class AnalisisController extends Controller
                 DB::raw('ROUND(COUNT(DISTINCT CASE WHEN ptk_jawaban.ptk_jawaban_id IS NOT NULL THEN ptk.ptk_id END) * 100.0 / COUNT(DISTINCT ptk.ptk_id), 1) as persentase')
             )
             ->leftJoin('ptk', 'kota.kota_id', '=', 'ptk.kota_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
             ->leftJoin('ptk_jawaban', function ($join) use ($request) {
                 $join->on('ptk.ptk_id', '=', 'ptk_jawaban.ptk_id')
                     ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
@@ -364,44 +528,84 @@ class AnalisisController extends Controller
             ->when($request->filled('kota_id'), function ($q) use ($request) {
                 $q->where('kota.kota_id', $request->kota_id);
             })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            })
             ->groupBy('kota.kota_id', 'kota.nama_kota')
             ->orderBy('persentase', 'desc')
             ->limit(10)
             ->get();
     }
 
-    private function getModusPerKota($jawabanData)
+    private function getModusPerKota($modusKotaData, $semuaSubIndikator, $totalJawabanPerKota)
     {
-        // Kelompokkan per kota
-        return $jawabanData->groupBy('nama_kota')
-            ->map(function ($items, $kota) {
-                // Kelompokkan per sub indikator
-                $subIndikatorModus = $items->groupBy('sub_indikator_id')
-                    ->map(function ($subItems, $subIndikatorId) {
-                        $firstItem = $subItems->first();
+        if ($modusKotaData->isEmpty() || $semuaSubIndikator->isEmpty()) {
+            return [];
+        }
 
-                        // Hitung modus level untuk sub indikator ini
-                        $levelCounts = $subItems->pluck('level')->countBy();
-                        $modus = $levelCounts->sortDesc()->keys()->first();
+        // Buat mapping untuk nama sub indikator
+        $subIndikatorMap = [];
+        foreach ($semuaSubIndikator as $sub) {
+            $subIndikatorMap[$sub->sub_indikator_id] = [
+                'code' => $sub->sub_indikator_code,
+                'name' => $sub->sub_indikator_name
+            ];
+        }
 
-                        return [
-                            'sub_indikator_code' => $firstItem->sub_indikator_code ?? 'SI-' . $subIndikatorId,
-                            'sub_indikator_name' => $firstItem->sub_indikator_name ?? 'Sub Indikator ' . $subIndikatorId,
-                            'modus_level' => $modus,
-                            'jumlah_jawaban' => $subItems->count()
-                        ];
-                    })
-                    ->values()
-                    ->sortBy('sub_indikator_code')
-                    ->take(5); // Ambil 5 sub indikator pertama
+        // Kelompokkan per kota dan sub indikator
+        $groupedByKota = $modusKotaData->groupBy(['nama_kota', 'sub_indikator_id']);
 
-                return [
-                    'nama_kota' => $kota ?: 'Tidak Diketahui',
-                    'total_jawaban' => $items->count(),
-                    'sub_indikator_modus' => $subIndikatorModus
-                ];
-            })
-            ->values()
-            ->sortBy('nama_kota');
+        $result = [];
+
+        foreach ($groupedByKota as $namaKota => $subIndikators) {
+            $kotaModus = [
+                'nama_kota' => $namaKota ?: 'Tidak Diketahui',
+                'sub_indikator_modus' => [],
+                'total_jawaban' => $totalJawabanPerKota[$namaKota] ?? 0 // Gunakan total dari query khusus
+            ];
+
+            foreach ($subIndikators as $subIndikatorId => $levels) {
+                // Cari level dengan jumlah jawaban terbanyak (modus)
+                $modusLevel = $levels->sortByDesc('jumlah_jawaban')->first();
+
+                if ($modusLevel) {
+                    $subInfo = $subIndikatorMap[$subIndikatorId] ?? [
+                        'code' => 'SI-' . $subIndikatorId,
+                        'name' => 'Sub Indikator ' . $subIndikatorId
+                    ];
+
+                    $kotaModus['sub_indikator_modus'][] = [
+                        'sub_indikator_code' => $subInfo['code'],
+                        'sub_indikator_name' => $subInfo['name'],
+                        'modus_level' => $modusLevel->level,
+                        'jumlah_jawaban' => $modusLevel->jumlah_jawaban
+                    ];
+                }
+            }
+
+            // Jika tidak ada data modus untuk kota ini, set kosong
+            if (empty($kotaModus['sub_indikator_modus'])) {
+                continue;
+            }
+
+            // Urutkan berdasarkan jumlah jawaban terbanyak
+            usort($kotaModus['sub_indikator_modus'], function ($a, $b) {
+                return $b['jumlah_jawaban'] - $a['jumlah_jawaban'];
+            });
+
+            // Batasi hanya 5 sub indikator pertama
+            $kotaModus['sub_indikator_modus'] = array_slice($kotaModus['sub_indikator_modus'], 0, 5);
+            $result[] = $kotaModus;
+        }
+
+        // Urutkan kota berdasarkan total jawaban terbanyak
+        usort($result, function ($a, $b) {
+            return $b['total_jawaban'] - $a['total_jawaban'];
+        });
+
+        return $result;
     }
 }

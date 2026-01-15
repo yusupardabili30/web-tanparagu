@@ -629,4 +629,50 @@ class SoalController extends Controller
             'nip' => $nip
         ]);
     }
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Mendapatkan posisi lanjutan quiz untuk user
+     */
+    public function getContinuePosition($kegiatan_id, $ptk_id)
+    {
+        // Ambil jawaban terakhir dari ptk_jawaban_detail
+        $lastAnswer = DB::table('ptk_jawaban_detail as pjd')
+            ->join('soal as s', 's.soal_id', '=', 'pjd.soal_id')
+            ->where('pjd.kegiatan_id', $kegiatan_id)
+            ->where('pjd.ptk_id', $ptk_id)
+            ->where('pjd.tahap', 2)
+            ->orderBy('pjd.created_at', 'desc')
+            ->first();
+
+        if (!$lastAnswer) {
+            return null;
+        }
+
+        // Cek apakah sudah ada level final untuk sub_indikator ini
+        $finalLevel = DB::table('ptk_jawaban')
+            ->where('kegiatan_id', $kegiatan_id)
+            ->where('ptk_id', $ptk_id)
+            ->where('tahap', 2)
+            ->where('sub_indikator_id', $lastAnswer->sub_indikator_id)
+            ->whereNotNull('level')
+            ->first();
+
+        $result = [
+            'last_soal_id' => $lastAnswer->soal_id,
+            'sub_indikator_id' => $lastAnswer->sub_indikator_id,
+            'no_urut' => $lastAnswer->no_urut,
+            'has_final_level' => $finalLevel ? true : false
+        ];
+
+        return $result;
+    }
 }
