@@ -215,6 +215,10 @@
                                         <input type="hidden" name="encoded_no_urut" value="{{ $encoded_no_urut }}">
                                         <input type="hidden" name="nip" value="{{ $nip }}">
                                         <input type="text" name="bobot" id="bobot">
+                                       <!-- Menjadi ini -->
+<input type="hidden" name="remaining_seconds" id="remainingSecondsInput" value="{{ $remaining_seconds ?? 7200 }}">
+<input type="hidden" name="frontend_time_string" id="frontendTimeString">
+
 
                                         <!-- Pilihan Jawaban -->
                                         @foreach ($choices as $c)
@@ -767,29 +771,99 @@
     </script>
 
 
+
+
+
+
+
 <script>
-    // Timer yang sync dengan database
-    let remainingSeconds = {{ $remaining_seconds ?? 7200 }}; // Default 2 jam jika tidak ada data
+    // Timer yang TEPAT sinkron dengan database
+    let remainingSeconds = {{ $remaining_seconds ?? 7200 }};
+    let lastUpdateTime = Date.now();
+    let isInitialized = false;
     
-    // ============================================
-    // RESET LOCALSTORAGE JIKA ADA FLAG
-    // ============================================
-    @if($reset_localstorage ?? false)
-        // Reset semua localStorage timer
-        localStorage.removeItem("quiz2_remaining_seconds");
-        localStorage.removeItem("quiz2_last_update");
-        localStorage.removeItem("quiz_start_time");
-        localStorage.removeItem("quiz2_start_time");
+    // Format waktu untuk ditampilkan
+    function formatTime(seconds) {
+        const hours = String(Math.floor(seconds / 3600)).padStart(2, "0");
+        const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+        const secs = String(seconds % 60).padStart(2, "0");
+        return `${hours}:${minutes}:${secs}`;
+    }
+    
+    // Update timer display DAN input hidden
+    function updateTimerDisplay() {
+        const timeString = formatTime(remainingSeconds);
+        document.getElementById("timerText").textContent = timeString;
         
-        console.log("🔄 LocalStorage timer direset untuk lanjutkan quiz");
-        console.log("⏱️ Waktu dari database: {{ $remaining_time_formatted }}");
-    @endif
+        // UPDATE INPUT HIDDEN UNTUK DIKIRIM KE BACKEND
+        document.getElementById("remainingSecondsInput").value = remainingSeconds;
+        document.getElementById("frontendTimeString").value = timeString;
+        
+        // Debug log
+        console.log("🕐 Timer updated:", {
+            seconds: remainingSeconds,
+            display: timeString,
+            timestamp: new Date().toLocaleTimeString()
+        });
+    }
     
+    // Simpan waktu ke localStorage
+    function saveTimeToLocalStorage() {
+        localStorage.setItem("quiz2_remaining_seconds", remainingSeconds);
+        localStorage.setItem("quiz2_last_update", Date.now());
+        localStorage.setItem("quiz2_display_time", formatTime(remainingSeconds));
+    }
+    
+    // Hitung waktu yang telah berlalu sejak penyimpanan terakhir
+    function calculateElapsedTimeSinceLastSave() {
+        const lastSave = localStorage.getItem("quiz2_last_update");
+        if (!lastSave) return 0;
+        
+        const now = Date.now();
+        const elapsed = Math.floor((now - parseInt(lastSave)) / 1000);
+        return Math.max(0, elapsed);
+    }
+    
+    // Load waktu dari localStorage dengan memperhitungkan waktu yang telah berlalu
+    function loadAndContinueTime() {
+        @if(!($reset_localstorage ?? false))
+            const savedRemaining = localStorage.getItem("quiz2_remaining_seconds");
+            const lastUpdate = localStorage.getItem("quiz2_last_update");
+            const savedDisplay = localStorage.getItem("quiz2_display_time");
+            
+            if (savedRemaining && lastUpdate) {
+                const now = Date.now();
+                const elapsedSeconds = Math.floor((now - parseInt(lastUpdate)) / 1000);
+                const savedSeconds = parseInt(savedRemaining);
+                
+                // Kurangi waktu yang telah berlalu sejak penyimpanan terakhir
+                const continuedSeconds = Math.max(0, savedSeconds - elapsedSeconds);
+                
+                // Gunakan yang TERKECIL antara waktu lanjutan dan waktu dari database
+                remainingSeconds = Math.min(continuedSeconds, remainingSeconds);
+                
+                // Update waktu terakhir
+                lastUpdateTime = now;
+                
+                console.log("✅ Timer dilanjutkan dari localStorage:", {
+                    dariLocalStorage: continuedSeconds + " detik",
+                    dariDatabase: {{ $remaining_seconds ?? 7200 }} + " detik",
+                    dipakai: remainingSeconds + " detik (" + formatTime(remainingSeconds) + ")"
+                });
+            } else {
+                console.log("📊 Menggunakan waktu dari database:", formatTime(remainingSeconds));
+            }
+        @else
+            console.log("🆕 Timer dimulai baru:", formatTime(remainingSeconds));
+        @endif
+    }
+    
+    // Main timer function
     function updateTimer() {
         if (remainingSeconds <= 0) {
-            document.getElementById("timerText").textContent = "00:00:00";
+            updateTimerDisplay();
             
-            // Redirect ke halaman finish jika waktu habis
+            // Redirect ke finish jika waktu habis
             setTimeout(() => {
                 window.location.href = "{{ route('quiz.finish', [
                     'encoded_kegiatan_id' => $encoded_kegiatan_id,
@@ -803,55 +877,79 @@
         // Kurangi 1 detik
         remainingSeconds--;
         
-        // Hitung jam, menit & detik
-        const hours = String(Math.floor(remainingSeconds / 3600)).padStart(2, "0");
-        const minutes = String(Math.floor((remainingSeconds % 3600) / 60)).padStart(2, "0");
-        const seconds = String(remainingSeconds % 60).padStart(2, "0");
+        // Update tampilan dan input hidden
+        updateTimerDisplay();
         
-        // Tampilkan dalam format 00:00:00
-        document.getElementById("timerText").textContent = `${hours}:${minutes}:${seconds}`;
-        
-        // Simpan sisa waktu ke localStorage untuk backup
-        localStorage.setItem("quiz2_remaining_seconds", remainingSeconds);
-        localStorage.setItem("quiz2_last_update", Date.now());
+        // Simpan ke localStorage setiap 5 detik
+        if (Date.now() - lastUpdateTime > 5000) {
+            saveTimeToLocalStorage();
+            lastUpdateTime = Date.now();
+        }
     }
     
-    // Load sisa waktu dari localStorage jika ada (untuk handle refresh)
-    window.addEventListener('load', function() {
-        // JIKA INI LANJUTAN QUIZ, IGNORE LOCALSTORAGE
-        @if(!($reset_localstorage ?? false))
-            const savedRemaining = localStorage.getItem("quiz2_remaining_seconds");
-            const lastUpdate = localStorage.getItem("quiz2_last_update");
-            
-            if (savedRemaining && lastUpdate) {
-                const now = Date.now();
-                const elapsed = Math.floor((now - lastUpdate) / 1000);
-                const calculatedRemaining = Math.max(0, savedRemaining - elapsed);
-                
-                // Gunakan yang terkecil antara data dari database dan localStorage
-                // TAPI prioritaskan database jika perbedaan besar
-                if (Math.abs(remainingSeconds - calculatedRemaining) > 300) { // Lebih dari 5 menit beda
-                    console.log("⚠️ Perbedaan waktu besar, menggunakan data dari database");
-                    console.log(`Database: ${remainingSeconds}s, LocalStorage: ${calculatedRemaining}s`);
-                    // Tetap gunakan remainingSeconds dari database
-                } else {
-                    remainingSeconds = Math.min(remainingSeconds, calculatedRemaining);
-                }
-            }
+    // Initialize timer dengan benar
+    function initializeTimer() {
+        if (isInitialized) return;
+        
+        // 1. Load dan lanjutkan waktu dari localStorage
+        loadAndContinueTime();
+        
+        // 2. Reset localStorage jika ada flag (untuk lanjutkan quiz)
+        @if($reset_localstorage ?? false)
+            localStorage.removeItem("quiz2_remaining_seconds");
+            localStorage.removeItem("quiz2_last_update");
+            localStorage.removeItem("quiz2_display_time");
+            console.log("🔄 Timer localStorage direset untuk lanjutkan quiz");
         @endif
         
-        // Update timer setiap detik
+        // 3. Tampilkan waktu awal dan update input
+        updateTimerDisplay();
+        
+        // 4. Simpan waktu awal ke localStorage jika belum ada
+        if (!localStorage.getItem("quiz2_remaining_seconds")) {
+            saveTimeToLocalStorage();
+        }
+        
+        // 5. Start timer interval
         setInterval(updateTimer, 1000);
-        updateTimer(); // Jalankan sekali langsung
+        
+        isInitialized = true;
+        
+        console.log("🎬 Timer diinisialisasi:", {
+            seconds: remainingSeconds,
+            display: formatTime(remainingSeconds),
+            databaseTime: "{{ $remaining_time_formatted ?? '02:00:00' }}"
+        });
+    }
+    
+    // Event listeners
+    window.addEventListener('load', function() {
+        initializeTimer();
     });
     
-    // Handle sebelum unload halaman (sebelum refresh/close)
-    window.addEventListener('beforeunload', function(e) {
-        // Simpan sisa waktu ke localStorage
-        localStorage.setItem("quiz2_remaining_seconds", remainingSeconds);
-        localStorage.setItem("quiz2_last_update", Date.now());
+    // Simpan waktu sebelum unload/tutup halaman
+    window.addEventListener('beforeunload', function() {
+        saveTimeToLocalStorage();
+        console.log("💾 Timer disimpan sebelum unload:", formatTime(remainingSeconds));
+    });
+    
+    // Pastikan input hidden selalu ter-update saat form di-submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Update input hidden terakhir kali sebelum submit
+        updateTimerDisplay();
+        
+        console.log("📤 Form akan disubmit dengan waktu:", {
+            seconds: remainingSeconds,
+            display: formatTime(remainingSeconds),
+            inputValue: document.getElementById("remainingSecondsInput").value
+        });
     });
 </script>
+
+
+
+
+
 
     <script>
         // ============================================

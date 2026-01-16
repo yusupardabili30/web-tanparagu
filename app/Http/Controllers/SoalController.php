@@ -184,11 +184,13 @@ class SoalController extends Controller
         ]);
     }
 
-    // App\Http\Controllers\SoalController.php - update method quiz2
-
+    // App\Http\Controllers\SoalController.php - Method quiz2
     public function quiz2($tahap, $encoded_kegiatan_id, $nip, $encoded_sub_indikator_id, $encoded_no_urut)
     {
         session(['timesoal' => now()->format('H:i:s')]);
+        if (Hashids::decode($encoded_no_urut)[0] == 1) {
+            session(['timestart' => now()->format('H:i:s')]);
+        }
 
         $sub_indikator_id = Hashids::decode($encoded_sub_indikator_id)[0] ?? 0;
         $no_urut = Hashids::decode($encoded_no_urut)[0] ?? 0;
@@ -213,9 +215,18 @@ class SoalController extends Controller
         }
 
         // ==============================================
-        // PERHITUNGAN WAKTU SISA - PRIORITAS DATABASE
+        // PERHITUNGAN WAKTU SISA - TIDAK RESET SAAT LANJUTKAN
         // ==============================================
         $remaining_seconds = PtkJawabanDetail::getLatestRemainingTimeFromDatabase($kegiatan_id, $ptk->ptk_id, 2);
+
+        // Debug: Catat waktu yang didapat dari database
+        \Log::info("quiz2 - Remaining time from database", [
+            'kegiatan_id' => $kegiatan_id,
+            'ptk_id' => $ptk->ptk_id,
+            'remaining_seconds' => $remaining_seconds,
+            'formatted_time' => gmdate("H:i:s", $remaining_seconds)
+        ]);
+
         $remaining_time_formatted = PtkJawabanDetail::formatRemainingTime($remaining_seconds);
 
         // Cek apakah waktu sudah habis
@@ -227,32 +238,26 @@ class SoalController extends Controller
         }
 
         // ==============================================
-        // HANDLE RESET LOCALSTORAGE (JIKA ADA FLAG)
+        // SIMPAN WAKTU YANG SAMA UNTUK FRONTEND DAN BACKEND
         // ==============================================
+        // Simpan waktu sisa di session untuk konsistensi
+        session(['current_remaining_seconds' => $remaining_seconds]);
+        session(['quiz2_display_time' => $remaining_time_formatted]);
+
+        // Reset flag untuk localStorage
         $resetLocalStorage = false;
         if (session()->has('reset_localstorage') && session('reset_localstorage') === true) {
             $resetLocalStorage = true;
-            // Hapus flag setelah digunakan
             session()->forget('reset_localstorage');
-
-            // Gunakan waktu dari database yang sudah disimpan di session
-            if (session()->has('quiz2_remaining_seconds')) {
-                $remaining_seconds = session('quiz2_remaining_seconds');
-                session()->forget('quiz2_remaining_seconds');
-            }
         }
 
-        // Simpan waktu sisa di session untuk JavaScript
-        session(['current_remaining_seconds' => $remaining_seconds]);
-        session(['should_reset_localstorage' => $resetLocalStorage]); // Flag untuk JavaScript
-
         // ==============================================
-        // AMBIL DATA LAINNYA (case, choices, dll)
+        // AMBIL DATA LAINNYA
         // ==============================================
         $case = SoalCase::where('soal_case_id', $soal->soal_case_id)->first();
         $choices = SoalJawaban::where('soal_id', $soal->soal_id)->inRandomOrder()->get();
 
-        // Ambil data case list (sama seperti sebelumnya)
+        // Ambil data case list
         $entity = $kegiatan->entity ?? null;
         $cases = SoalCase::where('entity', $entity)
             ->orderBy('sub_indikator_id')
@@ -287,9 +292,6 @@ class SoalController extends Controller
             ];
         }
 
-        // ==============================================
-        // PASS KE VIEW
-        // ==============================================
         return view('quiz.quiz2', [
             'soal' => $soal,
             'tahap' => $tahap,
@@ -305,8 +307,8 @@ class SoalController extends Controller
             'kegiatan' => $kegiatan,
             'caseList' => $caseList,
             'currentCaseId' => $soal->soal_case_id ?? 0,
-            'remaining_seconds' => $remaining_seconds, // Untuk JavaScript
-            'remaining_time_formatted' => $remaining_time_formatted, // Untuk display
+            'remaining_seconds' => $remaining_seconds, // Sama dengan database
+            'remaining_time_formatted' => $remaining_time_formatted, // Format HH:MM:SS
             'reset_localstorage' => $resetLocalStorage
         ]);
     }
@@ -444,15 +446,73 @@ class SoalController extends Controller
         $endSoal = Carbon::createFromFormat('H:i:s', now()->format('H:i:s'));
         $durasi_soal = gmdate('H:i:s', $startSoal->diffInSeconds($endSoal));
 
-        // ==============================================
-        // HITUNG WAKTU SISA DARI DATABASE
-        // ==============================================
-        $total_used_seconds = $startSoal->diffInSeconds($endSoal);
-        $remaining_before = PtkJawabanDetail::calculateRemainingTime($kegiatan_id, $ptk->ptk_id, 2);
-        $remaining_after = max(0, $remaining_before - $total_used_seconds);
-        $sisa_duration_time = PtkJawabanDetail::formatRemainingTime($remaining_after);
 
-        PtkJawabanDetail::updateOrCreate([
+
+
+
+        // Waktu jawaban disimpan
+        $start = Carbon::createFromFormat('H:i:s', session('timestart'));
+        $end = Carbon::createFromFormat('H:i:s', now()->format('H:i:s'));
+        $durasi_sub = gmdate('H:i:s', $start->diffInSeconds($end));
+
+
+        // ==============================================
+        // AMBIL WAKTU DARI FRONTEND (PRIORITAS UTAMA)
+        // ==============================================
+        $frontend_remaining_seconds = $request->remaining_seconds;
+        $frontend_time_string = $request->frontend_time_string;
+
+        $sisa_duration_time = '';
+        $new_remaining_seconds = 0;
+
+        // JIKA ADA WAKTU DARI FRONTEND, GUNAKAN ITU
+        if ($frontend_remaining_seconds && is_numeric($frontend_remaining_seconds)) {
+            $new_remaining_seconds = (int) $frontend_remaining_seconds;
+
+            // Jika ada string waktu dari frontend, gunakan itu
+            if ($frontend_time_string && preg_match('/^\d{2}:\d{2}:\d{2}$/', $frontend_time_string)) {
+                $sisa_duration_time = $frontend_time_string;
+            } else {
+                // Format dari seconds
+                $sisa_duration_time = PtkJawabanDetail::formatRemainingTime($new_remaining_seconds);
+            }
+
+            \Log::info("submitq2 - Menggunakan waktu dari FRONTEND", [
+                'frontend_seconds' => $frontend_remaining_seconds,
+                'frontend_time' => $frontend_time_string,
+                'hasil_sisa_time' => $sisa_duration_time,
+                'kegiatan_id' => $kegiatan_id,
+                'ptk_id' => $ptk->ptk_id,
+                'soal_id' => $soal_id
+            ]);
+        }
+        // JIKA TIDAK ADA WAKTU DARI FRONTEND, HITUNG DARI DATABASE
+        else {
+            $previous_remaining = PtkJawabanDetail::getLatestRemainingTimeFromDatabase($kegiatan_id, $ptk->ptk_id, 2);
+            $time_used = $startSoal->diffInSeconds($endSoal);
+            $new_remaining_seconds = max(0, $previous_remaining - $time_used);
+            $sisa_duration_time = PtkJawabanDetail::formatRemainingTime($new_remaining_seconds);
+
+            \Log::warning("submitq2 - Waktu dari frontend TIDAK ADA, menggunakan perhitungan backend", [
+                'previous_remaining' => $previous_remaining,
+                'time_used' => $time_used,
+                'new_remaining' => $new_remaining_seconds,
+                'sisa_duration_time' => $sisa_duration_time
+            ]);
+        }
+
+        // ==============================================
+        // VALIDASI WAKTU TIDAK NEGATIF
+        // ==============================================
+        if ($new_remaining_seconds < 0) {
+            $new_remaining_seconds = 0;
+            $sisa_duration_time = '00:00:00';
+        }
+
+        // ==============================================
+        // SIMPAN KE DATABASE
+        // ==============================================
+        $detail = PtkJawabanDetail::updateOrCreate([
             'kegiatan_id' => $kegiatan_id,
             'sub_indikator_id' => $sub_indikator->sub_indikator_id,
             'sub_indikator_code' => $sub_indikator->sub_indikator_code,
@@ -464,9 +524,19 @@ class SoalController extends Controller
             'time_end' => now()->format('H:i:s'),
             'selisih' => $durasi_soal,
             'level' => $soal->level,
-            'sisa_duration_time' => $sisa_duration_time, // TAMBAHKAN INI
+            'sisa_duration_time' => $sisa_duration_time, // DISIMPAN SAMA DENGAN YANG DITAMPILKAN
             'bobot' => $bobot
         ]);
+
+        // LOG PERBANDINGAN
+        $calculated_from_db = PtkJawabanDetail::getLatestRemainingTimeFromDatabase($kegiatan_id, $ptk->ptk_id, 2);
+        \Log::info("submitq2 - Perbandingan akhir", [
+            'waktu_dari_frontend' => $frontend_time_string ?? 'TIDAK ADA',
+            'waktu_dihitung_backend' => PtkJawabanDetail::formatRemainingTime($calculated_from_db),
+            'waktu_disimpan' => $sisa_duration_time,
+            'selisih' => abs($new_remaining_seconds - $calculated_from_db) . ' detik'
+        ]);
+
 
         // ALGORITMA QUIZ 2
         switch ($soal->level) {
@@ -498,7 +568,7 @@ class SoalController extends Controller
                     ], [
                         'time_start' => session('timestart'),
                         'time_end' => now()->format('H:i:s'),
-                        'selisih' => $durasi_soal,
+                        'selisih' => $durasi_sub,
                         'level' => $level_final
                     ]);
                 }
@@ -518,7 +588,7 @@ class SoalController extends Controller
                         ], [
                             'time_start' => session('timestart'),
                             'time_end' => now()->format('H:i:s'),
-                            'selisih' => $durasi_soal,
+                            'selisih' => $durasi_sub,
                             'level' => 5
                         ]);
                     }
@@ -548,7 +618,7 @@ class SoalController extends Controller
                     ], [
                         'time_start' => session('timestart'),
                         'time_end' => now()->format('H:i:s'),
-                        'selisih' => $durasi_soal,
+                        'selisih' => $durasi_sub,
                         'level' => $level_final
                     ]);
                 }

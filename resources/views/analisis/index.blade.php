@@ -117,14 +117,11 @@
     overflow-x: auto;   /* sudah ada, tinggal pastikan */
     -webkit-overflow-scrolling: touch;
 }
-.table-card {
-    background: white;
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 6px 18px rgba(0,0,0,.06);
+.modus-table th,
+.modus-table td {
+    white-space: nowrap;
+    min-width: 100px;   /* sesuaikan jika masih terlalu kecil */
 }
-
 </style>
 
 <div class="container-fluid">
@@ -351,7 +348,7 @@
                 @if(!empty($analisisData['all_sub_indikators_chart']['labels']))
                 <div class="row">
                     <div class="col-12">
-                       <div class="table-card">
+                        <div class="chart-container chart-container-large">
                             <div class="chart-title">
                                 <i class="ri-bar-chart-grouped-line"></i> Distribusi PTK per Sub Indikator
                                 <span class="badge bg-info ms-2">Jumlah PTK (Bukan Jawaban)</span>
@@ -366,7 +363,7 @@
                 @if(!empty($analisisData['modus_per_kota']))
                 <div class="row">
                     <div class="col-12">
-            <div class="table-card">
+                        <div class="chart-container chart-container-large">
                             <div class="chart-title">
                                 <i class="ri-map-pin-line"></i> Modus Level per Kota
                                 <small class="text-muted ms-2">(Berdasarkan jumlah PTK)</small>
@@ -425,7 +422,7 @@
                 @if(!empty($analisisData['progress_kota']))
                 <div class="row">
                     <div class="col-12">
-                         <div class="table-card">
+                        <div class="chart-container chart-container-large">
                             <div class="chart-title">
                                 <i class="ri-progress-3-line"></i> Progress Pengisian per Kota
                             </div>
@@ -646,7 +643,7 @@ function updateAnalisisContent(data) {
         html += `
         <div class="row">
             <div class="col-12">
-          <div class="table-card">
+                <div class="chart-container chart-container-large">
                     <div class="chart-title">
                         <i class="ri-map-pin-line"></i> Modus Level per Kota <small class="text-muted">(Jumlah PTK)</small>
                     </div>
@@ -698,7 +695,7 @@ function updateAnalisisContent(data) {
         html += `
         <div class="row">
             <div class="col-12">
-                <div class="table-card">
+                <div class="chart-container chart-container-large">
                     <div class="chart-title">
                         <i class="ri-progress-3-line"></i> Progress Pengisian per Kota
                     </div>
