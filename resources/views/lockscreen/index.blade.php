@@ -816,19 +816,6 @@
                 sekolahSelect.classList.remove('is-invalid');
                 instansiInput.classList.remove('is-invalid');
 
-                // TAMBAHKAN VALIDASI UNTUK JENIS PTK (WAJIB)
-const jenisPtkSelect = document.getElementById('jenis_ptk_id');
-if (!jenisPtkSelect.value) {
-    isValid = false;
-    errorMessages.push('Pilih Jenis PTK');
-    jenisPtkSelect.classList.add('is-invalid');
-}
-
-// VALIDASI UNTUK PANGKAT GOLONGAN (OPSIONAL, tapi pastikan tidak error)
-const pangkatGolonganSelect = document.getElementById('pangkat_golongan_id');
-if (pangkatGolonganSelect && pangkatGolonganSelect.classList.contains('is-invalid')) {
-    pangkatGolonganSelect.classList.remove('is-invalid');
-}
 
                 if (e.target.value === 'sekolah') {
                     sekolahDropdownSection.classList.remove('d-none');
@@ -1106,7 +1093,7 @@ document.getElementById('submit-register')?.addEventListener('click', function()
     const form = document.getElementById('register-form');
     const formData = new FormData(form);
 
-    const requiredFields = ['nama', 'jenis_kelamin', 'tempat_lahir', 'tgl_lahir', 'pangkat_jabatan_id', 'email', 'no_hp'];
+    const requiredFields = ['nama', 'jenis_kelamin', 'tempat_lahir', 'tgl_lahir', 'pangkat_jabatan_id', 'email', 'no_hp', 'agama', 'jenis_ptk_id', 'pangkat_golongan_id'];
     let isValid = true;
     let errorMessages = [];
 
@@ -1122,6 +1109,8 @@ document.getElementById('submit-register')?.addEventListener('click', function()
             errorMessages.push(`${fieldName} wajib diisi`);
         }
     });
+
+
 
     const kotaSelect = document.getElementById('kotaSelect');
     if (!kotaSelect.value) {
@@ -1180,6 +1169,9 @@ document.getElementById('submit-register')?.addEventListener('click', function()
         errorMessages.push('Nomor HP minimal 10 digit');
     }
 
+
+
+    
     const dobInput = form.querySelector('[name="tgl_lahir"]');
     if (dobInput.value) {
         const dob = new Date(dobInput.value);
