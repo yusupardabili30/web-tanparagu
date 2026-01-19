@@ -51,8 +51,10 @@ class LockScreenController extends Controller
 
         // Ambil 10 sekolah pertama untuk inisialisasi
         $sekolahs = Sekolah::orderBy('nama_sekolah')->limit(100)->get();
-        // AMBIL DATA AGAMA DARI DATABASE
-        $agamas = Agama::orderBy('nama_agama')->get();
+        // // AMBIL DATA AGAMA DARI DATABASE
+        // $agamas = Agama::orderBy('nama_agama')->get();
+        // GANTI DENGAN INI: Urutkan Islam pertama, sisanya alfabet
+        $agamas = Agama::orderByRaw("CASE WHEN nama_agama = 'Islam' THEN 0 ELSE 1 END, nama_agama ASC")->get();
 
         return view('lockscreen.index', [
             'title' => 'Lock Screen',

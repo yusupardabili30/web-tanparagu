@@ -938,14 +938,13 @@ if (pangkatGolonganSelect && pangkatGolonganSelect.classList.contains('is-invali
 
             loadingIndicator.classList.remove('d-none');
             searchResults.innerHTML = '';
+fetch(`/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
+    method: 'GET',
+    headers: {
+        'Accept': 'application/json'
+    }
+})
 
-            fetch(`/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
                 .then(response => response.json())
                 .then(data => {
                     loadingIndicator.classList.add('d-none');
