@@ -20,7 +20,7 @@ class ManagementUsersController extends Controller
         $roles = Role::all();
         $timKerja = TimKerja::all();
 
-        return view('users.index', [
+        return view('user.index', [
             'tittle' => 'Management Users',
             'data' => $users,
             'roles' => $roles,

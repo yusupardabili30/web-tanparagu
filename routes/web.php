@@ -221,17 +221,9 @@ Route::get('/quiz1/case-list/{encoded_kegiatan_id}/{nip}', [SoalController::clas
     ->name('quiz1.case-list');
 
 
-
-
-
-
 // web.php - tambahkan route ini
 Route::get('/analisis', [AnalisisController::class, 'index'])->name('analisis.index');
 Route::get('/ptk/continue/{encode_kegiatan_id}/{nip}', [PtkController::class, 'continueQuiz'])->name('ptk.continue-quiz');
-
-
-
-
 
 
 // Pastikan di web.php routes sudah tepat
