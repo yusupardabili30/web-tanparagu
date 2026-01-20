@@ -4,7 +4,8 @@
             <div class="d-flex">
                 <!-- LOGO -->
                 <div class="navbar-brand-box horizontal-logo">
-                    <a href="{{ route('home') }}" class="logo logo-dark">
+                    {{-- ✅ MATIIN LINK TANPA UBAH TAMPILAN --}}
+                    <a href="javascript:void(0)" onclick="return false;" class="logo logo-dark">
                         <span class="logo-sm">
                             <img src="{{asset('build')}}/images/logo-sm.png" alt="" height="15">
                         </span>
@@ -14,10 +15,10 @@
                                 height="140"
                                 style="position:relative; top:-10px;">
                         </span>
-
                     </a>
 
-                    <a href="{{ route('home') }}" class="logo logo-light">
+                    {{-- ✅ MATIIN LINK TANPA UBAH TAMPILAN --}}
+                    <a href="javascript:void(0)" onclick="return false;" class="logo logo-light">
                         <span class="logo-sm">
                             <img src="{{asset('build')}}/images/logo-sm.png" alt="" height="15">
                         </span>
@@ -44,7 +45,6 @@
                         <i class='bx bx-fullscreen fs-22'></i>
                     </button>
                 </div>
-
 
             </div>
         </div>
@@ -75,3 +75,39 @@
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+{{-- ✅ AKTIFIN FULLSCREEN TANPA UBAH TAMPILAN --}}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.querySelector('[data-toggle="fullscreen"]');
+    if (!btn) return;
+
+    function openFullscreen() {
+        const el = document.documentElement;
+        if (el.requestFullscreen) return el.requestFullscreen();
+        if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(); // Safari
+        if (el.mozRequestFullScreen) return el.mozRequestFullScreen(); // Firefox
+        if (el.msRequestFullscreen) return el.msRequestFullscreen(); // IE/Edge lama
+    }
+
+    function closeFullscreen() {
+        if (document.exitFullscreen) return document.exitFullscreen();
+        if (document.webkitExitFullscreen) return document.webkitExitFullscreen(); // Safari
+        if (document.mozCancelFullScreen) return document.mozCancelFullScreen(); // Firefox
+        if (document.msExitFullscreen) return document.msExitFullscreen(); // IE/Edge lama
+    }
+
+    btn.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        const isFull =
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement;
+
+        if (!isFull) openFullscreen();
+        else closeFullscreen();
+    });
+});
+</script>
