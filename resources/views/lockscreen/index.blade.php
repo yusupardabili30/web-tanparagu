@@ -16,19 +16,19 @@
 
     <style>
         /* ===== SEKOLAH SELECT + SEARCH BUTTON NYAMBUNG ===== */
-        #registerModal .mm-float.input-group{
+        #registerModal .mm-float.input-group {
             width: 100%;
             align-items: stretch;
         }
 
         /* selectnya jadi sisi kiri, radius kanan dimatiin biar nempel sama tombol */
-        #registerModal .mm-float.input-group > .form-control{
+        #registerModal .mm-float.input-group>.form-control {
             border-top-right-radius: 0 !important;
             border-bottom-right-radius: 0 !important;
         }
 
         /* tombol search nempel + tinggi sama */
-        #registerModal #openSearchModalBtn{
+        #registerModal #openSearchModalBtn {
             height: 58px !important;
             border-radius: 0 12px 12px 0 !important;
             border: 1px solid #d7e2ff !important;
@@ -39,7 +39,7 @@
             justify-content: center;
         }
 
-        #registerModal #openSearchModalBtn i{
+        #registerModal #openSearchModalBtn i {
             font-size: 20px;
         }
 
@@ -281,6 +281,30 @@
         #registerModal .mm-float select.form-control {
             height: 58px !important;
         }
+
+        /* =========================================
+           FIX INPUT DATE: tanggal harus MUNCUL
+           ========================================= */
+        #registerModal .mm-float input[type="date"] {
+            padding-top: 30px !important;
+            color: #555555 !important;
+        }
+
+        #registerModal .mm-float input[type="date"]::-webkit-datetime-edit {
+            color: #555555 !important;
+        }
+
+        #registerModal .mm-float input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 1 !important;
+            cursor: pointer;
+        }
+
+        #registerModal .mm-float input[type="date"] + .mm-label {
+            top: 6px !important;
+            font-size: 12px !important;
+            color: #133d78 !important;
+            background: #fff !important;
+        }
     </style>
 </head>
 
@@ -504,35 +528,33 @@
                                 </div>
                             </div>
 
+                            <!-- Jenis PTK -->
+                            <div class="col-md-6 mb-3">
+                                <div class="mm-float">
+                                    <select name="jenis_ptk_id" id="jenis_ptk_id" class="form-control" required>
+                                        <option value="" selected hidden></option>
+                                        @foreach($jenisPtk as $jenis)
+                                            <option value="{{ $jenis->jenis_ptk_id }}">{{ $jenis->jenis_ptk }}</option>
+                                        @endforeach
+                                    </select>
+                                    <label class="mm-label">Jenis PTK *</label>
+                                </div>
+                            </div>
 
-
-                            <!-- Dalam modal registrasi, tambahkan setelah field pangkat_jabatan_id -->
-<div class="col-md-6">
-    <div class="mb-3">
-        <label for="jenis_ptk_id" class="form-label">Jenis PTK <span class="text-danger">*</span></label>
-        <select class="form-select" id="jenis_ptk_id" name="jenis_ptk_id" required>
-            <option value="">Pilih Jenis PTK</option>
-            @foreach($jenisPtk as $jenis)
-                <option value="{{ $jenis->jenis_ptk_id }}">{{ $jenis->jenis_ptk }}</option>
-            @endforeach
-        </select>
-        <div class="invalid-feedback">Pilih jenis PTK</div>
-    </div>
-</div>
-
-<div class="col-md-6">
-    <div class="mb-3">
-        <label for="pangkat_golongan_id" class="form-label">Pangkat/Golongan</label>
-        <select class="form-select" id="pangkat_golongan_id" name="pangkat_golongan_id">
-            <option value="">Pilih Pangkat/Golongan</option>
-            @foreach($pangkatGolongans as $golongan)
-                <option value="{{ $golongan->pangkat_golongan_id }}">
-                    {{ $golongan->pangkat }} ({{ $golongan->golongan }})
-                </option>
-            @endforeach
-        </select>
-    </div>
-</div>
+                            <!-- Pangkat/Golongan -->
+                            <div class="col-md-6 mb-3">
+                                <div class="mm-float">
+                                    <select name="pangkat_golongan_id" id="pangkat_golongan_id" class="form-control">
+                                        <option value="" selected hidden></option>
+                                        @foreach($pangkatGolongans as $golongan)
+                                            <option value="{{ $golongan->pangkat_golongan_id }}">
+                                                {{ $golongan->pangkat }} ({{ $golongan->golongan }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <label class="mm-label">Pangkat/Golongan</label>
+                                </div>
+                            </div>
 
                             <!-- Jabatan -->
                             <div class="col-md-6 mb-3">
@@ -540,11 +562,11 @@
                                     <select name="pangkat_jabatan_id" class="form-control" required>
                                         <option value="" selected hidden></option>
                                         @foreach($pangkatJabatans as $pangkatJabatan)
-                                        <option value="{{ $pangkatJabatan->pangkat_jabatan_id }}">
-                                            {{ $pangkatJabatan->jenjang_jabatan }}
-                                            @if($pangkatJabatan->pangkat) - {{ $pangkatJabatan->pangkat }} @endif
-                                            @if($pangkatJabatan->golongan_ruang) ({{ $pangkatJabatan->golongan_ruang }}) @endif
-                                        </option>
+                                            <option value="{{ $pangkatJabatan->pangkat_jabatan_id }}">
+                                                {{ $pangkatJabatan->jenjang_jabatan }}
+                                                @if($pangkatJabatan->pangkat) - {{ $pangkatJabatan->pangkat }} @endif
+                                                @if($pangkatJabatan->golongan_ruang) ({{ $pangkatJabatan->golongan_ruang }}) @endif
+                                            </option>
                                         @endforeach
                                     </select>
                                     <label class="mm-label">Jenjang Jabatan *</label>
@@ -573,9 +595,7 @@
                                     <select name="agama" class="form-control" required>
                                         <option value="" selected hidden></option>
                                         @foreach($agamas as $agama)
-                                        <option value="{{ $agama->nama_agama }}">
-                                            {{ $agama->nama_agama }}
-                                        </option>
+                                            <option value="{{ $agama->nama_agama }}">{{ $agama->nama_agama }}</option>
                                         @endforeach
                                     </select>
                                     <label class="mm-label">Agama *</label>
@@ -588,7 +608,7 @@
                                     <select name="kota_id" id="kotaSelect" class="form-control" required>
                                         <option value="" selected hidden></option>
                                         @foreach($kotas as $kota)
-                                        <option value="{{ $kota->kota_id }}">{{ $kota->nama_kota }}</option>
+                                            <option value="{{ $kota->kota_id }}">{{ $kota->nama_kota }}</option>
                                         @endforeach
                                     </select>
                                     <label class="mm-label">Kota *</label>
@@ -614,36 +634,35 @@
                                     </div>
                                 </div>
 
-<!-- Dropdown sekolah -->
-<div id="sekolahDropdownSection">
-    <div class="mm-float input-group">
-        <select name="sekolah_id" class="form-control" id="sekolahSelect">
-            <option value="" selected hidden></option>
-            @foreach($sekolahs as $sekolah)
-                <option value="{{ $sekolah->sekolah_id }}"
-                        data-nama="{{ $sekolah->nama_sekolah }}"
-                        data-alamat="{{ $sekolah->alamat }}">
-                    {{ $sekolah->nama_sekolah }}
-                </option>
-            @endforeach
-        </select>
-        <label class="mm-label">Sekolah *</label>
+                                <!-- Dropdown sekolah -->
+                                <div id="sekolahDropdownSection">
+                                    <div class="mm-float input-group">
+                                        <select name="sekolah_id" class="form-control" id="sekolahSelect">
+                                            <option value="" selected hidden></option>
+                                            @foreach($sekolahs as $sekolah)
+                                                <option value="{{ $sekolah->sekolah_id }}"
+                                                    data-nama="{{ $sekolah->nama_sekolah }}"
+                                                    data-alamat="{{ $sekolah->alamat }}">
+                                                    {{ $sekolah->nama_sekolah }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <label class="mm-label">Sekolah *</label>
 
-        <button class="btn btn-outline-primary" type="button" id="openSearchModalBtn">
-            <i class="ri-search-line"></i>
-        </button>
-    </div>
+                                        <button class="btn btn-outline-primary" type="button" id="openSearchModalBtn">
+                                            <i class="ri-search-line"></i>
+                                        </button>
+                                    </div>
 
-    <div id="sekolahInfo" class="mt-2 p-2 bg-light rounded d-none">
-        <small>
-            <i class="ri-building-2-line me-1"></i>
-            <span id="selectedSekolahName"></span><br>
-            <i class="ri-map-pin-line me-1"></i>
-            <span id="selectedSekolahAlamat"></span>
-        </small>
-    </div>
-</div>
-
+                                    <div id="sekolahInfo" class="mt-2 p-2 bg-light rounded d-none">
+                                        <small>
+                                            <i class="ri-building-2-line me-1"></i>
+                                            <span id="selectedSekolahName"></span><br>
+                                            <i class="ri-map-pin-line me-1"></i>
+                                            <span id="selectedSekolahAlamat"></span>
+                                        </small>
+                                    </div>
+                                </div>
 
                                 <!-- Input manual -->
                                 <div id="instansiManualSection" class="d-none">
@@ -816,7 +835,6 @@
                 sekolahSelect.classList.remove('is-invalid');
                 instansiInput.classList.remove('is-invalid');
 
-
                 if (e.target.value === 'sekolah') {
                     sekolahDropdownSection.classList.remove('d-none');
                     instansiManualSection.classList.add('d-none');
@@ -925,12 +943,12 @@
 
             loadingIndicator.classList.remove('d-none');
             searchResults.innerHTML = '';
-fetch(`/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json'
-    }
-})
+            fetch(`/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
 
                 .then(response => response.json())
                 .then(data => {
@@ -1085,121 +1103,116 @@ fetch(`/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
                 });
         });
 
-// ============================================
-// 5. REGISTER FORM - UPDATE BAGIAN INI SAJA
-// ============================================
+        // ============================================
+        // 5. REGISTER FORM - UPDATE BAGIAN INI SAJA
+        // ============================================
 
-document.getElementById('submit-register')?.addEventListener('click', function() {
-    const form = document.getElementById('register-form');
-    const formData = new FormData(form);
+        document.getElementById('submit-register')?.addEventListener('click', function() {
+            const form = document.getElementById('register-form');
+            const formData = new FormData(form);
 
-    const requiredFields = ['nama', 'jenis_kelamin', 'tempat_lahir', 'tgl_lahir', 'pangkat_jabatan_id', 'email', 'no_hp', 'agama', 'jenis_ptk_id', 'pangkat_golongan_id'];
-    let isValid = true;
-    let errorMessages = [];
+            const requiredFields = ['nama', 'jenis_kelamin', 'tempat_lahir', 'tgl_lahir', 'pangkat_jabatan_id', 'email', 'no_hp', 'agama', 'jenis_ptk_id', 'pangkat_golongan_id'];
+            let isValid = true;
+            let errorMessages = [];
 
-    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-    requiredFields.forEach(field => {
-        const input = form.querySelector(`[name="${field}"]`);
-        if (!input.value.trim()) {
-            isValid = false;
-            input.classList.add('is-invalid');
-            let fieldName = field.replace('_', ' ');
-            fieldName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
-            errorMessages.push(`${fieldName} wajib diisi`);
-        }
-    });
+            requiredFields.forEach(field => {
+                const input = form.querySelector(`[name="${field}"]`);
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.classList.add('is-invalid');
+                    let fieldName = field.replace('_', ' ');
+                    fieldName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+                    errorMessages.push(`${fieldName} wajib diisi`);
+                }
+            });
 
+            const kotaSelect = document.getElementById('kotaSelect');
+            if (!kotaSelect.value) {
+                isValid = false;
+                errorMessages.push('Pilih kota');
+                kotaSelect.classList.add('is-invalid');
+            }
 
+            // TAMBAHKAN VALIDASI JENIS PTK
+            const jenisPtkSelect = document.getElementById('jenis_ptk_id');
+            if (!jenisPtkSelect.value) {
+                isValid = false;
+                errorMessages.push('Pilih Jenis PTK');
+                jenisPtkSelect.classList.add('is-invalid');
+            }
 
-    const kotaSelect = document.getElementById('kotaSelect');
-    if (!kotaSelect.value) {
-        isValid = false;
-        errorMessages.push('Pilih kota');
-        kotaSelect.classList.add('is-invalid');
-    }
+            const sekolahOption = document.querySelector('input[name="sekolah_option"]:checked');
+            if (!sekolahOption) {
+                isValid = false;
+                errorMessages.push('Pilih opsi sekolah atau input manual');
+            } else if (sekolahOption.value === 'sekolah') {
+                const sekolahSelect = document.getElementById('sekolahSelect');
+                if (!sekolahSelect.value) {
+                    isValid = false;
+                    errorMessages.push('Pilih sekolah dari daftar');
+                    sekolahSelect.classList.add('is-invalid');
+                } else {
+                    formData.set('sekolah_id', sekolahSelect.value);
+                    formData.delete('instansi');
+                }
+            } else if (sekolahOption.value === 'manual') {
+                const instansiInput = document.getElementById('instansiInput');
+                if (!instansiInput.value.trim()) {
+                    isValid = false;
+                    errorMessages.push('Isi nama instansi/lembaga');
+                    instansiInput.classList.add('is-invalid');
+                } else {
+                    formData.set('instansi', instansiInput.value);
+                    formData.delete('sekolah_id');
+                }
+            }
 
-    // TAMBAHKAN VALIDASI JENIS PTK
-    const jenisPtkSelect = document.getElementById('jenis_ptk_id');
-    if (!jenisPtkSelect.value) {
-        isValid = false;
-        errorMessages.push('Pilih Jenis PTK');
-        jenisPtkSelect.classList.add('is-invalid');
-    }
+            const emailInput = form.querySelector('[name="email"]');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailInput.value.trim() && !emailRegex.test(emailInput.value.trim())) {
+                isValid = false;
+                emailInput.classList.add('is-invalid');
+                errorMessages.push('Format email tidak valid');
+            }
 
-    const sekolahOption = document.querySelector('input[name="sekolah_option"]:checked');
-    if (!sekolahOption) {
-        isValid = false;
-        errorMessages.push('Pilih opsi sekolah atau input manual');
-    } else if (sekolahOption.value === 'sekolah') {
-        const sekolahSelect = document.getElementById('sekolahSelect');
-        if (!sekolahSelect.value) {
-            isValid = false;
-            errorMessages.push('Pilih sekolah dari daftar');
-            sekolahSelect.classList.add('is-invalid');
-        } else {
-            formData.set('sekolah_id', sekolahSelect.value);
-            formData.delete('instansi');
-        }
-    } else if (sekolahOption.value === 'manual') {
-        const instansiInput = document.getElementById('instansiInput');
-        if (!instansiInput.value.trim()) {
-            isValid = false;
-            errorMessages.push('Isi nama instansi/lembaga');
-            instansiInput.classList.add('is-invalid');
-        } else {
-            formData.set('instansi', instansiInput.value);
-            formData.delete('sekolah_id');
-        }
-    }
+            const phoneInput = form.querySelector('[name="no_hp"]');
+            const phoneValue = phoneInput.value.replace(/\D/g, '');
+            if (phoneInput.value.trim() && phoneValue.length < 10) {
+                isValid = false;
+                phoneInput.classList.add('is-invalid');
+                errorMessages.push('Nomor HP minimal 10 digit');
+            }
 
-    const emailInput = form.querySelector('[name="email"]');
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailInput.value.trim() && !emailRegex.test(emailInput.value.trim())) {
-        isValid = false;
-        emailInput.classList.add('is-invalid');
-        errorMessages.push('Format email tidak valid');
-    }
+            const dobInput = form.querySelector('[name="tgl_lahir"]');
+            if (dobInput.value) {
+                const dob = new Date(dobInput.value);
+                const today = new Date();
+                const minAgeDate = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate());
+                if (dob > minAgeDate) {
+                    isValid = false;
+                    dobInput.classList.add('is-invalid');
+                    errorMessages.push('Minimal usia 17 tahun');
+                }
+            }
 
-    const phoneInput = form.querySelector('[name="no_hp"]');
-    const phoneValue = phoneInput.value.replace(/\D/g, '');
-    if (phoneInput.value.trim() && phoneValue.length < 10) {
-        isValid = false;
-        phoneInput.classList.add('is-invalid');
-        errorMessages.push('Nomor HP minimal 10 digit');
-    }
+            if (!isValid) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Belum Lengkap',
+                    html: 'Harap lengkapi data berikut:<br><br>' + errorMessages.join('<br>'),
+                    confirmButtonText: 'Mengerti',
+                    confirmButtonColor: '#2c7be5'
+                });
+                initRegisterFloatingLabels();
+                return;
+            }
 
-
-
-    
-    const dobInput = form.querySelector('[name="tgl_lahir"]');
-    if (dobInput.value) {
-        const dob = new Date(dobInput.value);
-        const today = new Date();
-        const minAgeDate = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate());
-        if (dob > minAgeDate) {
-            isValid = false;
-            dobInput.classList.add('is-invalid');
-            errorMessages.push('Minimal usia 17 tahun');
-        }
-    }
-
-    if (!isValid) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Data Belum Lengkap',
-            html: 'Harap lengkapi data berikut:<br><br>' + errorMessages.join('<br>'),
-            confirmButtonText: 'Mengerti',
-            confirmButtonColor: '#2c7be5'
-        });
-        initRegisterFloatingLabels();
-        return;
-    }
-
-    // TAMBAHKAN KONFIRMASI SEBELUM SIMPAN
-    Swal.fire({
-        title: 'Konfirmasi Penyimpanan Data',
-        html: `
+            // TAMBAHKAN KONFIRMASI SEBELUM SIMPAN
+            Swal.fire({
+                title: 'Konfirmasi Penyimpanan Data',
+                html: `
             <div class="text-start">
                 <p>Apakah Anda sudah yakin dengan data yang diisi?</p>
                 <div class="alert alert-warning">
@@ -1227,44 +1240,44 @@ document.getElementById('submit-register')?.addEventListener('click', function()
                 </div>
             </div>
         `,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: '<i class="ri-check-line me-1"></i> Ya, Simpan Data',
-        cancelButtonText: '<i class="ri-close-line me-1"></i> Periksa Kembali',
-        confirmButtonColor: '#28a745',
-        cancelButtonColor: '#6c757d',
-        reverseButtons: true,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        width: 600
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // JIKA DIKONFIRMASI, LANJUTKAN PENYIMPANAN
-            Swal.fire({
-                title: 'Menyimpan Data...',
-                text: 'Mohon tunggu sebentar',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="ri-check-line me-1"></i> Ya, Simpan Data',
+                cancelButtonText: '<i class="ri-close-line me-1"></i> Periksa Kembali',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true,
                 allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
+                allowEscapeKey: false,
+                width: 600
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // JIKA DIKONFIRMASI, LANJUTKAN PENYIMPANAN
+                    Swal.fire({
+                        title: 'Menyimpan Data...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
 
-            fetch("{{ route('lockscreen.register') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
-                        registerModal.hide();
+                    fetch("{{ route('lockscreen.register') }}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+                                registerModal.hide();
 
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Registrasi Berhasil!',
-                            html: `
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Registrasi Berhasil!',
+                                    html: `
                                 <div class="text-start">
                                     <p>${data.message}</p>
                                     <div class="alert alert-success mt-2">
@@ -1281,18 +1294,18 @@ document.getElementById('submit-register')?.addEventListener('click', function()
                                     </div>
                                 </div>
                             `,
-                            confirmButtonText: 'Login Sekarang',
-                            confirmButtonColor: '#2c7be5',
-                            willClose: () => {
-                                document.getElementById('nip').value = data.nip;
-                                document.getElementById('nip').focus();
-                            }
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Registrasi Gagal',
-                            html: `
+                                    confirmButtonText: 'Login Sekarang',
+                                    confirmButtonColor: '#2c7be5',
+                                    willClose: () => {
+                                        document.getElementById('nip').value = data.nip;
+                                        document.getElementById('nip').focus();
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Registrasi Gagal',
+                                    html: `
                                 <div class="text-start">
                                     <p>${data.message || 'Terjadi kesalahan saat menyimpan data'}</p>
                                     ${data.message && data.message.includes('NIP sudah terdaftar') ? 
@@ -1304,17 +1317,17 @@ document.getElementById('submit-register')?.addEventListener('click', function()
                                         </div>` : ''}
                                 </div>
                             `,
-                            confirmButtonText: 'Mengerti',
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Kesalahan Server',
-                        html: `
+                                    confirmButtonText: 'Mengerti',
+                                    confirmButtonColor: '#dc3545'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Kesalahan Server',
+                                html: `
                             <div class="text-start">
                                 <p>Terjadi kesalahan pada server</p>
                                 <div class="alert alert-warning mt-2">
@@ -1325,44 +1338,46 @@ document.getElementById('submit-register')?.addEventListener('click', function()
                                 </div>
                             </div>
                         `,
-                        confirmButtonText: 'Mengerti',
-                        confirmButtonColor: '#dc3545'
-                    });
-                })
-                .finally(() => {
-                    initRegisterFloatingLabels();
-                });
-        } else {
-            // JIKA BATAL, FOKUS KE INPUT PERTAMA
-            const firstInvalid = form.querySelector('.is-invalid') || form.querySelector('input, select, textarea');
-            if (firstInvalid) {
-                firstInvalid.focus();
-                if (firstInvalid.tagName === 'SELECT') {
-                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                confirmButtonText: 'Mengerti',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        })
+                        .finally(() => {
+                            initRegisterFloatingLabels();
+                        });
+                } else {
+                    // JIKA BATAL, FOKUS KE INPUT PERTAMA
+                    const firstInvalid = form.querySelector('.is-invalid') || form.querySelector('input, select, textarea');
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                        if (firstInvalid.tagName === 'SELECT') {
+                            firstInvalid.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
+                        }
+                    }
                 }
-            }
-        }
-    });
-});
+            });
+        });
 
+        document.querySelectorAll('#register-form input, #register-form select, #register-form textarea').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) this.classList.remove('is-invalid');
+            });
+            input.addEventListener('change', function() {
+                if (this.classList.contains('is-invalid')) this.classList.remove('is-invalid');
+            });
+        });
 
-document.querySelectorAll('#register-form input, #register-form select, #register-form textarea').forEach(input => {
-    input.addEventListener('input', function() {
-        if (this.classList.contains('is-invalid')) this.classList.remove('is-invalid');
-    });
-    input.addEventListener('change', function() {
-        if (this.classList.contains('is-invalid')) this.classList.remove('is-invalid');
-    });
-});
+        // TAMBAHKAN UNTUK SELECT JENIS PTK DAN PANGKAT GOLONGAN
+        document.getElementById('jenis_ptk_id')?.addEventListener('change', function() {
+            if (this.classList.contains('is-invalid')) this.classList.remove('is-invalid');
+        });
 
-// TAMBAHKAN UNTUK SELECT JENIS PTK DAN PANGKAT GOLONGAN
-document.getElementById('jenis_ptk_id')?.addEventListener('change', function() {
-    if (this.classList.contains('is-invalid')) this.classList.remove('is-invalid');
-});
-
-document.getElementById('pangkat_golongan_id')?.addEventListener('change', function() {
-    if (this.classList.contains('is-invalid')) this.classList.remove('is-invalid');
-});
+        document.getElementById('pangkat_golongan_id')?.addEventListener('change', function() {
+            if (this.classList.contains('is-invalid')) this.classList.remove('is-invalid');
+        });
 
         // ============================================
         // 6. INITIALIZATION
