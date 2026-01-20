@@ -1445,7 +1445,7 @@
                                 <div class="d-flex align-items-center">
                                     <i class="ri-information-line me-2"></i>
                                     <div>
-                                        <small><strong>Info:</strong> Sistem akan menempatkan Anda pada soal yang belum dikerjakan atau ke posisi terakhir kuis Anda.</small>
+                                        <small><strong>Info:</strong> Sistem akan menempatkan Anda pada soal yang belum dikerjakan atau ke posisi terakhir soal Anda.</small>
                                     </div>
                                 </div>
                             </div>
