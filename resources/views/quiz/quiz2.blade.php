@@ -1451,9 +1451,7 @@
                             </div>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
-                                <i class="ri-close-line me-2"></i> Tutup
-                            </button>
+                            
                             <button type="button" class="btn btn-primary" onclick="continueToLastPosition()">
                                 <i class="ri-arrow-right-line me-2"></i> Lanjutkan Soal
                             </button>
