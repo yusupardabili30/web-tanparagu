@@ -184,7 +184,6 @@ class SoalController extends Controller
         ]);
     }
 
-    // App\Http\Controllers\SoalController.php - Method quiz2
     public function quiz2($tahap, $encoded_kegiatan_id, $nip, $encoded_sub_indikator_id, $encoded_no_urut)
     {
         session(['timesoal' => now()->format('H:i:s')]);
@@ -202,6 +201,10 @@ class SoalController extends Controller
         if (!$ptk) abort(404, 'Data PTK tidak ditemukan');
 
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)->first();
+
+        // ==============================================
+        // VALIDASI: CEK APAKAH SOAL SUDAH DIJAWAB
+        // ==============================================
         $soal = Soal::where('sub_indikator_id', $sub_indikator_id)
             ->where('no_urut', $no_urut)
             ->where('entity', $kegiatan->entity)
@@ -214,8 +217,68 @@ class SoalController extends Controller
             ]);
         }
 
+        // Cek apakah soal ini sudah dijawab
+        $alreadyAnswered = PtkJawabanDetail::where('kegiatan_id', $kegiatan_id)
+            ->where('ptk_id', $ptk->ptk_id)
+            ->where('soal_id', $soal->soal_id)
+            ->where('tahap', 2)
+            ->exists();
+
+        // Jika sudah dijawab, redirect ke soal berikutnya
+        if ($alreadyAnswered) {
+            // Cari soal berikutnya yang belum dijawab dalam sub_indikator yang sama
+            $nextSoal = Soal::where('sub_indikator_id', $sub_indikator_id)
+                ->where('no_urut', '>', $no_urut)
+                ->where('entity', $kegiatan->entity)
+                ->orderBy('no_urut')
+                ->first();
+
+            if ($nextSoal) {
+                // Redirect ke soal berikutnya
+                return redirect()->route('quiz2.show', [
+                    'tahap' => $tahap,
+                    'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                    'nip' => $nip,
+                    'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                    'encoded_no_urut' => Hashids::encode($nextSoal->no_urut)
+                ])->with('warning', 'Soal ini sudah dijawab. Anda dialihkan ke soal berikutnya.');
+            } else {
+                // Cek apakah sudah ada level final
+                $finalLevel = PtkJawaban::where('kegiatan_id', $kegiatan_id)
+                    ->where('ptk_id', $ptk->ptk_id)
+                    ->where('sub_indikator_id', $sub_indikator_id)
+                    ->where('tahap', 2)
+                    ->whereNotNull('level')
+                    ->exists();
+
+                if ($finalLevel) {
+                    // Cari sub indikator berikutnya
+                    $nextSubIndikator = SubIndikator::where('sub_indikator_id', '>', $sub_indikator_id)
+                        ->orderBy('sub_indikator_id')
+                        ->first();
+
+                    if ($nextSubIndikator) {
+                        // Cek apakah ada soal untuk sub indikator berikutnya
+                        $hasSoal = Soal::where('sub_indikator_id', $nextSubIndikator->sub_indikator_id)
+                            ->where('entity', $kegiatan->entity)
+                            ->exists();
+
+                        if ($hasSoal) {
+                            return redirect()->route('quiz2.show', [
+                                'tahap' => $tahap,
+                                'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                                'nip' => $nip,
+                                'encoded_sub_indikator_id' => Hashids::encode($nextSubIndikator->sub_indikator_id),
+                                'encoded_no_urut' => Hashids::encode(1)
+                            ])->with('info', 'Sub indikator ini sudah selesai. Anda dialihkan ke sub indikator berikutnya.');
+                        }
+                    }
+                }
+            }
+        }
+
         // ==============================================
-        // PERHITUNGAN WAKTU SISA - TIDAK RESET SAAT LANJUTKAN
+        // PERHITUNGAN WAKTU SISA
         // ==============================================
         $remaining_seconds = PtkJawabanDetail::getLatestRemainingTimeFromDatabase($kegiatan_id, $ptk->ptk_id, 2);
 
@@ -240,7 +303,6 @@ class SoalController extends Controller
         // ==============================================
         // SIMPAN WAKTU YANG SAMA UNTUK FRONTEND DAN BACKEND
         // ==============================================
-        // Simpan waktu sisa di session untuk konsistensi
         session(['current_remaining_seconds' => $remaining_seconds]);
         session(['quiz2_display_time' => $remaining_time_formatted]);
 
@@ -307,9 +369,10 @@ class SoalController extends Controller
             'kegiatan' => $kegiatan,
             'caseList' => $caseList,
             'currentCaseId' => $soal->soal_case_id ?? 0,
-            'remaining_seconds' => $remaining_seconds, // Sama dengan database
-            'remaining_time_formatted' => $remaining_time_formatted, // Format HH:MM:SS
-            'reset_localstorage' => $resetLocalStorage
+            'remaining_seconds' => $remaining_seconds,
+            'remaining_time_formatted' => $remaining_time_formatted,
+            'reset_localstorage' => $resetLocalStorage,
+            'already_answered' => $alreadyAnswered // Kirim flag ke view
         ]);
     }
 
@@ -435,6 +498,60 @@ class SoalController extends Controller
         $current_no_urut = Hashids::decode($encoded_no_urut)[0];
         $kegiatan_id = Hashids::decode($encoded_kegiatan_id)[0];
 
+        $ptk = Ptk::where('nip', $nip)->first();
+        if (!$ptk) abort(404, 'Data PTK tidak ditemukan');
+
+        // ==============================================
+        // VALIDASI: CEK APAKAH SOAL SUDAH DIJAWAB
+        // ==============================================
+        $alreadyAnswered = PtkJawabanDetail::where('kegiatan_id', $kegiatan_id)
+            ->where('ptk_id', $ptk->ptk_id)
+            ->where('soal_id', $soal_id)
+            ->where('tahap', 2)
+            ->exists();
+
+        if ($alreadyAnswered) {
+            // Jika sudah dijawab, redirect ke soal berikutnya dengan pesan
+            $sub_indikator_id = Hashids::decode($encoded_sub_indikator_id)[0];
+
+            $nextSoal = Soal::where('sub_indikator_id', $sub_indikator_id)
+                ->where('no_urut', '>', $current_no_urut)
+                ->orderBy('no_urut')
+                ->first();
+
+            if ($nextSoal) {
+                return redirect()->route('quiz2.show', [
+                    'tahap' => $tahap,
+                    'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                    'nip' => $nip,
+                    'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                    'encoded_no_urut' => Hashids::encode($nextSoal->no_urut)
+                ])->with('warning', 'Soal ini sudah dijawab sebelumnya. Anda dialihkan ke soal berikutnya.');
+            } else {
+                // Cari sub indikator berikutnya
+                $nextSubIndikator = SubIndikator::where('sub_indikator_id', '>', $sub_indikator_id)
+                    ->orderBy('sub_indikator_id')
+                    ->first();
+
+                if ($nextSubIndikator) {
+                    return redirect()->route('quiz2.show', [
+                        'tahap' => $tahap,
+                        'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                        'nip' => $nip,
+                        'encoded_sub_indikator_id' => Hashids::encode($nextSubIndikator->sub_indikator_id),
+                        'encoded_no_urut' => Hashids::encode(1)
+                    ])->with('info', 'Anda sudah menyelesaikan sub indikator ini.');
+                }
+            }
+
+            return redirect()->route('quiz.finish', [
+                'encoded_kegiatan_id' => $encoded_kegiatan_id,
+                'nip' => $nip
+            ]);
+        }
+
+
+
         $soal = Soal::find($soal_id);
         $sub_indikator = SubIndikator::find(Hashids::decode($encoded_sub_indikator_id)[0]);
         $ptk = Ptk::where('nip', $nip)->first();
@@ -464,8 +581,7 @@ class SoalController extends Controller
         $end   = Carbon::createFromFormat('H:i:s', now()->format('H:i:s'));
         $durasi_sub = gmdate('H:i:s', $start->diffInSeconds($end));
 
-        $end = Carbon::createFromFormat('H:i:s', now()->format('H:i:s'));
-        $durasi_sub = gmdate('H:i:s', $start->diffInSeconds($end));
+
 
 
         // ==============================================
