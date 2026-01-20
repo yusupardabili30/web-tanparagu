@@ -6,12 +6,17 @@
         --ink:#1f2937;
         --muted:#6b7280;
         --line:#e5e7eb;
-        --blue:#1a5bb8;
+
+        /* PRIMARY BLUE */
+        --blue:#1A4BB8;
+
         --soft:#f8fafc;
         --success:#16a34a;
         --danger:#dc2626;
         --warning:#f59e0b;
-        --purple:#7c3aed;
+
+        /* legacy (kalau kepake) */
+        --purple:#1A4BB8;
     }
 
     .page-title-box{ padding: 6px 0 14px 0; }
@@ -32,11 +37,10 @@
         overflow: hidden;
         padding: 18px 18px;
         min-height: 92px;
-        background: var(--purple);
+        background: var(--blue);
         border-bottom: 1px solid rgba(255,255,255,.14);
     }
 
-    /* motif baduy repeat */
     .baduy-hero::before{
         content:"";
         position:absolute;
@@ -50,12 +54,11 @@
         z-index: 0;
     }
 
-    /* overlay solid purple */
     .baduy-hero::after{
         content:"";
         position:absolute;
         inset:0;
-        background: rgba(124,58,237,.50);
+        background: rgba(26,75,184,.50);
         z-index: 1;
         pointer-events:none;
     }
@@ -77,7 +80,6 @@
         min-width: 260px;
     }
 
-    /* icon glass */
     .hero-icon{
         width: 44px;
         height: 44px;
@@ -111,7 +113,6 @@
         text-shadow: 0 2px 12px rgba(0,0,0,.35);
     }
 
-    /* tombol di header: glass/transparent */
     .btn-hero{
         background: rgba(255,255,255,.16) !important;
         border: 1px solid rgba(255,255,255,.22) !important;
@@ -183,12 +184,12 @@
     }
 
     #usersTable tbody tr:hover td{
-        background: rgba(124,58,237,.04);
+        background: rgba(26,75,184,.04);
     }
 
     .cell-id a{
         font-weight: 900 !important;
-        color: var(--purple) !important;
+        color: var(--blue) !important;
         text-decoration: none;
     }
 
@@ -197,17 +198,11 @@
         font-weight: 500 !important;
     }
 
-    .user-avatar{
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, var(--purple), #8b5cf6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
+    /* USER CELL (1 BARIS, NO @) */
+    .user-cell{
         font-weight: 900;
-        font-size: 16px;
+        color: var(--ink);
+        white-space: nowrap;
     }
 
     .badge-soft{
@@ -223,9 +218,9 @@
     .badge-soft i{ font-size: 14px; }
 
     .badge-role-admin{
-        background: rgba(124,58,237,.12);
-        color: var(--purple);
-        border: 1px solid rgba(124,58,237,.18);
+        background: rgba(26,75,184,.12);
+        color: var(--blue) !important;
+        border: 1px solid rgba(26,75,184,.18);
     }
     .badge-role-user{
         background: rgba(59,130,246,.12);
@@ -315,8 +310,187 @@
         font-weight: 500;
     }
     .form-control:focus, .form-select:focus{
-        border-color: var(--purple);
-        box-shadow: 0 0 0 3px rgba(124,58,237,.15);
+        border-color: var(--blue) !important;
+        box-shadow: 0 0 0 3px rgba(26,75,184,.15) !important;
+    }
+
+    /* modal header SOLID */
+    .modal-head-blue{
+        background: var(--blue) !important;
+        padding: 24px 30px !important;
+    }
+
+    /* submit btn solid */
+    #submitBtn{
+        background: var(--blue) !important;
+        border-color: var(--blue) !important;
+        border-radius: 12px !important;
+        font-weight: 800 !important;
+    }
+
+    /* =========================
+       PAGINATION RAPII
+    ========================= */
+    .pagination-wrap{
+        display:flex;
+        align-items:center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-top: auto;
+        padding-top: 38px;
+        padding-bottom: 10px;
+    }
+
+    .pagination-info{
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .pagination-links{
+        display:flex;
+        justify-content: flex-end;
+    }
+
+    /* responsive: kalau layar kecil, turun kebawah */
+    @media (max-width: 576px){
+        .pagination-wrap{
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .pagination-links{
+            width: 100%;
+            justify-content: center;
+        }
+    }
+        /* ===== Biar pagination turun ke bawah (nempel bawah card) ===== */
+    .users-card .card-body{
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* table biar ngambil ruang, pagination terdorong ke bawah */
+    .users-card .table-card{
+        flex: 1 1 auto;
+    }
+
+    /* pagination didorong ke bawah */
+    .pagination-wrap{
+        margin-top: auto;      /* ini kuncinya */
+        padding-top: 38px;     /* jarak dari table */
+        padding-bottom: 10px;  /* nafas bawah */
+    }
+    /* =========================
+    MODAL HEADER: BADUY
+    ========================= */
+    .modal-head-baduy{
+        position: relative;
+        background: var(--blue) !important;
+        padding: 22px 26px !important;
+        overflow: hidden;
+    }
+
+    .modal-head-baduy::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        background-image: url("{{ asset('build/images/baduy.jpg') }}");
+        background-repeat: repeat;
+        background-size: 140px auto;
+        background-position: center;
+        opacity: .55;
+        filter: grayscale(100%) contrast(1.15);
+        z-index: 0;
+    }
+
+    .modal-head-baduy::after{
+        content:"";
+        position:absolute;
+        inset:0;
+        background: rgba(26,75,184,.55);
+        z-index: 1;
+        pointer-events:none;
+    }
+
+    /* isi header tetep di atas motif */
+    .modal-head-baduy > *{
+        position: relative;
+        z-index: 2;
+    }
+
+    /* tombol close putih + cantik */
+    .modal-head-baduy .btn-close{
+        filter: invert(1);
+        opacity: .9;
+    }
+    .modal-head-baduy .btn-close:hover{
+        opacity: 1;
+    }
+
+    /* judul & subjudul */
+    .modal-head-baduy .modal-title{
+        font-weight: 900;
+        letter-spacing: .2px;
+    }
+    .modal-head-baduy p{
+        margin: 6px 0 0 0;
+    }
+    /* =========================
+    TOOLBAR SEARCH
+    ========================= */
+    .users-toolbar{
+        display:flex;
+        align-items:center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        margin-bottom: 10px;
+    }
+
+    .searchbox{
+        position: relative;
+        min-width: 280px;
+        flex: 1 1 520px;
+    }
+
+    .searchbox i.ri-search-line{
+        position:absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        font-size: 18px;
+        pointer-events:none;
+    }
+
+    .searchbox #userSearch{
+        padding-left: 44px;
+        padding-right: 42px;
+        border-radius: 14px;
+        height: 46px;
+    }
+
+    .searchbox .btn-clear{
+        position:absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 0;
+        background: transparent;
+        padding: 4px;
+        color: #9ca3af;
+        display:none;
+    }
+    .searchbox .btn-clear:hover{ color: var(--ink); }
+
+    .searchmeta{
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
     }
 </style>
 
@@ -371,6 +545,17 @@
                 </div>
 
                 <div class="card-body">
+                    <div class="users-toolbar">
+                        <div class="searchbox">
+                            <i class="ri-search-line"></i>
+                            <input type="text" id="userSearch" class="form-control"
+                                placeholder="Cari: ID / Username / Nama / Role / Tim Kerja / NIP / NIK / Email / Sekolah...">
+                            <button type="button" class="btn-clear" id="clearSearch" title="Clear" aria-label="Clear">
+                                <i class="ri-close-circle-fill"></i>
+                            </button>
+                        </div>
+                        <div class="searchmeta" id="searchMeta"></div>
+                    </div>
 
                     <div class="table-card">
                         <div class="table-scroll" id="tableScroll">
@@ -409,16 +594,9 @@
                                             </a>
                                         </td>
 
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="user-avatar">
-                                                    {{ substr($row->nama, 0, 1) }}
-                                                </div>
-                                                <div>
-                                                    <div class="fw-800">{{ $row->user_name }}</div>
-                                                    <div class="text-muted small">@ {{ $row->user_name }}</div>
-                                                </div>
-                                            </div>
+                                        {{-- USER (1 baris, tanpa @) --}}
+                                        <td class="user-cell">
+                                            {{ $row->user_name }}
                                         </td>
 
                                         <td class="fw-600">{{ $row->nama }}</td>
@@ -508,7 +686,20 @@
                         </div>
                     </div>
 
-                    {!! $data->withQueryString()->links('pagination::bootstrap-5') !!}
+                    {{-- PAGINATION --}}
+                    <div class="pagination-wrap">
+                        <div class="pagination-info">
+                            @if(method_exists($data,'firstItem'))
+                                Showing {{ $data->firstItem() ?? 0 }} to {{ $data->lastItem() ?? 0 }} of {{ $data->total() ?? 0 }} results
+                            @else
+                                Showing 1 to {{ $data->count() }} of {{ $data->count() }} results
+                            @endif
+                        </div>
+
+                        <div class="pagination-links">
+                            {!! $data->withQueryString()->links('pagination::bootstrap-5') !!}
+                        </div>
+                    </div>
 
                     <!-- Modal Delete -->
                     <div class="modal fade flip" id="deleteModal" tabindex="-1" aria-hidden="true">
@@ -547,7 +738,7 @@
     <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content" style="border-radius: 18px; overflow: hidden;">
-                <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, var(--purple), #8b5cf6); padding: 24px 30px;">
+                <div class="modal-header border-0 pb-0 modal-head-baduy">
                     <div>
                         <h5 class="modal-title text-white" id="modalTitle">Tambah User</h5>
                         <p class="text-white-50 mb-0" id="modalSubtitle">Tambahkan user baru ke sistem</p>
@@ -555,10 +746,10 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-              <form id="userForm" action="{{ route('users.store') }}" method="POST">
+                <form id="userForm" action="{{ route('users.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="user_id" id="user_id">
-                    
+
                     <div class="modal-body p-30">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -645,7 +836,7 @@
 
                     <div class="modal-footer border-0 pt-0">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 12px; font-weight: 800;">Batal</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="border-radius: 12px; font-weight: 800; background: var(--purple); border-color: var(--purple);">Simpan</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -702,14 +893,13 @@
         $('#passwordLabel').html('Password <span class="text-danger">*</span>');
         $('#passwordHelp').text('Minimal 6 karakter');
         $('#password').prop('required', true);
-        
-        // Reset form
+
         $('#userForm')[0].reset();
         $('#user_id').val('');
         $('#password').val('').prop('disabled', false);
-        
-        // Enable semua field
+
         $('#userForm input, #userForm select').prop('disabled', false);
+        $('#submitBtn').show();
     });
 
     // view
@@ -717,11 +907,10 @@
         let userId = $(this).data('id');
         $('#modalTitle').text('View User');
         $('#modalSubtitle').text('Lihat detail user');
-        
-        // Disable semua field untuk view
+
         $('#userForm input, #userForm select').prop('disabled', true);
         $('#submitBtn').hide();
-        
+
         loadUserData(userId);
     });
 
@@ -733,12 +922,11 @@
         $('#passwordLabel').html('Password (kosongkan jika tidak diubah)');
         $('#passwordHelp').text('Kosongkan jika tidak ingin mengubah password');
         $('#password').prop('required', false);
-        
-        // Enable semua field untuk edit
+
         $('#userForm input, #userForm select').prop('disabled', false);
         $('#password').prop('disabled', false);
         $('#submitBtn').show();
-        
+
         loadUserData(userId);
     });
 
@@ -757,10 +945,8 @@
             $('#alamat_satuan_pendidikan').val(data.alamat_satuan_pendidikan);
             $('#kab_kota').val(data.kab_kota);
             $('#bos').val(data.bos);
-            
-            // Kosongkan password field
+
             $('#password').val('');
-            
             $('#userModal').modal('show');
         }).fail(function() {
             Swal.fire({ position:'center', icon:'error', title:'Gagal memuat data', showConfirmButton:true });
@@ -770,13 +956,13 @@
     // reset password
     $('.reset-password-btn').on('click', function() {
         let userId = $(this).data('id');
-        
+
         Swal.fire({
             title: 'Reset Password?',
             text: 'Password akan direset ke "password123"',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#7c3aed',
+            confirmButtonColor: '#1A4BB8',
             cancelButtonColor: '#6b7280',
             confirmButtonText: 'Ya, Reset!',
             cancelButtonText: 'Batal'
@@ -822,27 +1008,27 @@
         $.ajax({
             url: "/users/delete/" + id,
             type: 'DELETE',
-            data: { 
+            data: {
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {
                 Swal.fire({
-                    position:'center', 
-                    icon:'success', 
-                    title: response.message || 'Data user berhasil dihapus!', 
-                    showConfirmButton:false, 
+                    position:'center',
+                    icon:'success',
+                    title: response.message || 'Data user berhasil dihapus!',
+                    showConfirmButton:false,
                     timer:2000
                 });
                 $('#deleteModal').modal('hide');
-                setTimeout(function(){ 
-                    location.reload(); 
+                setTimeout(function(){
+                    location.reload();
                 }, 2000);
             },
             error: function(xhr) {
                 Swal.fire({
-                    position:'center', 
-                    icon:'error', 
-                    title:'Gagal menghapus data', 
+                    position:'center',
+                    icon:'error',
+                    title:'Gagal menghapus data',
                     text: xhr.responseJSON?.message || 'Terjadi kesalahan saat menghapus.',
                     showConfirmButton:true
                 });
@@ -858,6 +1044,69 @@
         $('#submitBtn').show();
         $('#password').prop('required', true);
         $('#passwordLabel').html('Password <span class="text-danger">*</span>');
+        $('#passwordHelp').text('Untuk edit user, kosongkan jika tidak ingin mengubah password');
     });
+    // =========================
+// SEARCH FILTER (LIVE)
+// =========================
+(function(){
+    const input = document.getElementById('userSearch');
+    const btnClear = document.getElementById('clearSearch');
+    const meta = document.getElementById('searchMeta');
+    const tbody = document.getElementById('user-list-data');
+
+    if(!input || !tbody) return;
+
+    function normalize(s){
+        return (s || '').toString().toLowerCase().trim();
+    }
+
+    function getRows(){
+        return Array.from(tbody.querySelectorAll('tr'));
+    }
+
+    function updateMeta(visible, total, q){
+        if(!meta) return;
+        if(!q){
+            meta.textContent = `Menampilkan ${total} data`;
+        }else{
+            meta.textContent = `Hasil: ${visible} dari ${total}`;
+        }
+    }
+
+    function filter(){
+        const q = normalize(input.value);
+        const rows = getRows();
+        const total = rows.length;
+        let visible = 0;
+
+        rows.forEach(tr => {
+            const text = normalize(tr.innerText);
+            const match = !q || text.includes(q);
+            tr.style.display = match ? '' : 'none';
+            if(match) visible++;
+        });
+
+        // tombol clear
+        if(btnClear){
+            btnClear.style.display = q ? 'inline-flex' : 'none';
+        }
+        updateMeta(visible, total, q);
+    }
+
+    input.addEventListener('input', filter);
+
+    if(btnClear){
+        btnClear.addEventListener('click', function(){
+            input.value = '';
+            input.focus();
+            filter();
+        });
+    }
+
+    // init
+    filter();
+})();
+
 </script>
 @endsection
