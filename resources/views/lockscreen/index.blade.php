@@ -14,298 +14,527 @@
     <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
     <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
 
-    <style>
-        /* ===== SEKOLAH SELECT + SEARCH BUTTON NYAMBUNG ===== */
-        #registerModal .mm-float.input-group {
-            width: 100%;
-            align-items: stretch;
-        }
+<style>
+    /* =========================
+       ONE COLOR FOR ALL BUTTONS
+       (samain semuanya kayak tombol "Masuk ke Sistem")
+       ========================= */
+    :root{
+        --mm-primary: #1a4d8e;              /* <<< ganti ini doang kalau mau beda */
+        --mm-primary-hover: #163f74;
+        --mm-primary-focus: rgba(26,75,184,.25);
 
-        /* selectnya jadi sisi kiri, radius kanan dimatiin biar nempel sama tombol */
-        #registerModal .mm-float.input-group>.form-control {
-            border-top-right-radius: 0 !important;
-            border-bottom-right-radius: 0 !important;
-        }
+        --mm-font: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
 
-        /* tombol search nempel + tinggi sama */
-        #registerModal #openSearchModalBtn {
-            height: 58px !important;
-            border-radius: 0 12px 12px 0 !important;
-            border: 1px solid #d7e2ff !important;
-            border-left: none !important;
-            padding: 0 18px !important;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
+    /* ===== FONT ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-        #registerModal #openSearchModalBtn i {
-            font-size: 20px;
-        }
+    /* Global font biar semua elemen ngikut */
+    html, body{
+        font-family: var(--mm-font) !important;
+    }
+    .auth-container,
+    .info-section,
+    .login-section,
+    .login-form-container,
+    .kegiatan-info,
+    .custom-modal,
+    .custom-modal .modal-content,
+    .custom-modal .modal-header,
+    .custom-modal .modal-body,
+    .custom-modal .modal-footer,
+    .form-control,
+    select,
+    textarea,
+    label,
+    button,
+    .btn,
+    .alert,
+    .carousel-caption,
+    .swal2-popup{
+        font-family: var(--mm-font) !important;
+    }
 
-        /* =======================================================
-           REGISTER MODAL - INPUT STYLE (NGIKUT BIODATA PAGE)
-           ======================================================= */
+    /* =======================================================
+       BUTTONS: SEMUA JADI 1 WARNA (PRIMARY)
+       ======================================================= */
 
-        #registerModal .form-control,
-        #registerModal select,
-        #registerModal textarea {
-            background: #ffffff !important;
-            border: 1px solid #d7e2ff !important;
-            border-radius: 12px !important;
-            padding-top: 20px !important;
-            padding-bottom: 12px !important;
-            height: 58px !important;
-            font-size: 15px !important;
-            color: #555555 !important;
-            font-weight: 600 !important;
-        }
+    /* tombol login (Masuk ke Sistem) */
+    .btn-login{
+        background: var(--mm-primary) !important;
+        border-color: var(--mm-primary) !important;
+        color: #fff !important;
+    }
+    .btn-login:hover{
+        background: var(--mm-primary-hover) !important;
+        border-color: var(--mm-primary-hover) !important;
+    }
+    .btn-login:focus{
+        box-shadow: 0 0 0 3px var(--mm-primary-focus) !important;
+    }
 
-        #registerModal .form-control::placeholder,
-        #registerModal select::placeholder,
-        #registerModal textarea::placeholder {
-            color: #555555 !important;
-            font-weight: 500 !important;
-        }
+    /* semua tombol primary bootstrap (Simpan Data, Cari, Pilih Sekolah, dll) */
+    .btn.btn-primary,
+    #registerModal .btn-primary,
+    .custom-modal .btn-primary,
+    #modalSearchBtn,
+    .pilih-sekolah-btn{
+        background: var(--mm-primary) !important;
+        border-color: var(--mm-primary) !important;
+        color: #fff !important;
+    }
+    .btn.btn-primary:hover,
+    #registerModal .btn-primary:hover,
+    .custom-modal .btn-primary:hover,
+    #modalSearchBtn:hover,
+    .pilih-sekolah-btn:hover{
+        background: var(--mm-primary-hover) !important;
+        border-color: var(--mm-primary-hover) !important;
+    }
+    .btn.btn-primary:focus,
+    #registerModal .btn-primary:focus,
+    .custom-modal .btn-primary:focus,
+    #modalSearchBtn:focus,
+    .pilih-sekolah-btn:focus{
+        box-shadow: 0 0 0 3px var(--mm-primary-focus) !important;
+    }
 
-        #registerModal .form-control:focus,
-        #registerModal select:focus,
-        #registerModal textarea:focus {
-            border-color: #1a5bb8 !important;
-            box-shadow: 0 0 0 2px rgba(26, 91, 184, 0.2) !important;
-        }
+    /* btn-outline-primary (tombol icon search di sebelah select) */
+    .btn.btn-outline-primary,
+    #openSearchModalBtn{
+        border-color: var(--mm-primary) !important;
+        color: var(--mm-primary) !important;
+        background: transparent !important;
+    }
+    .btn.btn-outline-primary:hover,
+    #openSearchModalBtn:hover{
+        background: var(--mm-primary) !important;
+        border-color: var(--mm-primary) !important;
+        color: #fff !important;
+    }
 
-        #registerModal label.form-label {
-            display: none !important;
-        }
+    /* SweetAlert confirm button (Mengerti, Ya Simpan, Login Sekarang, dll) */
+    .swal2-popup .swal2-confirm{
+        background: var(--mm-primary) !important;
+        border: 1px solid var(--mm-primary) !important;
+        color: #fff !important;
+    }
+    .swal2-popup .swal2-confirm:hover{
+        background: var(--mm-primary-hover) !important;
+        border-color: var(--mm-primary-hover) !important;
+    }
+    .swal2-popup .swal2-confirm:focus{
+        box-shadow: 0 0 0 3px var(--mm-primary-focus) !important;
+    }
 
-        #registerModal .col-md-6,
-        #registerModal .col-12 {
-            margin-bottom: 16px !important;
-        }
+    /* =======================================================
+       SEKOLAH SELECT + SEARCH BUTTON NYAMBUNG
+       ======================================================= */
+    #registerModal .mm-float.input-group{
+        width: 100%;
+        align-items: stretch;
+    }
 
-        #registerModal textarea.form-control {
-            height: auto !important;
-            padding-top: 14px !important;
-        }
+    /* selectnya jadi sisi kiri, radius kanan dimatiin biar nempel sama tombol */
+    #registerModal .mm-float.input-group>.form-control{
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
 
-        #registerModal .form-check-label {
-            color: #1a3f6b !important;
-            font-weight: 600 !important;
-        }
+    /* tombol search nempel + tinggi sama */
+    #registerModal #openSearchModalBtn{
+        height: 58px !important;
+        border-radius: 0 12px 12px 0 !important;
+        border: 1px solid #d7e2ff !important;
+        border-left: none !important;
+        padding: 0 18px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #registerModal #openSearchModalBtn i{ font-size: 20px; }
 
-        /* Tombol di register modal (sama kayak biodata) */
-        #registerModal .btn-primary {
-            background-color: #133d78 !important;
-            border-color: #133d78 !important;
-            color: #fff !important;
-            font-weight: 600 !important;
-            border-radius: 10px !important;
-        }
+    /* =======================================================
+       REGISTER MODAL - INPUT STYLE
+       ======================================================= */
+    #registerModal .form-control,
+    #registerModal select,
+    #registerModal textarea{
+        background: #ffffff !important;
+        border: 1px solid #d7e2ff !important;
+        border-radius: 12px !important;
+        padding-top: 20px !important;
+        padding-bottom: 12px !important;
+        height: 58px !important;
+        font-size: 15px !important;
+        color: #555555 !important;
+        font-weight: 600 !important;
+        font-family: var(--mm-font) !important;
+    }
 
-        #registerModal .btn-secondary {
-            border-radius: 10px !important;
-        }
+    #registerModal .form-control::placeholder,
+    #registerModal select::placeholder,
+    #registerModal textarea::placeholder{
+        color: #555555 !important;
+        font-weight: 500 !important;
+    }
 
-        /* =======================================================
-           GLOBAL MODAL WRAPPER
-           ======================================================= */
+    #registerModal .form-control:focus,
+    #registerModal select:focus,
+    #registerModal textarea:focus{
+        border-color: var(--mm-primary) !important;
+        box-shadow: 0 0 0 2px rgba(26, 75, 184, .20) !important;
+    }
 
-        /* Hilangkan rounded di layout lockscreen */
-        .no-radius,
-        .no-radius * {
-            border-radius: 0 !important;
-        }
+    #registerModal label.form-label{ display: none !important; }
 
-        .custom-modal .modal-content {
-            border-radius: 10px !important;
-            border: none !important;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
-        }
+    #registerModal .col-md-6,
+    #registerModal .col-12{
+        margin-bottom: 16px !important;
+    }
 
-        .custom-modal .modal-header:not(.baduy-bg) {
-            background: #dff1ff !important;
-            padding: 18px 22px !important;
-            border-bottom: 1px solid #e7edf3 !important;
-        }
+    #registerModal textarea.form-control{
+        height: auto !important;
+        padding-top: 14px !important;
+    }
 
-        .custom-modal .modal-header h5,
-        .custom-modal-title {
-            font-size: 20px !important;
-            font-weight: 700 !important;
-            color: #444 !important;
-            font-family: 'Inter', sans-serif;
-        }
+    #registerModal .form-check-label{
+        color: #1a3f6b !important;
+        font-weight: 600 !important;
+    }
 
-        #registerModal .modal-header.baduy-bg {
-            border-radius: 14px 14px 0 0 !important;
-        }
+    #registerModal .btn-secondary{
+        border-radius: 10px !important;
+        font-family: var(--mm-font) !important;
+    }
 
-        #registerModal .modal-header.baduy-bg * {
-            position: relative;
-            z-index: 2;
-            color: #fff !important;
-            font-weight: 700 !important;
-        }
+    /* =======================================================
+       GLOBAL MODAL WRAPPER
+       ======================================================= */
 
-        #registerModal .modal-header .btn-close {
-            filter: brightness(10) !important;
-        }
+    /* Hilangkan rounded di layout lockscreen */
+    .no-radius,
+    .no-radius *{
+        border-radius: 0 !important;
+    }
 
-        .custom-modal .btn-close {
-            filter: invert(0.4);
-            transform: scale(1.2);
-        }
+    .custom-modal .modal-content{
+        border-radius: 10px !important;
+        border: none !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        font-family: var(--mm-font) !important;
+    }
 
-        .custom-modal .modal-body {
-            padding: 28px 26px !important;
-        }
+    .custom-modal .modal-header:not(.baduy-bg){
+        background: #dff1ff !important;
+        padding: 18px 22px !important;
+        border-bottom: 1px solid #e7edf3 !important;
+    }
 
-        .custom-modal .form-label {
-            font-weight: 600 !important;
-            color: #555 !important;
-            font-size: 14px !important;
-            margin-bottom: 6px !important;
-        }
+    .custom-modal .modal-header h5,
+    .custom-modal-title{
+        font-size: 20px !important;
+        font-weight: 700 !important;
+        color: #444 !important;
+        font-family: var(--mm-font) !important;
+    }
 
-        .custom-modal .form-control,
-        .custom-modal select,
-        .custom-modal textarea {
-            background: #ffffff !important;
-            border: 1px solid #d6d6d6 !important;
-            border-radius: 6px !important;
-            font-size: 15px !important;
-            padding: 10px 12px !important;
-            color: #333 !important;
-            box-shadow: none !important;
-        }
+    #registerModal .modal-header.baduy-bg{
+        border-radius: 14px 14px 0 0 !important;
+    }
 
-        .custom-modal .form-control:focus,
-        .custom-modal select:focus,
-        .custom-modal textarea:focus {
-            border-color: #8bb5ff !important;
-            box-shadow: 0 0 0 2px rgba(120, 160, 255, 0.25) !important;
-        }
+    #registerModal .modal-header.baduy-bg *{
+        position: relative;
+        z-index: 2;
+        color: #fff !important;
+        font-weight: 700 !important;
+        font-family: var(--mm-font) !important;
+    }
 
-        .custom-modal .input-group-text {
-            background: #fff !important;
-            border-left: none !important;
-            border-radius: 0 6px 6px 0 !important;
-            cursor: pointer;
-            border: 1px solid #d6d6d6 !important;
-            border-left: none !important;
-        }
+    #registerModal .modal-header .btn-close{
+        filter: brightness(10) !important;
+    }
 
-        .custom-modal .input-group .form-control {
-            border-right: none !important;
-        }
+    .custom-modal .btn-close{
+        filter: invert(0.4);
+        transform: scale(1.2);
+    }
 
-        .custom-modal .modal-footer {
-            padding: 18px 26px !important;
-            border-top: 1px solid #eaeaea !important;
-        }
+    .custom-modal .modal-body{
+        padding: 28px 26px !important;
+    }
 
-        .custom-modal .btn-secondary {
-            background: #f3f3f3;
-            color: #444;
-            border: none;
-            padding: 9px 20px;
-            font-size: 15px;
-            border-radius: 8px;
-        }
+    .custom-modal .form-label{
+        font-weight: 600 !important;
+        color: #555 !important;
+        font-size: 14px !important;
+        margin-bottom: 6px !important;
+    }
 
-        .custom-modal .btn-primary {
-            background: #1db5a6 !important;
-            border: none !important;
-            padding: 9px 22px !important;
-            font-size: 15px !important;
-            border-radius: 8px !important;
-        }
+    .custom-modal .form-control,
+    .custom-modal select,
+    .custom-modal textarea{
+        background: #ffffff !important;
+        border: 1px solid #d6d6d6 !important;
+        border-radius: 6px !important;
+        font-size: 15px !important;
+        padding: 10px 12px !important;
+        color: #333 !important;
+        box-shadow: none !important;
+        font-family: var(--mm-font) !important;
+    }
 
-        /* =======================================================
-           FLOATING LABEL (PASTI MUNCUL) - REGISTER MODAL
-           ======================================================= */
+    .custom-modal .form-control:focus,
+    .custom-modal select:focus,
+    .custom-modal textarea:focus{
+        border-color: #8bb5ff !important;
+        box-shadow: 0 0 0 2px rgba(120, 160, 255, 0.25) !important;
+    }
 
-        #registerModal .mm-float {
-            position: relative;
-        }
+    .custom-modal .input-group-text{
+        background: #fff !important;
+        border-left: none !important;
+        border-radius: 0 6px 6px 0 !important;
+        cursor: pointer;
+        border: 1px solid #d6d6d6 !important;
+        border-left: none !important;
+    }
 
-        /* pastiin label tampil walau ada css global yang nyembunyiin label */
-        #registerModal .mm-label {
-            display: block !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
+    .custom-modal .input-group .form-control{
+        border-right: none !important;
+    }
 
-        #registerModal .mm-float .mm-label {
-            position: absolute;
-            left: 14px;
-            top: 18px;
-            font-size: 15px;
-            font-weight: 700;
-            color: #6b7280;
-            transition: all .15s ease;
-            pointer-events: none;
-            padding: 0 6px;
-            z-index: 9;
-            background: transparent;
-        }
+    .custom-modal .modal-footer{
+        padding: 18px 26px !important;
+        border-top: 1px solid #eaeaea !important;
+    }
 
-        /* biar input gak nutup label */
-        #registerModal .mm-float .form-control,
-        #registerModal .mm-float select,
-        #registerModal .mm-float textarea {
-            position: relative !important;
-            z-index: 1 !important;
-            padding-top: 28px !important;
-        }
+    .custom-modal .btn-secondary{
+        background: #f3f3f3;
+        color: #444;
+        border: none;
+        padding: 9px 20px;
+        font-size: 15px;
+        border-radius: 8px;
+        font-family: var(--mm-font) !important;
+    }
 
-        /* fokus / isi -> label naik */
-        #registerModal .mm-float:focus-within .mm-label,
-        #registerModal .mm-float.is-filled .mm-label {
-            top: 6px;
-            font-size: 12px;
-            color: #133d78;
-            background: #fff;
-        }
+    /* =======================================================
+       FLOATING LABEL (PASTI MUNCUL) - REGISTER MODAL
+       ======================================================= */
+    #registerModal .mm-float{ position: relative; }
 
-        /* kalau mm-float dipakai di input-group */
-        #registerModal .input-group .mm-float {
-            flex: 1 1 auto;
-            width: 1%;
-        }
+    /* pastiin label tampil walau ada css global yang nyembunyiin label */
+    #registerModal .mm-label{
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
 
-        /* kecilin tinggi select dikit biar enak */
-        #registerModal .mm-float select.form-control {
-            height: 58px !important;
-        }
+    #registerModal .mm-float .mm-label{
+        position: absolute;
+        left: 14px;
+        top: 18px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #6b7280;
+        transition: all .15s ease;
+        pointer-events: none;
+        padding: 0 6px;
+        z-index: 9;
+        background: transparent;
+        font-family: var(--mm-font) !important;
+    }
 
-        /* =========================================
-           FIX INPUT DATE: tanggal harus MUNCUL
-           ========================================= */
-        #registerModal .mm-float input[type="date"] {
-            padding-top: 30px !important;
-            color: #555555 !important;
-        }
+    /* biar input gak nutup label */
+    #registerModal .mm-float .form-control,
+    #registerModal .mm-float select,
+    #registerModal .mm-float textarea{
+        position: relative !important;
+        z-index: 1 !important;
+        padding-top: 28px !important;
+    }
 
-        #registerModal .mm-float input[type="date"]::-webkit-datetime-edit {
-            color: #555555 !important;
-        }
+    /* fokus / isi -> label naik */
+    #registerModal .mm-float:focus-within .mm-label,
+    #registerModal .mm-float.is-filled .mm-label{
+        top: 6px;
+        font-size: 12px;
+        color: var(--mm-primary);
+        background: #fff;
+    }
 
-        #registerModal .mm-float input[type="date"]::-webkit-calendar-picker-indicator {
-            opacity: 1 !important;
-            cursor: pointer;
-        }
+    /* kalau mm-float dipakai di input-group */
+    #registerModal .input-group .mm-float{
+        flex: 1 1 auto;
+        width: 1%;
+    }
 
-        #registerModal .mm-float input[type="date"] + .mm-label {
-            top: 6px !important;
-            font-size: 12px !important;
-            color: #133d78 !important;
-            background: #fff !important;
-        }
-    </style>
+    /* kecilin tinggi select dikit biar enak */
+    #registerModal .mm-float select.form-control{
+        height: 58px !important;
+    }
+
+    /* =========================================
+       FIX INPUT DATE: tanggal harus MUNCUL
+       ========================================= */
+    #registerModal .mm-float input[type="date"]{
+        padding-top: 30px !important;
+        color: #555555 !important;
+        font-family: var(--mm-font) !important;
+    }
+
+    #registerModal .mm-float input[type="date"]::-webkit-datetime-edit{
+        color: #555555 !important;
+    }
+
+    #registerModal .mm-float input[type="date"]::-webkit-calendar-picker-indicator{
+        opacity: 1 !important;
+        cursor: pointer;
+    }
+
+    #registerModal .mm-float input[type="date"] + .mm-label{
+        top: 6px !important;
+        font-size: 12px !important;
+        color: var(--mm-primary) !important;
+        background: #fff !important;
+    }
+
+    /* =======================================================
+       SWEETALERT: DATA BELUM LENGKAP (LEBIH BAGUS)
+       ======================================================= */
+    .swal2-popup.swal-mm{
+        border-radius: 16px !important;
+        box-shadow: 0 18px 60px rgba(0,0,0,.18) !important;
+        overflow: hidden !important;
+        font-family: var(--mm-font) !important;
+    }
+
+    .swal-mm .swal2-title{
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        color: #1f2937 !important;
+        margin: 10px 0 6px !important;
+        font-family: var(--mm-font) !important;
+    }
+
+    .swal-mm .swal2-html-container{
+        margin: 10px 0 0 !important;
+        color: #374151 !important;
+        line-height: 1.45 !important;
+        text-align: left !important;
+        font-family: var(--mm-font) !important;
+    }
+
+    .mm-alert-wrap{
+        display: grid;
+        gap: 12px;
+    }
+
+    .mm-alert-head{
+        display:flex;
+        align-items:flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(255,193,7,.14);
+        border: 1px solid rgba(255,193,7,.25);
+    }
+
+    .mm-alert-ico{
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background: rgba(255,193,7,.18);
+        flex: 0 0 auto;
+    }
+
+    .mm-alert-ico i{ font-size: 18px; color:#a16207; }
+
+    .mm-alert-title{
+        font-weight: 800;
+        margin: 0;
+        color:#111827;
+        font-size: 14px;
+        font-family: var(--mm-font) !important;
+    }
+    .mm-alert-sub{
+        margin: 2px 0 0;
+        font-size: 12.5px;
+        color:#6b7280;
+        font-family: var(--mm-font) !important;
+    }
+
+    .mm-missing{
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        padding: 12px 12px 10px;
+    }
+
+    .mm-missing-label{
+        display:flex;
+        align-items:center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 13px;
+        color:#111827;
+        margin: 0 0 10px;
+        font-family: var(--mm-font) !important;
+    }
+    .mm-missing-label i{ color:#ef4444; font-size: 16px; }
+
+    .mm-missing-list{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 8px;
+    }
+
+    /* kalau itemnya banyak -> jadi 2 kolom (lebih rapi) */
+    .mm-missing-list.two-col{
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 14px;
+    }
+
+    .mm-missing-item{
+        display:flex;
+        align-items:flex-start;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: #f9fafb;
+        border: 1px solid #eef2f7;
+    }
+
+    .mm-missing-item i{
+        font-size: 16px;
+        color: #ef4444;
+        margin-top: 1px;
+        flex: 0 0 auto;
+    }
+
+    .mm-missing-item span{
+        font-size: 13px;
+        color:#374151;
+        font-weight: 700;
+        font-family: var(--mm-font) !important;
+    }
+
+    .mm-tip{
+        font-size: 12.5px;
+        color:#6b7280;
+        margin-top: 2px;
+        font-family: var(--mm-font) !important;
+    }
+</style>
+
 </head>
 
 <body>
@@ -1198,13 +1427,40 @@
             }
 
             if (!isValid) {
+                const items = errorMessages
+                    .map(msg => `<li class="mm-missing-item"><i class="ri-close-circle-line"></i><span>${msg}</span></li>`)
+                    .join('');
+
                 Swal.fire({
                     icon: 'warning',
                     title: 'Data Belum Lengkap',
-                    html: 'Harap lengkapi data berikut:<br><br>' + errorMessages.join('<br>'),
-                    confirmButtonText: 'Mengerti',
-                    confirmButtonColor: '#2c7be5'
+                    html: `
+                        <div class="mm-alert-wrap">
+                            <div class="mm-alert-head">
+                                <div class="mm-alert-ico"><i class="ri-error-warning-line"></i></div>
+                                <div>
+                                    <p class="mm-alert-title">Masih ada data yang wajib diisi</p>
+                                    <p class="mm-alert-sub">Lengkapi bagian berikut supaya biodata bisa disimpan.</p>
+                                </div>
+                            </div>
+
+                            <div class="mm-missing">
+                                <p class="mm-missing-label"><i class="ri-asterisk"></i> Daftar yang belum diisi</p>
+                                <ul class="mm-missing-list ${errorMessages.length >= 8 ? 'two-col' : ''}">
+                                    ${items}
+                                </ul>
+                                <div class="mm-tip">Tip: setelah kamu isi, kolom merah akan hilang otomatis.</div>
+                            </div>
+                        </div>
+                    `,
+                    customClass: {
+                        popup: 'swal-mm'
+                    },
+                    confirmButtonText: '<i class="ri-check-line me-1"></i> Mengerti',
+                    confirmButtonColor: '#1a4bb8',
+                    width: 620
                 });
+
                 initRegisterFloatingLabels();
                 return;
             }
@@ -1213,38 +1469,38 @@
             Swal.fire({
                 title: 'Konfirmasi Penyimpanan Data',
                 html: `
-            <div class="text-start">
-                <p>Apakah Anda sudah yakin dengan data yang diisi?</p>
-                <div class="alert alert-warning">
-                    <div class="d-flex align-items-start">
-                        <i class="ri-alert-line me-2 mt-1"></i>
-                        <div>
-                            <strong>PERHATIAN PENTING!</strong><br>
+                    <div class="text-start">
+                        <p>Apakah Anda sudah yakin dengan data yang diisi?</p>
+                        <div class="alert alert-warning">
+                            <div class="d-flex align-items-start">
+                                <i class="ri-alert-line me-2 mt-1"></i>
+                                <div>
+                                    <strong>PERHATIAN PENTING!</strong><br>
+                                    <small>
+                                        Biodata hanya dapat diisi <strong>SATU KALI</strong> dan <strong>TIDAK DAPAT DIEDIT</strong> setelah disimpan.<br>
+                                        Pastikan semua data yang Anda masukkan sudah benar.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border p-2 mt-2 rounded bg-light">
                             <small>
-                                Biodata hanya dapat diisi <strong>SATU KALI</strong> dan <strong>TIDAK DAPAT DIEDIT</strong> setelah disimpan.<br>
-                                Pastikan semua data yang Anda masukkan sudah benar.
+                                <strong>Data yang akan disimpan:</strong><br>
+                                • Nama: ${form.querySelector('[name="nama"]').value}<br>
+                                • NIP: ${document.getElementById('reg_nip').value}<br>
+                                • Jenis PTK: ${jenisPtkSelect.options[jenisPtkSelect.selectedIndex].text}<br>
+                                • Sekolah/Instansi: ${sekolahOption.value === 'sekolah' ?
+                                    document.getElementById('selectedSekolahName').textContent :
+                                    form.querySelector('[name="instansi"]').value}
                             </small>
                         </div>
                     </div>
-                </div>
-                <div class="border p-2 mt-2 rounded bg-light">
-                    <small>
-                        <strong>Data yang akan disimpan:</strong><br>
-                        • Nama: ${form.querySelector('[name="nama"]').value}<br>
-                        • NIP: ${document.getElementById('reg_nip').value}<br>
-                        • Jenis PTK: ${jenisPtkSelect.options[jenisPtkSelect.selectedIndex].text}<br>
-                        • Sekolah/Instansi: ${sekolahOption.value === 'sekolah' ? 
-                            document.getElementById('selectedSekolahName').textContent : 
-                            form.querySelector('[name="instansi"]').value}
-                    </small>
-                </div>
-            </div>
-        `,
+                `,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: '<i class="ri-check-line me-1"></i> Ya, Simpan Data',
                 cancelButtonText: '<i class="ri-close-line me-1"></i> Periksa Kembali',
-                confirmButtonColor: '#28a745',
+                confirmButtonColor: '#1a4bb8',
                 cancelButtonColor: '#6c757d',
                 reverseButtons: true,
                 allowOutsideClick: false,
@@ -1278,24 +1534,24 @@
                                     icon: 'success',
                                     title: 'Registrasi Berhasil!',
                                     html: `
-                                <div class="text-start">
-                                    <p>${data.message}</p>
-                                    <div class="alert alert-success mt-2">
-                                        <div class="d-flex align-items-start">
-                                            <i class="ri-checkbox-circle-line me-2 mt-1"></i>
-                                            <div>
-                                                <strong>Data telah berhasil disimpan!</strong><br>
-                                                <small>
-                                                    Biodata Anda telah tersimpan secara permanen.<br>
-                                                    Anda dapat login menggunakan NIP: <strong>${data.nip}</strong>
-                                                </small>
+                                        <div class="text-start">
+                                            <p>${data.message}</p>
+                                            <div class="alert alert-success mt-2">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="ri-checkbox-circle-line me-2 mt-1"></i>
+                                                    <div>
+                                                        <strong>Data telah berhasil disimpan!</strong><br>
+                                                        <small>
+                                                            Biodata Anda telah tersimpan secara permanen.<br>
+                                                            Anda dapat login menggunakan NIP: <strong>${data.nip}</strong>
+                                                        </small>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            `,
+                                    `,
                                     confirmButtonText: 'Login Sekarang',
-                                    confirmButtonColor: '#2c7be5',
+                                    confirmButtonColor: '#1a4bb8',
                                     willClose: () => {
                                         document.getElementById('nip').value = data.nip;
                                         document.getElementById('nip').focus();
@@ -1306,19 +1562,19 @@
                                     icon: 'error',
                                     title: 'Registrasi Gagal',
                                     html: `
-                                <div class="text-start">
-                                    <p>${data.message || 'Terjadi kesalahan saat menyimpan data'}</p>
-                                    ${data.message && data.message.includes('NIP sudah terdaftar') ? 
-                                        `<div class="alert alert-info mt-2">
-                                            <small>
-                                                <i class="ri-information-line me-1"></i>
-                                                NIP Anda sudah terdaftar. Silakan login menggunakan NIP tersebut.
-                                            </small>
-                                        </div>` : ''}
-                                </div>
-                            `,
+                                        <div class="text-start">
+                                            <p>${data.message || 'Terjadi kesalahan saat menyimpan data'}</p>
+                                            ${data.message && data.message.includes('NIP sudah terdaftar') ?
+                                                `<div class="alert alert-info mt-2">
+                                                    <small>
+                                                        <i class="ri-information-line me-1"></i>
+                                                        NIP Anda sudah terdaftar. Silakan login menggunakan NIP tersebut.
+                                                    </small>
+                                                </div>` : ''}
+                                        </div>
+                                    `,
                                     confirmButtonText: 'Mengerti',
-                                    confirmButtonColor: '#dc3545'
+                                    confirmButtonColor: '#1a4bb8',
                                 });
                             }
                         })
@@ -1328,18 +1584,18 @@
                                 icon: 'error',
                                 title: 'Kesalahan Server',
                                 html: `
-                            <div class="text-start">
-                                <p>Terjadi kesalahan pada server</p>
-                                <div class="alert alert-warning mt-2">
-                                    <small>
-                                        <i class="ri-error-warning-line me-1"></i>
-                                        Silakan coba beberapa saat lagi. Jika masalah berlanjut, hubungi administrator.
-                                    </small>
-                                </div>
-                            </div>
-                        `,
+                                    <div class="text-start">
+                                        <p>Terjadi kesalahan pada server</p>
+                                        <div class="alert alert-warning mt-2">
+                                            <small>
+                                                <i class="ri-error-warning-line me-1"></i>
+                                                Silakan coba beberapa saat lagi. Jika masalah berlanjut, hubungi administrator.
+                                            </small>
+                                        </div>
+                                    </div>
+                                `,
                                 confirmButtonText: 'Mengerti',
-                                confirmButtonColor: '#dc3545'
+                                confirmButtonColor: '#1a4bb8',
                             });
                         })
                         .finally(() => {

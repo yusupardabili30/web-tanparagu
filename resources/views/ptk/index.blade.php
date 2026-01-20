@@ -12,25 +12,46 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
     <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
-<style>.btn-warning {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #212529;
-    transition: all 0.3s ease;
+<style>
+:root{
+  --mm-primary: #1a4d8e;                 /* #1a4 = #11aa44 */
+  --mm-primary-hover: #163f74;
+  --mm-primary-focus:  rgba(26,75,184,.25);
 }
 
-.btn-warning:hover {
-    background-color: #e0a800;
-    border-color: #d39e00;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+/* tombol Lihat Riwayat Kegiatan */
+a.btn.btn-primary.btn-sm.w-100{
+  background-color: var(--mm-primary) !important;
+  border-color: var(--mm-primary) !important;
+  color:#fff !important;
+}
+a.btn.btn-primary.btn-sm.w-100:hover{
+  background-color: var(--mm-primary-hover) !important;
+  border-color: var(--mm-primary-hover) !important;
+  box-shadow: 0 4px 12px var(--mm-primary-focus); 
+  transform: translateY(-2px);
 }
 
-.alert-warning {
-    background-color: #fff3cd;
-    border-color: #ffeaa7;
-    color: #856404;
-}</style>
+/* tombol Mulai / Mulai Baru (id=btnMulai) */
+#btnMulai{
+  background-color: var(--mm-primary) !important;
+  border-color: var(--mm-primary) !important;
+  color:#fff !important;
+}
+#btnMulai:hover{
+  background-color: var(--mm-primary-hover) !important;
+  border-color: var(--mm-primary-hover) !important;
+  box-shadow: 0 4px 12px var(--mm-primary-focus);
+  transform: translateY(-2px);
+}
+
+/* fokus */
+#btnMulai:focus,
+a.btn.btn-primary.btn-sm.w-100:focus{
+  box-shadow: 0 0 0 .25rem var(--mm-primary-focus) !important;
+}
+</style>
+
     <!-- PAGE TITLE -->
     <div class="row mb-1 pt-0" style="margin-top:-50px;">
         <div class="col-12">

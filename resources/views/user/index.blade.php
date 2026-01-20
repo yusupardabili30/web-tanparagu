@@ -601,28 +601,40 @@
 
                                         <td class="fw-600">{{ $row->nama }}</td>
 
+                                        {{-- ✅ FIX: ROLE dibuat tahan banting (relasi object / string / null) --}}
                                         <td>
-                                            @if($row->role)
-                                                @php
-                                                    $roleColors = [
-                                                        'admin' => 'badge-role-admin',
-                                                        'superadmin' => 'badge-role-superadmin',
-                                                        'user' => 'badge-role-user'
-                                                    ];
-                                                    $roleClass = $roleColors[strtolower($row->role->role)] ?? 'badge-role-user';
-                                                @endphp
-                                                <span class="badge-soft {{ $roleClass }}">
-                                                    <i class="ri-shield-user-line"></i> {{ $row->role->role }}
-                                                </span>
-                                            @else
-                                                <span class="badge-soft badge-role-user">
-                                                    <i class="ri-user-line"></i> User
-                                                </span>
-                                            @endif
+                                            @php
+                                                $roleObj = $row->role ?? null; // bisa relasi / bisa kolom string
+                                                $roleName = null;
+
+                                                if (is_object($roleObj)) {
+                                                    $roleName = $roleObj->role ?? null;
+                                                } else {
+                                                    $roleName = $roleObj;
+                                                }
+
+                                                $roleName = $roleName ?: 'User';
+
+                                                $roleColors = [
+                                                    'admin' => 'badge-role-admin',
+                                                    'superadmin' => 'badge-role-superadmin',
+                                                    'user' => 'badge-role-user'
+                                                ];
+                                                $roleClass = $roleColors[strtolower((string)$roleName)] ?? 'badge-role-user';
+                                            @endphp
+
+                                            <span class="badge-soft {{ $roleClass }}">
+                                                <i class="ri-shield-user-line"></i> {{ $roleName }}
+                                            </span>
                                         </td>
 
+                                        {{-- ✅ FIX: TIM KERJA dibuat tahan banting (relasi / null) --}}
                                         <td class="cell-small">
-                                            {{ $row->timKerja->tim_kerja ?? '-' }}
+                                            @php
+                                                $timObj = $row->timKerja ?? null;
+                                                $timName = is_object($timObj) ? ($timObj->tim_kerja ?? '-') : ($timObj ?? '-');
+                                            @endphp
+                                            {{ $timName }}
                                         </td>
 
                                         <td class="cell-small">
@@ -1047,66 +1059,66 @@
         $('#passwordHelp').text('Untuk edit user, kosongkan jika tidak ingin mengubah password');
     });
     // =========================
-// SEARCH FILTER (LIVE)
-// =========================
-(function(){
-    const input = document.getElementById('userSearch');
-    const btnClear = document.getElementById('clearSearch');
-    const meta = document.getElementById('searchMeta');
-    const tbody = document.getElementById('user-list-data');
+    // SEARCH FILTER (LIVE)
+    // =========================
+    (function(){
+        const input = document.getElementById('userSearch');
+        const btnClear = document.getElementById('clearSearch');
+        const meta = document.getElementById('searchMeta');
+        const tbody = document.getElementById('user-list-data');
 
-    if(!input || !tbody) return;
+        if(!input || !tbody) return;
 
-    function normalize(s){
-        return (s || '').toString().toLowerCase().trim();
-    }
-
-    function getRows(){
-        return Array.from(tbody.querySelectorAll('tr'));
-    }
-
-    function updateMeta(visible, total, q){
-        if(!meta) return;
-        if(!q){
-            meta.textContent = `Menampilkan ${total} data`;
-        }else{
-            meta.textContent = `Hasil: ${visible} dari ${total}`;
+        function normalize(s){
+            return (s || '').toString().toLowerCase().trim();
         }
-    }
 
-    function filter(){
-        const q = normalize(input.value);
-        const rows = getRows();
-        const total = rows.length;
-        let visible = 0;
+        function getRows(){
+            return Array.from(tbody.querySelectorAll('tr'));
+        }
 
-        rows.forEach(tr => {
-            const text = normalize(tr.innerText);
-            const match = !q || text.includes(q);
-            tr.style.display = match ? '' : 'none';
-            if(match) visible++;
-        });
+        function updateMeta(visible, total, q){
+            if(!meta) return;
+            if(!q){
+                meta.textContent = `Menampilkan ${total} data`;
+            }else{
+                meta.textContent = `Hasil: ${visible} dari ${total}`;
+            }
+        }
 
-        // tombol clear
+        function filter(){
+            const q = normalize(input.value);
+            const rows = getRows();
+            const total = rows.length;
+            let visible = 0;
+
+            rows.forEach(tr => {
+                const text = normalize(tr.innerText);
+                const match = !q || text.includes(q);
+                tr.style.display = match ? '' : 'none';
+                if(match) visible++;
+            });
+
+            // tombol clear
+            if(btnClear){
+                btnClear.style.display = q ? 'inline-flex' : 'none';
+            }
+            updateMeta(visible, total, q);
+        }
+
+        input.addEventListener('input', filter);
+
         if(btnClear){
-            btnClear.style.display = q ? 'inline-flex' : 'none';
+            btnClear.addEventListener('click', function(){
+                input.value = '';
+                input.focus();
+                filter();
+            });
         }
-        updateMeta(visible, total, q);
-    }
 
-    input.addEventListener('input', filter);
-
-    if(btnClear){
-        btnClear.addEventListener('click', function(){
-            input.value = '';
-            input.focus();
-            filter();
-        });
-    }
-
-    // init
-    filter();
-})();
+        // init
+        filter();
+    })();
 
 </script>
 @endsection
