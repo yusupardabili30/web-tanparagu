@@ -81,6 +81,11 @@
                                             {{-- Menjadi: --}}
                                             <a href="{{ route('hasil-instrumen.index') }}" class="nav-link">Hasil Instrumen</a>
                                         </li>
+                                    </ul><ul class="nav nav-sm flex-column">
+                                        <li class="nav-item">
+                                            {{-- Menjadi: --}}
+                                            <a href="{{ route('users.index') }}" class="nav-link">Management Users</a>
+                                        </li>
                                     </ul>
 
                                     <ul class="nav nav-sm flex-column">

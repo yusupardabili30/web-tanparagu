@@ -13,6 +13,7 @@ use App\Http\Controllers\InstrumenController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\BiodataController;
 use App\Http\Controllers\AnalisisController;
+use App\Http\Controllers\ManagementUsersController;
 
 /*
 |--------------------------------------------------------------------------
@@ -227,3 +228,19 @@ Route::get('/quiz1/case-list/{encoded_kegiatan_id}/{nip}', [SoalController::clas
 // web.php - tambahkan route ini
 Route::get('/analisis', [AnalisisController::class, 'index'])->name('analisis.index');
 Route::get('/ptk/continue/{encode_kegiatan_id}/{nip}', [PtkController::class, 'continueQuiz'])->name('ptk.continue-quiz');
+
+
+
+
+
+
+
+
+// Pastikan di web.php routes sudah tepat
+Route::prefix('users')->name('users.')->group(function () {
+    Route::get('/', [ManagementUsersController::class, 'index'])->name('index');
+    Route::get('/get/{user_id}', [ManagementUsersController::class, 'get'])->name('get');
+    Route::post('/submit', [ManagementUsersController::class, 'store'])->name('store'); // Perhatikan ini!
+    Route::delete('/delete/{user_id}', [ManagementUsersController::class, 'delete'])->name('delete');
+    Route::put('/reset-password/{user_id}', [ManagementUsersController::class, 'resetPassword'])->name('reset-password');
+});
