@@ -451,7 +451,19 @@ class SoalController extends Controller
 
 
         // Waktu jawaban disimpan
-        $start = Carbon::createFromFormat('H:i:s', session('timestart'));
+        $timestart = session('timestart');
+
+        if (!$timestart || !preg_match('/^\d{2}:\d{2}:\d{2}$/', $timestart)) {
+            // fallback kalau session hilang
+            $timestart = now()->format('H:i:s');
+            session(['timestart' => $timestart]);
+        }
+
+
+        $start = Carbon::createFromFormat('H:i:s', $timestart);
+        $end   = Carbon::createFromFormat('H:i:s', now()->format('H:i:s'));
+        $durasi_sub = gmdate('H:i:s', $start->diffInSeconds($end));
+
         $end = Carbon::createFromFormat('H:i:s', now()->format('H:i:s'));
         $durasi_sub = gmdate('H:i:s', $start->diffInSeconds($end));
 
