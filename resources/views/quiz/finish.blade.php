@@ -17,7 +17,6 @@
     <br>
     <br>
 
-
     <!-- FINISH CARD -->
     <div class="row justify-content-center">
         <div class="col-xl-6">
@@ -71,6 +70,15 @@
                         <i class="ri-time-line me-1"></i>
                         Selesai pada: {{ date('d F Y H:i:s') }}
                     </p>
+
+                    <!-- ✅ BUTTON BACK: FULL WIDTH -->
+                    <div class="mt-3">
+                        <a href="{{ route('ptk.show', ['encode_kegiatan_id' => $encoded_kegiatan_id, 'nip' => $nip]) }}"
+                           class="btn btn-primary btn-lg btn-back-blue w-100 d-block"
+                           style="border-radius:12px; padding: 14px 22px; font-weight: 700;">
+                            <i class="ri-arrow-left-line me-2"></i> Kembali
+                        </a>
+                    </div>
                 </div>
 
             </div>
@@ -94,6 +102,20 @@
 
     .card {
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ✅ warna biru */
+    .btn-back-blue{
+        background: #1a4d8e !important;
+        border-color: #1a4d8e !important;
+        color: #fff !important;
+        box-shadow: 0 8px 18px rgba(26, 91, 184, .18);
+    }
+    .btn-back-blue:hover,
+    .btn-back-blue:focus{
+        background: #164f9e !important;
+        border-color: #164f9e !important;
+        color: #fff !important;
     }
 </style>
 
@@ -125,10 +147,10 @@
         const timerKeys = [
             "quiz_start_time",
             "quiz1_start_time", // Timer untuk quiz1
- 
+
             "quiz_timer_start", // Backup key jika ada
             "quiz1_timer_start", // Backup untuk quiz1
-        
+
         ];
 
         timerKeys.forEach(key => {
@@ -149,7 +171,6 @@
 
         console.log("✅ Semua timer telah direset:");
         console.log("- Timer Quiz 1 (Indikator) dihapus");
- 
         console.log("- Backup timer juga dihapus");
 
         // Tampilkan pesan konfirmasi di console
@@ -160,12 +181,10 @@
     window.onload = function() {
         // Hapus kembali untuk memastikan
         localStorage.removeItem("quiz1_start_time");
- 
 
         console.log("🔄 Timer di-reset ulang saat onload");
     };
 </script>
-
 
 <script>
     // Reset semua timer saat halaman finish diakses
@@ -177,12 +196,12 @@
             "quiz_start_time",
             "quiz2_start_time"
         ];
-        
+
         timerKeys.forEach(key => {
             localStorage.removeItem(key);
             sessionStorage.removeItem(key);
         });
-        
+
         // Clear session
         if (typeof session !== 'undefined') {
             session.removeItem('quiz2_start_time');
@@ -190,12 +209,12 @@
             session.removeItem('timesoal');
             session.removeItem('timestart');
         }
-        
+
         // Clear cookies timer jika ada
         timerKeys.forEach(key => {
             document.cookie = key + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         });
-        
+
         console.log("✅ Semua timer telah direset.");
     });
 </script>
