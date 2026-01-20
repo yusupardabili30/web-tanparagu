@@ -933,17 +933,30 @@
         console.log("💾 Timer disimpan sebelum unload:", formatTime(remainingSeconds));
     });
     
-    // Pastikan input hidden selalu ter-update saat form di-submit
-    document.querySelector('form').addEventListener('submit', function(e) {
-        // Update input hidden terakhir kali sebelum submit
-        updateTimerDisplay();
-        
-        console.log("📤 Form akan disubmit dengan waktu:", {
-            seconds: remainingSeconds,
-            display: formatTime(remainingSeconds),
-            inputValue: document.getElementById("remainingSecondsInput").value
-        });
+// Update di bagian form submit
+document.querySelector('form').addEventListener('submit', function(e) {
+    // Simpan waktu sebelum submit
+    updateTimerDisplay();
+    
+    // Simpan URL saat ini untuk referensi
+    sessionStorage.setItem('lastQuizUrl', window.location.href);
+    
+    console.log('📤 Form akan disubmit dengan waktu:', {
+        seconds: remainingSeconds,
+        display: formatTime(remainingSeconds),
+        inputValue: document.getElementById("remainingSecondsInput").value
     });
+});
+
+
+// Cek jika user kembali ke halaman quiz dari cache
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted && isQuizUrl(window.location.href)) {
+        // Jika halaman dimuat dari cache (back button), refresh
+        console.log('🔄 Halaman dimuat dari cache, refresh...');
+        window.location.reload();
+    }
+});
 </script>
 
 
@@ -1387,4 +1400,406 @@
             }
         });
     </script>
+
+
+
+
+  {{-- Script untuk tombol "Mengerti" dengan redirect menggunakan logic dari PtkController --}}
+<script>
+    // ==================================================
+    // TOMBOL MENGERTI + REDIRECT MENGGUNAKAN LOGIC PtkController
+    // ==================================================
+    
+    // Ambil data dari PHP untuk redirect
+    const encodedKegiatanId = '{{ $encoded_kegiatan_id }}';
+    const nip = '{{ $nip }}';
+    const currentSoalId = {{ $soal->soal_id ?? 0 }};
+    const currentSubId = {{ $sub_indikator_id ?? 0 }};
+    const currentNoUrut = {{ $no_urut ?? 1 }};
+    const currentTahap = {{ $tahap ?? 2 }};
+    
+    // Variabel untuk tracking redirect
+    let isRedirecting = false;
+    let redirectModalShown = false;
+    
+    // Fungsi redirect menggunakan logika PtkController (lanjutkan quiz)
+    function redirectUsingPtkControllerLogic() {
+        if (isRedirecting) return;
+        
+        isRedirecting = true;
+        console.log('🔄 Redirect menggunakan logika PtkController (continue-quiz)...');
+        
+        // Redirect ke route continue-quiz yang akan menggunakan logika PtkController
+        const continueUrl = "{{ route('ptk.continue-quiz', [
+            'encode_kegiatan_id' => $encoded_kegiatan_id,
+            'nip' => $nip
+        ]) }}";
+        
+        console.log('📤 Redirect URL:', continueUrl);
+        window.location.href = continueUrl;
+    }
+    
+    // Fungsi redirect default ke soal berikutnya (fallback)
+    function redirectToNextQuestion() {
+        const nextNoUrut = currentNoUrut + 1;
+        
+        console.log('📝 Redirect default ke soal berikutnya:', nextNoUrut);
+        
+        // Build URL untuk soal berikutnya dalam sub indikator yang sama
+        const url = "{{ route('quiz2.show', [
+            'tahap' => $tahap,
+            'encoded_kegiatan_id' => $encoded_kegiatan_id,
+            'nip' => $nip,
+            'encoded_sub_indikator_id' => 'PLACEHOLDER_SUB_ID',
+            'encoded_no_urut' => 'PLACEHOLDER_NO_URUT'
+        ]) }}"
+            .replace('PLACEHOLDER_SUB_ID', '{{ $encoded_sub_indikator_id }}')
+            .replace('PLACEHOLDER_NO_URUT', btoa(nextNoUrut.toString()));
+        
+        console.log('📤 Redirect URL:', url);
+        window.location.href = url;
+    }
+    
+    // Fungsi tampilkan modal back warning dengan tombol "Mengerti"
+    function showBackWarningWithContinueButton() {
+        // Hanya tampilkan sekali per sesi
+        if (redirectModalShown) return;
+        redirectModalShown = true;
+        
+        const modalHtml = `
+            <div class="back-warning-modal" id="backWarningModal" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.85);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999;
+            ">
+                <div style="
+                    background: white;
+                    padding: 30px;
+                    border-radius: 16px;
+                    max-width: 480px;
+                    width: 90%;
+                    text-align: center;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+                    animation: slideIn 0.4s ease;
+                    border-top: 6px solid #dc3545;
+                ">
+                    <!-- Header dengan icon -->
+                    <div style="
+                        background: linear-gradient(135deg, #dc3545, #ff6b6b);
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 20px;
+                        box-shadow: 0 10px 20px rgba(220, 53, 69, 0.3);
+                    ">
+                        <i class="ri-error-warning-fill" style="font-size: 40px; color: white;"></i>
+                    </div>
+                    
+                    <!-- Title -->
+                    <h4 style="color: #dc3545; margin-bottom: 12px; font-weight: 800; font-size: 22px; letter-spacing: -0.5px;">
+                        Tidak Dapat Kembali
+                    </h4>
+                    
+                    <!-- Message -->
+                    <p style="color: #555; margin-bottom: 24px; font-size: 16px; line-height: 1.7;">
+                        Anda tidak dapat kembali ke soal sebelumnya.<br>
+                        <strong style="color: #1a4d8e;">Sistem akan mengarahkan Anda ke posisi lanjutan quiz.</strong>
+                    </p>
+                    
+                    <!-- Info Box -->
+                    <div style="
+                        background: linear-gradient(135deg, #f8f9ff, #e8f0ff);
+                        padding: 18px;
+                        border-radius: 12px;
+                        margin-bottom: 24px;
+                        border: 2px solid #e0e6ff;
+                        text-align: left;
+                    ">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 10px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="
+                                    background: #1a4d8e;
+                                    width: 36px;
+                                    height: 36px;
+                                    border-radius: 10px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+                                    <i class="ri-timer-line" style="font-size: 18px; color: white;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #666; font-weight: 600;">TIMER</div>
+                                    <div style="font-size: 18px; color: #1a4d8e; font-weight: 700;" id="modalTimer">00:00:00</div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="
+                                    background: #28a745;
+                                    width: 36px;
+                                    height: 36px;
+                                    border-radius: 10px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+                                    <i class="ri-check-line" style="font-size: 18px; color: white;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #666; font-weight: 600;">SOAL</div>
+                                    <div style="font-size: 18px; color: #28a745; font-weight: 700;">${currentNoUrut}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Note -->
+                        <div style="
+                            background: #fff9e6;
+                            border-left: 4px solid #ffc107;
+                            padding: 10px 12px;
+                            border-radius: 6px;
+                            margin-top: 12px;
+                        ">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="ri-information-line" style="color: #ffc107; font-size: 16px;"></i>
+                                <span style="font-size: 13px; color: #856404; font-weight: 500;">
+                                    Sistem akan melanjutkan dari posisi terakhir Anda mengerjakan
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button onclick="handleContinueUsingPtkController()" style="
+                            background: linear-gradient(135deg, #1a4d8e 0%, #163f74 100%);
+                            color: white;
+                            border: none;
+                            padding: 16px 30px;
+                            border-radius: 12px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            font-size: 17px;
+                            transition: all 0.3s;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 10px;
+                            box-shadow: 0 6px 20px rgba(26, 77, 142, 0.3);
+                        " id="continueBtn">
+                            <i class="ri-play-circle-line" style="font-size: 20px;"></i>
+                            Lanjutkan ke Posisi Terakhir
+                        </button>
+                        
+                     
+                    </div>
+                    
+                    <!-- Footer Note -->
+                    <p style="color: #999; font-size: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                        <i class="ri-shield-check-line me-1"></i>
+                        Klik "Lanjutkan" untuk melanjutkan quiz dengan logika sistem yang sama seperti tombol "Lanjutkan Quiz" di halaman utama
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        const existingModal = document.getElementById('backWarningModal');
+        if (!existingModal) {
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Update timer di modal
+            updateModalTimer();
+            
+            // Fokus ke tombol continue
+            setTimeout(() => {
+                const btn = document.getElementById('continueBtn');
+                if (btn) btn.focus();
+            }, 300);
+        }
+    }
+    
+    // Fungsi update timer di modal
+    function updateModalTimer() {
+        const timerElement = document.getElementById('modalTimer');
+        if (timerElement && typeof formatTime === 'function') {
+            timerElement.textContent = formatTime(remainingSeconds);
+        }
+    }
+    
+    // Handler tombol "Lanjutkan" menggunakan PtkController logic
+    function handleContinueUsingPtkController() {
+        if (isRedirecting) return;
+        
+        // Tampilkan loading state di tombol
+        const btn = document.getElementById('continueBtn');
+        if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="ri-loader-4-line rotating"></i> Mengarahkan...';
+            btn.disabled = true;
+            btn.style.opacity = '0.8';
+        }
+        
+        console.log('✅ Tombol "Lanjutkan" diklik, menggunakan logika PtkController...');
+        
+        // Redirect menggunakan PtkController logic
+        redirectUsingPtkControllerLogic();
+    }
+    
+    // Fallback handler jika ingin redirect ke soal berikutnya saja
+    function handleContinueToNextQuestion() {
+        if (isRedirecting) return;
+        
+        isRedirecting = true;
+        console.log('📝 Mengarahkan ke soal berikutnya...');
+        
+        closeBackWarning();
+        redirectToNextQuestion();
+    }
+    
+    // Tutup modal warning
+    function closeBackWarning() {
+        const modal = document.getElementById('backWarningModal');
+        if (modal) {
+            // Animasi keluar
+            modal.style.opacity = '0';
+            modal.style.transform = 'translateY(20px)';
+            modal.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.parentNode.removeChild(modal);
+                }
+            }, 300);
+        }
+    }
+    
+    // Setup blokir back browser dengan modal
+    function setupBackBlock() {
+        // Simpan URL saat ini
+        const currentUrl = window.location.href;
+        
+        // Push state awal
+        if (window.history && window.history.pushState) {
+            window.history.pushState(null, null, currentUrl);
+        }
+        
+        // Event untuk deteksi back button
+        window.addEventListener('popstate', function(event) {
+            console.log('🔙 Back button ditekan di halaman quiz');
+            
+            // Tampilkan modal dengan tombol "Mengerti"
+            showBackWarningWithContinueButton();
+            
+            // Push kembali state saat ini
+            if (window.history && window.history.pushState) {
+                window.history.pushState(null, null, currentUrl);
+            }
+        });
+    }
+    
+    // Tambahkan style untuk animasi
+    const continueStyle = document.createElement('style');
+    continueStyle.textContent = `
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px) scale(0.9); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .rotating {
+            animation: rotate 1s linear infinite;
+        }
+        
+        .back-warning-modal button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(26, 77, 142, 0.4);
+        }
+        
+        .back-warning-modal button:active {
+            transform: translateY(0);
+        }
+        
+        /* Pulse animation untuk highlight tombol */
+        #continueBtn {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Responsive */
+        @media (max-width: 576px) {
+            .back-warning-modal > div {
+                padding: 20px 15px !important;
+            }
+            
+            .back-warning-modal h4 {
+                font-size: 20px !important;
+            }
+            
+            .back-warning-modal button {
+                padding: 14px 20px !important;
+                font-size: 16px !important;
+            }
+        }
+    `;
+    document.head.appendChild(continueStyle);
+    
+    // Inisialisasi saat DOM siap
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup blokir back browser
+        setupBackBlock();
+        
+        console.log('🎯 Sistem redirect PtkController aktif', {
+            soalId: currentSoalId,
+            subId: currentSubId,
+            noUrut: currentNoUrut,
+            tahap: currentTahap
+        });
+    });
+    
+    // Update timer di modal setiap detik
+    if (typeof updateTimerDisplay === 'function') {
+        setInterval(updateModalTimer, 1000);
+    }
+    
+    // Prevent keyboard shortcuts untuk back
+    document.addEventListener('keydown', function(e) {
+        // Alt + Left Arrow atau Backspace
+        if ((e.altKey && e.key === 'ArrowLeft') || e.key === 'Backspace') {
+            // Cek jika tidak di input field
+            if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+                e.preventDefault();
+                console.log('⌨️ Keyboard back shortcut diblokir');
+                
+                // Tampilkan modal
+                showBackWarningWithContinueButton();
+            }
+        }
+    });
+</script>
     @endsection
