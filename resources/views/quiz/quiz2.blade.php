@@ -1393,7 +1393,6 @@
 
 
 {{-- Script untuk mencegah back button --}}
-{{-- Script untuk mencegah back button --}}
 <script>
     // ============================================
     // MENCEGAH NAVIGASI BACK BROWSER DENGAN LOGIKA LANJUTKAN YANG TEPAT
@@ -1404,7 +1403,17 @@
         sessionStorage.setItem('quiz2_visited_' + {{ $soal->soal_id ?? 0 }}, 'true');
     }
 
-    // 2. Redirect jika mencoba back ke soal yang sudah dikunjungi
+    // 2. Flag untuk menandai apakah halaman ini sedang di-refresh
+    let isPageRefreshing = false;
+
+    // 3. Deteksi refresh halaman
+    window.addEventListener('beforeunload', function() {
+        isPageRefreshing = true;
+        // Simpan status refresh ke sessionStorage dengan timestamp
+        sessionStorage.setItem('quiz2_refresh_timestamp', Date.now());
+    });
+
+    // 4. Redirect jika mencoba back ke soal yang sudah dikunjungi
     window.addEventListener('pageshow', function(event) {
         // Cek jika halaman dimuat dari cache (back/forward)
         if (event.persisted) {
@@ -1413,24 +1422,30 @@
             const visitedKey = 'quiz2_visited_' + soalId;
             
             if (sessionStorage.getItem(visitedKey) === 'true') {
-                // Tampilkan modal peringatan dan arahkan ke posisi lanjutan
+                // Tampilkan modal peringatan yang tidak bisa ditutup
                 showBackButtonWarning();
             }
         }
     });
 
-    // 3. Tampilkan warning modal dengan opsi lanjutkan
+    // 5. Tampilkan warning modal dengan opsi lanjutkan (TIDAK BISA DITUTUP)
     function showBackButtonWarning() {
-        // Buat modal peringatan yang lebih informatif
+        // Hapus modal lama jika ada
+        const oldModal = document.getElementById('backWarningModal');
+        if (oldModal) {
+            oldModal.remove();
+        }
+
+        // Buat modal peringatan yang TIDAK BISA DITUTUP
         const modalHtml = `
-            <div class="modal fade" id="backWarningModal" tabindex="-1" aria-hidden="true" style="display: none;">
+            <div class="modal fade" id="backWarningModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="backWarningModalLabel" aria-hidden="true" style="display: none;">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 shadow">
                         <div class="modal-header bg-warning text-white">
-                            <h5 class="modal-title">
+                            <h5 class="modal-title" id="backWarningModalLabel">
                                 <i class="ri-alert-line me-2"></i> Soal Sudah Dikerjakan
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            <!-- HAPUS TOMBOL CLOSE -->
                         </div>
                         <div class="modal-body">
                             <div class="text-center mb-3">
@@ -1439,7 +1454,7 @@
                             <h5 class="text-center mb-3">Anda Sudah Menjawab Soal Ini!</h5>
                             <p class="text-muted text-center mb-4">
                                 Soal ini sudah pernah Anda kerjakan dan tidak dapat diulang.<br>
-                                Anda akan dialihkan ke posisi lanjutan kuis Anda.
+                                Anda akan dialihkan ke posisi lanjutan soal Anda.
                             </p>
                             <div class="alert alert-info">
                                 <div class="d-flex align-items-center">
@@ -1451,8 +1466,8 @@
                             </div>
                         </div>
                         <div class="modal-footer justify-content-center">
-                            
-                            <button type="button" class="btn btn-primary" onclick="continueToLastPosition()">
+                            <!-- Hanya tombol Lanjutkan Soal yang tersedia -->
+                            <button type="button" class="btn btn-primary btn-lg" onclick="continueToLastPosition()">
                                 <i class="ri-arrow-right-line me-2"></i> Lanjutkan Soal
                             </button>
                         </div>
@@ -1462,17 +1477,45 @@
         `;
 
         // Tambahkan modal ke body
-        if (!document.getElementById('backWarningModal')) {
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        }
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
 
+        // Tampilkan modal dan nonaktifkan interaksi dengan latar belakang
+        const modalElement = document.getElementById('backWarningModal');
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static', // Tidak bisa klik di luar modal
+            keyboard: false      // Tidak bisa tutup dengan ESC
+        });
+        
         // Tampilkan modal
-        const modal = new bootstrap.Modal(document.getElementById('backWarningModal'));
         modal.show();
+        
+        // Nonaktifkan semua klik di luar modal
+        modalElement.addEventListener('click', function(e) {
+            // Jika yang diklik adalah backdrop (background gelap)
+            if (e.target === modalElement) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Berikan efek getar sebagai feedback
+                modalElement.querySelector('.modal-content').classList.add('shake-modal');
+                setTimeout(() => {
+                    modalElement.querySelector('.modal-content').classList.remove('shake-modal');
+                }, 500);
+            }
+        });
     }
 
-    // 4. Fungsi untuk lanjutkan ke posisi terakhir (MENGGUNAKAN ROUTE continue-quiz)
+    // 6. Fungsi untuk lanjutkan ke posisi terakhir (MENGGUNAKAN ROUTE continue-quiz)
     function continueToLastPosition() {
+        // Hapus modal
+        const modalElement = document.getElementById('backWarningModal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            }
+            modalElement.remove();
+        }
+
         const encodedKegiatanId = '{{ $encoded_kegiatan_id }}';
         const nip = '{{ $nip }}';
         
@@ -1482,7 +1525,9 @@
             text: 'Mohon tunggu sebentar',
             allowOutsideClick: false,
             allowEscapeKey: false,
-            didOpen: () => {
+            showConfirmButton: false,
+            backdrop: true,
+            willOpen: () => {
                 Swal.showLoading();
             }
         });
@@ -1494,36 +1539,72 @@
         ]) }}`;
     }
 
-    // 5. Fallback function untuk mencari posisi berikutnya secara lokal
-    function findNextPositionLocally() {
-        const currentSubIndikatorId = {{ $sub_indikator_id ?? 0 }};
-        const currentNoUrut = {{ $no_urut ?? 1 }};
-        const encodedKegiatanId = '{{ $encoded_kegiatan_id }}';
-        const nip = '{{ $nip }}';
-        const tahap = {{ $tahap }};
-        
-        // Cari soal berikutnya dalam sub_indikator yang sama
-        const nextNoUrut = currentNoUrut + 1;
-        const encodedNextNoUrut = btoa(nextNoUrut);
-        
-        // Redirect ke soal berikutnya
-        window.location.href = `{{ route('quiz2.show', [
-            'tahap' => $tahap,
-            'encoded_kegiatan_id' => $encoded_kegiatan_id,
-            'nip' => $nip,
-            'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
-            'encoded_no_urut' => 'NO_URUT_PLACEHOLDER'
-        ]) }}`.replace('NO_URUT_PLACEHOLDER', encodedNextNoUrut);
-    }
-
-    // 6. Replace state history untuk mencegah back
-    history.replaceState(null, null, window.location.href);
-    window.addEventListener('popstate', function(event) {
-        history.replaceState(null, null, window.location.href);
-        showBackButtonWarning();
+    // 7. Blokir escape key untuk mencegah penutupan modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('backWarningModal')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Berikan efek getar
+            const modalContent = document.querySelector('#backWarningModal .modal-content');
+            if (modalContent) {
+                modalContent.classList.add('shake-modal');
+                setTimeout(() => {
+                    modalContent.classList.remove('shake-modal');
+                }, 500);
+            }
+        }
     });
 
-    // 7. Cegah form submit ganda
+    // 8. Replace state history untuk mencegah back
+    history.replaceState(null, null, window.location.href);
+    
+    // 9. Tangkap event popstate (back button)
+    window.addEventListener('popstate', function(event) {
+        history.replaceState(null, null, window.location.href);
+        
+        // Reset flag refresh saat back button ditekan
+        isPageRefreshing = false;
+        
+        // Cek apakah soal ini sudah dikunjungi
+        const soalId = {{ $soal->soal_id ?? 0 }};
+        const visitedKey = 'quiz2_visited_' + soalId;
+        
+        if (sessionStorage.getItem(visitedKey) === 'true') {
+            // Tunggu sebentar untuk memastikan bukan refresh
+            setTimeout(() => {
+                // Cek apakah benar-benar back button (bukan refresh)
+                if (!isPageRefreshing) {
+                    showBackButtonWarning();
+                }
+            }, 100);
+        }
+    });
+
+    // 10. Deteksi navigasi back lainnya
+    window.addEventListener('beforeunload', function(e) {
+        // Jika user mencoba meninggalkan halaman dengan cara selain refresh
+        if (!isPageRefreshing) {
+            const soalId = {{ $soal->soal_id ?? 0 }};
+            const visitedKey = 'quiz2_visited_' + soalId;
+            
+            // Jika user mencoba meninggalkan halaman setelah mengunjungi soal ini
+            if (sessionStorage.getItem(visitedKey) === 'true') {
+                // Hanya tampilkan peringatan jika modal belum ditampilkan
+                if (!document.getElementById('backWarningModal')) {
+                    e.preventDefault();
+                    e.returnValue = 'Anda sudah mengerjakan soal ini. Ingin melanjutkan ke soal berikutnya?';
+                    
+                    // Tampilkan modal warning
+                    setTimeout(() => {
+                        showBackButtonWarning();
+                    }, 100);
+                }
+            }
+        }
+    });
+
+    // 11. Cegah form submit ganda
     let isSubmitting = false;
     document.querySelector('form')?.addEventListener('submit', function(e) {
         if (isSubmitting) {
@@ -1550,7 +1631,7 @@
         }, 5000);
     });
 
-    // 8. Simpan pilihan jawaban sementara
+    // 12. Simpan pilihan jawaban sementara
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.querySelector('form');
         if (form) {
@@ -1576,6 +1657,48 @@
                 }
             }
         }
+        
+        // 13. Cek jika user refresh halaman - TIDAK TAMPILKAN MODAL
+        // (diperbaiki: refresh tidak menampilkan modal)
+        const performanceEntries = performance.getEntriesByType("navigation");
+        
+        // Reset flag refresh saat halaman dimuat
+        isPageRefreshing = false;
+        
+        // Cek timestamp dari sessionStorage untuk deteksi refresh
+        const refreshTimestamp = sessionStorage.getItem('quiz2_refresh_timestamp');
+        if (refreshTimestamp) {
+            const timeDiff = Date.now() - parseInt(refreshTimestamp);
+            // Jika refresh terjadi dalam 2 detik terakhir
+            if (timeDiff < 2000) {
+                // Ini adalah refresh, tidak tampilkan modal
+                console.log("🔄 Refresh terdeteksi, tidak menampilkan modal back warning");
+                // Hapus timestamp
+                sessionStorage.removeItem('quiz2_refresh_timestamp');
+                return;
+            }
+        }
+        
+        // Jika bukan refresh dan ada navigation type "back_forward"
+        if (performanceEntries.length > 0 && performanceEntries[0].type === "back_forward") {
+            const soalId = {{ $soal->soal_id ?? 0 }};
+            const visitedKey = 'quiz2_visited_' + soalId;
+            
+            if (sessionStorage.getItem(visitedKey) === 'true' && !isPageRefreshing) {
+                // Tunggu sebentar sebelum menampilkan modal
+                setTimeout(() => {
+                    showBackButtonWarning();
+                }, 500);
+            }
+        }
+    });
+
+    // 14. Reset flag refresh saat halaman selesai dimuat
+    window.addEventListener('load', function() {
+        // Reset flag setelah halaman dimuat sepenuhnya
+        setTimeout(() => {
+            isPageRefreshing = false;
+        }, 1000);
     });
 </script>
 
@@ -1636,6 +1759,7 @@
         padding: 10px 20px;
         font-weight: 500;
         transition: all 0.3s ease;
+        min-width: 180px;
     }
     
     #backWarningModal .btn-primary:hover {
@@ -1643,15 +1767,18 @@
         box-shadow: 0 4px 12px rgba(26, 77, 142, 0.3);
     }
     
-    #backWarningModal .btn-secondary {
-        padding: 10px 20px;
-        font-weight: 500;
-        transition: all 0.3s ease;
+    /* Style khusus untuk modal yang tidak bisa ditutup */
+    #backWarningModal.modal {
+        backdrop-filter: blur(3px);
     }
     
-    #backWarningModal .btn-secondary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    #backWarningModal.modal.show .modal-backdrop {
+        opacity: 0.8 !important;
+    }
+    
+    /* Nonaktifkan pointer events untuk backdrop */
+    #backWarningModal .modal-backdrop {
+        pointer-events: auto !important;
     }
 </style>
 {{-- SweetAlert2 --}}
