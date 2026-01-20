@@ -26,7 +26,7 @@
 
 <style>
     :root{
-        --mm-blue:#1a5bb8;
+        --mm-blue:#1a4d8e;
         --mm-soft:#f6f9ff;
         --mm-text:#1f2937;
         --mm-muted:#6b7280;
@@ -135,13 +135,13 @@
         font-weight: 900;
     }
     .btn-cari{
-        background: #1a5bb8 !important;
-        border-color: #1a5bb8 !important;
+        background: #1a4d8e !important;
+        border-color: #1a4d8e !important;
         color: #fff !important;
     }
     .btn-cari:hover{
-        background: #154a93 !important;
-        border-color: #154a93 !important;
+        background: #163f74 !important;
+        border-color: #163f74 !important;
         color: #fff !important;
     }
     .btn-cari:focus{

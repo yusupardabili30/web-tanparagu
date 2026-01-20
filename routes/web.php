@@ -234,8 +234,6 @@ Route::get('/ptk/continue/{encode_kegiatan_id}/{nip}', [PtkController::class, 'c
 
 
 
-
-
 // Pastikan di web.php routes sudah tepat
 Route::prefix('users')->name('users.')->group(function () {
     Route::get('/', [ManagementUsersController::class, 'index'])->name('index');

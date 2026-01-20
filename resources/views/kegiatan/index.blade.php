@@ -2,11 +2,35 @@
 @section('mycontent')
 
 <style>
+    /* BUTTON SUBMIT MODAL: "Tambah Kegiatan" */
+#showModal #add-btn,
+#showModal .modal-footer .btn-primary{
+  background: #1a4d8e !important;
+  border-color: #1a4d8e !important;
+  color:#fff !important;
+  font-weight: 800;
+  border-radius: 12px;
+}
+
+#showModal #add-btn:hover,
+#showModal .modal-footer .btn-primary:hover{
+  background: #163f74 !important;
+  border-color: #163f74 !important;
+  color:#fff !important;
+}
+
+#showModal #add-btn:focus,
+#showModal #add-btn:active,
+#showModal .modal-footer .btn-primary:focus,
+#showModal .modal-footer .btn-primary:active{
+  box-shadow: 0 0 0 .25rem rgba(26,77,142,.25) !important;
+}
+
     :root{
         --ink:#1f2937;
         --muted:#6b7280;
         --line:#e5e7eb;
-        --blue:#1a5bb8;
+        --blue:#1a4d8e;
         --soft:#f8fafc;
         --success:#16a34a;
         --danger:#dc2626;
