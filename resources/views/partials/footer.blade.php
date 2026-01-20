@@ -6,7 +6,7 @@
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end d-none d-sm-block">
-                    Develop by Team IT Developer 
+                    Develop by Team Apps Developer 
                 </div>
             </div>
         </div>
