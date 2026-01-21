@@ -218,7 +218,7 @@
     </table>
     
     <div class="footer">
-        <p>Total Sub Indikator: {{ $totalIndikator }} | Total Skor: {{ $totalSkor }}</p>
+        <p>Total Sub Indikator: {{ $totalIndikator }}</p>
         <p>© {{ date('Y') }} - Sistem TanpaRagu</p>
     </div>
 </body>
