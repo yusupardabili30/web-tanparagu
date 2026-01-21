@@ -14,6 +14,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\BiodataController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Controllers\ManagementUsersController;
+use App\Http\Controllers\PelatihanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -242,3 +243,26 @@ Route::prefix('users')->name('users.')->group(function () {
 
 Route::get('/ptk/export-hasil/{encode_kegiatan_id}/{nip}', [PtkController::class, 'exportHasilPdf'])
     ->name('ptk.export-hasil');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Tambahkan di web.php
+Route::prefix('pelatihan')->name('pelatihan.')->group(function () {
+    Route::get('/{encoded_kegiatan_id}/{nip}', [PelatihanController::class, 'index'])
+        ->name('index');
+
+    Route::post('/{encoded_kegiatan_id}/{nip}/store', [PelatihanController::class, 'store'])
+        ->name('store');
+});

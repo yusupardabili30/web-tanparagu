@@ -73,10 +73,13 @@
 
                     <!-- ✅ BUTTON BACK: FULL WIDTH -->
                     <div class="mt-3">
-                        <a href="{{ route('ptk.show', ['encode_kegiatan_id' => $encoded_kegiatan_id, 'nip' => $nip]) }}"
-                           class="btn btn-primary btn-lg btn-back-blue w-100 d-block"
-                           style="border-radius:12px; padding: 14px 22px; font-weight: 700;">
-                            <i class="ri-arrow-left-line me-2"></i> Kembali
+                      
+
+                           <!-- ✅ BUTTON ISI FORM PELATIHAN: FULL WIDTH -->
+                        <a href="{{ route('pelatihan.index', ['encoded_kegiatan_id' => $encoded_kegiatan_id, 'nip' => $nip]) }}"
+                           class="btn btn-success btn-lg w-100 d-block"
+                           style="border-radius:12px; padding: 14px 22px; font-weight: 700; background: #28a745; border-color: #28a745;">
+                            <i class="ri-checkbox-circle-line me-2"></i> Isi Form Pelatihan
                         </a>
                     </div>
                 </div>

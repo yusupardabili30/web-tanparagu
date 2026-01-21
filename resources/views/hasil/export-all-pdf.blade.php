@@ -329,6 +329,41 @@
             text-align: center;
             width: 60px;
         }
+
+
+
+        /* Pelatihan Section */
+        .pelatihan-section {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .pelatihan-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-size: 9px;
+        }
+
+        .pelatihan-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            color: #1565c0;
+            border-radius: 3px;
+            padding: 2px 6px;
+            margin: 0 5px 5px 0;
+            font-size: 8px;
+            line-height: 1.2;
+        }
+
+        .pelatihan-kategori {
+            display: block;
+            font-size: 7px;
+            color: #546e7a;
+            margin-top: 1px;
+        }
     </style>
 </head>
 
@@ -370,11 +405,37 @@
     @php
     $firstRow = $dataRows->first();
     
+// Ambil data pelatihan untuk PTK ini
+    $pelatihanData = [];
+    if (isset($firstRow->ptk_id) && isset($firstRow->kegiatan_id)) {
+        // Simulasi query pelatihan (dalam real case, ini harus di-pass dari controller)
+        $pelatihanData = DB::table('ptk_pelatihan')
+            ->select(
+                'ptk_pelatihan.*',
+                'ms_pelatihan.nama_pelatihan',
+                DB::raw("CASE 
+                    WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN ms_pelatihan.nama_pelatihan
+                    WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN ptk_pelatihan.pelatihan_lainnya
+                    ELSE 'Belum Tersedia'
+                END as nama_pelatihan_lengkap"),
+                DB::raw("CASE 
+                    WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN 'Dari Daftar'
+                    WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN 'Lainnya'
+                    ELSE 'Belum Tersedia'
+                END as kategori_pelatihan")
+            )
+            ->leftJoin('ms_pelatihan', 'ptk_pelatihan.ms_pelatihan_id', '=', 'ms_pelatihan.ms_pelatihan_id')
+            ->where('ptk_pelatihan.ptk_id', $firstRow->ptk_id)
+            ->where('ptk_pelatihan.kegiatan_id', $firstRow->kegiatan_id)
+            ->get();
+    }
+
+
     // Proses rekomendasi untuk setiap row
     $processedRows = [];
     foreach($dataRows as $row) {
         // Simulasi fungsi getRekomendasiWithGap dari controller
-        $jenjangJabatan = $row->jenjang_jabatan ?? 'Guru Pertama';
+        $jenjangJabatan = $row->jenjang_jabatan ?? 'Pertama';
         $levelJawaban = $row->level_jawaban ?? $row->level ?? 0;
         $subIndikatorId = $row->sub_indikator_id;
         $tahap = $row->tahap;
@@ -383,13 +444,13 @@
         
         // Tentukan rentang level berdasarkan jenjang jabatan
         $levelRanges = [
-            'Guru Pertama' => ['min' => 2, 'max' => 2],
-            'Guru Muda'    => ['min' => 2, 'max' => 3],
-            'Guru Madya'   => ['min' => 2, 'max' => 4],
-            'Guru Utama'   => ['min' => 2, 'max' => 5]
+            'Pertama' => ['min' => 2, 'max' => 2],
+            'Muda'    => ['min' => 2, 'max' => 3],
+            'Madya'   => ['min' => 2, 'max' => 4],
+            'Utama'   => ['min' => 2, 'max' => 5]
         ];
         
-        $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Guru Pertama'];
+        $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Pertama'];
         $levelMin = $range['min'];
         $levelMax = $range['max'];
         
@@ -493,6 +554,29 @@
                     <td class="info-value">{{ $firstRow->pangkat ?? '-' }} {{ $firstRow->golongan_ruang ? '('.$firstRow->golongan_ruang.')' : '' }}</td>
                 </tr>
             </table>
+         <!-- Pelatihan Section -->
+            @if(count($pelatihanData) > 0)
+            <div class="pelatihan-section">
+                <div class="pelatihan-title">
+                    <i class="fas fa-book-open"></i> Pelatihan yang Anda Perlukan:
+                </div>
+                <div>
+                    @foreach($pelatihanData as $pelatihan)
+                    <div class="pelatihan-badge">
+                        {{ $pelatihan->nama_pelatihan_lengkap ?? 'Belum Tersedia' }}
+                        <span class="pelatihan-kategori">{{ $pelatihan->kategori_pelatihan ?? 'Tidak Diketahui' }}</span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @else
+            <div class="pelatihan-section">
+                <div class="pelatihan-title">
+                    <i class="fas fa-book-open"></i> Pelatihan yang Anda Perlukan:
+                </div>
+                <div class="text-muted">Belum ada data pelatihan</div>
+            </div>
+            @endif
         </div>
 
         <!-- Tabel Data -->

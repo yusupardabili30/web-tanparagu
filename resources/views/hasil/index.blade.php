@@ -393,6 +393,60 @@
     }
 
     .page-link{ border-radius: 10px !important; font-weight: 800; }
+
+
+
+
+
+
+
+
+
+
+
+
+     /* =========================
+       PELATIHAN STYLE
+       ========================= */
+    .pelatihan-section {
+        margin-top: 12px;
+        border-top: 1px dashed rgba(229,231,235,.7);
+        padding-top: 12px;
+    }
+
+    .pelatihan-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(26,91,184,.08);
+        border: 1px solid rgba(26,91,184,.2);
+        color: var(--mm-blue);
+        border-radius: 10px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 800;
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+
+    .pelatihan-badge i {
+        font-size: 14px;
+    }
+
+    .pelatihan-kategori {
+        font-size: 11px;
+        color: var(--mm-muted);
+        font-weight: 800;
+        display: block;
+        margin-top: 4px;
+    }
+
+    .no-pelatihan {
+        color: var(--mm-muted);
+        font-style: italic;
+        font-size: 12.5px;
+        font-weight: 500;
+    }
 </style>
 
 <div class="container-fluid">
@@ -569,6 +623,34 @@
                                 </div>
                             </div>
                         </div>
+
+  {{-- ✅ TAMBAHKAN SECTION PELATIHAN --}}
+                            @if(isset($first->pelatihan) && $first->pelatihan->count() > 0)
+                                <div class="pelatihan-section">
+                                    <div style="margin-bottom: 8px; color: var(--mm-text); font-weight: 900; font-size: 13px;">
+                                        <i class="ri-book-open-line me-1"></i> Pelatihan yang Anda Perlukan
+                                    </div>
+                                    <div>
+                                        @foreach($first->pelatihan as $pelatihan)
+                                            <div class="pelatihan-badge">
+                                                <i class="ri-checkbox-circle-fill"></i>
+                                                <span>{{ $pelatihan->nama_pelatihan_lengkap }}</span>
+                                                <span class="pelatihan-kategori">{{ $pelatihan->kategori_pelatihan }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <div class="pelatihan-section">
+                                    <div class="no-pelatihan">
+                                        <i class="ri-information-line me-1"></i> Belum ada data pelatihan
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
 
                         {{-- ✅ SEMUA INDIKATOR JADI 1 CARD --}}
                         <div class="ptk-body">

@@ -28,6 +28,7 @@ class HasilInstrumenController extends Controller
                 'ptk_jawaban.created_at',
                 'ptk.nama',
                 'ptk.nip',
+                'ptk.ptk_id',
                 'ptk.pangkat_jabatan_id',
                 'ptk.instansi',
                 'ptk.kota_id',
@@ -41,7 +42,9 @@ class HasilInstrumenController extends Controller
                 // Ambil data dari tabel sub_indikator
                 'sub_indikator.sub_indikator_name',
                 'kegiatan.kegiatan_name',
-                'kegiatan.entity'
+                'kegiatan.entity',
+                'kegiatan.kegiatan_id', // ← TAMBAHKAN INI (penting!)
+                'ptk_jawaban.kegiatan_id as jawaban_kegiatan_id'
             )
             ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
             ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
@@ -84,7 +87,31 @@ class HasilInstrumenController extends Controller
             );
 
             $item->rekomendasi_info = $rekomendasiInfo;
+
+
+            // TAMBAHKAN: Ambil data pelatihan untuk PTK ini
+            // Gunakan jawaban_kegiatan_id jika tersedia, jika tidak gunakan kegiatan_id
+            $kegiatanId = $item->jawaban_kegiatan_id ?? $item->kegiatan_id;
+            if (isset($item->ptk_id) && isset($kegiatanId)) {
+                $item->pelatihan = $this->getPelatihanByPtk($item->ptk_id, $kegiatanId);
+
+                // DEBUG: Cek apakah data ditemukan
+                \Log::info('Data pelatihan untuk PTK:', [
+                    'ptk_id' => $item->ptk_id,
+                    'kegiatan_id' => $kegiatanId,
+                    'jumlah_pelatihan' => $item->pelatihan->count(),
+                    'nama' => $item->nama
+                ]);
+            } else {
+                $item->pelatihan = collect(); // return empty collection jika data tidak lengkap
+                \Log::warning('Data ptk_id atau kegiatan_id tidak lengkap:', [
+                    'ptk_id' => $item->ptk_id ?? 'null',
+                    'kegiatan_id' => $kegiatanId ?? 'null',
+                    'nama' => $item->nama ?? 'null'
+                ]);
+            }
         }
+
 
         // Ambil semua kegiatan untuk dropdown
         $kegiatans = DB::table('kegiatan')->get();
@@ -196,6 +223,7 @@ class HasilInstrumenController extends Controller
                 'ptk_jawaban.created_at',
                 'ptk.nama',
                 'ptk.nip',
+                'ptk.ptk_id', // ← TAMBAHKAN ini untuk join dengan pelatihan
                 'ptk.pangkat_jabatan_id',
                 'ptk.instansi',
                 'ptk.email',
@@ -208,7 +236,8 @@ class HasilInstrumenController extends Controller
                 // Ambil data sub indikator
                 'sub_indikator.sub_indikator_name',
                 'kegiatan.kegiatan_name',
-                'kegiatan.entity'
+                'kegiatan.entity',
+                'kegiatan.kegiatan_id' // ← TAMBAHKAN untuk join dengan pelatihan
             )
             ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
             ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
@@ -233,6 +262,10 @@ class HasilInstrumenController extends Controller
             );
 
             $item->rekomendasi_info = $rekomendasiInfo;
+
+
+            // TAMBAHKAN: Ambil data pelatihan untuk PTK ini
+            $item->pelatihan = $this->getPelatihanByPtk($item->ptk_id, $item->kegiatan_id);
         }
 
         $totalSkor = $data->sum('bobot');
@@ -265,13 +298,7 @@ class HasilInstrumenController extends Controller
     }
 
 
-    /**
-     * Export PDF semua data dengan filter
-     */
 
-    /**
-     * Export PDF semua data dengan filter
-     */
     public function exportAllPdf(Request $request)
     {
         try {
@@ -282,8 +309,8 @@ class HasilInstrumenController extends Controller
                     'ptk_jawaban.tahap',
                     'ptk_jawaban.level',
                     'ptk_jawaban.sub_indikator_code',
-                    'ptk_jawaban.sub_indikator_id', // Tambahkan ini
-                    'ptk_jawaban.bobot', // Opsional: bisa dihapus nanti
+                    'ptk_jawaban.sub_indikator_id',
+                    'ptk_jawaban.bobot',
                     'ptk_jawaban.created_at',
                     'ptk.ptk_id',
                     'ptk.nama',
@@ -304,14 +331,15 @@ class HasilInstrumenController extends Controller
                     // Ambil data dari tabel sub_indikator
                     'sub_indikator.sub_indikator_name',
                     'kegiatan.kegiatan_name',
-                    'kegiatan.entity'
+                    'kegiatan.entity',
+                    'kegiatan.kegiatan_id'
                 )
                 ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
                 ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
                 ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
                 ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
                 ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
-                ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id'); // JOIN ke tabel sub_indikator
+                ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id');
 
             // Filter pencarian
             if ($request->filled('search')) {
@@ -322,7 +350,7 @@ class HasilInstrumenController extends Controller
                         ->orWhere('pangkat_jabatan.pangkat', 'like', "%{$search}%")
                         ->orWhere('pangkat_jabatan.jenjang_jabatan', 'like', "%{$search}%")
                         ->orWhere('kota.nama_kota', 'like', "%{$search}%")
-                        ->orWhere('sub_indikator.sub_indikator_name', 'like', "%{$search}%"); // Tambahkan pencarian sub_indikator
+                        ->orWhere('sub_indikator.sub_indikator_name', 'like', "%{$search}%");
                 });
             }
 
@@ -350,6 +378,17 @@ class HasilInstrumenController extends Controller
                 $kegiatan_name = $kegiatan->kegiatan_name ?? '';
             }
 
+            // Ambil data pelatihan untuk semua PTK yang ditampilkan
+            $pelatihanPerPtk = [];
+            foreach ($groupedData as $nip => $rows) {
+                $firstRow = $rows->first();
+                if (isset($firstRow->ptk_id) && isset($firstRow->kegiatan_id)) {
+                    $pelatihanPerPtk[$nip] = $this->getPelatihanByPtk($firstRow->ptk_id, $firstRow->kegiatan_id);
+                } else {
+                    $pelatihanPerPtk[$nip] = collect();
+                }
+            }
+
             if (!class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
                 return redirect()->back()->with('error', 'Fitur PDF belum tersedia. Silakan install package DomPDF.');
             }
@@ -361,6 +400,7 @@ class HasilInstrumenController extends Controller
 
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewPath, [
                 'groupedData' => $groupedData,
+                'pelatihanPerPtk' => $pelatihanPerPtk, // Tambahkan ini
                 'search' => $request->search,
                 'kegiatan_id' => $request->kegiatan_id,
                 'kegiatan_name' => $kegiatan_name,
@@ -431,5 +471,46 @@ class HasilInstrumenController extends Controller
             // Jika Excel tidak terinstall, kembalikan error
             return redirect()->back()->with('error', 'Fitur export Excel belum tersedia. Silakan install Maatwebsite/Excel.');
         }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Fungsi untuk mendapatkan data pelatihan PTK
+     */
+    private function getPelatihanByPtk($ptkId, $kegiatanId)
+    {
+        return DB::table('ptk_pelatihan')
+            ->select(
+                'ptk_pelatihan.*',
+                'ms_pelatihan.nama_pelatihan',
+                // Tentukan nama pelatihan lengkap berdasarkan ms_pelatihan_id atau pelatihan_lainnya
+                DB::raw("CASE 
+                WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN ms_pelatihan.nama_pelatihan
+                WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN ptk_pelatihan.pelatihan_lainnya
+                ELSE 'Belum Tersedia'
+            END as nama_pelatihan_lengkap"),
+                // Tentukan kategori pelatihan
+                DB::raw("CASE 
+                WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN 'Dari Daftar'
+                WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN 'Lainnya'
+                ELSE 'Belum Tersedia'
+            END as kategori_pelatihan")
+            )
+            ->leftJoin('ms_pelatihan', 'ptk_pelatihan.ms_pelatihan_id', '=', 'ms_pelatihan.ms_pelatihan_id')
+            ->where('ptk_pelatihan.ptk_id', $ptkId)
+            ->where('ptk_pelatihan.kegiatan_id', $kegiatanId)
+            ->get();
     }
 }

@@ -145,4 +145,32 @@ class Ptk extends Model
     {
         return $this->hasMany(PtkJawaban::class, 'ptk_id', 'ptk_id');
     }
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Relationship dengan pelatihan
+     */
+    public function pelatihan()
+    {
+        return $this->hasMany(PtkPelatihan::class, 'ptk_id', 'ptk_id');
+    }
+
+    /**
+     * Relationship dengan pelatihan berdasarkan kegiatan
+     */
+    public function pelatihanByKegiatan($kegiatanId)
+    {
+        return $this->pelatihan()
+            ->where('kegiatan_id', $kegiatanId)
+            ->with('masterPelatihan')
+            ->get();
+    }
 }
