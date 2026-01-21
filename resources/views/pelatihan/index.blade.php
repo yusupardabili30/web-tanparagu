@@ -11,7 +11,7 @@
             <div class="card border-0 shadow-sm" style="border-radius:14px;">
                 <div class="card-header baduy-bg text-center" style="border-radius:14px 14px 0 0;">
                     <h5 class="mb-0 text-white" style="font-size:20px; font-weight:700;">
-                        <i class="ri-file-list-3-line me-2"></i> Form Pelatihan Yang Diinginkan
+                        <i class="ri-file-list-3-line me-2"></i> Pelatihan Apa Yang Paling Anda Butuhkan
                     </h5>
                 </div>
 
