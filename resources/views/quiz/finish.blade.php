@@ -73,8 +73,7 @@
 
                     <!-- ✅ BUTTON BACK: FULL WIDTH -->
                     <div class="mt-3">
-                      
-
+                        Silakan lengkapi form di bawah ini, lalu klik tombol Simpan.
                            <!-- ✅ BUTTON ISI FORM PELATIHAN: FULL WIDTH -->
                         <a href="{{ route('pelatihan.index', ['encoded_kegiatan_id' => $encoded_kegiatan_id, 'nip' => $nip]) }}"
                            class="btn btn-success btn-lg w-100 d-block"
