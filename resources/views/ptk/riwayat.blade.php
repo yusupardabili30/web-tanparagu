@@ -38,6 +38,30 @@
             .table td.text-start {
                 text-align: left !important;
             }
+            
+            /* Style untuk tombol aksi */
+            .btn-detail {
+                background: linear-gradient(135deg, #10299c 0% );
+                border: none;
+                border-radius: 8px;
+                padding: 8px 16px;
+                color: white;
+                font-weight: 600;
+                font-size: 13px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            }
+
+            .btn-detail:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+                color: white;
+                background: linear-gradient(135deg, #10299c 0%);
+            }
+
+            .btn-detail i {
+                margin-right: 5px;
+            }
         </style>
 
 
@@ -69,6 +93,7 @@
                                     <th>Tanggal Mulai</th>
                                     <th>Tanggal Selesai</th>
                                     <th>Status</th>
+                                    <th>Aksi</th>
                                     
                                 </tr>
                             </thead>
@@ -103,7 +128,15 @@
                                         <span class="badge bg-secondary">Selesai</span>
                                         @endif
                                     </td>
-
+  <td>
+                                        <a href="{{ route('ptk.detailriwayat', [
+                                            'encode_kegiatan_id' => Hashids::encode($item->kegiatan_id),
+                                            'nip' => $nip
+                                        ]) }}" 
+                                           class="btn btn-detail">
+                                            <i class="ri-eye-line"></i> Detail
+                                        </a>
+                                    </td>
                                    
                                 </tr>
                                 @endforeach

@@ -387,13 +387,218 @@ class PtkController extends Controller
         ]);
     }
 
+
+
+
+
+
+
     /**
-     * Menampilkan detail riwayat per kegiatan
-     */
-    /**
-     * Menampilkan detail riwayat per kegiatan
+     * Menampilkan detail riwayat dengan format seperti hasil instrumen
+     * Hanya untuk PTK yang sedang login
      */
     public function detailRiwayat($encode_kegiatan_id, $nip)
+    {
+        try {
+            // Decode kegiatan_id
+            $kegiatan_id = Hashids::decode($encode_kegiatan_id)[0] ?? 0;
+
+            if (!$kegiatan_id) {
+                return redirect()->back()->with('error', 'Kegiatan tidak ditemukan.');
+            }
+
+            // Cari PTK berdasarkan NIP
+            $ptk = Ptk::with(['pangkatJabatan', 'kota', 'sekolah', 'jenisPtk', 'pangkatGolongan'])
+                ->where('nip', $nip)
+                ->first();
+
+            if (!$ptk) {
+                abort(404, 'Data PTK tidak ditemukan');
+            }
+
+            // Cari Kegiatan
+            $kegiatan = Kegiatan::find($kegiatan_id);
+            if (!$kegiatan) {
+                abort(404, 'Kegiatan tidak ditemukan');
+            }
+
+            // ============================================
+            // AMBIL DATA JAWABAN PTK INI SAJA
+            // ============================================
+            $query = DB::table('ptk_jawaban')
+                ->select(
+                    'ptk_jawaban.ptk_jawaban_id',
+                    'ptk_jawaban.tahap',
+                    'ptk_jawaban.level as level_jawaban',
+                    'ptk_jawaban.sub_indikator_code',
+                    'ptk_jawaban.sub_indikator_id',
+                    'ptk_jawaban.bobot',
+                    'ptk_jawaban.created_at',
+                    'ptk.nama',
+                    'ptk.nip',
+                    'ptk.pangkat_jabatan_id',
+                    'ptk.instansi',
+                    'pangkat_jabatan.golongan_ruang',
+                    'pangkat_jabatan.pangkat',
+                    'pangkat_jabatan.jenjang_jabatan',
+                    'pangkat_jabatan.level_kompetensi',
+                    'sub_indikator.sub_indikator_name',
+                    'kegiatan.kegiatan_name',
+                    'kegiatan.entity'
+                )
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+                ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+                ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+                ->where('ptk_jawaban.kegiatan_id', $kegiatan_id)
+                ->where('ptk.nip', $nip) // Hanya data PTK ini
+                ->orderBy('ptk_jawaban.created_at', 'desc');
+
+            $data = $query->get();
+
+            // ============================================
+            // TAMBAHKAN REKOMENDASI DENGAN GAP
+            // ============================================
+            foreach ($data as $item) {
+                $rekomendasiInfo = $this->getRekomendasiWithGap(
+                    $item->jenjang_jabatan,
+                    $item->level_jawaban,
+                    $item->sub_indikator_id,
+                    $item->tahap,
+                    $item->entity,
+                    $item->sub_indikator_code
+                );
+
+                $item->rekomendasi_info = $rekomendasiInfo;
+            }
+
+            // ============================================
+            // HITUNG STATISTIK
+            // ============================================
+            $totalSubIndikator = $data->count();
+            $levelTertinggi = $data->max('level_jawaban') ?? 0;
+            $levelTerendah = $data->min('level_jawaban') ?? 0;
+            $totalLevel = $data->sum('level_jawaban');
+            $rataRataLevel = $totalSubIndikator > 0 ? round($totalLevel / $totalSubIndikator, 2) : 0;
+
+            // Format tanggal
+            $start_date = date('d F Y', strtotime($kegiatan->start_date));
+            $end_date = date('d F Y', strtotime($kegiatan->end_date));
+            $tanggalTerakhir = $data->max('created_at')
+                ? date('d F Y H:i:s', strtotime($data->max('created_at')))
+                : '-';
+
+            return view('ptk.detail-riwayat', [
+                'ptk' => $ptk,
+                'kegiatan' => $kegiatan,
+                'data' => $data, // Data jawaban dengan rekomendasi
+                'totalSubIndikator' => $totalSubIndikator,
+                'levelTertinggi' => $levelTertinggi,
+                'levelTerendah' => $levelTerendah,
+                'rataRataLevel' => $rataRataLevel,
+                'tanggalTerakhir' => $tanggalTerakhir,
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+                'encode_kegiatan_id' => $encode_kegiatan_id,
+                'nip' => $nip
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Fungsi untuk mendapatkan rekomendasi dengan GAP level
+     * (Sama seperti di HasilInstrumenController)
+     */
+    private function getRekomendasiWithGap($jenjangJabatan, $levelJawaban, $subIndikatorId, $tahap, $entity, $subIndikatorCode)
+    {
+        // 1. Tentukan rentang level berdasarkan jenjang jabatan
+        $levelRanges = [
+            'Pertama' => ['min' => 2, 'max' => 2],  // Hanya level 2
+            'Muda'    => ['min' => 2, 'max' => 3],  // Level 2-3
+            'Madya'   => ['min' => 2, 'max' => 4],  // Level 2-4
+            'Utama'   => ['min' => 2, 'max' => 5]   // Level 2-5
+        ];
+
+        $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Pertama'];
+        $levelMin = $range['min'];
+        $levelMax = $range['max'];
+
+        // 2. Ambil semua rekomendasi untuk jenjang ini
+        $rekomendasiSemua = DB::table('ptk_rekomendasi')
+            ->where('sub_indikator_id', $subIndikatorId)
+            ->where('tahap', $tahap)
+            ->where('entity', $entity)
+            ->where('sub_indikator_code', $subIndikatorCode)
+            ->whereBetween('level', [$levelMin, $levelMax])
+            ->orderBy('level', 'asc')
+            ->get();
+
+        // 3. Pisahkan: sudah dicapai vs belum dicapai (GAP)
+        $rekomendasiDicapai = [];
+        $rekomendasiGap = []; // Level yang belum dicapai
+
+        foreach ($rekomendasiSemua as $rek) {
+            $gap = $rek->level - $levelJawaban;
+
+            if ($gap <= 0) {
+                // Sudah dicapai atau melampaui
+                $rekomendasiDicapai[] = [
+                    'level' => $rek->level,
+                    'rekomendasi' => $rek->rekomendasi,
+                    'gap' => $gap,
+                    'status' => $gap < 0 ? 'melampaui' : 'tepat'
+                ];
+            } else {
+                // Belum dicapai (GAP)
+                $rekomendasiGap[] = [
+                    'level' => $rek->level,
+                    'rekomendasi' => $rek->rekomendasi,
+                    'gap' => $gap,
+                    'status' => 'belum'
+                ];
+            }
+        }
+
+        // 4. Hitung statistik
+        $totalLevelHarus = ($levelMax - $levelMin) + 1;
+        $levelDicapaiCount = count($rekomendasiDicapai);
+        $levelGapCount = count($rekomendasiGap);
+
+        // 5. Tentukan status keseluruhan
+        if ($levelGapCount == 0) {
+            $status = 'Mencapai Semua Level';
+            $statusClass = 'success';
+        } elseif ($levelGapCount == 1 && $levelMax - $levelJawaban == 1) {
+            $status = 'Mendekati Target';
+            $statusClass = 'warning';
+        } else {
+            $status = 'Perlu Peningkatan';
+            $statusClass = 'danger';
+        }
+
+        return [
+            'jenjang' => $jenjangJabatan,
+            'level_jawaban' => $levelJawaban,
+            'level_min' => $levelMin,
+            'level_max' => $levelMax,
+            'rekomendasi_dicapai' => $rekomendasiDicapai,
+            'rekomendasi_gap' => $rekomendasiGap,
+            'total_level' => $totalLevelHarus,
+            'level_dicapai_count' => $levelDicapaiCount,
+            'level_gap_count' => $levelGapCount,
+            'persentase' => $totalLevelHarus > 0 ? round(($levelDicapaiCount / $totalLevelHarus) * 100, 1) : 0,
+            'status' => $status,
+            'status_class' => $statusClass,
+            'gap_terbesar' => $levelGapCount > 0 ? max(array_column($rekomendasiGap, 'gap')) : 0
+        ];
+    }
+
+    /**
+     * Export PDF hasil instrumen untuk PTK yang sedang login
+     */
+    public function exportHasilPdf($encode_kegiatan_id, $nip)
     {
         try {
             // Decode kegiatan_id
@@ -415,64 +620,90 @@ class PtkController extends Controller
                 abort(404, 'Kegiatan tidak ditemukan');
             }
 
-            // ============================================
-            // AMBIL DETAIL JAWABAN PER SUB INDIKATOR
-            // ============================================
-            $detailJawaban = DB::table('ptk_jawaban as pj')
+            // Query data jawaban
+            $query = DB::table('ptk_jawaban')
                 ->select(
-                    'pj.sub_indikator_id',
-                    'pj.sub_indikator_code',
-                    'pj.level',
-                    'pj.date_create',
-                    'pj.date_update',
-                    'si.sub_indikator_name',
-                    'si.sub_indikator_dec',
-                    'si.no_urut as urut_subindikator'
+                    'ptk_jawaban.ptk_jawaban_id',
+                    'ptk_jawaban.tahap',
+                    'ptk_jawaban.level as level_jawaban',
+                    'ptk_jawaban.sub_indikator_code',
+                    'ptk_jawaban.sub_indikator_id',
+                    'ptk_jawaban.bobot',
+                    'ptk_jawaban.created_at',
+                    'ptk.nama',
+                    'ptk.nip',
+                    'ptk.pangkat_jabatan_id',
+                    'ptk.instansi',
+                    'pangkat_jabatan.golongan_ruang',
+                    'pangkat_jabatan.pangkat',
+                    'pangkat_jabatan.jenjang_jabatan',
+                    'pangkat_jabatan.level_kompetensi',
+                    'sub_indikator.sub_indikator_name',
+                    'kegiatan.kegiatan_name',
+                    'kegiatan.entity'
                 )
-                ->leftJoin('sub_indikator as si', 'pj.sub_indikator_id', '=', 'si.sub_indikator_id')
-                ->where('pj.kegiatan_id', $kegiatan_id)
-                ->where('pj.ptk_id', $ptk->ptk_id)
-                ->orderBy('si.no_urut', 'asc')
-                ->get();
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+                ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+                ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+                ->where('ptk_jawaban.kegiatan_id', $kegiatan_id)
+                ->where('ptk.nip', $nip)
+                ->orderBy('ptk_jawaban.created_at', 'desc');
 
-            // ============================================
-            // HITUNG STATISTIK
-            // ============================================
-            $totalSubIndikator = $detailJawaban->count();
-            $levelTertinggi = $detailJawaban->max('level') ?? 0;
-            $levelTerendah = $detailJawaban->min('level') ?? 0;
+            $data = $query->get();
 
-            // Hitung persentase
-            $totalLevel = $detailJawaban->sum('level');
-            $rataRataLevel = $totalSubIndikator > 0 ? round($totalLevel / $totalSubIndikator, 2) : 0;
+            if ($data->isEmpty()) {
+                return redirect()->back()->with('error', 'Tidak ada data hasil instrumen');
+            }
 
-            // Format tanggal kegiatan
-            $start_date = date('d F Y', strtotime($kegiatan->start_date));
-            $end_date = date('d F Y', strtotime($kegiatan->end_date));
+            // Tambahkan rekomendasi
+            foreach ($data as $item) {
+                $rekomendasiInfo = $this->getRekomendasiWithGap(
+                    $item->jenjang_jabatan,
+                    $item->level_jawaban,
+                    $item->sub_indikator_id,
+                    $item->tahap,
+                    $item->entity,
+                    $item->sub_indikator_code
+                );
 
-            // Tanggal terakhir aktif
-            $tanggalTerakhir = $detailJawaban->max('date_update')
-                ? date('d F Y H:i:s', strtotime($detailJawaban->max('date_update')))
-                : '-';
+                $item->rekomendasi_info = $rekomendasiInfo;
+            }
 
-            return view('ptk.detail-riwayat', [
-                'ptk' => $ptk,
-                'kegiatan' => $kegiatan,
-                'detailJawaban' => $detailJawaban,
-                'totalSubIndikator' => $totalSubIndikator,
-                'levelTertinggi' => $levelTertinggi,
-                'levelTerendah' => $levelTerendah,
-                'rataRataLevel' => $rataRataLevel,
-                'tanggalTerakhir' => $tanggalTerakhir,
-                'start_date' => $start_date,
-                'end_date' => $end_date,
-                'encode_kegiatan_id' => $encode_kegiatan_id,
-                'nip' => $nip
-            ]);
+            // Hitung total
+            $totalSkor = $data->sum('bobot');
+            $totalIndikator = $data->count();
+
+            // Generate PDF
+            if (class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('ptk.export-hasil-pdf', [
+                    'data' => $data,
+                    'ptk' => $ptk,
+                    'kegiatan' => $kegiatan,
+                    'totalSkor' => $totalSkor,
+                    'totalIndikator' => $totalIndikator,
+                    'tanggal' => now()->format('d F Y H:i:s')
+                ]);
+
+                return $pdf->download('hasil-instrumen-' . $ptk->nip . '-' . date('Ymd-His') . '.pdf');
+            } else {
+                return view('ptk.export-hasil-pdf', [
+                    'data' => $data,
+                    'ptk' => $ptk,
+                    'kegiatan' => $kegiatan,
+                    'totalSkor' => $totalSkor,
+                    'totalIndikator' => $totalIndikator,
+                    'tanggal' => now()->format('d F Y H:i:s')
+                ]);
+            }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+
+
+
 
 
 

@@ -234,3 +234,11 @@ Route::prefix('users')->name('users.')->group(function () {
     Route::delete('/delete/{user_id}', [ManagementUsersController::class, 'delete'])->name('delete');
     Route::put('/reset-password/{user_id}', [ManagementUsersController::class, 'resetPassword'])->name('reset-password');
 });
+
+
+
+
+
+
+Route::get('/ptk/export-hasil/{encode_kegiatan_id}/{nip}', [PtkController::class, 'exportHasilPdf'])
+    ->name('ptk.export-hasil');
