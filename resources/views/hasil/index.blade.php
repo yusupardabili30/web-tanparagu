@@ -4,6 +4,10 @@
     $tittle = $tittle ?? 'Hasil Instrumen PTK';
     $kegiatans = DB::table('kegiatan')->get();
 
+    // ✅ map kegiatan_id => kegiatan_name (biar cepat & gak query di loop)
+    $kegiatanMap = $kegiatans->pluck('kegiatan_name', 'kegiatan_id')->toArray();
+
+
     $levelNames = [
         2 => 'Penerapan',
         3 => 'Analisis',
@@ -485,6 +489,18 @@
         font-size: 12.5px;
         font-weight: 500;
     }
+    .ptk-kegiatan{
+        margin-top: 2px;
+        margin-bottom: 8px;
+        font-size: 20px;
+        color: var(--mm-muted);
+        font-weight: 800;
+        display:flex;
+        align-items:center;
+        gap: 6px;
+        word-break: break-word;
+        padding-left: 10px; 
+    }
 </style>
 
 <div class="container-fluid">
@@ -637,6 +653,12 @@
 
                         {{-- ✅ IDENTITAS SEKALI (JADI CARD PROFIL) --}}
                         <div class="ptk-head">
+                                    <div class="ptk-kegiatan">
+                                        <i class="ri-calendar-event-line"></i>
+                                        <span>
+                                            {{ $kegiatanMap[$first->kegiatan_id] ?? '-' }}
+                                        </span>
+                                    </div>
                             <div class="ptk-profile">
                                 <div class="ptk-avatar">
                                     <i class="ri-user-3-line"></i>
