@@ -208,9 +208,9 @@
                     </div>
 
                     <div class="filter-col">
-                        <label class="form-label">Bentuk Pendidikan</label>
+                        <label class="form-label">Jenjang Pendidikan</label>
                         <select class="form-select" name="bentuk_pendidikan" id="bentukPendidikanSelect">
-                            <option value="">Semua Bentuk</option>
+                            <option value="">Semua Jenjang</option>
                             @foreach($bentukPendidikanList as $bentuk)
                                 <option value="{{ $bentuk->bentuk_pendidikan }}"
                                     {{ request('bentuk_pendidikan') == $bentuk->bentuk_pendidikan ? 'selected' : '' }}>
@@ -324,11 +324,11 @@
 
                 <!-- Charts Row 2: Distribusi Berdasarkan PTK -->
                 <div class="row">
-                    <!-- Chart 3: Distribusi Bentuk Pendidikan -->
+                    <!-- Chart 3: Distribusi Jenjang Pendidikan -->
                     <div class="col-md-6">
                         <div class="chart-container">
                             <div class="chart-title">
-                                <i class="ri-school-line"></i> Distribusi Bentuk Pendidikan
+                                <i class="ri-school-line"></i> Distribusi Jenjang Pendidikan
                                 <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
                             </div>
                             <canvas id="bentukPendidikanChart" height="300"></canvas>
@@ -362,6 +362,37 @@
                 </div>
                 @endif
 
+
+
+
+               <!-- Ganti bagian Charts 6: Sub Indikator per Jenjang Jabatan dengan ini -->
+@if(!empty($analisisData['sub_indikator_per_jenjang']))
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="chart-container">
+            <div class="chart-title">
+                <i class="ri-bar-chart-grouped-line"></i> Distribusi PTK per Sub Indikator per Jenjang Jabatan
+                <span class="badge bg-info ms-2">Jumlah PTK per Jenjang</span>
+            </div>
+            
+            <div class="row" id="jenjangChartsContainer">
+                @foreach($analisisData['sub_indikator_per_jenjang'] as $jenjangChart)
+                <div class="col-md-6 mb-4">
+                    <div class="chart-card" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.05); height: 400px;">
+                        <h6 class="mb-3 text-center" style="color: #1a5bb8; font-weight: 600; font-size: 16px;">
+                            <i class="ri-user-star-line me-2"></i>{{ $jenjangChart['jenjang_jabatan'] }}
+                        </h6>
+                        <div class="chart-wrapper" style="height: 320px;">
+                            <canvas id="jenjangChart_{{ $loop->index }}" height="320"></canvas>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+@endif
                 <!-- Tabel Modus per Kota -->
                 @if(!empty($analisisData['modus_per_kota']))
                 <div class="row">
@@ -585,7 +616,7 @@ function updateAnalisisContent(data) {
     <div class="row">
         <div class="col-md-6">
             <div class="chart-container">
-                <div class="chart-title"><i class="ri-school-line"></i> Distribusi Bentuk Pendidikan <small class="text-muted">(PTK yang menjawab)</small></div>
+                <div class="chart-title"><i class="ri-school-line"></i> Distribusi Jenjang Pendidikan <small class="text-muted">(PTK yang menjawab)</small></div>
                 <canvas id="bentukPendidikanChart" height="300"></canvas>
             </div>
         </div>
@@ -608,6 +639,41 @@ function updateAnalisisContent(data) {
                         <span class="badge bg-info ms-2">Jumlah PTK</span>
                     </div>
                     <canvas id="allSubIndikatorsChart" height="400"></canvas>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // Tambahkan charts per jenjang jabatan jika ada
+    if (data.sub_indikator_per_jenjang?.length > 0) {
+        html += `
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="chart-container chart-container-large">
+                    <div class="chart-title">
+                        <i class="ri-bar-chart-grouped-line"></i> Distribusi PTK per Sub Indikator per Jenjang Jabatan
+                        <span class="badge bg-info ms-2">Jumlah PTK per Jenjang</span>
+                    </div>
+                    
+                    <div class="row" id="jenjangChartsContainer">`;
+        
+        data.sub_indikator_per_jenjang.forEach((jenjangData, index) => {
+            html += `
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="chart-card" style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,.05); height: 320px;">
+                                <h6 class="mb-3 text-center" style="color: #1a5bb8; font-weight: 600;">
+                                    <i class="ri-user-star-line me-2"></i>${jenjangData.jenjang_jabatan}
+                                </h6>
+                                <canvas 
+                                    id="jenjangChart_${index}" 
+                                    height="250">
+                                </canvas>
+                            </div>
+                        </div>`;
+        });
+        
+        html += `
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -648,8 +714,6 @@ function updateAnalisisContent(data) {
         <div class="row">
             <div class="col-12">
                 <div class="table-card">
-<div class="table-card">
-
                     <div class="chart-title">
                         <i class="ri-map-pin-line"></i> Modus Level per Kota <small class="text-muted">(Jumlah PTK)</small>
                     </div>
@@ -701,8 +765,7 @@ function updateAnalisisContent(data) {
         html += `
         <div class="row">
             <div class="col-12">
-             <div class="table-card">
-
+                <div class="table-card">
                     <div class="chart-title">
                         <i class="ri-progress-3-line"></i> Progress Pengisian per Kota
                     </div>
@@ -983,6 +1046,128 @@ function renderCharts(data) {
             }
         }
     }
+
+    /* ================= RENDER JENJANG CHARTS ================= */
+    renderJenjangCharts(data);
+}
+
+/* =====================================================
+   RENDER JENJANG CHARTS
+===================================================== */
+function renderJenjangCharts(data) {
+    console.log('Rendering jenjang charts:', data?.sub_indikator_per_jenjang);
+    
+    // Hapus container sebelumnya
+    const container = document.getElementById('jenjangChartsContainer');
+    if (!container || !data?.sub_indikator_per_jenjang) return;
+    
+    // Hancurkan chart sebelumnya
+    document.querySelectorAll('[id^="jenjangChart_"]').forEach(canvas => {
+        const chartId = canvas.id;
+        if (window[chartId]) {
+            try {
+                window[chartId].destroy();
+            } catch(e) {
+                console.log('Error destroying chart:', e);
+            }
+        }
+    });
+    
+    // Render chart untuk setiap jenjang
+    data.sub_indikator_per_jenjang.forEach((jenjangData, index) => {
+        const canvasId = `jenjangChart_${index}`;
+        const canvas = document.getElementById(canvasId);
+        
+        if (!canvas) {
+            console.log(`Canvas ${canvasId} tidak ditemukan`);
+            return;
+        }
+        
+        // Dapatkan context canvas
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.log(`Context tidak ditemukan untuk ${canvasId}`);
+            return;
+        }
+        
+        console.log(`Membuat chart untuk ${jenjangData.jenjang_jabatan}`, jenjangData);
+        
+        // Pastikan datasets ada dan valid
+        if (!jenjangData.datasets || !Array.isArray(jenjangData.datasets)) {
+            console.log(`Datasets tidak valid untuk ${jenjangData.jenjang_jabatan}`);
+            return;
+        }
+        
+        // Buat chart
+        window[canvasId] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: jenjangData.labels || [],
+                datasets: jenjangData.datasets.map(dataset => ({
+                    label: dataset.label || 'Unknown',
+                    data: dataset.data || [],
+                    backgroundColor: dataset.backgroundColor || '#17a2b8',
+                    borderColor: dataset.borderColor || '#17a2b8',
+                    borderWidth: dataset.borderWidth || 1
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            padding: 10,
+                            usePointStyle: true,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.raw} PTK`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 9
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            font: {
+                                size: 10
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Jumlah PTK',
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log(`Chart ${canvasId} berhasil dibuat`);
+    });
 }
 
 /* =====================================================
@@ -990,6 +1175,7 @@ function renderCharts(data) {
 ===================================================== */
 @if(isset($analisisData) && !isset($analisisData['error']))
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Initial load dengan data:', @json($analisisData));
     renderCharts(@json($analisisData));
 });
 @endif

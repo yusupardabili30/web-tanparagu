@@ -11,13 +11,14 @@ class AnalisisController extends Controller
     {
         $tittle = 'Analisis Hasil Instrumen';
 
-        // Ambil data untuk dropdown
+        // =========================
+        // DATA DROPDOWN
+        // =========================
         $kegiatans = DB::table('kegiatan')->get();
         $pangkatJabatans = DB::table('pangkat_jabatan')->get();
         $jenisPtkList = DB::table('jenis_ptk')->get();
         $kotas = DB::table('kota')->orderBy('nama_kota')->get();
 
-        // Ambil data untuk dropdown baru
         $bentukPendidikanList = DB::table('sekolah')
             ->select('bentuk_pendidikan')
             ->whereNotNull('bentuk_pendidikan')
@@ -32,55 +33,66 @@ class AnalisisController extends Controller
             ->orderBy('jenis_kelamin')
             ->get();
 
-        // Jika ada filter, ambil data analisis
-        if ($request->hasAny(['kegiatan_id', 'pangkat_jabatan_id', 'jenis_ptk_id', 'kota_id', 'bentuk_pendidikan', 'jenis_kelamin'])) {
+        // =========================
+        // DATA ANALISIS (DEFAULT NULL)
+        // =========================
+        $analisisData = null;
+
+        $pelatihan_req = DB::select('SELECT  ms_pelatihan.nama_pelatihan,
+                                    COUNT(ptk_pelatihan.ptk_pelatihan_id) as qty
+                                    FROM `ptk_pelatihan` 
+                                    LEFT JOIN ms_pelatihan ON ptk_pelatihan.ms_pelatihan_id=ms_pelatihan.ms_pelatihan_id
+                                    WHERE ptk_pelatihan.kegiatan_id=?
+                                    GROUP BY ms_pelatihan.nama_pelatihan, ptk_pelatihan.kegiatan_id;', [9]);
+
+        // return $request;
+
+
+        // =========================
+        // JIKA ADA FILTER
+        // =========================
+        if ($request->hasAny([
+            'kegiatan_id',
+            'pangkat_jabatan_id',
+            'jenis_ptk_id',
+            'kota_id',
+            'bentuk_pendidikan',
+            'jenis_kelamin'
+        ])) {
             try {
                 $analisisData = $this->getAnalisisData($request);
 
-                // Jika request AJAX, kembalikan JSON
+                // Jika AJAX → JSON
                 if ($request->ajax()) {
                     return response()->json($analisisData);
                 }
-
-                // Jika bukan AJAX, parse data untuk view
-                return view('analisis.index', compact(
-                    'tittle',
-                    'kegiatans',
-                    'pangkatJabatans',
-                    'jenisPtkList',
-                    'kotas',
-                    'bentukPendidikanList',
-                    'jenisKelaminList',
-                    'analisisData'
-                ));
             } catch (\Exception $e) {
-                // Jika request AJAX, kembalikan error
                 if ($request->ajax()) {
-                    return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+                    return response()->json([
+                        'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+                    ], 500);
                 }
 
-                // Jika bukan AJAX, redirect dengan error
-                return redirect()->route('analisis.index')
+                return redirect()
+                    ->route('analisis.index')
                     ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
             }
         }
 
-        // Jika request AJAX tapi tanpa filter
-        if ($request->ajax()) {
-            return response()->json(['error' => 'Silakan pilih filter terlebih dahulu']);
-        }
+        return view('analisis.index', [
+            'tittle' => $tittle,
 
-        // Tampilkan view tanpa data
-        return view('analisis.index', compact(
-            'tittle',
-            'kegiatans',
-            'pangkatJabatans',
-            'jenisPtkList',
-            'kotas',
-            'bentukPendidikanList',
-            'jenisKelaminList'
-        ));
+            // dropdown
+            'kegiatans' => $kegiatans,
+            'pangkatJabatans' => $pangkatJabatans,
+            'jenisPtkList' => $jenisPtkList,
+            'kotas' => $kotas,
+            'bentukPendidikanList' => $bentukPendidikanList,
+            'jenisKelaminList' => $jenisKelaminList,
+            'data' => $analisisData
+        ]);
     }
+
 
     private function getAnalisisData(Request $request)
     {
@@ -343,7 +355,7 @@ class AnalisisController extends Controller
         $modusKotaData = $modusKotaQuery->get();
 
         $modusPerKota = $this->getModusPerKota($modusKotaData, $semuaSubIndikator, $totalJawabanPerKota);
-
+        $subIndikatorPerJenjang = $this->getSubIndikatorPerJenjang($request, $semuaSubIndikator);
         // ========================================================
         // DATA LAINNYA
         // ========================================================
@@ -358,6 +370,7 @@ class AnalisisController extends Controller
             'bentuk_pendidikan_distribution' => $bentukPendidikanDistribution,
             'jenis_kelamin_distribution' => $jenisKelaminDistribution,
             'all_sub_indikators_chart' => $allSubIndikatorsChart,
+            'sub_indikator_per_jenjang' => $subIndikatorPerJenjang, // TAMBAH INI
             'progress_kota' => $progressKota,
             'modus_per_kota' => $modusPerKota
         ];
@@ -564,7 +577,7 @@ class AnalisisController extends Controller
             $kotaModus = [
                 'nama_kota' => $namaKota ?: 'Tidak Diketahui',
                 'sub_indikator_modus' => [],
-                'total_jawaban' => $totalJawabanPerKota[$namaKota] ?? 0 // Gunakan total dari query khusus
+                'total_jawaban' => $totalJawabanPerKota[$namaKota] ?? 0
             ];
 
             foreach ($subIndikators as $subIndikatorId => $levels) {
@@ -591,13 +604,16 @@ class AnalisisController extends Controller
                 continue;
             }
 
-            // Urutkan berdasarkan jumlah jawaban terbanyak
+            // **PERBAIKAN DI SINI: HAPUS BATASAN 5 SUB INDIKATOR**
+            // Sebelumnya: array_slice($kotaModus['sub_indikator_modus'], 0, 5);
+            // Sekarang: tampilkan semua sub indikator yang ada
+
+            // Urutkan berdasarkan jumlah jawaban terbanyak (opsional)
             usort($kotaModus['sub_indikator_modus'], function ($a, $b) {
                 return $b['jumlah_jawaban'] - $a['jumlah_jawaban'];
             });
 
-            // Batasi hanya 5 sub indikator pertama
-            $kotaModus['sub_indikator_modus'] = array_slice($kotaModus['sub_indikator_modus'], 0, 5);
+            // **TIDAK ADA LAGI BATASAN JUMLAH SUB INDIKATOR**
             $result[] = $kotaModus;
         }
 
@@ -605,6 +621,126 @@ class AnalisisController extends Controller
         usort($result, function ($a, $b) {
             return $b['total_jawaban'] - $a['total_jawaban'];
         });
+
+        return $result;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private function getSubIndikatorPerJenjang(Request $request, $semuaSubIndikator)
+    {
+        // Query untuk data per jenjang jabatan
+        $perJenjangQuery = DB::table('ptk_jawaban')
+            ->select(
+                'ptk_jawaban.sub_indikator_id',
+                'ptk_jawaban.sub_indikator_code',
+                'ptk_jawaban.level',
+                'pangkat_jabatan.jenjang_jabatan',
+                DB::raw('COUNT(DISTINCT ptk_jawaban.ptk_id) as ptk_count')
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            })
+            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            })
+            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            })
+            ->when($request->filled('kota_id'), function ($q) use ($request) {
+                $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            })
+            ->where('ptk_jawaban.level', '>=', 2)
+            ->whereNotNull('pangkat_jabatan.jenjang_jabatan')
+            ->groupBy('pangkat_jabatan.jenjang_jabatan', 'ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'ptk_jawaban.level')
+            ->orderBy('pangkat_jabatan.jenjang_jabatan')
+            ->orderBy('ptk_jawaban.sub_indikator_code');
+
+        $dataPerJenjang = $perJenjangQuery->get();
+
+        if ($dataPerJenjang->isEmpty() || $semuaSubIndikator->isEmpty()) {
+            return [];
+        }
+
+        // Ambil semua jenjang jabatan yang ada
+        $jenjangList = $dataPerJenjang->pluck('jenjang_jabatan')->unique()->values();
+
+        // Batasi sub indikator untuk readability
+        $limitedSubIndikators = $semuaSubIndikator->take(10);
+
+        $result = [];
+
+        foreach ($jenjangList as $jenjang) {
+            $jenjangData = [
+                'jenjang_jabatan' => $jenjang,
+                'labels' => $limitedSubIndikators->pluck('sub_indikator_code')->toArray(),
+                'datasets' => []
+            ];
+
+            // Level yang akan ditampilkan
+            $levels = [2, 3, 4, 5];
+            $levelColors = [
+                2 => '#17a2b8',
+                3 => '#007bff',
+                4 => '#ffc107',
+                5 => '#28a745'
+            ];
+            $levelNames = [
+                2 => 'Level 2',
+                3 => 'Level 3',
+                4 => 'Level 4',
+                5 => 'Level 5'
+            ];
+
+            // Buat dataset untuk setiap level
+            foreach ($levels as $level) {
+                $dataPerLevel = [];
+
+                foreach ($limitedSubIndikators as $subIndikator) {
+                    // Cari data untuk jenjang, sub indikator, dan level tertentu
+                    $data = $dataPerJenjang
+                        ->where('jenjang_jabatan', $jenjang)
+                        ->where('sub_indikator_id', $subIndikator->sub_indikator_id)
+                        ->where('level', $level)
+                        ->first();
+
+                    $dataPerLevel[] = $data ? $data->ptk_count : 0;
+                }
+
+                $jenjangData['datasets'][] = [
+                    'label' => $levelNames[$level],
+                    'data' => $dataPerLevel,
+                    'backgroundColor' => $levelColors[$level],
+                    'borderColor' => $levelColors[$level],
+                    'borderWidth' => 1
+                ];
+            }
+
+            // Hanya tambahkan jika ada data
+            if (array_sum(array_merge(...array_column($jenjangData['datasets'], 'data'))) > 0) {
+                $result[] = $jenjangData;
+            }
+        }
 
         return $result;
     }
