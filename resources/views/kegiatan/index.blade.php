@@ -358,6 +358,28 @@
         .url-wrap{ max-width: 260px; }
         .url-wrap a{ max-width: 180px; }
     }
+        /* ===== FIX DROPDOWN ACTION TABLE ===== */
+.table-card{
+    overflow: visible !important;
+}
+
+.table-scroll{
+    overflow-x: auto;
+    overflow-y: visible !important;
+}
+
+/* pastiin td & tr ga motong dropdown */
+#ticketTable td,
+#ticketTable tr{
+    overflow: visible !important;
+    position: relative;
+}
+
+/* dropdown di atas segalanya */
+.dropdown-menu{
+    z-index: 9999 !important;
+}
+
 </style>
 
 <div class="container-fluid">
