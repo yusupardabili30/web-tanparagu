@@ -29,7 +29,7 @@
                         <input type="hidden" name="ptk_id" value="{{ $ptk->ptk_id }}">
                         <input type="hidden" name="kegiatan_id" value="{{ $kegiatan_id }}">
 
-                        <!-- INFO PTK -->
+                        <!-- INFO PTK DAN ENTITY -->
                         <div class="alert alert-info mb-4" style="border-radius: 10px;">
                             <div class="d-flex align-items-center">
                                 <i class="ri-user-line me-3" style="font-size: 24px;"></i>
@@ -38,17 +38,24 @@
                                     <p class="mb-0">
                                         <strong>Nama:</strong> {{ $ptk->nama ?? 'Tidak ditemukan' }} | 
                                         <strong>NIP:</strong> {{ $ptk->nip ?? 'Tidak ditemukan' }} | 
-                                        <strong>Kegiatan:</strong> {{ $kegiatan->kegiatan_name ?? 'Tidak ditemukan' }}
+                                        <strong>Kegiatan:</strong> {{ $kegiatan->kegiatan_name ?? 'Tidak ditemukan' }} | 
+                                        <strong>Entity:</strong> {{ $kegiatan->entity ?? 'Tidak ditemukan' }}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- PILIHAN PELATIHAN DARI DAFTAR -->
+                        @if($masterPelatihan->isNotEmpty())
+                        <!-- PILIHAN PELATIHAN DARI DAFTAR BERDASARKAN ENTITY -->
                         <div class="mb-4">
                             <label class="form-label" style="font-weight:700; color:#1f2937;">
                                 Pilih pelatihan yang diinginkan (boleh lebih dari satu):
                             </label>
+                            
+                            {{-- <div class="alert alert-primary mb-3" style="border-radius:10px;">
+                                <i class="ri-information-line me-2"></i>
+                                Menampilkan pelatihan untuk entity: <strong>{{ $kegiatan->entity ?? 'Semua' }}</strong>
+                            </div> --}}
 
                             <div class="mt-2" style="display:flex; flex-direction:column; gap:10px;">
                                 @foreach($masterPelatihan as $pelatihan)
@@ -61,21 +68,34 @@
                                            id="pelatihan_{{ $pelatihan->ms_pelatihan_id }}"
                                            {{ in_array($pelatihan->ms_pelatihan_id, $selectedPelatihanIds) ? 'checked' : '' }}>
                                     <span style="font-weight:600; flex:1;">{{ $pelatihan->nama_pelatihan }}</span>
+                                    @if($pelatihan->entity)
+                                    {{-- <span class="badge bg-secondary" style="font-size:11px;">
+                                        {{ $pelatihan->entity }}
+                                    </span> --}}
+                                    @endif
                                 </label>
                                 @endforeach
-
-                                @if($masterPelatihan->isEmpty())
-                                <div class="alert alert-warning">
-                                    <i class="ri-alert-line me-2"></i>
-                                    Tidak ada data pelatihan tersedia.
-                                </div>
-                                @endif
                             </div>
 
                             <div class="form-text mt-2" style="color:#6b7280;">
                                 Centang minimal 1 pilihan.
                             </div>
                         </div>
+                        @else
+                        <!-- JIKA TIDAK ADA PELATIHAN UNTUK ENTITY INI -->
+                        <div class="alert alert-warning mb-4" style="border-radius:12px;">
+                            <div class="d-flex align-items-center">
+                                <i class="ri-alert-line me-3" style="font-size:24px;"></i>
+                                <div>
+                                    <h6 class="mb-1" style="font-weight:700;">Pelatihan Tidak Tersedia</h6>
+                                    <p class="mb-0">
+                                        Belum ada daftar pelatihan untuk entity <strong>{{ $kegiatan->entity ?? 'ini' }}</strong>. 
+                                        Silakan gunakan kolom "Pelatihan lainnya" di bawah.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
 
                         <!-- FREE TEXT: PELATIHAN LAINNYA -->
                         <div class="mb-3">
@@ -86,7 +106,7 @@
                                       placeholder="Tulis pelatihan lain yang Anda inginkan..."
                                       style="border-radius:12px;">{{ $pelatihanLainnya }}</textarea>
                             <div class="form-text mt-2" style="color:#6b7280;">
-                                Opsional. Isi jika pilihan di atas belum sesuai.
+                                Opsional. Isi jika pilihan di atas belum sesuai atau tidak tersedia.
                             </div>
                         </div>
 

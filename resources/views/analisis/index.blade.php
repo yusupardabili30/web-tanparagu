@@ -3,7 +3,8 @@
 @php
     $tittle = 'Analisis Hasil Instrumen';
     
-    $levelNames = [
+     $levelNames = [
+        1 => 'Gagal',
         2 => 'Penerapan',
         3 => 'Analisis', 
         4 => 'Evaluasi',
@@ -11,6 +12,7 @@
     ];
     
     $levelColors = [
+        1 => '#17a212',
         2 => '#17a2b8',
         3 => '#007bff',
         4 => '#ffc107',
@@ -904,19 +906,19 @@ canvas {
                         </select>
                     </div>
 
-                    <div class="filter-col">
-                        <label class="form-label">Jenjang Pendidikan</label>
-                        <select class="form-select" name="bentuk_pendidikan" id="bentukPendidikanSelect">
-                            <option value="">Semua Jenjang</option>
-                            @foreach($bentukPendidikanList as $bentuk)
-                                <option value="{{ $bentuk->bentuk_pendidikan }}"
-                                    {{ request('bentuk_pendidikan') == $bentuk->bentuk_pendidikan ? 'selected' : '' }}>
-                                    {{ $bentuk->bentuk_pendidikan }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
+                   <!-- Tambahkan di bagian filter setelah kota_id -->
+<div class="filter-col">
+    <label class="form-label">Jenjang Pendidikan</label>
+    <select class="form-select" name="jenjang_pendidikan_id" id="jenjangPendidikanSelect">
+        <option value="">Semua Jenjang</option>
+        @foreach($jenjangPendidikanList as $jenjang)
+            <option value="{{ $jenjang->jenjang_pendidikan_id }}"
+                {{ request('jenjang_pendidikan_id') == $jenjang->jenjang_pendidikan_id ? 'selected' : '' }}>
+                {{ $jenjang->jenjang_pendidikan }}
+            </option>
+        @endforeach
+    </select>
+</div>
                     <div class="filter-col">
                         <label class="form-label">Jenis Kelamin</label>
                         <select class="form-select" name="jenis_kelamin" id="jenisKelaminSelect">
@@ -1729,38 +1731,39 @@ function renderCharts(data) {
         }
     });
 
-    /* ================= LEVEL DISTRIBUTION (BERDASARKAN JAWABAN) ================= */
-    const levelCtx = document.getElementById('levelDistributionChart')?.getContext('2d');
-    if (levelCtx) {
-        const src = Array.isArray(data.level_distribution) ? data.level_distribution : [];
-        const get = l => src.find(x => x.level === l)?.count ?? 0;
+ /* ================= LEVEL DISTRIBUTION (INCLUDE LEVEL 1) ================= */
+const levelCtx = document.getElementById('levelDistributionChart')?.getContext('2d');
+if (levelCtx) {
+    const src = Array.isArray(data.level_distribution) ? data.level_distribution : [];
+    const get = l => src.find(x => x.level === l)?.count ?? 0;
 
-        levelDistributionChart = new Chart(levelCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Level 2','Level 3','Level 4','Level 5'],
-                datasets: [{
-                    label: 'Jumlah Jawaban',
-                    data: [get(2),get(3),get(4),get(5)],
-                    backgroundColor: ['#17a2b8','#007bff','#ffc107','#28a745'],
-                    borderWidth: 1
-                }]
+    levelDistributionChart = new Chart(levelCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Level 1','Level 2','Level 3','Level 4','Level 5'],
+            datasets: [{
+                label: 'Jumlah Jawaban',
+                data: [get(1),get(2),get(3),get(4),get(5)],
+                backgroundColor: ['#17a212','#17a2b8','#007bff','#ffc107','#28a745'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: { 
-                    y: { 
-                        beginAtZero: true,
-                        ticks: { stepSize: 1 }
-                    }
+            scales: { 
+                y: { 
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
                 }
             }
-        });
-    }
+        }
+    });
+}
+
 
     /* ================= JENJANG DISTRIBUTION (BERDASARKAN PTK) ================= */
     const jenjangCtx = document.getElementById('jenjangDistributionChart')?.getContext('2d');
@@ -1791,35 +1794,34 @@ function renderCharts(data) {
         });
     }
 
-    /* ================= BENTUK PENDIDIKAN DISTRIBUTION (BERDASARKAN PTK) ================= */
-    const bentukPendidikanCtx = document.getElementById('bentukPendidikanChart')?.getContext('2d');
-    if (bentukPendidikanCtx) {
-        const src = data.bentuk_pendidikan_distribution?.length
-            ? data.bentuk_pendidikan_distribution
-            : [{ bentuk_pendidikan:'Tidak Ada Data', count:0 }];
+ /* ================= JENJANG PENDIDIKAN DISTRIBUTION ================= */
+const jenjangPendidikanCtx = document.getElementById('jenjangPendidikanChart')?.getContext('2d');
+if (jenjangPendidikanCtx) {
+    const src = data.jenjang_pendidikan_distribution?.length
+        ? data.jenjang_pendidikan_distribution
+        : [{ jenjang_pendidikan:'Tidak Ada Data', count:0 }];
 
-        bentukPendidikanChart = new Chart(bentukPendidikanCtx, {
-            type: 'pie',
-            data: {
-                labels: src.map(x => x.bentuk_pendidikan),
-                datasets: [{
-                    data: src.map(x => x.count),
-                    backgroundColor: ['#36a2eb','#ff6384','#4bc0c0','#ff9f40','#9966ff','#ffcd56']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { 
-                        position: 'bottom',
-                        labels: { padding: 20 }
-                    }
+    jenjangPendidikanChart = new Chart(jenjangPendidikanCtx, {
+        type: 'pie',
+        data: {
+            labels: src.map(x => x.jenjang_pendidikan),
+            datasets: [{
+                data: src.map(x => x.count),
+                backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { 
+                    position: 'bottom',
+                    labels: { padding: 20 }
                 }
             }
-        });
-    }
-
+        }
+    });
+}
     /* ================= JENIS KELAMIN DISTRIBUTION (BERDASARKAN PTK) ================= */
     const jenisKelaminCtx = document.getElementById('jenisKelaminChart')?.getContext('2d');
     if (jenisKelaminCtx) {

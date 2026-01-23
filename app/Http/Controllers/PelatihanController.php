@@ -24,8 +24,10 @@ class PelatihanController extends Controller
             ])->with('error', 'Data tidak ditemukan');
         }
 
-        // Ambil data dari tabel ms_pelatihan
-        $masterPelatihan = MsPelatihan::orderBy('nama_pelatihan')->get();
+        // Ambil data dari tabel ms_pelatihan berdasarkan entity kegiatan
+        $masterPelatihan = MsPelatihan::byEntity($kegiatan->entity)
+            ->orderBy('nama_pelatihan')
+            ->get();
 
         // Ambil data pelatihan yang sudah dipilih sebelumnya
         $pelatihanTerpilih = PtkPelatihan::where('ptk_id', $ptk->ptk_id)
