@@ -831,23 +831,11 @@
                                 </div>
                             </div>
 
-                            <!-- Kota -->
-                            <div class="col-md-6 mb-3">
-                                <div class="mm-float">
-                                    <select name="kota_id" id="kotaSelect" class="form-control" required>
-                                        <option value="" selected hidden></option>
-                                        @foreach($kotas as $kota)
-                                            <option value="{{ $kota->kota_id }}">{{ $kota->nama_kota }}</option>
-                                        @endforeach
-                                    </select>
-                                    <label class="mm-label">Kota *</label>
-                                </div>
-                            </div>
+                        
 
                             <!-- SEKOLAH / INSTANSI -->
-                            <div class="col-md-6 mb-3">
-
-                                <div class="mb-2">
+                              <div class="col-12 mb-3">
+                                <div class="mm-float">
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio"
                                             name="sekolah_option" id="optionSekolah"
@@ -902,6 +890,30 @@
                                 </div>
                             </div>
 
+                                <!-- Kota -->
+                <div class="col-md-6 mb-3">
+                                <div class="mm-float">
+                                    <select name="kota_id" id="kotaSelect" class="form-control" required>
+                                        <option value="" selected hidden></option>
+                                        @foreach($kotas as $kota)
+                                            <option value="{{ $kota->kota_id }}">{{ $kota->nama_kota }}</option>
+                                        @endforeach
+                                    </select>
+                                    <label class="mm-label">Kota *</label>
+                                </div>
+                            </div>
+  <!-- jenjang -->
+                                                       <div class="col-md-6 mb-3">
+                                <div class="mm-float">
+                                    <select name="jenjang_pendidikan_id" id="jenjangSelect"class="form-control" required>
+                                        <option value="" selected hidden></option>
+                                        @foreach($jenjangs as $jenjang)
+                                            <option value="{{ $jenjang->jenjang_pendidikan_id }}">{{ $jenjang->jenjang_pendidikan }}</option>
+                                        @endforeach
+                                    </select>
+                                    <label class="mm-label">Jenjang Satuan Pendidikan *</label>
+                                </div>
+                            </div>
                             <!-- Alamat Kantor -->
                             <div class="col-12 mb-3">
                                 <div class="mm-float">
@@ -1172,7 +1184,7 @@
 
             loadingIndicator.classList.remove('d-none');
             searchResults.innerHTML = '';
-            fetch(`/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
+            fetch(`/tanparagu/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json'
@@ -1312,6 +1324,7 @@
                                 document.getElementById('instansiInput').value = '';
                                 document.getElementById('sekolahInfo').classList.add('d-none');
                                 document.getElementById('kotaSelect').value = '';
+                                document.getElementById('jenjangSelect').value = '';
 
                                 document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
@@ -1362,6 +1375,13 @@
                 isValid = false;
                 errorMessages.push('Pilih kota');
                 kotaSelect.classList.add('is-invalid');
+            }
+
+             const jenjangSelect = document.getElementById('jenjangSelect');
+            if (!jenjangSelect.value) {
+                isValid = false;
+                errorMessages.push('Pilih Jenjang Pendidikan');
+                jenjangSelect.classList.add('is-invalid');
             }
 
             // TAMBAHKAN VALIDASI JENIS PTK

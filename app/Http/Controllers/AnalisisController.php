@@ -38,12 +38,12 @@ class AnalisisController extends Controller
         // =========================
         $analisisData = null;
 
-        $pelatihan_req = DB::select('SELECT  ms_pelatihan.nama_pelatihan,
-                                    COUNT(ptk_pelatihan.ptk_pelatihan_id) as qty
-                                    FROM `ptk_pelatihan` 
-                                    LEFT JOIN ms_pelatihan ON ptk_pelatihan.ms_pelatihan_id=ms_pelatihan.ms_pelatihan_id
-                                    WHERE ptk_pelatihan.kegiatan_id=?
-                                    GROUP BY ms_pelatihan.nama_pelatihan, ptk_pelatihan.kegiatan_id;', [9]);
+        // $pelatihan_req = DB::select('SELECT  ms_pelatihan.nama_pelatihan,
+        //                             COUNT(ptk_pelatihan.ptk_pelatihan_id) as qty
+        //                             FROM `ptk_pelatihan` 
+        //                             LEFT JOIN ms_pelatihan ON ptk_pelatihan.ms_pelatihan_id=ms_pelatihan.ms_pelatihan_id
+        //                             WHERE ptk_pelatihan.kegiatan_id=?
+        //                             GROUP BY ms_pelatihan.nama_pelatihan, ptk_pelatihan.kegiatan_id;', [9]);
 
         // return $request;
 
@@ -363,6 +363,9 @@ class AnalisisController extends Controller
         // Progress pengisian per kota
         $progressKota = $this->getProgressKota($request);
 
+
+        // Data pelatihan PTK
+        $pelatihanData = $this->getPelatihanData($request);
         return [
             'statistik' => $statistik,
             'level_distribution' => $levelDistribution,
@@ -372,7 +375,8 @@ class AnalisisController extends Controller
             'all_sub_indikators_chart' => $allSubIndikatorsChart,
             'sub_indikator_per_jenjang' => $subIndikatorPerJenjang, // TAMBAH INI
             'progress_kota' => $progressKota,
-            'modus_per_kota' => $modusPerKota
+            'modus_per_kota' => $modusPerKota,
+            'pelatihan_data' => $pelatihanData,
         ];
     }
 
@@ -472,14 +476,16 @@ class AnalisisController extends Controller
         ];
 
         // Level yang akan ditampilkan
-        $levels = [2, 3, 4, 5];
+        $levels = [1, 2, 3, 4, 5];
         $levelColors = [
+            1 => '#17a212',
             2 => '#17a2b8',
             3 => '#007bff',
             4 => '#ffc107',
             5 => '#28a745'
         ];
         $levelNames = [
+            1 => 'Level 1',
             2 => 'Level 2',
             3 => 'Level 3',
             4 => 'Level 4',
@@ -698,14 +704,16 @@ class AnalisisController extends Controller
             ];
 
             // Level yang akan ditampilkan
-            $levels = [2, 3, 4, 5];
+            $levels = [1, 2, 3, 4, 5];
             $levelColors = [
+                1 => '#17a212',
                 2 => '#17a2b8',
                 3 => '#007bff',
                 4 => '#ffc107',
                 5 => '#28a745'
             ];
             $levelNames = [
+                1 => 'Level 1',
                 2 => 'Level 2',
                 3 => 'Level 3',
                 4 => 'Level 4',
@@ -743,5 +751,112 @@ class AnalisisController extends Controller
         }
 
         return $result;
+    }
+
+
+
+
+
+
+
+
+
+
+    private function getPelatihanData(Request $request)
+    {
+        // Query untuk pelatihan dari ms_pelatihan
+        $pelatihanFromMaster = DB::table('ptk_pelatihan')
+            ->select(
+                'ms_pelatihan.nama_pelatihan',
+                DB::raw('COUNT(ptk_pelatihan.ptk_pelatihan_id) as jumlah_ptk'),
+                DB::raw("'master' as tipe")
+            )
+            ->leftJoin('ms_pelatihan', 'ptk_pelatihan.ms_pelatihan_id', '=', 'ms_pelatihan.ms_pelatihan_id')
+            ->leftJoin('ptk', 'ptk_pelatihan.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                $q->where('ptk_pelatihan.kegiatan_id', $request->kegiatan_id);
+            })
+            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            })
+            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            })
+            ->when($request->filled('kota_id'), function ($q) use ($request) {
+                $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            })
+            ->whereNotNull('ms_pelatihan.nama_pelatihan')
+            ->groupBy('ms_pelatihan.nama_pelatihan');
+
+        // Query untuk pelatihan lainnya (manual input)
+        $pelatihanLainnya = DB::table('ptk_pelatihan')
+            ->select(
+                DB::raw('TRIM(pelatihan_lainnya) as nama_pelatihan'),
+                DB::raw('COUNT(ptk_pelatihan.ptk_pelatihan_id) as jumlah_ptk'),
+                DB::raw("'manual' as tipe")
+            )
+            ->leftJoin('ptk', 'ptk_pelatihan.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                $q->where('ptk_pelatihan.kegiatan_id', $request->kegiatan_id);
+            })
+            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            })
+            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            })
+            ->when($request->filled('kota_id'), function ($q) use ($request) {
+                $q->where('ptk.kota_id', $request->kota_id);
+            })
+            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            })
+            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            })
+            ->whereNotNull('pelatihan_lainnya')
+            ->where('pelatihan_lainnya', '!=', '')
+            ->groupBy(DB::raw('TRIM(pelatihan_lainnya)'))
+            ->union($pelatihanFromMaster);
+
+        // Eksekusi query gabungan
+        $data = DB::query()->fromSub($pelatihanLainnya, 'combined')
+            ->select('nama_pelatihan', 'jumlah_ptk', 'tipe')
+            ->orderByDesc('jumlah_ptk')
+            ->limit(15)
+            ->get();
+
+        // Gabungkan data yang sama (jika ada duplikat antara master dan manual)
+        $groupedData = collect();
+
+        foreach ($data as $item) {
+            $nama = trim($item->nama_pelatihan);
+            $existing = $groupedData->firstWhere('nama_pelatihan', $nama);
+
+            if ($existing) {
+                // Jika sudah ada, tambahkan jumlahnya
+                $existing->jumlah_ptk += $item->jumlah_ptk;
+            } else {
+                // Jika belum ada, tambahkan baru
+                $groupedData->push((object)[
+                    'nama_pelatihan' => $nama,
+                    'jumlah_ptk' => $item->jumlah_ptk,
+                    'tipe' => $item->tipe
+                ]);
+            }
+        }
+
+        // Urutkan kembali berdasarkan jumlah PTK
+        $sortedData = $groupedData->sortByDesc('jumlah_ptk')->values();
+
+        return $sortedData;
     }
 }

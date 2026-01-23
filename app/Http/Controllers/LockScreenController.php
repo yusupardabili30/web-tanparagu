@@ -9,6 +9,7 @@ use App\Models\Kota;
 use App\Models\JenisPtk; // TAMBAHKAN INI
 use App\Models\PangkatGolongan; // TAMBAHKAN INI
 use App\Models\Agama;
+use App\Models\JenjangPendidikan;
 use App\Models\Sekolah;
 use Illuminate\Http\Request;
 use Vinkla\Hashids\Facades\Hashids;
@@ -51,6 +52,7 @@ class LockScreenController extends Controller
 
         // Ambil 10 sekolah pertama untuk inisialisasi
         $sekolahs = Sekolah::orderBy('nama_sekolah')->limit(100)->get();
+        $jenjangs = JenjangPendidikan::get();
         // // AMBIL DATA AGAMA DARI DATABASE
         // $agamas = Agama::orderBy('nama_agama')->get();
         // GANTI DENGAN INI: Urutkan Islam pertama, sisanya alfabet
@@ -65,7 +67,8 @@ class LockScreenController extends Controller
             'kotas' => $kotas,
             'sekolahs' => $sekolahs,
             'jenisPtk' => $jenisPtk, // TAMBAHKAN INI
-            'pangkatGolongans' => $pangkatGolongans, // TAMBAHKAN INI
+            'pangkatGolongans' => $pangkatGolongans,
+            'jenjangs' => $jenjangs,  // TAMBAHKAN INI
             'agamas' => $agamas
         ]);
     }
@@ -80,10 +83,16 @@ class LockScreenController extends Controller
 
         $kegiatan_id = $request->kegiatan_id;
 
+        $ptk = Ptk::where('nip', $request->nip)->first();
+
         // Cari kegiatan yang aktif
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)
             ->where('status', 'Active')
             ->first();
+
+
+
+
 
         if (!$kegiatan) {
             return response()->json([
@@ -112,6 +121,26 @@ class LockScreenController extends Controller
                 'token' => $request->token
             ]);
         }
+
+        // VALIDASI: Cek apakah jenis_ptk_id PTK sesuai dengan entity kegiatan
+        if ($ptk->jenis_ptk_id && $kegiatan->entity) {
+            $jenisPtk = JenisPtk::find($ptk->jenis_ptk_id);
+
+            // PERBAIKAN: Validasi harus SAMA, bukan BEDA
+            if ($jenisPtk && $jenisPtk->jenis_ptk !== $kegiatan->entity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Maaf, Anda tidak dapat mengikuti kegiatan ini. Jenis PTK Anda (' . $jenisPtk->jenis_ptk . ') tidak sesuai dengan kategori kegiatan (' . $kegiatan->entity . ').'
+                ]);
+            }
+        } else {
+            // Jika jenis_ptk_id tidak ada di PTK
+            return response()->json([
+                'success' => false,
+                'message' => 'Data PTK tidak lengkap. Silakan hubungi administrator.'
+            ]);
+        }
+
 
         // ENCODE kegiatan_id untuk URL PTK
         $encoded_kegiatan_id = Hashids::encode($kegiatan_id);
@@ -150,7 +179,8 @@ class LockScreenController extends Controller
             'instansi' => 'nullable|max:100',
             'alamat_kantor' => 'nullable|max:200',
             'no_rekening' => 'nullable|max:45',
-            'kegiatan_id' => 'required|integer', // kegiatan_id asli
+            'kegiatan_id' => 'required|integer',
+            'jenjang_pendidikan_id' => 'nullable|exists:jenjang_pendidikan,jenjang_pendidikan_id', // kegiatan_id asli
             'token' => 'required'
         ]);
 
@@ -198,6 +228,7 @@ class LockScreenController extends Controller
                 'alamat_rumah' => $request->alamat_rumah,
                 'kota_id' => $request->kota_id,
                 'sekolah_id' => $request->sekolah_id,
+                'jenjang_pendidikan_id' => $request->jenjang_pendidikan_id,
                 'instansi' => $request->instansi,
                 'alamat_kantor' => $request->alamat_kantor,
                 'no_rekening' => $request->no_rekening,

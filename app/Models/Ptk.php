@@ -34,6 +34,7 @@ class Ptk extends Model
         'sekolah_id',
         'alamat_kantor',
         'alamat_kantor_kota',
+        'jenjang_pendidikan_id',
         'no_rekening',
         'jenis_ptk_id', // TAMBAHKAN INI
         'pangkat_golongan_id', // TAMBAHKAN INI
