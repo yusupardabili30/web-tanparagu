@@ -2,33 +2,49 @@
 @section('mycontent')
 @php
     $tittle = 'Analisis Hasil Instrumen';
-    
+
     $levelNames = [
         2 => 'Penerapan',
-        3 => 'Analisis', 
+        3 => 'Analisis',
         4 => 'Evaluasi',
         5 => 'Pembimbingan'
     ];
-    
+
     $levelColors = [
         2 => '#17a2b8',
         3 => '#007bff',
         4 => '#ffc107',
         5 => '#28a745'
     ];
-    
+
     $jenjangColors = [
         'Pertama' => '#ff6b6b',
-        'Muda' => '#4ecdc4', 
+        'Muda' => '#4ecdc4',
         'Madya' => '#45b7d1',
         'Utama' => '#96ceb4'
     ];
 @endphp
 
 <style>
-   /* =====================================================
+/* =====================================================
    ANALISIS LAYOUT STYLES - FULL CSS
 ===================================================== */
+
+:root{
+    --ink:#1f2937;
+    --muted:#6b7280;
+    --line:#e5e7eb;
+
+    /* PRIMARY BLUE (samain vibe kegiatan) */
+    --blue:#1a5bb8;
+
+    --soft:#f8fafc;
+    --success:#16a34a;
+    --danger:#dc2626;
+    --warning:#f59e0b;
+}
+
+.page-title-box{ padding: 6px 0 14px 0; }
 
 /* Base Container & Global Styles */
 .analisis-wrap {
@@ -53,56 +69,115 @@
     z-index: 0;
 }
 
-/* Header Section */
-.analisis-head {
-    background: linear-gradient(135deg, #1a5bb8 0%, #2d6bc8 100%);
-    color: white;
-    padding: 25px 30px;
+/* =====================================================
+   HEADER: BADUY STYLE (AMBIL DARI KODE KEGIATAN)
+   - pakai baduy.jpg
+   - teks putih
+===================================================== */
+.baduy-hero{
+    position: relative;
     border-radius: 18px;
-    margin-bottom: 25px;
-    position: relative;
     overflow: hidden;
-    box-shadow: 0 8px 25px rgba(26, 91, 184, 0.2);
-    z-index: 1;
+    padding: 18px 18px;
+    min-height: 92px;
+    background: var(--blue);
+    border-bottom: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 8px 25px rgba(26, 91, 184, 0.18);
+    margin-bottom: 25px;
 }
 
-.analisis-head::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200px;
-    height: 200px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+/* motif baduy repeat */
+.baduy-hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image: url("{{ asset('build/images/baduy.jpg') }}");
+    background-repeat: repeat;
+    background-size: 140px auto;
+    background-position: center;
+    opacity: .55;
+    filter: grayscale(100%) contrast(1.15);
     z-index: 0;
 }
 
-.analisis-head::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -10%;
-    width: 150px;
-    height: 150px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 50%;
-    z-index: 0;
+/* overlay biru biar teks kebaca */
+.baduy-hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background: rgba(26, 91, 184, .55);
+    z-index: 1;
+    pointer-events:none;
 }
 
-.analisis-head h5 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
+.baduy-hero .hero-inner{
     position: relative;
-    z-index: 1;
+    z-index: 2;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.analisis-head .meta {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    position: relative;
-    z-index: 1;
+.hero-left{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    min-width: 260px;
+}
+
+.hero-icon{
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.18);
+    color: #fff;
+    flex: 0 0 auto;
+    backdrop-filter: blur(6px);
+}
+.hero-icon i{ font-size: 20px; }
+
+.hero-title{
+    margin:0;
+    font-weight: 900;
+    font-size: 20px;
+    letter-spacing: .2px;
+    color:#fff;
+    line-height: 1.15;
+    text-shadow: 0 2px 12px rgba(0,0,0,.35);
+}
+
+.hero-sub{
+    margin-top: 4px;
+    font-weight: 500;
+    font-size: 13px;
+    color: rgba(255,255,255,.92);
+    text-shadow: 0 2px 12px rgba(0,0,0,.35);
+}
+
+/* (opsional) kalau suatu saat butuh tombol kanan */
+.btn-hero{
+    background: rgba(255,255,255,.16) !important;
+    border: 1px solid rgba(255,255,255,.22) !important;
+    color: #fff !important;
+    font-weight: 900;
+    border-radius: 14px;
+    padding: 10px 14px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition: .2s ease;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 18px rgba(2,6,23,.12);
+}
+.btn-hero:hover{
+    background: rgba(255,255,255,.22) !important;
+    transform: translateY(-1px);
 }
 
 /* Filter Section */
@@ -129,16 +204,10 @@
 }
 
 @media (max-width: 1200px) {
-    .filter-col {
-        flex: 1 1 calc(33.333% - 20px);
-    }
+    .filter-col { flex: 1 1 calc(33.333% - 20px); }
 }
-
 @media (max-width: 768px) {
-    .filter-col {
-        flex: 1 1 100%;
-        min-width: 100%;
-    }
+    .filter-col { flex: 1 1 100%; min-width: 100%; }
 }
 
 .filter-col label {
@@ -164,9 +233,7 @@
     box-shadow: 0 0 0 3px rgba(26, 91, 184, 0.1);
 }
 
-.filter-col .d-flex.gap-2.align-items-end {
-    align-self: flex-end;
-}
+.filter-col .d-flex.gap-2.align-items-end { align-self: flex-end; }
 
 /* Stat Cards */
 .stat-card {
@@ -209,9 +276,7 @@
     z-index: 1;
 }
 
-.stat-icon i {
-    font-size: 1.5rem;
-}
+.stat-icon i { font-size: 1.5rem; }
 
 .stat-number {
     font-size: 2rem;
@@ -229,16 +294,9 @@
     font-weight: 500;
 }
 
-.stat-label small {
-    font-size: 0.8rem;
-    color: #94a3b8;
-}
+.stat-label small { font-size: 0.8rem; color: #94a3b8; }
 
-/* =====================================================
-   CHART FIXES - ADD THESE TO YOUR EXISTING CSS
-===================================================== */
-
-/* Fix untuk chart container */
+/* ================= CHART FIXES ================= */
 .chart-container {
     background: white;
     border-radius: 16px;
@@ -250,22 +308,18 @@
     min-height: 380px;
     display: flex;
     flex-direction: column;
-    height: 420px; /* Tambahkan fixed height */
+    height: 420px;
 }
 
-.chart-container-large {
-    min-height: 450px;
-    height: 500px; /* Tambahkan fixed height */
-}
+.chart-container-large { min-height: 450px; height: 500px; }
 
-/* Fix untuk chart wrapper di dalam chart-card */
 .chart-card {
     background: white;
     border-radius: 14px;
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-    height: 380px; /* Fixed height */
+    height: 380px;
     display: flex;
     flex-direction: column;
 }
@@ -274,73 +328,30 @@
     flex: 1;
     position: relative;
     min-height: 250px;
-    height: 250px; /* Fixed height */
+    height: 250px;
 }
 
-/* Fix untuk canvas elements */
-canvas {
-    max-width: 100% !important;
-    height: 100% !important;
-    display: block;
-}
+/* canvas fix */
+canvas { max-width: 100% !important; height: 100% !important; display: block; }
 
-/* Pastikan parent container memiliki height yang benar */
-#jenjangChartsContainer .col-md-6 {
-    height: 400px;
-}
+#jenjangChartsContainer .col-md-6 { height: 400px; }
+#jenjangChartsContainer .col-lg-4 { height: 350px; }
 
-#jenjangChartsContainer .col-lg-4 {
-    height: 350px;
-}
+.row::after { content: ""; display: table; clear: both; }
 
-/* Tambahkan clear untuk row */
-.row::after {
-    content: "";
-    display: table;
-    clear: both;
-}
-
-/* Fix untuk responsive grid */
 @media (max-width: 768px) {
-    .chart-container {
-        height: 350px;
-    }
-    
-    .chart-container-large {
-        height: 400px;
-    }
-    
-    .chart-card {
-        height: 320px;
-    }
-    
+    .chart-container { height: 350px; }
+    .chart-container-large { height: 400px; }
+    .chart-card { height: 320px; }
     #jenjangChartsContainer .col-md-6,
-    #jenjangChartsContainer .col-lg-4 {
-        height: 320px;
-    }
+    #jenjangChartsContainer .col-lg-4 { height: 320px; }
 }
 
-/* Prevent chart overlapping with force display block */
-.chartjs-render-monitor {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-}
+.chartjs-render-monitor { display: block !important; width: 100% !important; height: 100% !important; }
+.chart-container, .chart-card { isolation: isolate; }
 
-/* Ensure charts have their own stacking context */
-.chart-container,
-.chart-card {
-    isolation: isolate;
-}
-
-/* Tambahkan margin bottom untuk spacing yang lebih baik */
-.row {
-    margin-bottom: 25px;
-}
-
-.row:last-child {
-    margin-bottom: 0;
-}
+.row { margin-bottom: 25px; }
+.row:last-child { margin-bottom: 0; }
 
 /* Table Cards */
 .table-card {
@@ -370,28 +381,12 @@ canvas {
     border: 1px solid #e2e8f0;
 }
 
-.table-responsive::-webkit-scrollbar {
-    height: 8px;
-}
+.table-responsive::-webkit-scrollbar { height: 8px; }
+.table-responsive::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+.table-responsive::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.table-responsive::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-.table-responsive::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 4px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-.analisis-table {
-    width: 100%;
-    margin-bottom: 0;
-}
+.analisis-table { width: 100%; margin-bottom: 0; }
 
 .analisis-table th {
     background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
@@ -412,18 +407,10 @@ canvas {
     font-size: 0.95rem;
 }
 
-.analisis-table tbody tr:hover {
-    background-color: #f8fafc;
-}
+.analisis-table tbody tr:hover { background-color: #f8fafc; }
+.analisis-table tbody tr:last-child td { border-bottom: none; }
 
-.analisis-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.modus-table {
-    font-size: 0.9rem;
-}
-
+.modus-table { font-size: 0.9rem; }
 .modus-table th {
     background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
     color: #334155;
@@ -431,15 +418,8 @@ canvas {
     padding: 12px 15px;
     text-align: left;
 }
-
-.modus-table td {
-    padding: 12px 15px;
-    vertical-align: middle;
-}
-
-.modus-table tbody tr:nth-child(even) {
-    background-color: #f8fafc;
-}
+.modus-table td { padding: 12px 15px; vertical-align: middle; }
+.modus-table tbody tr:nth-child(even) { background-color: #f8fafc; }
 
 /* Badge Levels */
 .badge-level {
@@ -468,65 +448,9 @@ canvas {
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
 }
 
-.progress-bar.bg-warning {
-    background: linear-gradient(to right, #f59e0b, #fbbf24);
-}
-
-.progress-bar.bg-danger {
-    background: linear-gradient(to right, #ef4444, #f87171);
-}
-
-.progress-bar.bg-success {
-    background: linear-gradient(to right, #10b981, #34d399);
-}
-
-/* Empty State */
-.empty-state {
-    background: white;
-    border-radius: 16px;
-    padding: 80px 20px;
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-    position: relative;
-    overflow: hidden;
-}
-
-.empty-state::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 200px;
-    height: 200px;
-    background: linear-gradient(135deg, rgba(26, 91, 184, 0.05) 0%, rgba(26, 91, 184, 0) 70%);
-    border-radius: 50%;
-}
-
-.empty-state i {
-    font-size: 5rem;
-    color: #cbd5e1;
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 1;
-}
-
-.empty-state p {
-    font-size: 1.1rem;
-    color: #64748b;
-    margin-bottom: 25px;
-    position: relative;
-    z-index: 1;
-}
-
-.empty-state .btn {
-    position: relative;
-    z-index: 1;
-    padding: 12px 30px;
-    border-radius: 10px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(26, 91, 184, 0.2);
-}
+.progress-bar.bg-warning { background: linear-gradient(to right, #f59e0b, #fbbf24); }
+.progress-bar.bg-danger  { background: linear-gradient(to right, #ef4444, #f87171); }
+.progress-bar.bg-success { background: linear-gradient(to right, #10b981, #34d399); }
 
 /* Loading Spinner */
 #loadingSpinner {
@@ -537,11 +461,7 @@ canvas {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
 }
 
-.spinner-border {
-    width: 3rem;
-    height: 3rem;
-    border-width: 0.25em;
-}
+.spinner-border { width: 3rem; height: 3rem; border-width: 0.25em; }
 
 /* Error Alert */
 #errorAlert {
@@ -595,222 +515,62 @@ canvas {
 }
 
 /* Badge Colors */
-.badge.bg-info {
-    background: linear-gradient(135deg, #0ea5e9, #3b82f6) !important;
-    border: none;
-}
+.badge.bg-info    { background: linear-gradient(135deg, #0ea5e9, #3b82f6) !important; border: none; }
+.badge.bg-primary { background: linear-gradient(135deg, #1a5bb8, #2d6bc8) !important; border: none; }
+.badge.bg-secondary{ background: linear-gradient(135deg, #64748b, #94a3b8) !important; border: none; }
+.badge.bg-warning { background: linear-gradient(135deg, #f59e0b, #fbbf24) !important; border: none; }
 
-.badge.bg-primary {
-    background: linear-gradient(135deg, #1a5bb8, #2d6bc8) !important;
-    border: none;
-}
-
-.badge.bg-secondary {
-    background: linear-gradient(135deg, #64748b, #94a3b8) !important;
-    border: none;
-}
-
-.badge.bg-warning {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
-    border: none;
-}
-
-/* Responsive Grid Adjustments */
+/* Responsive */
 @media (max-width: 768px) {
-    .analisis-wrap {
-        padding: 15px;
-        margin: 0 -15px;
-        border-radius: 0;
-    }
-    
-    .analisis-head {
-        padding: 20px;
-        border-radius: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .analisis-head h5 {
-        font-size: 1.3rem;
-    }
-    
-    .analisis-filter {
-        padding: 15px;
-    }
-    
-    .chart-container {
-        padding: 20px;
-        min-height: 350px;
-    }
-    
-    .chart-container-large {
-        min-height: 400px;
-    }
-    
-    .table-card {
-        padding: 20px;
-    }
-    
-    .stat-card {
-        padding: 20px;
-    }
-    
-    .stat-number {
-        font-size: 1.75rem;
-    }
-    
-    .chart-title {
-        font-size: 1rem;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-    
-    .chart-title small.text-muted {
-        margin-left: 0;
-    }
-    
-    .empty-state {
-        padding: 60px 15px;
-    }
-    
-    .empty-state i {
-        font-size: 4rem;
-    }
+    .analisis-wrap { padding: 15px; margin: 0 -15px; border-radius: 0; }
+    .baduy-hero { padding: 16px; border-radius: 16px; margin-bottom: 20px; }
+    .hero-title { font-size: 18px; }
+    .analisis-filter { padding: 15px; }
+    .chart-container { padding: 20px; min-height: 350px; }
+    .chart-container-large { min-height: 400px; }
+    .table-card { padding: 20px; }
+    .stat-card { padding: 20px; }
+    .stat-number { font-size: 1.75rem; }
 }
 
 @media (max-width: 576px) {
-    .analisis-head {
-        padding: 15px;
-    }
-    
-    .chart-container {
-        padding: 15px;
-        min-height: 320px;
-    }
-    
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-    }
-    
-    .stat-icon i {
-        font-size: 1.25rem;
-    }
-    
-    .stat-number {
-        font-size: 1.5rem;
-    }
-    
+    .baduy-hero { padding: 14px; }
+    .chart-container { padding: 15px; min-height: 320px; }
+    .stat-icon { width: 48px; height: 48px; }
+    .stat-icon i { font-size: 1.25rem; }
+    .stat-number { font-size: 1.5rem; }
     .filter-col .form-select,
-    .filter-col .form-control {
-        padding: 8px 12px;
-        font-size: 0.9rem;
-        height: 42px;
-    }
-    
+    .filter-col .form-control { padding: 8px 12px; font-size: 0.9rem; height: 42px; }
     .btn-primary,
-    .btn-outline-secondary {
-        padding: 10px 20px;
-        font-size: 0.9rem;
-    }
+    .btn-outline-secondary { padding: 10px 20px; font-size: 0.9rem; }
 }
 
-/* Animation for charts loading */
+/* Animation */
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-.chart-container,
-.table-card,
-.stat-card {
-    animation: fadeInUp 0.5s ease-out;
-}
+.chart-container, .table-card, .stat-card { animation: fadeInUp 0.5s ease-out; }
 
-/* Custom scrollbar for better UX */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 5px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-/* Chart.js specific adjustments */
-canvas {
-    max-width: 100% !important;
-    height: auto !important;
-}
-
-/* Ensure charts don't overflow */
-.chartjs-render-monitor {
-    width: 100% !important;
-    height: 100% !important;
-}
-
-/* Row spacing */
-.row {
-    margin-bottom: 15px;
-}
-
-.row > div {
-    margin-bottom: 15px;
-}
-
-/* Print styles */
+/* Print */
 @media print {
-    .analisis-wrap {
-        box-shadow: none;
-        background: white;
-    }
-    
-    .btn-primary,
-    .btn-outline-secondary,
-    .analisis-filter {
-        display: none !important;
-    }
-    
-    .chart-container {
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
-    
-    .table-responsive {
-        overflow: visible !important;
-    }
-}
-
-/* Tooltip customization */
-.tooltip {
-    font-size: 0.85rem;
+    .analisis-wrap { box-shadow: none; background: white; }
+    .btn-primary, .btn-outline-secondary, .analisis-filter { display: none !important; }
+    .chart-container { break-inside: avoid; page-break-inside: avoid; }
+    .table-responsive { overflow: visible !important; }
 }
 
 /* Ensure proper z-index stacking */
-.analisis-wrap > * {
-    position: relative;
-    z-index: 1;
-}
+.analisis-wrap > * { position: relative; z-index: 1; }
 
-
-
-/* Alternatif CSS yang lebih minimalis */
+/* Empty state wrapper (yang kamu pake) */
 .row .col-12.d-flex {
     background: white;
     border-radius: 16px;
@@ -818,10 +578,7 @@ canvas {
     margin: 30px 0;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
 }
-
-.row .col-12.d-flex .text-center {
-    padding: 40px;
-}
+.row .col-12.d-flex .text-center { padding: 40px; }
 </style>
 
 <div class="container-fluid">
@@ -840,12 +597,28 @@ canvas {
     </div>
 
     <div class="analisis-wrap">
-        <!-- Header -->
-        <div class="analisis-head">
-            <h5 class="mb-0 d-flex align-items-center gap-2">
-                <i class="ri-pie-chart-2-line"></i> {{ $tittle }}
-            </h5>
-            <div class="meta mt-2">Analisis komprehensif hasil instrumen berdasarkan berbagai kriteria</div>
+
+        {{-- HEADER BADUY (PAKAI baduy.jpg + TEKS PUTIH) --}}
+        <div class="baduy-hero">
+            <div class="hero-inner">
+                <div class="hero-left">
+                    <div class="hero-icon">
+                        <i class="ri-pie-chart-2-line"></i>
+                    </div>
+                    <div>
+                        <h5 class="hero-title">{{ $tittle }}</h5>
+                        <div class="hero-sub">Analisis komprehensif hasil instrumen berdasarkan berbagai kriteria</div>
+                    </div>
+                </div>
+
+                {{-- kalau mau tombol kanan nanti, tinggal aktifin ini
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-hero" type="button" onclick="document.getElementById('analisisForm').submit()">
+                        <i class="ri-filter-line"></i> Terapkan Filter
+                    </button>
+                </div>
+                --}}
+            </div>
         </div>
 
         <!-- Filter -->
@@ -965,6 +738,7 @@ canvas {
                             <div class="stat-label">Total PTK (Semua Filter)</div>
                         </div>
                     </div>
+
                     <div class="col-md-3">
                         <div class="stat-card">
                             <div class="stat-icon" style="background: rgba(40,167,69,.12); color: #28a745;">
@@ -974,15 +748,7 @@ canvas {
                             <div class="stat-label">PTK Menjawab (Kegiatan)</div>
                         </div>
                     </div>
-                    {{-- <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: rgba(255,193,7,.12); color: #ffc107;">
-                                <i class="ri-bar-chart-line fs-4"></i>
-                            </div>
-                            <div class="stat-number">{{ number_format($analisisData['statistik']['rata_level'] ?? 0, 2) }}</div>
-                            <div class="stat-label">Rata-rata Level</div>
-                        </div>
-                    </div> --}}
+
                     <div class="col-md-3">
                         <div class="stat-card">
                             <div class="stat-icon" style="background: rgba(220,53,69,.12); color: #dc3545;">
@@ -994,9 +760,8 @@ canvas {
                     </div>
                 </div>
 
-                <!-- Charts Row 1: Distribusi Berdasarkan Jawaban -->
+                <!-- Charts Row 1 -->
                 <div class="row">
-                    <!-- Chart 1: Distribusi Level Kompetensi -->
                     <div class="col-md-6">
                         <div class="chart-container">
                             <div class="chart-title">
@@ -1007,7 +772,6 @@ canvas {
                         </div>
                     </div>
 
-                    <!-- Chart 2: Distribusi Jenjang Jabatan -->
                     <div class="col-md-6">
                         <div class="chart-container">
                             <div class="chart-title">
@@ -1019,9 +783,8 @@ canvas {
                     </div>
                 </div>
 
-                <!-- Charts Row 2: Distribusi Berdasarkan PTK -->
+                <!-- Charts Row 2 -->
                 <div class="row">
-                    <!-- Chart 3: Distribusi Jenjang Pendidikan -->
                     <div class="col-md-6">
                         <div class="chart-container">
                             <div class="chart-title">
@@ -1032,7 +795,6 @@ canvas {
                         </div>
                     </div>
 
-                    <!-- Chart 4: Distribusi Jenis Kelamin -->
                     <div class="col-md-6">
                         <div class="chart-container">
                             <div class="chart-title">
@@ -1044,7 +806,7 @@ canvas {
                     </div>
                 </div>
 
-                <!-- Chart 5: Semua Sub Indikator -->
+                <!-- Chart 5 -->
                 @if(!empty($analisisData['all_sub_indikators_chart']['labels']))
                 <div class="row">
                     <div class="col-12">
@@ -1059,11 +821,11 @@ canvas {
                 </div>
                 @endif
 
-<!-- Tabel Modus per Kota -->
+                <!-- Tabel Modus per Kota -->
                 @if(!empty($analisisData['modus_per_kota']))
                 <div class="row">
                     <div class="col-12">
-                       <div class="table-card">
+                        <div class="table-card">
                             <div class="chart-title">
                                 <i class="ri-map-pin-line"></i> Modus Level per Kota
                                 <small class="text-muted ms-2">(Berdasarkan jumlah PTK)</small>
@@ -1118,130 +880,125 @@ canvas {
                 </div>
                 @endif
 
+                <!-- Chart 6 -->
+                @if(!empty($analisisData['sub_indikator_per_jenjang']))
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <i class="ri-bar-chart-grouped-line"></i> Distribusi PTK per Sub Indikator per Jenjang Jabatan
+                                <span class="badge bg-info ms-2">Jumlah PTK per Jenjang</span>
+                            </div>
 
-               <!-- Ganti bagian Charts 6: Sub Indikator per Jenjang Jabatan dengan ini -->
-@if(!empty($analisisData['sub_indikator_per_jenjang']))
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="chart-container">
-            <div class="chart-title">
-                <i class="ri-bar-chart-grouped-line"></i> Distribusi PTK per Sub Indikator per Jenjang Jabatan
-                <span class="badge bg-info ms-2">Jumlah PTK per Jenjang</span>
-            </div>
-            
-            <div class="row" id="jenjangChartsContainer">
-                @foreach($analisisData['sub_indikator_per_jenjang'] as $jenjangChart)
-                <div class="col-md-6 mb-4">
-                    <div class="chart-card" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.05); height: 400px;">
-                        <h6 class="mb-3 text-center" style="color: #1a5bb8; font-weight: 600; font-size: 16px;">
-                            <i class="ri-user-star-line me-2"></i>{{ $jenjangChart['jenjang_jabatan'] }}
-                        </h6>
-                        <div class="chart-wrapper" style="height: 320px;">
-                            <canvas id="jenjangChart_{{ $loop->index }}" height="320"></canvas>
+                            <div class="row" id="jenjangChartsContainer">
+                                @foreach($analisisData['sub_indikator_per_jenjang'] as $jenjangChart)
+                                <div class="col-md-6 mb-4">
+                                    <div class="chart-card" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.05); height: 400px;">
+                                        <h6 class="mb-3 text-center" style="color: #1a5bb8; font-weight: 600; font-size: 16px;">
+                                            <i class="ri-user-star-line me-2"></i>{{ $jenjangChart['jenjang_jabatan'] }}
+                                        </h6>
+                                        <div class="chart-wrapper" style="height: 320px;">
+                                            <canvas id="jenjangChart_{{ $loop->index }}" height="320"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+
                         </div>
                     </div>
                 </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-</div>
-@endif
-                
+                @endif
 
+                <!-- Chart 7: Pelatihan -->
+                @if(!empty($analisisData['pelatihan_data']))
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="chart-container chart-container-large">
+                            <div class="chart-title">
+                                <i class="ri-book-mark-line"></i> Distribusi Pelatihan yang diperlukan PTK
+                                <span class="badge bg-info ms-2">Berdasarkan Kegiatan</span>
+                            </div>
+                            <canvas id="pelatihanChart" height="400"></canvas>
+                        </div>
+                    </div>
+                </div>
 
-<!-- Tambahkan setelah Chart 6: Sub Indikator per Jenjang Jabatan -->
-<!-- Chart 7: Distribusi Pelatihan PTK -->
-@if(!empty($analisisData['pelatihan_data']))
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="chart-container chart-container-large">
-            <div class="chart-title">
-                <i class="ri-book-mark-line"></i> Distribusi Pelatihan yang diperlukan PTK
-                <span class="badge bg-info ms-2">Berdasarkan Kegiatan</span>
-            </div>
-            <canvas id="pelatihanChart" height="400"></canvas>
-        </div>
-    </div>
-</div>
-
-<!-- Di bagian tabel pelatihan, tambahkan kolom tipe -->
-<div class="row mt-3">
-    <div class="col-12">
-        <div class="table-card">
-            <div class="chart-title">
-                <i class="ri-list-check-2"></i> Detail Pelatihan yang Diikuti
-                <span class="badge bg-info ms-2">Total {{ $analisisData['pelatihan_data']->sum('jumlah_ptk') }} PTK</span>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-bordered modus-table">
-                    <thead>
-                        <tr>
-                            <th width="5%">#</th>
-                            <th>Nama Pelatihan</th>
-                            <th width="10%" class="text-center">Tipe</th>
-                            <th width="15%" class="text-center">Jumlah PTK</th>
-                            <th width="15%" class="text-center">Persentase</th>
-                            <th width="20%" class="text-center">Progress</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $totalPtkPelatihan = $analisisData['pelatihan_data']->sum('jumlah_ptk');
-                            $counter = 1;
-                        @endphp
-                        @foreach($analisisData['pelatihan_data'] as $pelatihan)
-                            @php
-                                $persentase = $totalPtkPelatihan > 0 ? 
-                                    round(($pelatihan->jumlah_ptk / $totalPtkPelatihan) * 100, 1) : 0;
-                            @endphp
-                            <tr>
-                                <td class="text-center">{{ $counter++ }}</td>
-                                <td>
-                                    {{ $pelatihan->nama_pelatihan }}
-                                    @if(empty($pelatihan->nama_pelatihan) || $pelatihan->nama_pelatihan == '')
-                                        <span class="badge bg-warning">Kosong</span>
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    @if(isset($pelatihan->tipe))
-                                        @if($pelatihan->tipe == 'master')
-                                            <span class="badge bg-primary">Master</span>
-                                        @else
-                                            <span class="badge bg-secondary">Manual</span>
-                                        @endif
-                                    @endif
-                                </td>
-                                <td class="text-center">{{ $pelatihan->jumlah_ptk }}</td>
-                                <td class="text-center fw-bold">{{ $persentase }}%</td>
-                                <td>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar 
-                                            @if($persentase >= 30) bg-success
-                                            @elseif($persentase >= 15) bg-warning
-                                            @else bg-danger
-                                            @endif" 
-                                            role="progressbar" 
-                                            style="width: {{ $persentase }}%;">
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="table-card">
+                            <div class="chart-title">
+                                <i class="ri-list-check-2"></i> Detail Pelatihan yang Diikuti
+                                <span class="badge bg-info ms-2">Total {{ $analisisData['pelatihan_data']->sum('jumlah_ptk') }} PTK</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered modus-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">#</th>
+                                            <th>Nama Pelatihan</th>
+                                            <th width="10%" class="text-center">Tipe</th>
+                                            <th width="15%" class="text-center">Jumlah PTK</th>
+                                            <th width="15%" class="text-center">Persentase</th>
+                                            <th width="20%" class="text-center">Progress</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @php
+                                            $totalPtkPelatihan = $analisisData['pelatihan_data']->sum('jumlah_ptk');
+                                            $counter = 1;
+                                        @endphp
+                                        @foreach($analisisData['pelatihan_data'] as $pelatihan)
+                                            @php
+                                                $persentase = $totalPtkPelatihan > 0 ?
+                                                    round(($pelatihan->jumlah_ptk / $totalPtkPelatihan) * 100, 1) : 0;
+                                            @endphp
+                                            <tr>
+                                                <td class="text-center">{{ $counter++ }}</td>
+                                                <td>
+                                                    {{ $pelatihan->nama_pelatihan }}
+                                                    @if(empty($pelatihan->nama_pelatihan) || $pelatihan->nama_pelatihan == '')
+                                                        <span class="badge bg-warning">Kosong</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if(isset($pelatihan->tipe))
+                                                        @if($pelatihan->tipe == 'master')
+                                                            <span class="badge bg-primary">Master</span>
+                                                        @else
+                                                            <span class="badge bg-secondary">Manual</span>
+                                                        @endif
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">{{ $pelatihan->jumlah_ptk }}</td>
+                                                <td class="text-center fw-bold">{{ $persentase }}%</td>
+                                                <td>
+                                                    <div class="progress" style="height: 8px;">
+                                                        <div class="progress-bar
+                                                            @if($persentase >= 30) bg-success
+                                                            @elseif($persentase >= 15) bg-warning
+                                                            @else bg-danger
+                                                            @endif"
+                                                            role="progressbar"
+                                                            style="width: {{ $persentase }}%;">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <!-- Tabel Progress Kota -->
                 @if(!empty($analisisData['progress_kota']))
                 <div class="row">
                     <div class="col-12">
-                   <div class="table-card">
-
+                        <div class="table-card">
                             <div class="chart-title">
                                 <i class="ri-progress-3-line"></i> Progress Pengisian per Kota
                             </div>
@@ -1265,12 +1022,12 @@ canvas {
                                                 <td style="text-align: center; font-weight: 600;">{{ $kota->persentase }}%</td>
                                                 <td>
                                                     <div class="progress" style="height: 8px;">
-                                                        <div class="progress-bar 
+                                                        <div class="progress-bar
                                                             @if($kota->persentase >= 80) bg-success
                                                             @elseif($kota->persentase >= 50) bg-warning
                                                             @else bg-danger
-                                                            @endif" 
-                                                            role="progressbar" 
+                                                            @endif"
+                                                            role="progressbar"
                                                             style="width: {{ $kota->persentase }}%;">
                                                         </div>
                                                     </div>
@@ -1285,29 +1042,32 @@ canvas {
                 </div>
                 @endif
 
-           @else
-<!-- Empty State -->
-<div class="row">
-    <div class="col-12 d-flex justify-content-center align-items-center" style="min-height: 500px;">
-        <div class="text-center" style="max-width: 500px;">
-            <div class="mb-4">
-                <i class="ri-bar-chart-box-line" style="font-size: 5rem; color: #dee2e6;"></i>
+            @else
+            <!-- Empty State -->
+            <div class="row">
+                <div class="col-12 d-flex justify-content-center align-items-center" style="min-height: 500px;">
+                    <div class="text-center" style="max-width: 500px;">
+                        <div class="mb-4">
+                            <i class="ri-bar-chart-box-line" style="font-size: 5rem; color: #dee2e6;"></i>
+                        </div>
+                        <h4 class="mb-3" style="color: #495057;">Belum Ada Data Analisis</h4>
+                        <p class="text-muted mb-4" style="font-size: 1.1rem; line-height: 1.6;">
+                            Silakan pilih filter yang diinginkan untuk melihat analisis data instrumen
+                        </p>
+                        <div class="d-flex justify-content-center mt-3">
+                            <button class="btn btn-primary btn-lg"
+                                    onclick="document.getElementById('analisisForm').submit()"
+                                    style="padding: 12px 30px; font-size: 1.1rem;">
+                                <i class="ri-filter-line align-bottom me-2"></i> Terapkan Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h4 class="mb-3" style="color: #495057;">Belum Ada Data Analisis</h4>
-            <p class="text-muted mb-4" style="font-size: 1.1rem; line-height: 1.6;">
-                Silakan pilih filter yang diinginkan untuk melihat analisis data instrumen
-            </p>
-            <button class="btn btn-primary btn-lg mt-3" onclick="document.getElementById('analisisForm').submit()" style="padding: 12px 30px; font-size: 1.1rem;">
-                <i class="ri-filter-line align-bottom me-2"></i> Terapkan Filter
-            </button>
+            @endif
         </div>
     </div>
 </div>
-@endif
-        </div>
-    </div>
-</div>
-
 @endsection
 
 @section('sipproja-js')
@@ -1321,7 +1081,7 @@ let jenjangDistributionChart = null;
 let bentukPendidikanChart = null;
 let jenisKelaminChart = null;
 let allSubIndikatorsChart = null;
-let pelatihanChart = null; // TAMBAHKAN INI
+let pelatihanChart = null;
 
 /* =====================================================
    RESET FORM
@@ -1388,7 +1148,6 @@ function updateAnalisisContent(data) {
     <div class="row">
         ${statCard('ri-user-3-line','Total PTK<br><small>Semua Filter</small>',data.statistik?.total_ptk ?? 0,'#1a5bb8')}
         ${statCard('ri-checkbox-circle-line','PTK Menjawab<br><small>Kegiatan</small>',data.statistik?.ptk_menjawab ?? 0,'#28a745')}
-    
         ${statCard('ri-progress-4-line','Progress<br>Pengisian',(data.statistik?.persentase_isi ?? 0)+'%','#dc3545')}
     </div>
 
@@ -1422,11 +1181,10 @@ function updateAnalisisContent(data) {
         </div>
     </div>`;
 
-
-      // Tambahkan tabel modus per kota jika ada
+    // Tabel modus per kota
     if (data.modus_per_kota?.length > 0) {
         let modusRows = '';
-        data.modus_per_kota.forEach((kota, kotaIndex) => {
+        data.modus_per_kota.forEach((kota) => {
             if (kota.sub_indikator_modus && kota.sub_indikator_modus.length > 0) {
                 kota.sub_indikator_modus.forEach((sub, subIndex) => {
                     modusRows += `
@@ -1453,7 +1211,7 @@ function updateAnalisisContent(data) {
                 });
             }
         });
-        
+
         html += `
         <div class="row">
             <div class="col-12">
@@ -1482,7 +1240,7 @@ function updateAnalisisContent(data) {
         </div>`;
     }
 
-    // Tambahkan chart sub indikator jika ada data
+    // Chart all sub indikator
     if (data.all_sub_indikators_chart?.labels?.length > 0) {
         html += `
         <div class="row">
@@ -1498,8 +1256,7 @@ function updateAnalisisContent(data) {
         </div>`;
     }
 
-    
-    // Tambahkan charts per jenjang jabatan jika ada
+    // Charts per jenjang
     if (data.sub_indikator_per_jenjang?.length > 0) {
         html += `
         <div class="row mt-4">
@@ -1509,9 +1266,9 @@ function updateAnalisisContent(data) {
                         <i class="ri-bar-chart-grouped-line"></i> Distribusi PTK per Sub Indikator per Jenjang Jabatan
                         <span class="badge bg-info ms-2">Jumlah PTK per Jenjang</span>
                     </div>
-                    
+
                     <div class="row" id="jenjangChartsContainer">`;
-        
+
         data.sub_indikator_per_jenjang.forEach((jenjangData, index) => {
             html += `
                         <div class="col-md-6 col-lg-4 mb-4">
@@ -1519,14 +1276,11 @@ function updateAnalisisContent(data) {
                                 <h6 class="mb-3 text-center" style="color: #1a5bb8; font-weight: 600;">
                                     <i class="ri-user-star-line me-2"></i>${jenjangData.jenjang_jabatan}
                                 </h6>
-                                <canvas 
-                                    id="jenjangChart_${index}" 
-                                    height="250">
-                                </canvas>
+                                <canvas id="jenjangChart_${index}" height="250"></canvas>
                             </div>
                         </div>`;
         });
-        
+
         html += `
                     </div>
                 </div>
@@ -1534,15 +1288,13 @@ function updateAnalisisContent(data) {
         </div>`;
     }
 
-  
-
-    // Tambahkan tabel progress kota jika ada
+    // Progress kota
     if (data.progress_kota?.length > 0) {
         let progressRows = '';
         data.progress_kota.forEach(kota => {
-            const progressClass = kota.persentase >= 80 ? 'bg-success' : 
-                                kota.persentase >= 50 ? 'bg-warning' : 'bg-danger';
-            
+            const progressClass = kota.persentase >= 80 ? 'bg-success' :
+                                  kota.persentase >= 50 ? 'bg-warning' : 'bg-danger';
+
             progressRows += `
             <tr>
                 <td>${kota.nama_kota}</td>
@@ -1551,15 +1303,12 @@ function updateAnalisisContent(data) {
                 <td style="text-align: center; font-weight: 600;">${kota.persentase}%</td>
                 <td>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar ${progressClass}" 
-                             role="progressbar" 
-                             style="width: ${kota.persentase}%;">
-                        </div>
+                        <div class="progress-bar ${progressClass}" role="progressbar" style="width: ${kota.persentase}%;"></div>
                     </div>
                 </td>
             </tr>`;
         });
-        
+
         html += `
         <div class="row">
             <div class="col-12">
@@ -1587,85 +1336,76 @@ function updateAnalisisContent(data) {
             </div>
         </div>`;
     }
-/* Di bagian updateAnalisisContent(), perbaiki bagian pelatihan */
-if (data.pelatihan_data?.length > 0) {
-    const totalPelatihan = data.pelatihan_data.reduce((sum, item) => sum + (item.jumlah_ptk || 0), 0);
-    
-    html += `
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="chart-container chart-container-large">
-                <div class="chart-title">
-                    <i class="ri-book-mark-line"></i> Distribusi Pelatihan yang diperlukan PTK
-                    <span class="badge bg-info ms-2">Berdasarkan Kegiatan</span>
-                </div>
-                <canvas id="pelatihanChart" height="400"></canvas>
-            </div>
-        </div>
-    </div>
 
-    <div class="row mt-3">
-        <div class="col-12">
-            <div class="table-card">
-                <div class="chart-title">
-                    <i class="ri-list-check-2"></i> Detail Pelatihan yang Diikuti
-                    <span class="badge bg-info ms-2">Total ${totalPelatihan} PTK</span>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-bordered modus-table">
-                        <thead>
-                            <tr>
-                                <th width="5%">#</th>
-                                <th>Nama Pelatihan</th>
-                                <th width="10%" class="text-center">Tipe</th>
-                                <th width="15%" class="text-center">Jumlah PTK</th>
-                                <th width="15%" class="text-center">Persentase</th>
-                                <th width="20%" class="text-center">Progress</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-    
-    data.pelatihan_data.forEach((pelatihan, index) => {
-        const persentase = totalPelatihan > 0 ? 
-            ((pelatihan.jumlah_ptk / totalPelatihan) * 100).toFixed(1) : 0;
-        const progressClass = persentase >= 30 ? 'bg-success' : 
-                            persentase >= 15 ? 'bg-warning' : 'bg-danger';
-        
-        // Tentukan tipe pelatihan
-        let tipeBadge = '';
-        if (pelatihan.tipe === 'master') {
-            tipeBadge = '<span class="badge bg-primary">Master</span>';
-        } else if (pelatihan.tipe === 'manual') {
-            tipeBadge = '<span class="badge bg-secondary">Manual</span>';
-        }
-        
+    // Pelatihan
+    if (data.pelatihan_data?.length > 0) {
+        const totalPelatihan = data.pelatihan_data.reduce((sum, item) => sum + (item.jumlah_ptk || 0), 0);
+
         html += `
-                        <tr>
-                            <td class="text-center">${index + 1}</td>
-                            <td>${pelatihan.nama_pelatihan || 'Pelatihan Lainnya'}</td>
-                            <td class="text-center">${tipeBadge}</td>
-                            <td class="text-center">${pelatihan.jumlah_ptk}</td>
-                            <td class="text-center fw-bold">${persentase}%</td>
-                            <td>
-                                <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar ${progressClass}" 
-                                         role="progressbar" 
-                                         style="width: ${persentase}%;">
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>`;
-    });
-    
-    html += `
-                        </tbody>
-                    </table>
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="chart-container chart-container-large">
+                    <div class="chart-title">
+                        <i class="ri-book-mark-line"></i> Distribusi Pelatihan yang diperlukan PTK
+                        <span class="badge bg-info ms-2">Berdasarkan Kegiatan</span>
+                    </div>
+                    <canvas id="pelatihanChart" height="400"></canvas>
                 </div>
             </div>
         </div>
-    </div>`;
-}
-    
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="table-card">
+                    <div class="chart-title">
+                        <i class="ri-list-check-2"></i> Detail Pelatihan yang Diikuti
+                        <span class="badge bg-info ms-2">Total ${totalPelatihan} PTK</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered modus-table">
+                            <thead>
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th>Nama Pelatihan</th>
+                                    <th width="10%" class="text-center">Tipe</th>
+                                    <th width="15%" class="text-center">Jumlah PTK</th>
+                                    <th width="15%" class="text-center">Persentase</th>
+                                    <th width="20%" class="text-center">Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+        data.pelatihan_data.forEach((pelatihan, index) => {
+            const persentase = totalPelatihan > 0 ? ((pelatihan.jumlah_ptk / totalPelatihan) * 100).toFixed(1) : 0;
+            const progressClass = persentase >= 30 ? 'bg-success' : persentase >= 15 ? 'bg-warning' : 'bg-danger';
+
+            let tipeBadge = '';
+            if (pelatihan.tipe === 'master') tipeBadge = '<span class="badge bg-primary">Master</span>';
+            else if (pelatihan.tipe === 'manual') tipeBadge = '<span class="badge bg-secondary">Manual</span>';
+
+            html += `
+                                <tr>
+                                    <td class="text-center">${index + 1}</tds>
+                                    <td>${pelatihan.nama_pelatihan || 'Pelatihan Lainnya'}</td>
+                                    <td class="text-center">${tipeBadge}</td>
+                                    <td class="text-center">${pelatihan.jumlah_ptk}</td>
+                                    <td class="text-center fw-bold">${persentase}%</td>
+                                    <td>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar ${progressClass}" role="progressbar" style="width: ${persentase}%;"></div>
+                                        </div>
+                                    </td>
+                                </tr>`;
+        });
+
+        html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
 
     document.getElementById('analisisContent').innerHTML = html;
     document.getElementById('analisisContent').style.display = 'block';
@@ -1693,22 +1433,11 @@ function statCard(icon,label,value,color){
    HELPER FUNCTIONS
 ===================================================== */
 function getLevelColor(level) {
-    const colors = {
-        2: '#17a2b8',
-        3: '#007bff',
-        4: '#ffc107',
-        5: '#28a745'
-    };
+    const colors = { 2:'#17a2b8', 3:'#007bff', 4:'#ffc107', 5:'#28a745' };
     return colors[level] || '#17a2b8';
 }
-
 function getLevelName(level) {
-    const names = {
-        2: 'Penerapan',
-        3: 'Analisis',
-        4: 'Evaluasi',
-        5: 'Pembimbingan'
-    };
+    const names = { 2:'Penerapan', 3:'Analisis', 4:'Evaluasi', 5:'Pembimbingan' };
     return names[level] || 'Penerapan';
 }
 
@@ -1716,20 +1445,11 @@ function getLevelName(level) {
    RENDER ALL CHARTS
 ===================================================== */
 function renderCharts(data) {
-    console.log('Rendering charts with data:', data);
-
-    // Destroy existing charts
     [levelDistributionChart, jenjangDistributionChart, bentukPendidikanChart, jenisKelaminChart, allSubIndikatorsChart, pelatihanChart].forEach(chart => {
-        if (chart) {
-            try {
-                chart.destroy();
-            } catch(e) {
-                console.log('Error destroying chart:', e);
-            }
-        }
+        if (chart) { try { chart.destroy(); } catch(e) {} }
     });
 
-    /* ================= LEVEL DISTRIBUTION (BERDASARKAN JAWABAN) ================= */
+    // Level Distribution
     const levelCtx = document.getElementById('levelDistributionChart')?.getContext('2d');
     if (levelCtx) {
         const src = Array.isArray(data.level_distribution) ? data.level_distribution : [];
@@ -1749,130 +1469,69 @@ function renderCharts(data) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: { 
-                    y: { 
-                        beginAtZero: true,
-                        ticks: { stepSize: 1 }
-                    }
-                }
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
             }
         });
     }
 
-    /* ================= JENJANG DISTRIBUTION (BERDASARKAN PTK) ================= */
+    // Jenjang Distribution
     const jenjangCtx = document.getElementById('jenjangDistributionChart')?.getContext('2d');
     if (jenjangCtx) {
-        const src = data.jenjang_distribution?.length
-            ? data.jenjang_distribution
-            : [{ jenjang_jabatan:'Tidak Ada Data', count:0 }];
+        const src = data.jenjang_distribution?.length ? data.jenjang_distribution : [{ jenjang_jabatan:'Tidak Ada Data', count:0 }];
 
         jenjangDistributionChart = new Chart(jenjangCtx, {
             type: 'doughnut',
             data: {
                 labels: src.map(x => x.jenjang_jabatan),
-                datasets: [{
-                    data: src.map(x => x.count),
-                    backgroundColor: ['#ff6b6b','#4ecdc4','#45b7d1','#96ceb4','#feca57','#5f27cd']
-                }]
+                datasets: [{ data: src.map(x => x.count), backgroundColor: ['#ff6b6b','#4ecdc4','#45b7d1','#96ceb4','#feca57','#5f27cd'] }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { 
-                    legend: { 
-                        position: 'bottom',
-                        labels: { padding: 20 }
-                    }
-                }
+                plugins: { legend: { position: 'bottom', labels: { padding: 20 } } }
             }
         });
     }
 
-    /* ================= BENTUK PENDIDIKAN DISTRIBUTION (BERDASARKAN PTK) ================= */
+    // Bentuk Pendidikan
     const bentukPendidikanCtx = document.getElementById('bentukPendidikanChart')?.getContext('2d');
     if (bentukPendidikanCtx) {
-        const src = data.bentuk_pendidikan_distribution?.length
-            ? data.bentuk_pendidikan_distribution
-            : [{ bentuk_pendidikan:'Tidak Ada Data', count:0 }];
+        const src = data.bentuk_pendidikan_distribution?.length ? data.bentuk_pendidikan_distribution : [{ bentuk_pendidikan:'Tidak Ada Data', count:0 }];
 
         bentukPendidikanChart = new Chart(bentukPendidikanCtx, {
             type: 'pie',
-            data: {
-                labels: src.map(x => x.bentuk_pendidikan),
-                datasets: [{
-                    data: src.map(x => x.count),
-                    backgroundColor: ['#36a2eb','#ff6384','#4bc0c0','#ff9f40','#9966ff','#ffcd56']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { 
-                        position: 'bottom',
-                        labels: { padding: 20 }
-                    }
-                }
-            }
+            data: { labels: src.map(x => x.bentuk_pendidikan), datasets: [{ data: src.map(x => x.count), backgroundColor: ['#36a2eb','#ff6384','#4bc0c0','#ff9f40','#9966ff','#ffcd56'] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 20 } } } }
         });
     }
 
-    /* ================= JENIS KELAMIN DISTRIBUTION (BERDASARKAN PTK) ================= */
+    // Jenis Kelamin
     const jenisKelaminCtx = document.getElementById('jenisKelaminChart')?.getContext('2d');
     if (jenisKelaminCtx) {
-        const src = data.jenis_kelamin_distribution?.length
-            ? data.jenis_kelamin_distribution
-            : [{ jenis_kelamin:'Tidak Ada Data', count:0 }];
+        const src = data.jenis_kelamin_distribution?.length ? data.jenis_kelamin_distribution : [{ jenis_kelamin:'Tidak Ada Data', count:0 }];
 
         jenisKelaminChart = new Chart(jenisKelaminCtx, {
             type: 'doughnut',
-            data: {
-                labels: src.map(x => x.jenis_kelamin),
-                datasets: [{
-                    data: src.map(x => x.count),
-                    backgroundColor: ['#4dc9f6','#f67019','#f53794','#537bc4','#acc236','#166a8f']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { 
-                        position: 'bottom',
-                        labels: { padding: 20 }
-                    }
-                }
-            }
+            data: { labels: src.map(x => x.jenis_kelamin), datasets: [{ data: src.map(x => x.count), backgroundColor: ['#4dc9f6','#f67019','#f53794','#537bc4','#acc236','#166a8f'] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 20 } } } }
         });
     }
 
-    /* ================= ALL SUB INDIKATOR (BERDASARKAN PTK) ================= */
+    // All sub indikator
     const allSubCtx = document.getElementById('allSubIndikatorsChart')?.getContext('2d');
     if (allSubCtx && data.all_sub_indikators_chart) {
         const chartData = data.all_sub_indikators_chart;
-        console.log('All sub indicators chart data:', chartData);
 
         if (chartData.labels?.length > 0 && chartData.datasets?.length > 0) {
             allSubIndikatorsChart = new Chart(allSubCtx, {
                 type: 'bar',
-                data: {
-                    labels: chartData.labels,
-                    datasets: chartData.datasets
-                },
+                data: { labels: chartData.labels, datasets: chartData.datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true
-                            }
-                        },
+                        legend: { position: 'top', labels: { padding: 20, usePointStyle: true } },
                         tooltip: {
                             mode: 'index',
                             intersect: false,
@@ -1886,63 +1545,39 @@ function renderCharts(data) {
                         }
                     },
                     scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Sub Indikator'
-                            },
-                            ticks: {
-                                autoSkip: false,
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Jumlah PTK'
-                            },
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
+                        x: { title: { display: true, text: 'Sub Indikator' }, ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 } },
+                        y: { beginAtZero: true, title: { display: true, text: 'Jumlah PTK' }, ticks: { stepSize: 1 } }
                     }
                 }
             });
         } else {
-            console.log('Chart data kosong, tidak membuat chart');
             const container = allSubCtx.canvas.parentElement;
             if (container) {
                 container.innerHTML += `
                     <div class="alert alert-info mt-3">
-                        <i class="ri-information-line"></i>
-                        Tidak ada data untuk grafik sub indikator
+                        <i class="ri-information-line"></i> Tidak ada data untuk grafik sub indikator
                     </div>
                 `;
             }
         }
     }
 
-
- /* ================= PELATIHAN CHART ================= */
+    // Pelatihan chart
     const pelatihanCtx = document.getElementById('pelatihanChart')?.getContext('2d');
     if (pelatihanCtx && data.pelatihan_data?.length > 0) {
         const pelatihanData = data.pelatihan_data;
         const labels = pelatihanData.map(item => {
-            // Potong label jika terlalu panjang
             const name = item.nama_pelatihan || 'Pelatihan Lainnya';
             return name.length > 30 ? name.substring(0, 30) + '...' : name;
         });
         const values = pelatihanData.map(item => item.jumlah_ptk);
-        
-        // Generate warna berbeda untuk setiap bar
+
         const backgroundColors = labels.map((_, index) => {
             const colors = [
-                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
-                '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF',
-                '#4DC9F6', '#F67019', '#F53794', '#537BC4',
-                '#ACC236', '#166A8F', '#00A950', '#58595B'
+                '#FF6384','#36A2EB','#FFCE56','#4BC0C0',
+                '#9966FF','#FF9F40','#C9CBCF','#4DC9F6',
+                '#F67019','#F53794','#537BC4','#ACC236',
+                '#166A8F','#00A950','#58595B'
             ];
             return colors[index % colors.length];
         });
@@ -1950,12 +1585,11 @@ function renderCharts(data) {
         pelatihanChart = new Chart(pelatihanCtx, {
             type: 'bar',
             data: {
-                labels: labels,
+                labels,
                 datasets: [{
                     label: 'Jumlah PTK',
                     data: values,
                     backgroundColor: backgroundColors,
-                    borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
                     borderWidth: 1
                 }]
             },
@@ -1963,61 +1597,26 @@ function renderCharts(data) {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                const label = labels[context.dataIndex] || '';
                                 const value = context.raw;
                                 const total = values.reduce((a, b) => a + b, 0);
                                 const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return `${label}: ${value} PTK (${percentage}%)`;
+                                return `${value} PTK (${percentage}%)`;
                             }
                         }
                     }
                 },
                 scales: {
-                    x: {
-                        ticks: {
-                            font: {
-                                size: 11
-                            },
-                            maxRotation: 45,
-                            minRotation: 45
-                        },
-                        title: {
-                            display: true,
-                            text: 'Nama Pelatihan',
-                            font: {
-                                size: 13
-                            }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                            font: {
-                                size: 11
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Jumlah PTK',
-                            font: {
-                                size: 13
-                            }
-                        }
-                    }
+                    x: { ticks: { font: { size: 11 }, maxRotation: 45, minRotation: 45 }, title: { display: true, text: 'Nama Pelatihan', font: { size: 13 } } },
+                    y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } }, title: { display: true, text: 'Jumlah PTK', font: { size: 13 } } }
                 }
             }
         });
     }
 
-
-    /* ================= RENDER JENJANG CHARTS ================= */
     renderJenjangCharts(data);
 }
 
@@ -2025,50 +1624,24 @@ function renderCharts(data) {
    RENDER JENJANG CHARTS
 ===================================================== */
 function renderJenjangCharts(data) {
-    console.log('Rendering jenjang charts:', data?.sub_indikator_per_jenjang);
-    
-    // Hapus container sebelumnya
     const container = document.getElementById('jenjangChartsContainer');
     if (!container || !data?.sub_indikator_per_jenjang) return;
-    
-    // Hancurkan chart sebelumnya
+
     document.querySelectorAll('[id^="jenjangChart_"]').forEach(canvas => {
         const chartId = canvas.id;
-        if (window[chartId]) {
-            try {
-                window[chartId].destroy();
-            } catch(e) {
-                console.log('Error destroying chart:', e);
-            }
-        }
+        if (window[chartId]) { try { window[chartId].destroy(); } catch(e) {} }
     });
-    
-    // Render chart untuk setiap jenjang
+
     data.sub_indikator_per_jenjang.forEach((jenjangData, index) => {
         const canvasId = `jenjangChart_${index}`;
         const canvas = document.getElementById(canvasId);
-        
-        if (!canvas) {
-            console.log(`Canvas ${canvasId} tidak ditemukan`);
-            return;
-        }
-        
-        // Dapatkan context canvas
+        if (!canvas) return;
+
         const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            console.log(`Context tidak ditemukan untuk ${canvasId}`);
-            return;
-        }
-        
-        console.log(`Membuat chart untuk ${jenjangData.jenjang_jabatan}`, jenjangData);
-        
-        // Pastikan datasets ada dan valid
-        if (!jenjangData.datasets || !Array.isArray(jenjangData.datasets)) {
-            console.log(`Datasets tidak valid untuk ${jenjangData.jenjang_jabatan}`);
-            return;
-        }
-        
-        // Buat chart
+        if (!ctx) return;
+
+        if (!jenjangData.datasets || !Array.isArray(jenjangData.datasets)) return;
+
         window[canvasId] = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -2088,55 +1661,20 @@ function renderJenjangCharts(data) {
                     legend: {
                         display: true,
                         position: 'top',
-                        labels: {
-                            padding: 10,
-                            usePointStyle: true,
-                            font: {
-                                size: 10
-                            }
-                        }
+                        labels: { padding: 10, usePointStyle: true, font: { size: 10 } }
                     },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: ${context.raw} PTK`;
-                            }
-                        }
+                        callbacks: { label: (context) => `${context.dataset.label}: ${context.raw} PTK` }
                     }
                 },
                 scales: {
-                    x: {
-                        ticks: {
-                            font: {
-                                size: 9
-                            },
-                            maxRotation: 45,
-                            minRotation: 45
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                            font: {
-                                size: 10
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Jumlah PTK',
-                            font: {
-                                size: 10
-                            }
-                        }
-                    }
+                    x: { ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 45 } },
+                    y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, title: { display: true, text: 'Jumlah PTK', font: { size: 10 } } }
                 }
             }
         });
-        
-        console.log(`Chart ${canvasId} berhasil dibuat`);
     });
 }
 
@@ -2145,9 +1683,8 @@ function renderJenjangCharts(data) {
 ===================================================== */
 @if(isset($analisisData) && !isset($analisisData['error']))
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initial load dengan data:', @json($analisisData));
     renderCharts(@json($analisisData));
 });
-  @endif
+@endif
 </script>
 @endsection
