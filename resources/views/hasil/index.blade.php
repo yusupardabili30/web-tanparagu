@@ -535,57 +535,92 @@
             </div>
         </div>
 
-        {{-- FILTER --}}
-        <div class="hi-filter">
-            <form action="{{ route('hasil-instrumen.index') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Pencarian</label>
-                    <input type="text" class="form-control" name="search"
-                           value="{{ request('search') }}"
-                           placeholder="Cari Nama/NIP PTK/Sub Indikator...">
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Kegiatan</label>
-                    <select class="form-select" name="kegiatan_id">
-                        <option value="">Semua Kegiatan</option>
-                        @foreach($kegiatans as $kegiatan)
-                            <option value="{{ $kegiatan->kegiatan_id }}"
-                                {{ request('kegiatan_id') == $kegiatan->kegiatan_id ? 'selected' : '' }}>
-                                {{ $kegiatan->kegiatan_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Tahap</label>
-                    <select class="form-select" name="tahap">
-                        <option value="">Semua Tahap</option>
-                        @for($i = 1; $i <= 10; $i++)
-                            <option value="{{ $i }}" {{ request('tahap') == $i ? 'selected' : '' }}>
-                                Tahap {{ $i }}
-                            </option>
-                        @endfor
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    @if($data->isNotEmpty())
-                        <div class="w-100 mb-2">
-                            <a class="btn btn-success w-100 btn-export-pill"
-                               href="{{ route('hasil-instrumen.export-all', request()->query()) }}">
-                                <i class="ri-file-pdf-line align-bottom me-1"></i> Export PDF
-                            </a>
-                        </div>
-                    @endif
-
-                    <button type="submit" class="btn btn-primary w-100 btn-cari">
-                        <i class="ri-search-line align-bottom me-1"></i> Cari
-                    </button>
-                </div>
-            </form>
+      {{-- FILTER --}}
+<div class="hi-filter">
+    <form action="{{ route('hasil-instrumen.index') }}" method="GET" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Pencarian</label>
+            <input type="text" class="form-control" name="search"
+                   value="{{ request('search') }}"
+                   placeholder="Cari Nama/NIP PTK/Sub Indikator...">
         </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Kegiatan</label>
+            <select class="form-select" name="kegiatan_id">
+                <option value="">Semua Kegiatan</option>
+                @foreach($kegiatans as $kegiatan)
+                    <option value="{{ $kegiatan->kegiatan_id }}"
+                        {{ request('kegiatan_id') == $kegiatan->kegiatan_id ? 'selected' : '' }}>
+                        {{ $kegiatan->kegiatan_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Tahap</label>
+            <select class="form-select" name="tahap">
+                <option value="">Semua Tahap</option>
+                @for($i = 1; $i <= 10; $i++)
+                    <option value="{{ $i }}" {{ request('tahap') == $i ? 'selected' : '' }}>
+                        Tahap {{ $i }}
+                    </option>
+                @endfor
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Jenjang Jabatan</label>
+            <select class="form-select" name="pangkat_jabatan_id">
+                <option value="">Semua</option>
+                @foreach($pangkatJabatans as $pangkat)
+                    <option value="{{ $pangkat->jenjang_jabatan }}"
+                        {{ request('pangkat_jabatan_id') == $pangkat->jenjang_jabatan ? 'selected' : '' }}>
+                        {{ $pangkat->jenjang_jabatan }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Jenis PTK</label>
+            <select class="form-select" name="jenis_ptk_id">
+                <option value="">Semua</option>
+                @foreach($jenisPtk as $jenis)
+                    <option value="{{ $jenis->jenis_ptk_id }}"
+                        {{ request('jenis_ptk_id') == $jenis->jenis_ptk_id ? 'selected' : '' }}>
+                        {{ $jenis->jenis_ptk }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- di dalam div col-md-1 di bagian filter --}}
+<div class="col-md-1">
+    @if($data->isNotEmpty())
+        <div class="w-100 mb-2">
+            <a class="btn btn-success w-100 btn-export-pill"
+               href="{{ route('hasil-instrumen.export-all', request()->query()) }}"
+               title="Export ke PDF">
+                <i class="ri-file-pdf-line align-bottom"></i>
+            </a>
+        </div>
+        
+        {{-- TAMBAHKAN TOMBOL EXCEL INI --}}
+        <div class="w-100 mb-2">
+            <a class="btn btn-warning w-100 btn-export-pill"
+               href="{{ route('hasil-instrumen.export-excel-all', request()->query()) }}"
+               title="Export ke Excel">
+                <i class="ri-file-excel-line align-bottom"></i>
+            </a>
+        </div>
+    @endif
+
+    <button type="submit" class="btn btn-primary w-100 btn-cari" title="Cari Data">
+        <i class="ri-search-line align-bottom"></i>
+    </button>
+</div>
 
         {{-- EMPTY --}}
         @if($data->isEmpty())
@@ -828,9 +863,9 @@
                                                     </div>
                                                 </div>
 
-                                                {{-- REKOMENDASI GAP --}}
+                                                {{-- REKOMENDASI --}}
                                                 <div>
-                                                    <div class="cell-title">Rekomendasi GAP</div>
+                                                    <div class="cell-title">Rekomendasi Pelatihan</div>
                                                     <div class="rek-box">
                                                         @if(count($rekomendasiGap) > 0)
                                                             @foreach($rekomendasiGap as $rkIndex => $rek)

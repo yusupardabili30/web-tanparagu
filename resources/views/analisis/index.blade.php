@@ -286,13 +286,77 @@ canvas {
     display: block;
 }
 
-/* Pastikan parent container memiliki height yang benar */
-#jenjangChartsContainer .col-md-6 {
-    height: 400px;
+//* =====================================================
+   JENJANG CHARTS SCROLL CONTAINER
+===================================================== */
+
+.jenjang-charts-scroll-container {
+    position: relative;
+    width: 100%;
 }
 
+/* Alternatif: Grid layout yang lebih baik */
+#jenjangChartsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 10px;
+    margin: 0;
+}
+
+#jenjangChartsContainer .col-md-6,
 #jenjangChartsContainer .col-lg-4 {
-    height: 350px;
+    grid-column: auto;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Atau gunakan flexbox sebagai alternatif */
+#jenjangChartsContainer.flex-version {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+#jenjangChartsContainer.flex-version > div {
+    flex: 0 0 calc(33.333% - 20px);
+    min-width: 350px;
+}
+
+@media (max-width: 1200px) {
+    #jenjangChartsContainer.flex-version > div {
+        flex: 0 0 calc(50% - 20px);
+    }
+}
+
+@media (max-width: 768px) {
+    #jenjangChartsContainer.flex-version > div {
+        flex: 0 0 100%;
+    }
+}
+
+/* Smooth scrolling */
+#jenjangChartsContainer {
+    scroll-behavior: smooth;
+}
+
+/* Shadow untuk indikasi scroll */
+.jenjang-charts-scroll-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* Tambahkan clear untuk row */
@@ -824,6 +888,30 @@ canvas {
 .row .col-12.d-flex .text-center {
     padding: 40px;
 }
+
+
+/* Tambahkan di bagian CSS */
+.chart-card .badge.bg-primary {
+    background: linear-gradient(135deg, #1a5bb8, #2d6bc8) !important;
+    border: none;
+    box-shadow: 0 2px 5px rgba(26, 91, 184, 0.2);
+}
+
+.chart-card {
+    position: relative;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .chart-card {
+        height: 350px;
+    }
+    
+    .chart-card .badge.bg-primary {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+}
 </style>
 
 <div class="container-fluid">
@@ -936,8 +1024,14 @@ canvas {
                             <button type="button" class="btn btn-outline-secondary" id="btnReset">
                                 <i class="ri-refresh-line align-bottom"></i>
                             </button>
+                            
+<!-- Atau alternatif dengan JavaScript -->
+<button type="button" class="btn btn-success" id="btnExportManual">
+    <i class="ri-file-excel-line align-bottom me-1"></i> Export Excel
+</button>
                         </div>
                     </div>
+                    
                 </div>
             </form>
         </div>
@@ -1030,7 +1124,7 @@ canvas {
                                 <i class="ri-school-line"></i> Distribusi Jenjang Pendidikan
                                 <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
                             </div>
-                            <canvas id="bentukPendidikanChart" height="300"></canvas>
+                            <canvas id="jenjangPendidikanChart" height="300"></canvas>
                         </div>
                     </div>
 
@@ -1062,66 +1156,82 @@ canvas {
                 @endif
 
 <!-- Tabel Modus per Kota -->
-                @if(!empty($analisisData['modus_per_kota']))
-                <div class="row">
-                    <div class="col-12">
-                       <div class="table-card">
-                            <div class="chart-title">
-                                <i class="ri-map-pin-line"></i> Modus Level per Kota
-                                <small class="text-muted ms-2">(Berdasarkan jumlah PTK)</small>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-bordered modus-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Kota</th>
-                                            <th>Total Jawab Sub Indikator</th>
-                                            <th>Sub Indikator</th>
-                                            <th>Modus Level</th>
-                                            <th>Jumlah PTK</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($analisisData['modus_per_kota'] as $kota)
-                                            @if(!empty($kota['sub_indikator_modus']))
-                                                @foreach($kota['sub_indikator_modus'] as $index => $sub)
-                                                    <tr>
-                                                        @if($index === 0)
-                                                            <td rowspan="{{ count($kota['sub_indikator_modus']) }}" style="vertical-align: middle; font-weight: 600;">
-                                                                {{ $kota['nama_kota'] }}
-                                                            </td>
-                                                            <td rowspan="{{ count($kota['sub_indikator_modus']) }}" style="vertical-align: middle; text-align: center;">
-                                                                {{ $kota['total_jawaban'] }}
-                                                            </td>
-                                                        @endif
-                                                        <td>
-                                                            <small class="text-muted">{{ $sub['sub_indikator_code'] }}</small><br>
-                                                            <span class="fw-medium">{{ Str::limit($sub['sub_indikator_name'], 40) }}</span>
-                                                        </td>
-                                                        <td>
-                                                            @php
-                                                                $levelColor = $levelColors[$sub['modus_level'] ?? 2] ?? '#17a2b8';
-                                                                $levelName = $levelNames[$sub['modus_level'] ?? 2] ?? 'Penerapan';
-                                                            @endphp
-                                                            <span class="badge-level" style="background-color: {{ $levelColor }}; color: white;">
-                                                                Level {{ $sub['modus_level'] }} ({{ $levelName }})
-                                                            </span>
-                                                        </td>
-                                                        <td style="text-align: center;">{{ $sub['jumlah_jawaban'] }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            @endif
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+@if(!empty($analisisData['modus_per_kota']))
+<div class="row">
+    <div class="col-12">
+        <div class="table-card">
+            <div class="chart-title">
+                <i class="ri-map-pin-line"></i> 
+                @if(request('kota_id'))
+                    Modus Level per Kota
+                @else
+                    Modus Level Provinsi Banten
                 @endif
+                <small class="text-muted ms-2">(Berdasarkan jumlah PTK)</small>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered modus-table">
+                    <thead>
+                        <tr>
+                            @if(request('kota_id'))
+                                <th>Kota</th>
+                                <th>Total Jawab Sub Indikator</th>
+                            @else
+                                <th>Provinsi</th>
+                                <th>Total Jawab Sub Indikator</th>
+                            @endif
+                            <th>Sub Indikator</th>
+                            <th>Modus Level</th>
+                            <th>Jumlah PTK</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($analisisData['modus_per_kota'] as $kota)
+                            @if(!empty($kota['sub_indikator_modus']))
+                                @foreach($kota['sub_indikator_modus'] as $index => $sub)
+                                    <tr>
+                                        @if($index === 0)
+                                            @if(request('kota_id'))
+                                                <td rowspan="{{ count($kota['sub_indikator_modus']) }}" style="vertical-align: middle; font-weight: 600;">
+                                                    {{ $kota['nama_kota'] }}
+                                                </td>
+                                            @else
+                                                <td rowspan="{{ count($kota['sub_indikator_modus']) }}" style="vertical-align: middle; font-weight: 600;">
+                                                    Banten
+                                                </td>
+                                            @endif
+                                            <td rowspan="{{ count($kota['sub_indikator_modus']) }}" style="vertical-align: middle; text-align: center;">
+                                                {{ $kota['total_jawaban'] }}
+                                            </td>
+                                        @endif
+                                        <td>
+                                            <small class="text-muted">{{ $sub['sub_indikator_code'] }}</small><br>
+                                            <span class="fw-medium">{{ Str::limit($sub['sub_indikator_name'], 40) }}</span>
+                                        </td>
+                                        <td>
+                                            @php
+                                                $levelColor = $levelColors[$sub['modus_level'] ?? 2] ?? '#17a2b8';
+                                                $levelName = $levelNames[$sub['modus_level'] ?? 2] ?? 'Penerapan';
+                                            @endphp
+                                            <span class="badge-level" style="background-color: {{ $levelColor }}; color: white;">
+                                                Level {{ $sub['modus_level'] }} ({{ $levelName }})
+                                            </span>
+                                        </td>
+                                        <td style="text-align: center;">{{ $sub['jumlah_jawaban'] }}</td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 
 
-               <!-- Ganti bagian Charts 6: Sub Indikator per Jenjang Jabatan dengan ini -->
+             <!-- Ganti bagian Charts 6: Sub Indikator per Jenjang Jabatan dengan ini -->
 @if(!empty($analisisData['sub_indikator_per_jenjang']))
 <div class="row mt-4">
     <div class="col-12">
@@ -1129,21 +1239,39 @@ canvas {
             <div class="chart-title">
                 <i class="ri-bar-chart-grouped-line"></i> Distribusi PTK per Sub Indikator per Jenjang Jabatan
                 <span class="badge bg-info ms-2">Jumlah PTK per Jenjang</span>
+              
             </div>
             
-            <div class="row" id="jenjangChartsContainer">
-                @foreach($analisisData['sub_indikator_per_jenjang'] as $jenjangChart)
-                <div class="col-md-6 mb-4">
-                    <div class="chart-card" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,.05); height: 400px;">
-                        <h6 class="mb-3 text-center" style="color: #1a5bb8; font-weight: 600; font-size: 16px;">
-                            <i class="ri-user-star-line me-2"></i>{{ $jenjangChart['jenjang_jabatan'] }}
-                        </h6>
-                        <div class="chart-wrapper" style="height: 320px;">
-                            <canvas id="jenjangChart_{{ $loop->index }}" height="320"></canvas>
+            <!-- Container dengan scroll -->
+            <div class="jenjang-charts-scroll-container">
+                <div class="row" id="jenjangChartsContainer">
+                    @foreach($analisisData['sub_indikator_per_jenjang'] as $jenjangChart)
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="chart-card">
+                            <h6 class="mb-3 text-center" style="color: #1a5bb8; font-weight: 600; font-size: 16px;">
+                                <i class="ri-user-star-line me-2"></i>{{ $jenjangChart['jenjang_jabatan'] }}
+                            </h6>
+                            
+                          
+                            
+                            <div class="chart-wrapper">
+                                <canvas id="jenjangChart_{{ $loop->index }}"></canvas>
+                            </div>
                         </div>
                     </div>
+                    @endforeach
                 </div>
-                @endforeach
+            </div>
+            
+            <!-- Info jumlah chart -->
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="ri-information-line"></i>
+                    Menampilkan {{ count($analisisData['sub_indikator_per_jenjang']) }} jenjang jabatan
+                    @if(count($analisisData['sub_indikator_per_jenjang']) > 6)
+                        (Gunakan scroll untuk melihat lebih banyak)
+                    @endif
+                </small>
             </div>
         </div>
     </div>
@@ -1320,7 +1448,7 @@ canvas {
 ===================================================== */
 let levelDistributionChart = null;
 let jenjangDistributionChart = null;
-let bentukPendidikanChart = null;
+let jenjangPendidikanChart = null;
 let jenisKelaminChart = null;
 let allSubIndikatorsChart = null;
 let pelatihanChart = null; // TAMBAHKAN INI
@@ -1413,7 +1541,7 @@ function updateAnalisisContent(data) {
         <div class="col-md-6">
             <div class="chart-container">
                 <div class="chart-title"><i class="ri-school-line"></i> Distribusi Jenjang Pendidikan <small class="text-muted">(PTK yang menjawab)</small></div>
-                <canvas id="bentukPendidikanChart" height="300"></canvas>
+                <canvas id="jenjangPendidikanChart" height="300"></canvas>
             </div>
         </div>
         <div class="col-md-6">
@@ -1502,39 +1630,47 @@ function updateAnalisisContent(data) {
 
     
     // Tambahkan charts per jenjang jabatan jika ada
-    if (data.sub_indikator_per_jenjang?.length > 0) {
-        html += `
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="chart-container chart-container-large">
-                    <div class="chart-title">
-                        <i class="ri-bar-chart-grouped-line"></i> Distribusi PTK per Sub Indikator per Jenjang Jabatan
-                        <span class="badge bg-info ms-2">Jumlah PTK per Jenjang</span>
-                    </div>
-                    
-                    <div class="row" id="jenjangChartsContainer">`;
-        
-        data.sub_indikator_per_jenjang.forEach((jenjangData, index) => {
-            html += `
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="chart-card" style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,.05); height: 320px;">
-                                <h6 class="mb-3 text-center" style="color: #1a5bb8; font-weight: 600;">
-                                    <i class="ri-user-star-line me-2"></i>${jenjangData.jenjang_jabatan}
-                                </h6>
-                                <canvas 
-                                    id="jenjangChart_${index}" 
-                                    height="250">
-                                </canvas>
-                            </div>
-                        </div>`;
-        });
+if (data.sub_indikator_per_jenjang?.length > 0) {
+    html += `
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="chart-container chart-container-large">
+                <div class="chart-title">
+                    <i class="ri-bar-chart-grouped-line"></i> Distribusi PTK per Sub Indikator per Jenjang Jabatan
+                    <span class="badge bg-info ms-2">Jumlah PTK per Jenjang</span>
+                </div>
+                
+                <div class="row" id="jenjangChartsContainer">`;
+    
+    data.sub_indikator_per_jenjang.forEach((jenjangData, index) => {
+        // Hitung rata-rata level jika belum ada di data
+        const rataLevel = jenjangData.rata_rata_level 
+            ? jenjangData.rata_rata_level.toFixed(2) 
+            : hitungRataRataLevel(jenjangData);
         
         html += `
-                    </div>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="chart-card" style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,.05); height: 370px;">
+                            <h6 class="mb-3 text-center" style="color: #1a5bb8; font-weight: 600; font-size: 15px;">
+                                <i class="ri-user-star-line me-2"></i>${jenjangData.jenjang_jabatan}
+                            </h6>
+                            
+                           
+                            <canvas 
+                                id="jenjangChart_${index}" 
+                                height="250"
+                                style="margin-top: 10px;">
+                            </canvas>
+                        </div>
+                    </div>`;
+    });
+    
+    html += `
                 </div>
             </div>
-        </div>`;
-    }
+        </div>
+    </div>`;
+}
 
   
 
@@ -1692,10 +1828,52 @@ function statCard(icon,label,value,color){
 }
 
 /* =====================================================
-   HELPER FUNCTIONS
+   HELPER FUNCTIONS - TAMBAHKAN FUNGSI INI
 ===================================================== */
+function hitungRataRataLevel(jenjangData) {
+    try {
+        // Debug: Lihat struktur data
+        console.log('Data untuk perhitungan rata-rata:', jenjangData);
+        
+        // Cek jika rata_rata_level sudah ada dari server
+        if (jenjangData.rata_rata_level !== undefined && jenjangData.rata_rata_level !== null) {
+            return parseFloat(jenjangData.rata_rata_level).toFixed(2);
+        }
+        
+        // Jika tidak ada, hitung dari datasets
+        let totalLevel = 0;
+        let totalCount = 0;
+        
+        if (jenjangData.datasets && Array.isArray(jenjangData.datasets)) {
+            jenjangData.datasets.forEach(dataset => {
+                const label = dataset.label || '';
+                const levelMatch = label.match(/Level (\d+)/);
+                
+                if (levelMatch && dataset.data && Array.isArray(dataset.data)) {
+                    const level = parseInt(levelMatch[1]);
+                    const jumlah = dataset.data.reduce((sum, val) => sum + (parseInt(val) || 0), 0);
+                    
+                    totalLevel += level * jumlah;
+                    totalCount += jumlah;
+                }
+            });
+        }
+        
+        if (totalCount > 0) {
+            const rataRata = totalLevel / totalCount;
+            return rataRata.toFixed(2);
+        }
+        
+        return '0.00';
+    } catch (error) {
+        console.error('Error calculating average level:', error, jenjangData);
+        return 'N/A';
+    }
+}
+
 function getLevelColor(level) {
     const colors = {
+        1: '#17a212',
         2: '#17a2b8',
         3: '#007bff',
         4: '#ffc107',
@@ -1706,6 +1884,7 @@ function getLevelColor(level) {
 
 function getLevelName(level) {
     const names = {
+        1: 'Gagal',
         2: 'Penerapan',
         3: 'Analisis',
         4: 'Evaluasi',
@@ -1721,7 +1900,7 @@ function renderCharts(data) {
     console.log('Rendering charts with data:', data);
 
     // Destroy existing charts
-    [levelDistributionChart, jenjangDistributionChart, bentukPendidikanChart, jenisKelaminChart, allSubIndikatorsChart, pelatihanChart].forEach(chart => {
+    [levelDistributionChart, jenjangDistributionChart, jenjangPendidikanChart, jenisKelaminChart, allSubIndikatorsChart, pelatihanChart].forEach(chart => {
         if (chart) {
             try {
                 chart.destroy();
@@ -2151,5 +2330,37 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCharts(@json($analisisData));
 });
   @endif
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+document.getElementById('btnExportManual')?.addEventListener('click', function() {
+    const form = document.getElementById('analisisForm');
+    const formData = new FormData(form);
+    
+    // Tambahkan parameter tambahan
+    formData.append('_token', '{{ csrf_token() }}');
+    formData.append('export', 'excel');
+    
+    // Buat URL dengan parameter
+    let params = new URLSearchParams();
+    for (let [key, value] of formData.entries()) {
+        params.append(key, value);
+    }
+    
+    // Redirect ke export URL
+    window.location.href = '{{ route("analisis.export-excel") }}?' + params.toString();
+});
 </script>
 @endsection

@@ -5,6 +5,28 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
+
+
+
+
+// Tambahkan di atas class AnalisisController (setelah namespace)
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use PhpOffice\PhpSpreadsheet\Chart\Title;
+use PhpOffice\PhpSpreadsheet\Chart\Legend;
+use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\Layout;
+
 class AnalisisController extends Controller
 {
     public function index(Request $request)
@@ -395,7 +417,7 @@ class AnalisisController extends Controller
 
         $modusKotaData = $modusKotaQuery->get();
 
-        $modusPerKota = $this->getModusPerKota($modusKotaData, $semuaSubIndikator, $totalJawabanPerKota);
+        $modusPerKota = $this->getModusPerKota($modusKotaData, $semuaSubIndikator, $totalJawabanPerKota, $request);
         $subIndikatorPerJenjang = $this->getSubIndikatorPerJenjang($request, $semuaSubIndikator);
         $subIndikatorPerJenjangPendidikan = $this->getSubIndikatorPerJenjangPendidikan($request, $semuaSubIndikator);
 
@@ -482,11 +504,7 @@ class AnalisisController extends Controller
 
         $ptkMenjawab = $ptkMenjawabQuery->first()->jumlah ?? 0;
 
-        // Rata-rata level berdasarkan jawaban
-        $rataLevel = 0;
-        if ($jawabanData && $jawabanData->count() > 0) {
-            $rataLevel = $jawabanData->avg('level');
-        }
+
 
         // Persentase pengisian
         $persentaseIsi = $totalPtk > 0
@@ -496,7 +514,7 @@ class AnalisisController extends Controller
         return [
             'total_ptk' => $totalPtk,
             'ptk_menjawab' => $ptkMenjawab,
-            'rata_level' => round($rataLevel, 2),
+
             'persentase_isi' => $persentaseIsi
         ];
     }
@@ -615,7 +633,7 @@ class AnalisisController extends Controller
             ->get();
     }
 
-    private function getModusPerKota($modusKotaData, $semuaSubIndikator, $totalJawabanPerKota)
+    private function getModusPerKota($modusKotaData, $semuaSubIndikator, $totalJawabanPerKota, $request)
     {
         if ($modusKotaData->isEmpty() || $semuaSubIndikator->isEmpty()) {
             return [];
@@ -630,9 +648,58 @@ class AnalisisController extends Controller
             ];
         }
 
-        // Kelompokkan per kota dan sub indikator
-        $groupedByKota = $modusKotaData->groupBy(['nama_kota', 'sub_indikator_id']);
+        // PERUBAHAN: Jika filter kota_id kosong (semua kota), gabungkan semua data
+        if (!$request->filled('kota_id')) {
+            // Kelompokkan per sub indikator tanpa memperhatikan kota
+            $groupedBySubIndikator = $modusKotaData->groupBy(['sub_indikator_id']);
 
+            $combinedResult = [];
+            $totalCombined = array_sum($totalJawabanPerKota);
+
+            foreach ($groupedBySubIndikator as $subIndikatorId => $dataPerSub) {
+                // Gabungkan semua data untuk sub indikator ini
+                $combinedData = $dataPerSub->groupBy('level')
+                    ->map(function ($items, $level) {
+                        return [
+                            'level' => (int)$level,
+                            'jumlah_jawaban' => $items->sum('jumlah_jawaban')
+                        ];
+                    })
+                    ->values()
+                    ->sortByDesc('jumlah_jawaban');
+
+                if (!$combinedData->isEmpty()) {
+                    $modusData = $combinedData->first();
+                    $subInfo = $subIndikatorMap[$subIndikatorId] ?? [
+                        'code' => 'SI-' . $subIndikatorId,
+                        'name' => 'Sub Indikator ' . $subIndikatorId
+                    ];
+
+                    $combinedResult[] = [
+                        'sub_indikator_code' => $subInfo['code'],
+                        'sub_indikator_name' => $subInfo['name'],
+                        'modus_level' => $modusData['level'],
+                        'jumlah_jawaban' => $modusData['jumlah_jawaban']
+                    ];
+                }
+            }
+
+            // Urutkan berdasarkan jumlah jawaban terbanyak
+            usort($combinedResult, function ($a, $b) {
+                return $b['jumlah_jawaban'] - $a['jumlah_jawaban'];
+            });
+
+            return [
+                [
+                    'nama_kota' => 'Banten',
+                    'sub_indikator_modus' => $combinedResult,
+                    'total_jawaban' => $totalCombined
+                ]
+            ];
+        }
+
+        // KODE ASAL (untuk filter kota tertentu)
+        $groupedByKota = $modusKotaData->groupBy(['nama_kota', 'sub_indikator_id']);
         $result = [];
 
         foreach ($groupedByKota as $namaKota => $subIndikators) {
@@ -1062,5 +1129,1824 @@ class AnalisisController extends Controller
         }
 
         return $groupedData->sortByDesc('jumlah_ptk')->values();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Tambahkan method exportExcel di dalam class AnalisisController
+    public function exportExcel(Request $request)
+    {
+        try {
+            // Set memory limit
+            ini_set('memory_limit', '512M');
+            ini_set('max_execution_time', 300);
+
+            // Dapatkan data analisis
+            $analisisData = $this->getAnalisisData($request);
+
+            // Buat spreadsheet baru
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+
+            // ======================
+            // SHEET 1: ANALISIS GRAFIK
+            // ======================
+            $sheet1 = $spreadsheet->getActiveSheet();
+            $sheet1->setTitle('ANALISIS GRAFIK');
+
+            // Set page setup
+            $sheet1->getPageSetup()
+                ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+                ->setPaperSize(PageSetup::PAPERSIZE_A4)
+                ->setFitToWidth(1)
+                ->setFitToHeight(0);
+
+            // Header Sheet 1
+            $currentRow = 1;
+
+            // Judul utama
+            $sheet1->mergeCells("A{$currentRow}:L{$currentRow}");
+            $sheet1->setCellValue("A{$currentRow}", 'LAPORAN ANALISIS HASIL INSTRUMEN PTK');
+            $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => '1a5bb8']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $currentRow++;
+            $sheet1->mergeCells("A{$currentRow}:L{$currentRow}");
+            $sheet1->setCellValue("A{$currentRow}", 'Analisis Komprehensif Berdasarkan Filter yang Diterapkan');
+            $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                'font' => ['size' => 12, 'color' => ['rgb' => '2d3748']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $currentRow++;
+            $sheet1->mergeCells("A{$currentRow}:L{$currentRow}");
+            $sheet1->setCellValue("A{$currentRow}", 'Dicetak: ' . now()->format('d F Y H:i:s'));
+            $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                'font' => ['color' => ['rgb' => '666666'], 'italic' => true],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $currentRow += 2;
+
+            // ======================
+            // FILTER INFO
+            // ======================
+            $filterStartRow = $currentRow;
+            $sheet1->mergeCells("A{$currentRow}:L{$currentRow}");
+            $sheet1->setCellValue("A{$currentRow}", 'FILTER YANG DIGUNAKAN');
+            $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a5bb8']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            ]);
+
+            // Ambil nama filter
+            $kegiatanName = '';
+            if ($request->filled('kegiatan_id')) {
+                $kegiatan = DB::table('kegiatan')->where('kegiatan_id', $request->kegiatan_id)->first();
+                $kegiatanName = $kegiatan->kegiatan_name ?? '';
+            }
+
+            $jenjangName = '';
+            if ($request->filled('pangkat_jabatan_id')) {
+                $jenjang = DB::table('pangkat_jabatan')->where('pangkat_jabatan_id', $request->pangkat_jabatan_id)->first();
+                $jenjangName = $jenjang->jenjang_jabatan ?? '';
+            }
+
+            $jenisPtkName = '';
+            if ($request->filled('jenis_ptk_id')) {
+                $jenisPtk = DB::table('jenis_ptk')->where('jenis_ptk_id', $request->jenis_ptk_id)->first();
+                $jenisPtkName = $jenisPtk->jenis_ptk ?? '';
+            }
+
+            $kotaName = '';
+            if ($request->filled('kota_id')) {
+                $kota = DB::table('kota')->where('kota_id', $request->kota_id)->first();
+                $kotaName = $kota->nama_kota ?? '';
+            }
+
+            // Tampilkan filter
+            $filters = [
+                ['Kegiatan:', $kegiatanName ?: 'Semua Kegiatan'],
+                ['Jenjang Jabatan:', $jenjangName ?: 'Semua Jenjang'],
+                ['Jenis PTK:', $jenisPtkName ?: 'Semua Jenis'],
+                ['Kota:', $kotaName ?: 'Semua Kota'],
+                ['Jenis Kelamin:', $request->jenis_kelamin ? ($request->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') : 'Semua'],
+                ['Total PTK:', $analisisData['statistik']['total_ptk'] ?? 0],
+                ['PTK Menjawab:', $analisisData['statistik']['ptk_menjawab'] ?? 0],
+                ['Progress:', ($analisisData['statistik']['persentase_isi'] ?? 0) . '%']
+            ];
+
+            foreach ($filters as $index => $filter) {
+                $currentRow++;
+                $sheet1->setCellValue("A{$currentRow}", $filter[0]);
+                $sheet1->setCellValue("B{$currentRow}", $filter[1]);
+                $sheet1->mergeCells("B{$currentRow}:L{$currentRow}");
+
+                $bgColor = $index % 2 == 0 ? 'F8FAFC' : 'F1F5F9';
+                $sheet1->getStyle("A{$currentRow}:L{$currentRow}")->applyFromArray([
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                ]);
+                $sheet1->getStyle("A{$currentRow}")->applyFromArray(['font' => ['bold' => true]]);
+            }
+
+            $currentRow += 2;
+
+            // ======================
+            // STATISTIK UTAMA
+            // ======================
+            $statRow = $currentRow;
+            $sheet1->mergeCells("A{$currentRow}:L{$currentRow}");
+            $sheet1->setCellValue("A{$currentRow}", 'STATISTIK UTAMA');
+            $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2d3748']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            ]);
+
+            $currentRow++;
+            $stats = [
+                ['Total PTK', $analisisData['statistik']['total_ptk'] ?? 0, 'ri-user-3-line'],
+                ['PTK Menjawab', $analisisData['statistik']['ptk_menjawab'] ?? 0, 'ri-checkbox-circle-line'],
+                ['Progress Pengisian', ($analisisData['statistik']['persentase_isi'] ?? 0) . '%', 'ri-progress-4-line']
+            ];
+
+            $col = 0;
+            foreach ($stats as $stat) {
+                $cell = chr(65 + $col * 4) . $currentRow; // A, E, I
+                $sheet1->mergeCells($cell . ':' . chr(65 + $col * 4 + 3) . $currentRow);
+                $sheet1->setCellValue($cell, $stat[0]);
+                $sheet1->getStyle($cell)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 9],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E2E8F0']],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $currentRow++;
+                $cellValue = chr(65 + $col * 4) . $currentRow;
+                $sheet1->mergeCells($cellValue . ':' . chr(65 + $col * 4 + 3) . $currentRow);
+                $sheet1->setCellValue($cellValue, $stat[1]);
+                $sheet1->getStyle($cellValue)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => '1a5bb8']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $col++;
+            }
+
+            $currentRow += 2;
+
+
+
+            // ======================
+            // DISTRIBUSI JENJANG JABATAN
+            // ======================
+            if (!empty($analisisData['jenjang_distribution'])) {
+                $sheet1->mergeCells("A{$currentRow}:F{$currentRow}");
+                $sheet1->setCellValue("A{$currentRow}", '1. DISTRIBUSI JENJANG JABATAN');
+                $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8'], 'size' => 12],
+                    'borders' => ['bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '1a5bb8']]]
+                ]);
+
+                $currentRow++;
+
+                $headers = ['Jenjang Jabatan', 'Jumlah PTK', 'Persentase', 'Diagram'];
+                foreach ($headers as $col => $header) {
+                    $cell = chr(65 + $col) . $currentRow;
+                    $sheet1->setCellValue($cell, $header);
+                    $sheet1->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4B5563']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+                }
+
+                $currentRow++;
+
+                $jenjangData = collect($analisisData['jenjang_distribution']);
+                $totalJenjang = $jenjangData->sum('count');
+
+                $jenjangColors = [
+                    'Pertama' => '#ff6b6b',
+                    'Muda' => '#4ecdc4',
+                    'Madya' => '#45b7d1',
+                    'Utama' => '#96ceb4'
+                ];
+
+                foreach ($jenjangData as $index => $jenjang) {
+                    $percentage = $totalJenjang > 0 ? round(($jenjang['count'] / $totalJenjang) * 100, 1) : 0;
+                    $color = $jenjangColors[$jenjang['jenjang_jabatan']] ?? '#CBD5E1';
+
+                    $sheet1->setCellValue("A{$currentRow}", $jenjang['jenjang_jabatan']);
+                    $sheet1->setCellValue("B{$currentRow}", $jenjang['count']);
+                    $sheet1->setCellValue("C{$currentRow}", $percentage . '%');
+
+                    // Diagram visual
+                    $barLength = (int)($percentage / 5);
+                    $diagram = str_repeat('█', $barLength) . " ({$percentage}%)";
+                    $sheet1->setCellValue("D{$currentRow}", $diagram);
+
+                    // Warna untuk diagram
+                    $fontColor = new Color();
+                    $fontColor->setRGB(substr($color, 1));
+                    $sheet1->getStyle("D{$currentRow}")->getFont()->setColor($fontColor);
+
+                    $bgColor = $currentRow % 2 == 0 ? 'FFFFFF' : 'F9FAFB';
+                    $sheet1->getStyle("A{$currentRow}:D{$currentRow}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $sheet1->getStyle("B{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet1->getStyle("C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $currentRow++;
+                }
+
+                $currentRow += 2;
+            }
+
+
+
+            // Dalam method exportExcel() di controller, setelah bagian "STATISTIK UTAMA", tambahkan:
+
+            // ======================
+            // GRAFIK DISTRIBUSI JENJANG PENDIDIKAN
+            // ======================
+            if (!empty($analisisData['jenjang_pendidikan_distribution'])) {
+                $currentRow += 2;
+                $chartStartRow = $currentRow;
+
+                $sheet1->mergeCells("A{$currentRow}:F{$currentRow}");
+                $sheet1->setCellValue("A{$currentRow}", '2. DISTRIBUSI JENJANG PENDIDIKAN PTK');
+                $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8'], 'size' => 12],
+                    'borders' => ['bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '1a5bb8']]]
+                ]);
+
+                $currentRow++;
+
+                // Header tabel
+                $headers = ['Jenjang Pendidikan', 'Jumlah PTK', 'Persentase', 'Diagram'];
+                foreach ($headers as $col => $header) {
+                    $cell = chr(65 + $col) . $currentRow;
+                    $sheet1->setCellValue($cell, $header);
+                    $sheet1->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4B5563']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+                }
+
+                $currentRow++;
+
+                $jenjangPendidikanData = collect($analisisData['jenjang_pendidikan_distribution']);
+                $totalJenjangPendidikan = $jenjangPendidikanData->sum('count');
+
+                $colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'];
+
+                foreach ($jenjangPendidikanData as $index => $jenjang) {
+                    $percentage = $totalJenjangPendidikan > 0 ? round(($jenjang['count'] / $totalJenjangPendidikan) * 100, 1) : 0;
+                    $color = $colors[$index % count($colors)];
+
+                    $sheet1->setCellValue("A{$currentRow}", $jenjang['jenjang_pendidikan']);
+                    $sheet1->setCellValue("B{$currentRow}", $jenjang['count']);
+                    $sheet1->setCellValue("C{$currentRow}", $percentage . '%');
+
+                    // Diagram visual pie chart
+                    $barLength = min((int)($percentage / 5), 20);
+                    $diagram = str_repeat('◉', ceil($percentage / 20)) . " ({$percentage}%)";
+                    $sheet1->setCellValue("D{$currentRow}", $diagram);
+
+                    // Warna untuk diagram
+                    $fontColor = new Color();
+                    $fontColor->setRGB(substr($color, 1));
+                    $sheet1->getStyle("D{$currentRow}")->getFont()->setColor($fontColor);
+
+                    $bgColor = $currentRow % 2 == 0 ? 'FFFFFF' : 'F9FAFB';
+                    $sheet1->getStyle("A{$currentRow}:D{$currentRow}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $sheet1->getStyle("B{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet1->getStyle("C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $currentRow++;
+                }
+
+                // Total row
+                $sheet1->setCellValue("A{$currentRow}", 'TOTAL');
+                $sheet1->setCellValue("B{$currentRow}", $totalJenjangPendidikan);
+                $sheet1->setCellValue("C{$currentRow}", '100%');
+                $sheet1->setCellValue("D{$currentRow}", str_repeat('◉', 5));
+
+                $sheet1->getStyle("A{$currentRow}:D{$currentRow}")->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $currentRow += 2;
+            }
+
+            // ======================
+            // GRAFIK DISTRIBUSI JENIS KELAMIN
+            // ======================
+            if (!empty($analisisData['jenis_kelamin_distribution'])) {
+                $chartStartRow = $currentRow;
+
+                $sheet1->mergeCells("A{$currentRow}:F{$currentRow}");
+                $sheet1->setCellValue("A{$currentRow}", '3. DISTRIBUSI JENIS KELAMIN PTK');
+                $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8'], 'size' => 12],
+                    'borders' => ['bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '1a5bb8']]]
+                ]);
+
+                $currentRow++;
+
+                // Header tabel
+                $headers = ['Jenis Kelamin', 'Jumlah PTK', 'Persentase', 'Diagram'];
+                foreach ($headers as $col => $header) {
+                    $cell = chr(65 + $col) . $currentRow;
+                    $sheet1->setCellValue($cell, $header);
+                    $sheet1->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4B5563']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+                }
+
+                $currentRow++;
+
+                $jenisKelaminData = collect($analisisData['jenis_kelamin_distribution']);
+                $totalJenisKelamin = $jenisKelaminData->sum('count');
+
+                $genderColors = [
+                    'Laki-laki' => '#4dc9f6',
+                    'Perempuan' => '#f67019',
+                    'Tidak Diketahui' => '#f53794'
+                ];
+
+                foreach ($jenisKelaminData as $index => $jenis) {
+                    $percentage = $totalJenisKelamin > 0 ? round(($jenis['count'] / $totalJenisKelamin) * 100, 1) : 0;
+                    $color = $genderColors[$jenis['jenis_kelamin']] ?? '#CBD5E1';
+
+                    $sheet1->setCellValue("A{$currentRow}", $jenis['jenis_kelamin']);
+                    $sheet1->setCellValue("B{$currentRow}", $jenis['count']);
+                    $sheet1->setCellValue("C{$currentRow}", $percentage . '%');
+
+                    // Diagram visual pie chart
+                    $barLength = min((int)($percentage / 5), 20);
+                    $diagram = str_repeat('●', ceil($percentage / 20)) . " ({$percentage}%)";
+                    $sheet1->setCellValue("D{$currentRow}", $diagram);
+
+                    // Warna untuk diagram
+                    $fontColor = new Color();
+                    $fontColor->setRGB(substr($color, 1));
+                    $sheet1->getStyle("D{$currentRow}")->getFont()->setColor($fontColor);
+
+                    $bgColor = $currentRow % 2 == 0 ? 'FFFFFF' : 'F9FAFB';
+                    $sheet1->getStyle("A{$currentRow}:D{$currentRow}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $sheet1->getStyle("B{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet1->getStyle("C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $currentRow++;
+                }
+
+                // Total row
+                $sheet1->setCellValue("A{$currentRow}", 'TOTAL');
+                $sheet1->setCellValue("B{$currentRow}", $totalJenisKelamin);
+                $sheet1->setCellValue("C{$currentRow}", '100%');
+                $sheet1->setCellValue("D{$currentRow}", str_repeat('●', 5));
+
+                $sheet1->getStyle("A{$currentRow}:D{$currentRow}")->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $currentRow += 2;
+            }
+
+            // ======================
+            // DIAGRAM BATANG DISTRIBUSI PTK PER SUB INDIKATOR (DIPERBAIKI)
+            // ======================
+            if (!empty($analisisData['all_sub_indikators_chart']['labels'])) {
+                $chartStartRow = $currentRow;
+
+                $sheet1->mergeCells("A{$currentRow}:L{$currentRow}");
+                $sheet1->setCellValue("A{$currentRow}", '4. DISTRIBUSI PTK PER SUB INDIKATOR');
+                $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8'], 'size' => 12],
+                    'borders' => ['bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '1a5bb8']]]
+                ]);
+
+                $currentRow++;
+
+                // Ambil data chart
+                $chartData = $analisisData['all_sub_indikators_chart'];
+                $labels = $chartData['labels'];
+                $datasets = $chartData['datasets'];
+
+                // Hitung jumlah kolom dengan benar
+                $numColumns = count($datasets) + 2; // A (Sub Indikator) + datasets + TOTAL
+                $lastColumnLetter = chr(65 + $numColumns - 1);
+
+                // Siapkan tabel data
+                $headers = ['Sub Indikator'];
+                foreach ($datasets as $dataset) {
+                    $headers[] = $dataset['label'];
+                }
+                $headers[] = 'TOTAL';
+
+                // Tulis header
+                foreach ($headers as $col => $header) {
+                    $cell = chr(65 + $col) . $currentRow;
+                    $sheet1->setCellValue($cell, $header);
+                    $sheet1->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2d3748']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+                }
+
+                $currentRow++;
+
+                // Siapkan array untuk menyimpan total per level
+                $totalPerLevel = array_fill(0, count($datasets), 0);
+                $grandTotal = 0;
+
+                // Tulis data
+                for ($i = 0; $i < count($labels); $i++) {
+                    $subIndikator = $labels[$i];
+                    $sheet1->setCellValue("A{$currentRow}", $subIndikator);
+
+                    $totalRow = 0;
+                    $colIndex = 1;
+
+                    foreach ($datasets as $index => $dataset) {
+                        $value = $dataset['data'][$i] ?? 0;
+                        $totalRow += $value;
+
+                        // Akumulasi total per level
+                        $totalPerLevel[$index] += $value;
+
+                        $cell = chr(65 + $colIndex) . $currentRow;
+                        $sheet1->setCellValue($cell, $value);
+
+                        // Warna sesuai level
+                        $levelColor = $dataset['backgroundColor'] ?? '#17a2b8';
+                        $fontColor = new Color();
+                        $fontColor->setRGB(substr($levelColor, 1));
+                        $sheet1->getStyle($cell)->getFont()->setColor($fontColor);
+
+                        $colIndex++;
+                    }
+
+                    // Total per sub indikator
+                    $totalCell = chr(65 + $colIndex) . $currentRow;
+                    $sheet1->setCellValue($totalCell, $totalRow);
+                    $sheet1->getStyle($totalCell)->applyFromArray([
+                        'font' => ['bold' => true]
+                    ]);
+
+                    // Akumulasi grand total
+                    $grandTotal += $totalRow;
+
+                    // Background color alternatif
+                    $bgColor = $currentRow % 2 == 0 ? 'FFFFFF' : 'F9FAFB';
+                    $sheet1->getStyle("A{$currentRow}:{$totalCell}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $sheet1->getStyle("B{$currentRow}:{$totalCell}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $currentRow++;
+                }
+
+                // Footer dengan total
+                $sheet1->setCellValue("A{$currentRow}", 'TOTAL');
+                $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                    'font' => ['bold' => true]
+                ]);
+
+                // Hitung total per level dengan benar
+                $colIndex = 1;
+                foreach ($totalPerLevel as $totalLevel) {
+                    $cell = chr(65 + $colIndex) . $currentRow;
+                    $sheet1->setCellValue($cell, $totalLevel);
+                    $sheet1->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true]
+                    ]);
+                    $colIndex++;
+                }
+
+                // Grand total
+                $grandTotalCell = $lastColumnLetter . $currentRow;
+                $sheet1->setCellValue($grandTotalCell, $grandTotal);
+                $sheet1->getStyle($grandTotalCell)->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8']]
+                ]);
+
+                $sheet1->getStyle("A{$currentRow}:{$grandTotalCell}")->applyFromArray([
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $currentRow += 2;
+            }
+
+            // ======================
+            // DIAGRAM BATANG DISTRIBUSI PTK PER SUB INDIKATOR PER JENJANG JABATAN (DIPERBAIKI)
+            // ======================
+            if (!empty($analisisData['sub_indikator_per_jenjang'])) {
+                foreach ($analisisData['sub_indikator_per_jenjang'] as $jenjangIndex => $jenjangData) {
+                    $chartStartRow = $currentRow;
+
+                    $sheet1->mergeCells("A{$currentRow}:L{$currentRow}");
+                    $sheet1->setCellValue("A{$currentRow}", ($jenjangIndex + 5) . '. DISTRIBUSI PTK PER SUB INDIKATOR - ' . strtoupper($jenjangData['jenjang_jabatan']));
+                    $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8'], 'size' => 12],
+                        'borders' => ['bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '1a5bb8']]]
+                    ]);
+
+                    $currentRow++;
+
+                    // Siapkan tabel data
+                    $labels = $jenjangData['labels'];
+                    $datasets = $jenjangData['datasets'];
+
+                    // Hitung jumlah kolom dengan benar
+                    $numColumns = count($datasets) + 2; // A (Sub Indikator) + datasets + TOTAL
+                    $lastColumnLetter = chr(65 + $numColumns - 1);
+
+                    $headers = ['Sub Indikator'];
+                    foreach ($datasets as $dataset) {
+                        $headers[] = $dataset['label'];
+                    }
+                    $headers[] = 'TOTAL';
+
+                    // Tulis header
+                    foreach ($headers as $col => $header) {
+                        $cell = chr(65 + $col) . $currentRow;
+                        $sheet1->setCellValue($cell, $header);
+                        $sheet1->getStyle($cell)->applyFromArray([
+                            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2d3748']],
+                            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                        ]);
+                    }
+
+                    $currentRow++;
+
+                    // Siapkan array untuk menyimpan total per level
+                    $totalPerLevel = array_fill(0, count($datasets), 0);
+                    $grandTotal = 0;
+
+                    // Tulis data
+                    for ($i = 0; $i < count($labels); $i++) {
+                        $subIndikator = $labels[$i];
+                        $sheet1->setCellValue("A{$currentRow}", $subIndikator);
+
+                        $totalRow = 0;
+                        $colIndex = 1;
+
+                        foreach ($datasets as $index => $dataset) {
+                            $value = $dataset['data'][$i] ?? 0;
+                            $totalRow += $value;
+
+                            // Akumulasi total per level
+                            $totalPerLevel[$index] += $value;
+
+                            $cell = chr(65 + $colIndex) . $currentRow;
+                            $sheet1->setCellValue($cell, $value);
+
+                            // Warna sesuai level
+                            $levelColor = $dataset['backgroundColor'] ?? '#17a2b8';
+                            $fontColor = new Color();
+                            $fontColor->setRGB(substr($levelColor, 1));
+                            $sheet1->getStyle($cell)->getFont()->setColor($fontColor);
+
+                            $colIndex++;
+                        }
+
+                        // Total per sub indikator
+                        $totalCell = chr(65 + $colIndex) . $currentRow;
+                        $sheet1->setCellValue($totalCell, $totalRow);
+                        $sheet1->getStyle($totalCell)->applyFromArray([
+                            'font' => ['bold' => true]
+                        ]);
+
+                        // Akumulasi grand total
+                        $grandTotal += $totalRow;
+
+                        // Background color alternatif
+                        $bgColor = $currentRow % 2 == 0 ? 'FFFFFF' : 'F9FAFB';
+                        $sheet1->getStyle("A{$currentRow}:{$totalCell}")->applyFromArray([
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                        ]);
+
+                        $sheet1->getStyle("B{$currentRow}:{$totalCell}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                        $currentRow++;
+                    }
+
+                    // Footer dengan total
+                    $sheet1->setCellValue("A{$currentRow}", 'TOTAL');
+                    $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                        'font' => ['bold' => true]
+                    ]);
+
+                    // Hitung total per level dengan benar
+                    $colIndex = 1;
+                    foreach ($totalPerLevel as $totalLevel) {
+                        $cell = chr(65 + $colIndex) . $currentRow;
+                        $sheet1->setCellValue($cell, $totalLevel);
+                        $sheet1->getStyle($cell)->applyFromArray([
+                            'font' => ['bold' => true]
+                        ]);
+                        $colIndex++;
+                    }
+
+                    // Grand total
+                    $grandTotalCell = $lastColumnLetter . $currentRow;
+                    $sheet1->setCellValue($grandTotalCell, $grandTotal);
+                    $sheet1->getStyle($grandTotalCell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8']]
+                    ]);
+
+                    $sheet1->getStyle("A{$currentRow}:{$grandTotalCell}")->applyFromArray([
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+
+                    $currentRow += 2;
+                }
+            }
+
+            // ======================
+            // TABEL MODUS LEVEL PER KOTA
+            // ======================
+            if (!empty($analisisData['modus_per_kota'])) {
+                $chartStartRow = $currentRow;
+
+                $sheet1->mergeCells("A{$currentRow}:G{$currentRow}");
+                $sheet1->setCellValue("A{$currentRow}", '9. MODUS LEVEL PER KOTA');
+                $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8'], 'size' => 12],
+                    'borders' => ['bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '1a5bb8']]]
+                ]);
+
+                $currentRow++;
+
+                // Header tabel
+                $headers = ['No', 'Kota', 'Sub Indikator', 'Modus Level', 'Level Name', 'Jumlah PTK', 'Persentase'];
+                foreach ($headers as $col => $header) {
+                    $cell = chr(65 + $col) . $currentRow;
+                    $sheet1->setCellValue($cell, $header);
+                    $sheet1->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2d3748']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+                }
+
+                $currentRow++;
+
+                $no = 1;
+                $levelNames = [
+                    1 => 'Gagal',
+                    2 => 'Penerapan',
+                    3 => 'Analisis',
+                    4 => 'Evaluasi',
+                    5 => 'Pembimbingan'
+                ];
+
+                $levelColors = [
+                    1 => '#17a212',
+                    2 => '#17a2b8',
+                    3 => '#007bff',
+                    4 => '#ffc107',
+                    5 => '#28a745'
+                ];
+
+                foreach ($analisisData['modus_per_kota'] as $kota) {
+                    if (empty($kota['sub_indikator_modus'])) continue;
+
+                    $kotaRowSpan = count($kota['sub_indikator_modus']);
+                    $firstRow = $currentRow;
+
+                    foreach ($kota['sub_indikator_modus'] as $subIndex => $sub) {
+                        $sheet1->setCellValue("A{$currentRow}", $no);
+                        $sheet1->setCellValue("B{$currentRow}", $kota['nama_kota']);
+                        $sheet1->setCellValue("C{$currentRow}", $sub['sub_indikator_code'] . ' - ' . substr($sub['sub_indikator_name'], 0, 30) . (strlen($sub['sub_indikator_name']) > 30 ? '...' : ''));
+                        $sheet1->setCellValue("D{$currentRow}", $sub['modus_level']);
+                        $sheet1->setCellValue("E{$currentRow}", $levelNames[$sub['modus_level']] ?? '');
+                        $sheet1->setCellValue("F{$currentRow}", $sub['jumlah_jawaban']);
+
+                        // Hitung persentase
+                        $percentage = $kota['total_jawaban'] > 0 ? round(($sub['jumlah_jawaban'] / $kota['total_jawaban']) * 100, 1) : 0;
+                        $sheet1->setCellValue("G{$currentRow}", $percentage . '%');
+
+                        // Warna untuk level
+                        $levelColor = $levelColors[$sub['modus_level']] ?? '#17a2b8';
+                        $fontColor = new Color();
+                        $fontColor->setRGB(substr($levelColor, 1));
+                        $sheet1->getStyle("D{$currentRow}")->getFont()->setColor($fontColor);
+                        $sheet1->getStyle("E{$currentRow}")->getFont()->setColor($fontColor);
+
+                        // Background color alternatif
+                        $bgColor = $currentRow % 2 == 0 ? 'FFFFFF' : 'F9FAFB';
+                        $sheet1->getStyle("A{$currentRow}:G{$currentRow}")->applyFromArray([
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                        ]);
+
+                        // Merge kota name jika lebih dari 1 sub indikator
+                        if ($subIndex === 0 && $kotaRowSpan > 1) {
+                            $sheet1->mergeCells("B{$firstRow}:B" . ($firstRow + $kotaRowSpan - 1));
+                            $sheet1->getStyle("B{$firstRow}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                        }
+
+                        $currentRow++;
+                    }
+
+                    $no++;
+                }
+
+                $currentRow += 2;
+            }
+
+            // Set column widths untuk Sheet 1 (tambahkan di akhir)
+            $sheet1->getColumnDimension('A')->setWidth(20);
+            $sheet1->getColumnDimension('B')->setWidth(15);
+            $sheet1->getColumnDimension('C')->setWidth(15);
+            $sheet1->getColumnDimension('D')->setWidth(15);
+            $sheet1->getColumnDimension('E')->setWidth(25);
+            $sheet1->getColumnDimension('F')->setWidth(25);
+            $sheet1->getColumnDimension('G')->setWidth(15);
+            $sheet1->getColumnDimension('H')->setWidth(15);
+            $sheet1->getColumnDimension('I')->setWidth(15);
+            $sheet1->getColumnDimension('J')->setWidth(15);
+            $sheet1->getColumnDimension('K')->setWidth(15);
+            $sheet1->getColumnDimension('L')->setWidth(20);
+
+            // ======================
+            // PROGRESS PER KOTA
+            // ======================
+            if (!empty($analisisData['progress_kota'])) {
+                $sheet1->mergeCells("A{$currentRow}:F{$currentRow}");
+                $sheet1->setCellValue("A{$currentRow}", '10. PROGRESS PENGISIAN PER KOTA');
+                $sheet1->getStyle("A{$currentRow}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8'], 'size' => 12],
+                    'borders' => ['bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '1a5bb8']]]
+                ]);
+
+                $currentRow++;
+
+                $headers = ['Kota', 'Total PTK', 'Sudah Isi', 'Persentase', 'Status'];
+                foreach ($headers as $col => $header) {
+                    $cell = chr(65 + $col) . $currentRow;
+                    $sheet1->setCellValue($cell, $header);
+                    $sheet1->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4B5563']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+                }
+
+                $currentRow++;
+
+                foreach ($analisisData['progress_kota'] as $kota) {
+                    $status = '';
+                    $statusColor = '';
+                    if ($kota->persentase >= 80) {
+                        $status = 'Baik';
+                        $statusColor = '10B981';
+                    } elseif ($kota->persentase >= 50) {
+                        $status = 'Cukup';
+                        $statusColor = 'F59E0B';
+                    } else {
+                        $status = 'Perlu Perhatian';
+                        $statusColor = 'EF4444';
+                    }
+
+                    $sheet1->setCellValue("A{$currentRow}", $kota->nama_kota);
+                    $sheet1->setCellValue("B{$currentRow}", $kota->total_ptk);
+                    $sheet1->setCellValue("C{$currentRow}", $kota->sudah_isi);
+                    $sheet1->setCellValue("D{$currentRow}", $kota->persentase . '%');
+                    $sheet1->setCellValue("E{$currentRow}", $status);
+
+                    // Warna status
+                    $sheet1->getStyle("E{$currentRow}")->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => $statusColor]]
+                    ]);
+
+                    $bgColor = $currentRow % 2 == 0 ? 'FFFFFF' : 'F9FAFB';
+                    $sheet1->getStyle("A{$currentRow}:E{$currentRow}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $sheet1->getStyle("B{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet1->getStyle("C{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet1->getStyle("D{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet1->getStyle("E{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $currentRow++;
+                }
+
+                $currentRow += 2;
+            }
+
+            // Set column widths untuk Sheet 1
+            $sheet1->getColumnDimension('A')->setWidth(20);
+            $sheet1->getColumnDimension('B')->setWidth(15);
+            $sheet1->getColumnDimension('C')->setWidth(15);
+            $sheet1->getColumnDimension('D')->setWidth(15);
+            $sheet1->getColumnDimension('E')->setWidth(25);
+            $sheet1->getColumnDimension('F')->setWidth(25);
+
+            // ======================
+            // SHEET 2: DETAIL HASIL INSTRUMEN (SAMA PERSIS DENGAN HASIL INSTRUMEN)
+            // ======================
+            $sheet2 = $spreadsheet->createSheet();
+            $sheet2->setTitle('DETAIL HASIL');
+            $sheet2->getPageSetup()
+                ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+                ->setPaperSize(PageSetup::PAPERSIZE_A4)
+                ->setFitToWidth(1)
+                ->setFitToHeight(0);
+
+            $row2 = 1;
+
+            // JUDUL UTAMA SHEET 2
+            $sheet2->mergeCells("A{$row2}:G{$row2}");
+            $sheet2->setCellValue("A{$row2}", 'LAPORAN HASIL INSTRUMEN PTK DENGAN REKOMENDASI GAP ANALYSIS');
+            $sheet2->getStyle("A{$row2}")->applyFromArray([
+                'font' => ['bold' => true, 'size' => 14],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $row2++;
+            $sheet2->mergeCells("A{$row2}:G{$row2}");
+            $sheet2->setCellValue("A{$row2}", 'Penilaian Kompetensi Profesional Berbasis Level Kompetensi');
+            $sheet2->getStyle("A{$row2}")->applyFromArray([
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $row2++;
+            $sheet2->mergeCells("A{$row2}:G{$row2}");
+            $sheet2->setCellValue("A{$row2}", 'Dicetak: ' . now()->format('d F Y H:i:s'));
+            $sheet2->getStyle("A{$row2}")->applyFromArray([
+                'font' => ['color' => ['rgb' => '666666']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $row2 += 2;
+
+            // FILTER INFO (SAMA DENGAN ANALISIS UTAMA)
+            $sheet2->mergeCells("A{$row2}:G{$row2}");
+            $sheet2->setCellValue("A{$row2}", 'FILTER YANG DIGUNAKAN');
+            $sheet2->getStyle("A{$row2}")->applyFromArray([
+                'font' => ['bold' => true, 'size' => 11],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F0F0']],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            ]);
+
+            $filters = [
+                ['Kegiatan:', $kegiatanName ?: 'Semua'],
+                ['Jenjang Jabatan:', $jenjangName ?: 'Semua'],
+                ['Jenis PTK:', $jenisPtkName ?: 'Semua'],
+                ['Kota:', $kotaName ?: 'Semua'],
+                ['Jenis Kelamin:', $request->jenis_kelamin ? ($request->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan') : 'Semua'],
+                ['Total PTK:', $analisisData['statistik']['ptk_menjawab'] ?? 0 . ' PTK'],
+            ];
+
+            foreach ($filters as $filter) {
+                $row2++;
+                $sheet2->setCellValue("A{$row2}", $filter[0]);
+                $sheet2->setCellValue("B{$row2}", $filter[1]);
+                $sheet2->mergeCells("B{$row2}:G{$row2}");
+                $sheet2->getStyle("A{$row2}:G{$row2}")->applyFromArray([
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F9F9F9']]
+                ]);
+                $sheet2->getStyle("A{$row2}")->applyFromArray(['font' => ['bold' => true]]);
+            }
+
+            $row2 += 2;
+
+            // AMBIL DATA DETAIL HASIL INSTRUMEN (SAMA DENGAN QUERY EXPORT)
+            $detailData = $this->getDetailHasilInstrumenExcel($request);
+
+            // KELOMPOKKAN DATA PER PTK (SAMA DENGAN PDF)
+            $groupedData = $detailData->groupBy('nip');
+
+            if (!empty($groupedData)) {
+                foreach ($groupedData as $nip => $dataRows) {
+                    if ($dataRows->isEmpty()) continue;
+
+                    $firstRow = $dataRows->first();
+
+                    // PROSES REKOMENDASI UNTUK SETIAP ROW
+                    $processedRows = [];
+                    foreach ($dataRows as $row) {
+                        // Gunakan fungsi getRekomendasiWithGap yang SAMA
+                        $rekomendasiInfo = $this->getRekomendasiWithGapExcel(
+                            $row->jenjang_jabatan,
+                            $row->level_dicapai,
+                            $row->sub_indikator_id,
+                            $row->tahap,
+                            $row->entity,
+                            $row->sub_indikator_code
+                        );
+
+                        $row->rekomendasi_info = $rekomendasiInfo;
+                        $processedRows[] = $row;
+                    }
+
+                    // HEADER PTK (SAMA DENGAN PDF)
+                    $sheet2->mergeCells("A{$row2}:G{$row2}");
+                    $sheet2->setCellValue("A{$row2}", $firstRow->nama ?? 'Nama tidak tersedia');
+                    $sheet2->getStyle("A{$row2}")->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2C3E50']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+
+                    // KEGIATAN BADGE (SAMA DENGAN PDF)
+                    $sheet2->setCellValue("F{$row2}", $firstRow->kegiatan_name ?? 'Kegiatan');
+                    $sheet2->getStyle("F{$row2}")->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E74C3C']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+
+                    $row2++;
+
+                    // INFO PTK (SAMA DENGAN PDF)
+                    $infoData = [
+                        ['NIP:', $nip],
+                        ['Jenjang:', $firstRow->jenjang_jabatan ?? '-'],
+                        ['Pangkat:', ($firstRow->pangkat ?? '-') . ' ' . ($firstRow->golongan_ruang ? '(' . $firstRow->golongan_ruang . ')' : '')],
+                        ['Instansi:', $firstRow->instansi ?? '-'],
+                        ['Sekolah:', $firstRow->nama_sekolah ?? '-'],
+                        ['NPSN:', $firstRow->npsn ?? '-'],
+                        ['Kota:', $firstRow->nama_kota ?? '-'],
+                        ['Kegiatan:', $firstRow->kegiatan_name ?? '-'],
+                        ['Entity:', $firstRow->entity ?? '-'],
+                        ['Tahap:', $firstRow->tahap ?? '-'],
+                        ['Jenis PTK:', $firstRow->jenis_ptk ?? '-'],
+                    ];
+
+                    $infoStartRow = $row2;
+                    foreach ($infoData as $index => $info) {
+                        $sheet2->setCellValue("A{$row2}", $info[0]);
+                        $sheet2->setCellValue("B{$row2}", $info[1]);
+                        $sheet2->mergeCells("B{$row2}:G{$row2}");
+
+                        $bgColor = $index % 2 == 0 ? 'FFFFFF' : 'F9F9F9';
+                        $sheet2->getStyle("A{$row2}:G{$row2}")->applyFromArray([
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                        ]);
+                        $sheet2->getStyle("A{$row2}")->applyFromArray(['font' => ['bold' => true]]);
+
+                        $row2++;
+                    }
+
+                    // MERGE KOLOM LABEL INFO
+                    for ($i = $infoStartRow; $i < $row2; $i++) {
+                        $sheet2->mergeCells("A{$i}:A{$i}");
+                    }
+
+                    // PELATIHAN SECTION (SAMA DENGAN PDF)
+                    $pelatihanData = $this->getPelatihanByPtkExcel($firstRow->ptk_id, $firstRow->kegiatan_id);
+
+                    if ($pelatihanData->count() > 0) {
+                        $row2++;
+                        $sheet2->mergeCells("A{$row2}:G{$row2}");
+                        $sheet2->setCellValue("A{$row2}", 'Pelatihan yang Anda Perlukan:');
+                        $sheet2->getStyle("A{$row2}")->applyFromArray([
+                            'font' => ['bold' => true, 'color' => ['rgb' => '2C3E50']]
+                        ]);
+
+                        $row2++;
+                        $pelStartRow = $row2;
+                        foreach ($pelatihanData as $index => $pelatihan) {
+                            $sheet2->mergeCells("A{$row2}:G{$row2}");
+                            $sheet2->setCellValue(
+                                "A{$row2}",
+                                ($index + 1) . '. ' . ($pelatihan->nama_pelatihan_lengkap ?? 'Belum Tersedia') .
+                                    ' [' . ($pelatihan->kategori_pelatihan ?? 'Tidak Diketahui') . ']'
+                            );
+                            $sheet2->getStyle("A{$row2}")->applyFromArray([
+                                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E3F2FD']],
+                                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                                'font' => ['color' => ['rgb' => '1565C0']]
+                            ]);
+                            $row2++;
+                        }
+                    } else {
+                        $row2++;
+                        $sheet2->mergeCells("A{$row2}:G{$row2}");
+                        $sheet2->setCellValue("A{$row2}", 'Pelatihan yang Anda Perlukan:');
+                        $sheet2->getStyle("A{$row2}")->applyFromArray([
+                            'font' => ['bold' => true, 'color' => ['rgb' => '2C3E50']]
+                        ]);
+
+                        $row2++;
+                        $sheet2->mergeCells("A{$row2}:G{$row2}");
+                        $sheet2->setCellValue("A{$row2}", 'Belum ada data pelatihan');
+                        $sheet2->getStyle("A{$row2}")->applyFromArray([
+                            'font' => ['color' => ['rgb' => '666666']],
+                            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                        ]);
+                        $row2++;
+                    }
+
+                    $row2++;
+
+                    // HEADER TABEL (SAMA DENGAN PDF)
+                    $headerRow = $row2;
+                    $headers = ['NO', 'KODE SUB INDIKATOR', 'NAMA SUB INDIKATOR', 'LEVEL DICAPAI', 'LEVEL HARUS', 'STATUS', 'REKOMENDASI (GAP)'];
+
+                    foreach ($headers as $col => $header) {
+                        $columnLetter = chr(65 + $col);
+                        $sheet2->setCellValue($columnLetter . $row2, $header);
+                        $sheet2->getStyle($columnLetter . $row2)->applyFromArray([
+                            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '34495E']],
+                            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '2C3E50']]]
+                        ]);
+                    }
+
+                    $row2++;
+
+                    // DATA INDIKATOR (SAMA DENGAN PDF)
+                    $indikatorNumber = 1;
+                    foreach ($processedRows as $row) {
+                        $info = $row->rekomendasi_info;
+
+                        // Tentukan level harus
+                        $levelMin = $info['level_min'] ?? 0;
+                        $levelMax = $info['level_max'] ?? 0;
+                        $levelHarus = '';
+                        for ($i = $levelMin; $i <= $levelMax; $i++) {
+                            $levelHarus .= ($levelHarus ? ', ' : '') . 'Lv ' . $i;
+                        }
+
+                        // STATUS (SAMA DENGAN PDF)
+                        $status = $info['status'] ?? '-';
+                        $statusClass = $info['status_class'] ?? 'secondary';
+
+                        // REKOMENDASI GAP (SAMA DENGAN PDF)
+                        $rekomendasiGap = $info['rekomendasi_gap'] ?? [];
+                        $rekText = '';
+                        if (!empty($rekomendasiGap)) {
+                            foreach ($rekomendasiGap as $gap) {
+                                $rekText .= 'Gap Level ' . ($gap['level'] ?? '') . ': ' .
+                                    ($gap['rekomendasi'] ?? '') . "\n";
+                            }
+                        } else {
+                            $rekText = 'Sudah mencapai semua level';
+                        }
+
+                        // ISI DATA
+                        $sheet2->setCellValue("A{$row2}", $indikatorNumber);
+                        $sheet2->setCellValue("B{$row2}", $row->sub_indikator_code);
+                        $sheet2->setCellValue("C{$row2}", $row->sub_indikator_name);
+                        $sheet2->setCellValue("D{$row2}", $row->level_dicapai ? 'Level ' . $row->level_dicapai : '-');
+                        $sheet2->setCellValue("E{$row2}", $levelHarus);
+                        $sheet2->setCellValue("F{$row2}", $status);
+                        $sheet2->setCellValue("G{$row2}", $rekText);
+
+                        // STYLING UNTUK BARIS DATA (SAMA DENGAN PDF)
+                        $bgColor = $indikatorNumber % 2 == 0 ? 'FFFFFF' : 'F9F9F9';
+                        $sheet2->getStyle("A{$row2}:G{$row2}")->applyFromArray([
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                            'alignment' => ['vertical' => Alignment::VERTICAL_TOP, 'wrapText' => true]
+                        ]);
+
+                        // ALIGNMENT
+                        $sheet2->getStyle("A{$row2}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                        $sheet2->getStyle("D{$row2}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                        $sheet2->getStyle("E{$row2}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                        $sheet2->getStyle("F{$row2}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                        // STYLING UNTUK STATUS (SAMA DENGAN PDF)
+                        $statusStyles = [
+                            'Mencapai Semua Level' => ['color' => '0F5132', 'bg' => 'D1E7DD'],
+                            'Mendekati Target' => ['color' => '664D03', 'bg' => 'FFF3CD'],
+                            'Perlu Peningkatan' => ['color' => '842029', 'bg' => 'F8D7DA']
+                        ];
+
+                        if (isset($statusStyles[$status])) {
+                            $style = $statusStyles[$status];
+                            $sheet2->getStyle("F{$row2}")->applyFromArray([
+                                'font' => ['color' => ['rgb' => $style['color']]],
+                                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $style['bg']]],
+                                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                            ]);
+                        }
+
+                        // STYLING UNTUK LEVEL DICAPAI (SAMA DENGAN PDF)
+                        if ($row->level_dicapai) {
+                            $levelColors = [
+                                1 => ['color' => 'FFFFFF', 'bg' => '17A2B8'],
+                                2 => ['color' => 'FFFFFF', 'bg' => '007BFF'],
+                                3 => ['color' => 'FFFFFF', 'bg' => 'FFC107'],
+                                4 => ['color' => 'FFFFFF', 'bg' => '28A745'],
+                                5 => ['color' => 'FFFFFF', 'bg' => '6C757D']
+                            ];
+
+                            $levelColor = $levelColors[$row->level_dicapai] ?? ['color' => 'FFFFFF', 'bg' => '6C757D'];
+                            $sheet2->getStyle("D{$row2}")->applyFromArray([
+                                'font' => ['color' => ['rgb' => $levelColor['color']], 'bold' => true],
+                                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $levelColor['bg']]],
+                                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                            ]);
+                        }
+
+                        // STYLING UNTUK LEVEL HARUS (SAMA DENGAN PDF)
+                        $sheet2->getStyle("E{$row2}")->applyFromArray([
+                            'font' => ['bold' => true],
+                            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                        ]);
+
+                        $row2++;
+                        $indikatorNumber++;
+                    }
+
+                    // SUMMARY PTK (SAMA DENGAN PDF)
+                    $summaryRow = $row2;
+                    $sheet2->mergeCells("A{$row2}:G{$row2}");
+                    $sheet2->setCellValue("A{$row2}", "SUMMARY: " . count($processedRows) . " Sub indikator dinilai");
+                    $sheet2->getStyle("A{$row2}")->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => '2C3E50']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F0F0']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+
+                    $row2 += 3; // Spasi antar PTK
+                }
+            }
+
+            // FOOTER (SAMA DENGAN PDF)
+            $sheet2->mergeCells("A{$row2}:G{$row2}");
+            $sheet2->setCellValue("A{$row2}", 'Catatan: Dokumen untuk keperluan internal evaluasi');
+            $sheet2->getStyle("A{$row2}")->applyFromArray([
+                'font' => ['italic' => true, 'color' => ['rgb' => '666666']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $row2++;
+            $sheet2->mergeCells("A{$row2}:G{$row2}");
+            $sheet2->setCellValue("A{$row2}", 'Laporan ini menunjukkan gap antara level kompetensi yang dicapai dengan level yang harus dicapai berdasarkan jenjang jabatan');
+            $sheet2->getStyle("A{$row2}")->applyFromArray([
+                'font' => ['color' => ['rgb' => '666666']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $row2++;
+            $sheet2->mergeCells("A{$row2}:G{$row2}");
+            $sheet2->setCellValue("A{$row2}", '© ' . date('Y') . ' - Sistem TanpaRagu | Dicetak: ' . now()->format('d F Y H:i:s'));
+            $sheet2->getStyle("A{$row2}")->applyFromArray([
+                'font' => ['color' => ['rgb' => '666666']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            // SET COLUMN WIDTHS (SAMA DENGAN PDF)
+            $sheet2->getColumnDimension('A')->setWidth(6);   // NO
+            $sheet2->getColumnDimension('B')->setWidth(15);  // KODE
+            $sheet2->getColumnDimension('C')->setWidth(35);  // INDIKATOR
+            $sheet2->getColumnDimension('D')->setWidth(12);  // LEVEL DICAPAI
+            $sheet2->getColumnDimension('E')->setWidth(12);  // LEVEL HARUS
+            $sheet2->getColumnDimension('F')->setWidth(18);  // STATUS
+            $sheet2->getColumnDimension('G')->setWidth(50);  // REKOMENDASI
+
+            // AUTO WRAP TEXT UNTUK KOLOM REKOMENDASI
+            $sheet2->getStyle('G')->getAlignment()->setWrapText(true);
+
+            // ======================
+            // SHEET 3: PELATIHAN (VERSI SEDERHANA)
+            // ======================
+            $sheet3 = $spreadsheet->createSheet();
+            $sheet3->setTitle('PELATIHAN');
+            $sheet3->getPageSetup()
+                ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+                ->setPaperSize(PageSetup::PAPERSIZE_A4);
+
+            $row3 = 1;
+
+            // JUDUL SHEET
+            $sheet3->mergeCells("A{$row3}:F{$row3}");
+            $sheet3->setCellValue("A{$row3}", 'DATA PELATIHAN YANG DIPILIH PTK');
+            $sheet3->getStyle("A{$row3}")->applyFromArray([
+                'font' => ['bold' => true, 'size' => 14],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $row3 += 2;
+
+            // BAGIAN 1: JUMLAH PTK YANG MEMILIH SETIAP PELATIHAN
+            $sheet3->mergeCells("A{$row3}:F{$row3}");
+            $sheet3->setCellValue("A{$row3}", '1. JUMLAH PTK PER PELATIHAN');
+            $sheet3->getStyle("A{$row3}")->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8']],
+                'borders' => ['bottom' => ['borderStyle' => Border::BORDER_MEDIUM]]
+            ]);
+
+            $row3++;
+
+            // Header tabel jumlah
+            $headersJumlah = ['No', 'Nama Pelatihan', 'Jumlah PTK', 'Persentase'];
+            foreach ($headersJumlah as $col => $header) {
+                $cell = chr(65 + $col) . $row3;
+                $sheet3->setCellValue($cell, $header);
+                $sheet3->getStyle($cell)->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4B5563']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+            }
+
+            $row3++;
+
+            // Ambil data pelatihan yang sudah ada di $analisisData
+            $pelatihanData = $analisisData['pelatihan_data'] ?? [];
+
+            if (!empty($pelatihanData)) {
+                $no = 1;
+                $totalPtkPelatihan = 0;
+
+                foreach ($pelatihanData as $pelatihan) {
+                    $totalPtkPelatihan += $pelatihan->jumlah_ptk;
+                }
+
+                // Tampilkan data pelatihan
+                foreach ($pelatihanData as $pelatihan) {
+                    $percentage = $totalPtkPelatihan > 0 ? round(($pelatihan->jumlah_ptk / $totalPtkPelatihan) * 100, 1) : 0;
+
+                    $sheet3->setCellValue("A{$row3}", $no);
+                    $sheet3->setCellValue("B{$row3}", $pelatihan->nama_pelatihan);
+                    $sheet3->setCellValue("C{$row3}", $pelatihan->jumlah_ptk);
+                    $sheet3->setCellValue("D{$row3}", $percentage . '%');
+
+                    // Diagram visual sederhana
+                    $barLength = min((int)($percentage / 5), 20);
+                    $diagram = str_repeat('█', $barLength);
+                    $sheet3->setCellValue("E{$row3}", $diagram);
+                    $sheet3->setCellValue("F{$row3}", $pelatihan->tipe == 'master' ? 'Master' : 'Manual');
+
+                    // Styling
+                    $bgColor = $row3 % 2 == 0 ? 'FFFFFF' : 'F9FAFB';
+                    $sheet3->getStyle("A{$row3}:F{$row3}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $row3++;
+                    $no++;
+                }
+
+                // Total row
+                $sheet3->setCellValue("A{$row3}", 'TOTAL');
+                $sheet3->setCellValue("C{$row3}", $totalPtkPelatihan);
+                $sheet3->setCellValue("D{$row3}", '100%');
+
+                $sheet3->getStyle("A{$row3}:F{$row3}")->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EFF6FF']],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+            }
+
+            $row3 += 3;
+
+            // BAGIAN 2: DAFTAR ORANG YANG MEMILIH PELATIHAN
+            $sheet3->mergeCells("A{$row3}:F{$row3}");
+            $sheet3->setCellValue("A{$row3}", '2. DAFTAR PTK YANG MEMILIH PELATIHAN');
+            $sheet3->getStyle("A{$row3}")->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => '1a5bb8']],
+                'borders' => ['bottom' => ['borderStyle' => Border::BORDER_MEDIUM]]
+            ]);
+
+            $row3++;
+
+            // Header tabel detail
+            $headersDetail = ['No', 'Nama PTK', 'NIP', 'Jenjang Jabatan', 'Kota', 'Pelatihan Dipilih'];
+            foreach ($headersDetail as $col => $header) {
+                $cell = chr(65 + $col) . $row3;
+                $sheet3->setCellValue($cell, $header);
+                $sheet3->getStyle($cell)->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2d3748']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+            }
+
+            $row3++;
+
+            // Ambil data detail PTK yang memilih pelatihan
+            $detailPelatihan = $this->getDetailPelatihanPTK($request);
+
+            if (!empty($detailPelatihan)) {
+                $noDetail = 1;
+
+                foreach ($detailPelatihan as $detail) {
+                    $sheet3->setCellValue("A{$row3}", $noDetail);
+                    $sheet3->setCellValue("B{$row3}", $detail->nama ?? '');
+                    $sheet3->setCellValue("C{$row3}", $detail->nip ?? '');
+                    $sheet3->setCellValue("D{$row3}", $detail->jenjang_jabatan ?? '');
+                    $sheet3->setCellValue("E{$row3}", $detail->nama_kota ?? '');
+                    $sheet3->setCellValue("F{$row3}", $detail->nama_pelatihan ?? '');
+
+                    // Styling
+                    $bgColor = $row3 % 2 == 0 ? 'FFFFFF' : 'F9FAFB';
+                    $sheet3->getStyle("A{$row3}:F{$row3}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $row3++;
+                    $noDetail++;
+                }
+            }
+
+            // Set lebar kolom
+            $sheet3->getColumnDimension('A')->setWidth(6);
+            $sheet3->getColumnDimension('B')->setWidth(25);
+            $sheet3->getColumnDimension('C')->setWidth(20);
+            $sheet3->getColumnDimension('D')->setWidth(15);
+            $sheet3->getColumnDimension('E')->setWidth(15);
+            $sheet3->getColumnDimension('F')->setWidth(30);
+
+            // Set active sheet kembali ke sheet 1
+            $spreadsheet->setActiveSheetIndex(0);
+
+            // Output file
+            $filename = 'analisis-hasil-instrumen-' . date('Ymd-His') . '.xlsx';
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+            header('Cache-Control: max-age=1');
+            header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+            header('Cache-Control: cache, must-revalidate');
+            header('Pragma: public');
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+
+            exit;
+        } catch (\Exception $e) {
+            \Log::error('Export Excel Analisis Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat export: ' . $e->getMessage());
+        }
+    }
+
+    // ======================
+    // HELPER FUNCTIONS
+    // ======================
+
+    private function getDetailHasilInstrumen(Request $request)
+    {
+        $query = DB::table('ptk_jawaban')
+            ->select(
+                'ptk.nip',
+                'ptk.nama',
+                'pangkat_jabatan.jenjang_jabatan',
+                'kota.nama_kota',
+                'ptk_jawaban.sub_indikator_code',
+                'sub_indikator.sub_indikator_name',
+                'ptk_jawaban.level as level_dicapai',
+                DB::raw('CASE 
+                WHEN pangkat_jabatan.jenjang_jabatan = "Pertama" THEN 2
+                WHEN pangkat_jabatan.jenjang_jabatan = "Muda" THEN 3
+                WHEN pangkat_jabatan.jenjang_jabatan = "Madya" THEN 4
+                WHEN pangkat_jabatan.jenjang_jabatan = "Utama" THEN 5
+                ELSE 2
+            END as level_min_wajib'),
+                DB::raw('CASE 
+                WHEN pangkat_jabatan.jenjang_jabatan = "Pertama" THEN 2
+                WHEN pangkat_jabatan.jenjang_jabatan = "Muda" THEN 3
+                WHEN pangkat_jabatan.jenjang_jabatan = "Madya" THEN 4
+                WHEN pangkat_jabatan.jenjang_jabatan = "Utama" THEN 5
+                ELSE 2
+            END as level_max_wajib')
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+            ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+            ->where('ptk_jawaban.level', '>=', 1);
+
+        // TERAPKAN FILTER YANG SAMA DENGAN ANALISIS UTAMA
+        if ($request->filled('kegiatan_id')) {
+            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+        }
+
+        if ($request->filled('pangkat_jabatan_id')) {
+            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+        }
+
+        if ($request->filled('jenis_ptk_id')) {
+            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+        }
+
+        if ($request->filled('kota_id')) {
+            $query->where('ptk.kota_id', $request->kota_id);
+        }
+
+        if ($request->filled('jenjang_pendidikan_id')) {
+            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+        }
+
+        if ($request->filled('bentuk_pendidikan')) {
+            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+        }
+
+        if ($request->filled('jenis_kelamin')) {
+            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        return $query->orderBy('ptk.nama')
+            ->orderBy('ptk_jawaban.sub_indikator_code')
+            ->get();
+    }
+
+
+    private function getDataPelatihan(Request $request)
+    {
+        $query = DB::table('ptk_pelatihan')
+            ->select(
+                'ptk.nip',
+                'ptk.nama',
+                'pangkat_jabatan.jenjang_jabatan',
+                'kota.nama_kota',
+                DB::raw('COALESCE(ms_pelatihan.nama_pelatihan, ptk_pelatihan.pelatihan_lainnya) as nama_pelatihan'),
+                DB::raw('CASE 
+                WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL THEN "master"
+                ELSE "manual"
+            END as tipe'),
+                DB::raw('(SELECT COUNT(*) FROM ptk_jawaban pj 
+                 WHERE pj.ptk_id = ptk.ptk_id 
+                 AND pj.level < 
+                     CASE 
+                         WHEN pangkat_jabatan.jenjang_jabatan = "Pertama" THEN 2
+                         WHEN pangkat_jabatan.jenjang_jabatan = "Muda" THEN 3
+                         WHEN pangkat_jabatan.jenjang_jabatan = "Madya" THEN 4
+                         WHEN pangkat_jabatan.jenjang_jabatan = "Utama" THEN 5
+                         ELSE 2
+                     END) as jumlah_gap')
+            )
+            ->join('ptk', 'ptk_pelatihan.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('ms_pelatihan', 'ptk_pelatihan.ms_pelatihan_id', '=', 'ms_pelatihan.ms_pelatihan_id')
+            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id');
+
+        // TERAPKAN FILTER YANG SAMA
+        if ($request->filled('kegiatan_id')) {
+            $query->where('ptk_pelatihan.kegiatan_id', $request->kegiatan_id);
+        }
+
+        if ($request->filled('pangkat_jabatan_id')) {
+            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+        }
+
+        if ($request->filled('jenis_ptk_id')) {
+            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+        }
+
+        if ($request->filled('kota_id')) {
+            $query->where('ptk.kota_id', $request->kota_id);
+        }
+
+        if ($request->filled('jenjang_pendidikan_id')) {
+            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+        }
+
+        if ($request->filled('bentuk_pendidikan')) {
+            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+        }
+
+        if ($request->filled('jenis_kelamin')) {
+            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        return $query->orderBy('ptk.nama')->get();
+    }
+
+    private function getKeteranganStatus($status)
+    {
+        $keterangan = [
+            'Memenuhi' => 'Sudah mencapai atau melampaui level minimal yang diwajibkan untuk jenjang jabatan',
+            'Mendekati' => 'Hanya 1 level di bawah level minimal wajib, perlu sedikit peningkatan',
+            'Perlu Peningkatan' => 'Masih jauh dari level minimal yang diwajibkan, perlu pelatihan intensif'
+        ];
+
+        return $keterangan[$status] ?? '-';
+    }
+
+    private function getDetailPelatihanPTK(Request $request)
+    {
+        $query = DB::table('ptk_pelatihan')
+            ->select(
+                'ptk.nip',
+                'ptk.nama',
+                'pangkat_jabatan.jenjang_jabatan',
+                'kota.nama_kota',
+                DB::raw('COALESCE(ms_pelatihan.nama_pelatihan, ptk_pelatihan.pelatihan_lainnya) as nama_pelatihan')
+            )
+            ->join('ptk', 'ptk_pelatihan.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('ms_pelatihan', 'ptk_pelatihan.ms_pelatihan_id', '=', 'ms_pelatihan.ms_pelatihan_id')
+            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id');
+
+        // Terapkan filter yang sama
+        if ($request->filled('kegiatan_id')) {
+            $query->where('ptk_pelatihan.kegiatan_id', $request->kegiatan_id);
+        }
+
+        if ($request->filled('pangkat_jabatan_id')) {
+            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+        }
+
+        if ($request->filled('jenis_ptk_id')) {
+            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+        }
+
+        if ($request->filled('kota_id')) {
+            $query->where('ptk.kota_id', $request->kota_id);
+        }
+
+        if ($request->filled('jenjang_pendidikan_id')) {
+            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+        }
+
+        if ($request->filled('bentuk_pendidikan')) {
+            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+        }
+
+        if ($request->filled('jenis_kelamin')) {
+            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        return $query->orderBy('ptk.nama')->get();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private function getDetailHasilInstrumenExcel(Request $request)
+    {
+        $query = DB::table('ptk_jawaban')
+            ->select(
+                'ptk_jawaban.ptk_jawaban_id',
+                'ptk_jawaban.tahap',
+                'ptk_jawaban.level as level_dicapai',
+                'ptk_jawaban.sub_indikator_code',
+                'ptk_jawaban.sub_indikator_id',
+                'ptk_jawaban.bobot',
+                'ptk_jawaban.created_at',
+                'ptk.ptk_id',
+                'ptk.nama',
+                'ptk.nip',
+                'ptk.pangkat_jabatan_id',
+                'ptk.jenis_ptk_id',
+                'ptk.instansi',
+                'ptk.sekolah_id',
+                'ptk.kota_id',
+                // Ambil data dari tabel pangkat_jabatan
+                'pangkat_jabatan.golongan_ruang',
+                'pangkat_jabatan.pangkat',
+                'pangkat_jabatan.jenjang_jabatan',
+                // Ambil data dari tabel sekolah
+                'sekolah.nama_sekolah',
+                'sekolah.npsn',
+                // Ambil data dari tabel kota
+                'kota.nama_kota',
+                // Ambil data dari tabel sub_indikator
+                'sub_indikator.sub_indikator_name',
+                'kegiatan.kegiatan_name',
+                'kegiatan.entity',
+                'kegiatan.kegiatan_id',
+                // Ambil data jenis_ptk
+                'jenis_ptk.jenis_ptk'
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+            ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+            ->leftJoin('jenis_ptk', 'ptk.jenis_ptk_id', '=', 'jenis_ptk.jenis_ptk_id')
+            ->where('ptk_jawaban.level', '>=', 1);
+
+        // TERAPKAN FILTER YANG SAMA DENGAN ANALISIS UTAMA
+        if ($request->filled('kegiatan_id')) {
+            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+        }
+
+        if ($request->filled('pangkat_jabatan_id')) {
+            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+        }
+
+        if ($request->filled('jenis_ptk_id')) {
+            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+        }
+
+        if ($request->filled('kota_id')) {
+            $query->where('ptk.kota_id', $request->kota_id);
+        }
+
+        if ($request->filled('jenjang_pendidikan_id')) {
+            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+        }
+
+        if ($request->filled('bentuk_pendidikan')) {
+            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+        }
+
+        if ($request->filled('jenis_kelamin')) {
+            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        return $query->orderBy('ptk.nip')
+            ->orderBy('ptk_jawaban.sub_indikator_code')
+            ->get();
+    }
+
+    private function getPelatihanByPtkExcel($ptkId, $kegiatanId)
+    {
+        return DB::table('ptk_pelatihan')
+            ->select(
+                'ptk_pelatihan.*',
+                'ms_pelatihan.nama_pelatihan',
+                // Tentukan nama pelatihan lengkap berdasarkan ms_pelatihan_id atau pelatihan_lainnya
+                DB::raw("CASE 
+                WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN ms_pelatihan.nama_pelatihan
+                WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN ptk_pelatihan.pelatihan_lainnya
+                ELSE 'Belum Tersedia'
+            END as nama_pelatihan_lengkap"),
+                // Tentukan kategori pelatihan
+                DB::raw("CASE 
+                WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN 'Dari Daftar'
+                WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN 'Lainnya'
+                ELSE 'Belum Tersedia'
+            END as kategori_pelatihan")
+            )
+            ->leftJoin('ms_pelatihan', 'ptk_pelatihan.ms_pelatihan_id', '=', 'ms_pelatihan.ms_pelatihan_id')
+            ->where('ptk_pelatihan.ptk_id', $ptkId)
+            ->where('ptk_pelatihan.kegiatan_id', $kegiatanId)
+            ->get();
+    }
+
+    private function getRekomendasiWithGapExcel($jenjangJabatan, $levelJawaban, $subIndikatorId, $tahap, $entity, $subIndikatorCode)
+    {
+        // 1. Tentukan rentang level berdasarkan jenjang jabatan
+        $levelRanges = [
+            'Pertama' => ['min' => 2, 'max' => 2],  // Hanya level 2
+            'Muda'    => ['min' => 2, 'max' => 3],  // Level 2-3
+            'Madya'   => ['min' => 2, 'max' => 4],  // Level 2-4
+            'Utama'   => ['min' => 2, 'max' => 5]   // Level 2-5
+        ];
+
+        $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Pertama'];
+        $levelMin = $range['min'];
+        $levelMax = $range['max'];
+
+        // 2. Ambil semua rekomendasi untuk jenjang ini
+        $rekomendasiSemua = DB::table('ptk_rekomendasi')
+            ->where('sub_indikator_id', $subIndikatorId)
+            ->where('tahap', $tahap)
+            ->where('entity', $entity)
+            ->where('sub_indikator_code', $subIndikatorCode)
+            ->whereBetween('level', [$levelMin, $levelMax])
+            ->orderBy('level', 'asc')
+            ->get();
+
+        // 3. Pisahkan: sudah dicapai vs belum dicapai (GAP)
+        $rekomendasiDicapai = [];
+        $rekomendasiGap = []; // Level yang belum dicapai
+
+        foreach ($rekomendasiSemua as $rek) {
+            $gap = $rek->level - $levelJawaban;
+
+            if ($gap <= 0) {
+                // Sudah dicapai atau melampaui
+                $rekomendasiDicapai[] = [
+                    'level' => $rek->level,
+                    'rekomendasi' => $rek->rekomendasi,
+                    'gap' => $gap, // negatif atau 0
+                    'status' => $gap < 0 ? 'melampaui' : 'tepat'
+                ];
+            } else {
+                // Belum dicapai (GAP)
+                $rekomendasiGap[] = [
+                    'level' => $rek->level,
+                    'rekomendasi' => $rek->rekomendasi,
+                    'gap' => $gap, // positif
+                    'status' => 'belum'
+                ];
+            }
+        }
+
+        // 4. Hitung statistik
+        $totalLevelHarus = ($levelMax - $levelMin) + 1;
+        $levelDicapaiCount = count($rekomendasiDicapai);
+        $levelGapCount = count($rekomendasiGap);
+
+        // 5. Tentukan status keseluruhan
+        if ($levelGapCount == 0) {
+            $status = 'Mencapai Semua Level';
+            $statusClass = 'success';
+        } elseif ($levelGapCount == 1 && $levelMax - $levelJawaban == 1) {
+            $status = 'Mendekati Target';
+            $statusClass = 'warning';
+        } else {
+            $status = 'Perlu Peningkatan';
+            $statusClass = 'danger';
+        }
+
+        return [
+            'jenjang' => $jenjangJabatan,
+            'level_jawaban' => $levelJawaban,
+            'level_min' => $levelMin,
+            'level_max' => $levelMax,
+            'rekomendasi_dicapai' => $rekomendasiDicapai,
+            'rekomendasi_gap' => $rekomendasiGap, // Yang belum dicapai
+            'total_level' => $totalLevelHarus,
+            'level_dicapai_count' => $levelDicapaiCount,
+            'level_gap_count' => $levelGapCount,
+            'persentase' => $totalLevelHarus > 0 ? round(($levelDicapaiCount / $totalLevelHarus) * 100, 1) : 0,
+            'status' => $status,
+            'status_class' => $statusClass,
+            'gap_terbesar' => $levelGapCount > 0 ? max(array_column($rekomendasiGap, 'gap')) : 0
+        ];
     }
 }

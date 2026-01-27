@@ -266,3 +266,19 @@ Route::prefix('pelatihan')->name('pelatihan.')->group(function () {
     Route::post('/{encoded_kegiatan_id}/{nip}/store', [PelatihanController::class, 'store'])
         ->name('store');
 });
+
+
+
+
+// // Tambahkan ini di atas route
+// ini_set('memory_limit', '512M');
+// ini_set('max_execution_time', 300); // 5 menit
+
+Route::get('/hasil-instrumen/export-excel-all', [HasilInstrumenController::class, 'exportExcelAll'])->name('hasil-instrumen.export-excel-all');
+
+
+
+// routes/web.php
+Route::post('/analisis/export-excel', [AnalisisController::class, 'exportExcel'])->name('analisis.export-excel');
+// ATAU
+Route::get('/analisis/export-excel', [AnalisisController::class, 'exportExcel'])->name('analisis.export-excel');

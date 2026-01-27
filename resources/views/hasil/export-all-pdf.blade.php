@@ -67,7 +67,6 @@
         .ptk-card {
             margin-bottom: 25px;
             border: 1px solid #ccc;
-            page-break-inside: avoid;
         }
 
         .ptk-header {
@@ -296,11 +295,6 @@
             font-size: 8px;
             color: #666;
         }
-
-        .page-break {
-            page-break-before: always;
-        }
-
         /* Sub Indikator */
         .sub-indikator-name {
             font-size: 8px;
@@ -390,6 +384,14 @@
             <span class="filter-label">Tahap:</span>
             <span class="filter-value">{{ $tahap ? "Tahap $tahap" : 'Semua' }}</span>
         </div>
+          <div class="filter-row">
+    <span class="filter-label">Jenjang Jabatan:</span>
+    <span class="filter-value">{{ $pangkat_jabatan_id ?: 'Semua' }}</span>
+</div>
+<div class="filter-row">
+    <span class="filter-label">Jenis PTK:</span>
+    <span class="filter-value">{{ $jenis_ptk_id ?: 'Semua' }}</span>
+</div>
         @php
         $totalData = count($groupedData);
         @endphp
@@ -589,7 +591,7 @@
                     <th width="10%">LEVEL DICAPAI</th>
                     <th width="10%">LEVEL HARUS</th>
                     <th width="10%">STATUS</th>
-                    <th width="25%">REKOMENDASI (GAP)</th>
+                    <th width="25%">REKOMENDASI</th>
                 </tr>
             </thead>
             <tbody>
@@ -680,10 +682,7 @@
         </div>
     </div>
 
-    <!-- Page Break -->
-    @if(!$loop->last)
-    <div class="page-break"></div>
-    @endif
+  
     @endif
     @endforeach
 
