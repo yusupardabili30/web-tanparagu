@@ -1025,10 +1025,10 @@ canvas {
                                 <i class="ri-refresh-line align-bottom"></i>
                             </button>
                             
-<!-- Atau alternatif dengan JavaScript -->
-<button type="button" class="btn btn-success" id="btnExportManual">
-    <i class="ri-file-excel-line align-bottom me-1"></i> Export Excel
-</button>
+<!-- TOMBOL EXPORT LENGKAP (HANYA 1 TOMBOL) -->
+        <button type="button" class="btn btn-success" id="btnExportLengkap">
+            <i class="ri-file-excel-2-line align-bottom me-1"></i> Export Excel Lengkap
+        </button>
                         </div>
                     </div>
                     
@@ -2344,14 +2344,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+{{-- Tambahkan di bagian akhir script --}}
 <script>
-document.getElementById('btnExportManual')?.addEventListener('click', function() {
+// Export Excel Lengkap (4 Sheet dalam 1 file)
+document.getElementById('btnExportLengkap')?.addEventListener('click', function() {
     const form = document.getElementById('analisisForm');
     const formData = new FormData(form);
     
     // Tambahkan parameter tambahan
     formData.append('_token', '{{ csrf_token() }}');
-    formData.append('export', 'excel');
     
     // Buat URL dengan parameter
     let params = new URLSearchParams();
@@ -2359,8 +2360,52 @@ document.getElementById('btnExportManual')?.addEventListener('click', function()
         params.append(key, value);
     }
     
+    // Tampilkan loading
+    const btn = this;
+    const originalText = btn.innerHTML;
+    const originalWidth = btn.offsetWidth;
+    
+    // Set fixed width agar tidak berubah
+    btn.style.minWidth = originalWidth + 'px';
+    btn.innerHTML = '<i class="ri-loader-4-line align-bottom me-1 spin-icon"></i> Exporting...';
+    btn.disabled = true;
+    
+    // Tambahkan class untuk animasi spin
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .spin-icon {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+    
     // Redirect ke export URL
-    window.location.href = '{{ route("analisis.export-excel") }}?' + params.toString();
+    setTimeout(() => {
+        window.location.href = '{{ route("analisis.export-excel") }}?' + params.toString();
+        
+        // Reset tombol setelah 5 detik
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.style.minWidth = '';
+            document.head.removeChild(style);
+        }, 5000);
+    }, 500);
+});
+
+// Reset Form
+document.getElementById('btnReset')?.addEventListener('click', function () {
+    document.getElementById('kegiatanSelect').value = '';
+    document.getElementById('pangkatSelect').value = '';
+    document.getElementById('jenisPtkSelect').value = '';
+    document.getElementById('kotaSelect').value = '';
+    document.getElementById('jenjangPendidikanSelect').value = '';
+    document.getElementById('jenisKelaminSelect').value = '';
+    document.getElementById('analisisForm').submit();
 });
 </script>
 @endsection

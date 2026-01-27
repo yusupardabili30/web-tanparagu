@@ -2528,8 +2528,410 @@ class AnalisisController extends Controller
             // Set active sheet kembali ke sheet 1
             $spreadsheet->setActiveSheetIndex(0);
 
+
+
+
+            // ======================
+            // SHEET 4: PTK PROGRESS (TAMBAHAN BARU)
+            // ======================
+            $sheet4 = $spreadsheet->createSheet();
+            $sheet4->setTitle('PTK PROGRESS');
+            $sheet4->getPageSetup()
+                ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+                ->setPaperSize(PageSetup::PAPERSIZE_A4);
+
+            $row4 = 1;
+
+            // JUDUL SHEET 4
+            $sheet4->mergeCells("A{$row4}:L{$row4}");
+            $sheet4->setCellValue("A{$row4}", 'MONITORING PROGRESS PTK PER KEGIATAN');
+            $sheet4->getStyle("A{$row4}")->applyFromArray([
+                'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => '1a5bb8']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $row4++;
+            $sheet4->mergeCells("A{$row4}:L{$row4}");
+            $sheet4->setCellValue("A{$row4}", 'Status Penyelesaian Instrumen Berdasarkan Entity');
+            $sheet4->getStyle("A{$row4}")->applyFromArray([
+                'font' => ['size' => 12, 'color' => ['rgb' => '2d3748']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $row4++;
+            $sheet4->mergeCells("A{$row4}:L{$row4}");
+            $sheet4->setCellValue("A{$row4}", 'Target: Guru = 13 Sub Indikator, Kepala Sekolah & Pengawas = 9 Sub Indikator');
+            $sheet4->getStyle("A{$row4}")->applyFromArray([
+                'font' => ['color' => ['rgb' => '666666'], 'italic' => true],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            $row4 += 2;
+
+            // FILTER INFO
+            $kegiatanName = '';
+            if ($request->filled('kegiatan_id')) {
+                $kegiatan = DB::table('kegiatan')->where('kegiatan_id', $request->kegiatan_id)->first();
+                $kegiatanName = $kegiatan->kegiatan_name ?? '';
+            }
+
+            $sheet4->mergeCells("A{$row4}:L{$row4}");
+            $sheet4->setCellValue("A{$row4}", 'FILTER: ' . ($kegiatanName ?: 'Semua Kegiatan'));
+            $sheet4->getStyle("A{$row4}")->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4B5563']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            ]);
+
+            $row4++;
+
+            // AMBIL DATA PTK PROGRESS
+            $progressData = $this->getPtkProgressData($request);
+
+            // GROUP BY STATUS
+            $groupedProgress = [
+                'selesai' => [],
+                'dalam_proses' => [],
+                'belum_mulai' => []
+            ];
+
+            foreach ($progressData as $ptk) {
+                $entityTarget = $this->getEntityTarget($ptk->entity);
+                $progressPercent = $entityTarget > 0 ? round(($ptk->jumlah_sub_indikator / $entityTarget) * 100, 0) : 0;
+
+                if ($ptk->jumlah_sub_indikator == 0) {
+                    $groupedProgress['belum_mulai'][] = $ptk;
+                } elseif ($progressPercent >= 100) {
+                    $groupedProgress['selesai'][] = $ptk;
+                } else {
+                    $groupedProgress['dalam_proses'][] = $ptk;
+                }
+            }
+
+            // ======================
+            // BAGIAN 1: PTK SELESAI (100%)
+            // ======================
+            if (!empty($groupedProgress['selesai'])) {
+                $sheet4->mergeCells("A{$row4}:L{$row4}");
+                $sheet4->setCellValue("A{$row4}", '1. PTK YANG SUDAH SELESAI (100%)');
+                $sheet4->getStyle("A{$row4}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 14],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '28a745']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $row4++;
+
+                // Header tabel selesai
+                $headersSelesai = ['No', 'NIP', 'Nama', 'No Hp', 'Jenjang Jabatan', 'Entity', 'Sekolah', 'Instansi', 'Kota', 'Sub Indikator', 'Target', 'Progress', 'Status'];
+                foreach ($headersSelesai as $col => $header) {
+                    $cell = chr(65 + $col) . $row4;
+                    $sheet4->setCellValue($cell, $header);
+                    $sheet4->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2d3748']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+                }
+
+                $row4++;
+
+                $noSelesai = 1;
+                foreach ($groupedProgress['selesai'] as $ptk) {
+                    $entityTarget = $this->getEntityTarget($ptk->entity);
+                    $progressPercent = $entityTarget > 0 ? round(($ptk->jumlah_sub_indikator / $entityTarget) * 100, 0) : 0;
+
+                    $sheet4->setCellValue("A{$row4}", $noSelesai);
+                    $sheet4->setCellValue("B{$row4}", $ptk->nip ?? '-');
+                    $sheet4->setCellValue("C{$row4}", $ptk->nama ?? '-');
+                    $sheet4->setCellValue("D{$row4}", $ptk->no_hp ?? '-');
+                    $sheet4->setCellValue("E{$row4}", $ptk->jenjang_jabatan ?? '-');
+                    $sheet4->setCellValue("F{$row4}", $ptk->entity ?? '-');
+                    $sheet4->setCellValue("G{$row4}", $ptk->nama_sekolah ?? '-');
+                    $sheet4->setCellValue("H{$row4}", $ptk->instansi ?? '-');
+                    $sheet4->setCellValue("I{$row4}", $ptk->nama_kota ?? '-');
+                    $sheet4->setCellValue("J{$row4}", $ptk->jumlah_sub_indikator);
+                    $sheet4->setCellValue("K{$row4}", $entityTarget);
+                    $sheet4->setCellValue("L{$row4}", $progressPercent . '%');
+                    $sheet4->setCellValue("M{$row4}", 'SELESAI');
+
+                    // Progress bar visual
+                    $progressBar = str_repeat('█', 10);
+                    $sheet4->setCellValue("L{$row4}", $progressBar);
+                    $sheet4->getStyle("L{$row4}")->getFont()->setColor(new Color('28a745'));
+
+                    // Styling
+                    $bgColor = $row4 % 2 == 0 ? 'F0FFF4' : 'E6F7EC';
+                    $sheet4->getStyle("A{$row4}:L{$row4}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $sheet4->getStyle("H{$row4}:J{$row4}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $row4++;
+                    $noSelesai++;
+                }
+
+                $row4 += 2;
+            }
+
+            // ======================
+            // BAGIAN 2: PTK DALAM PROSES (<100%)
+            // ======================
+            if (!empty($groupedProgress['dalam_proses'])) {
+                $sheet4->mergeCells("A{$row4}:L{$row4}");
+                $sheet4->setCellValue("A{$row4}", '2. PTK DALAM PROSES (<100%)');
+                $sheet4->getStyle("A{$row4}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 14],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'ffc107']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $row4++;
+
+                // Header tabel proses
+                $headersProses = ['No', 'NIP', 'Nama', 'No Hp', 'Jenjang Jabatan', 'Entity', 'Sekolah', 'Instansi', 'Kota', 'Sub Indikator', 'Target', 'Progress', 'Kurang'];
+                foreach ($headersProses as $col => $header) {
+                    $cell = chr(65 + $col) . $row4;
+                    $sheet4->setCellValue($cell, $header);
+                    $sheet4->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2d3748']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+                }
+
+                $row4++;
+
+                $noProses = 1;
+                foreach ($groupedProgress['dalam_proses'] as $ptk) {
+                    $entityTarget = $this->getEntityTarget($ptk->entity);
+                    $progressPercent = $entityTarget > 0 ? round(($ptk->jumlah_sub_indikator / $entityTarget) * 100, 0) : 0;
+                    $kurang = max(0, $entityTarget - $ptk->jumlah_sub_indikator);
+
+                    // Rekomendasi berdasarkan progress
+                    $rekomendasi = '';
+                    if ($progressPercent >= 70) {
+                        $rekomendasi = 'Hampir selesai, perlu motivasi';
+                    } elseif ($progressPercent >= 40) {
+                        $rekomendasi = 'Perlu bimbingan';
+                    } else {
+                        $rekomendasi = 'Perlu pendampingan intensif';
+                    }
+
+                    $sheet4->setCellValue("A{$row4}", $noProses);
+                    $sheet4->setCellValue("B{$row4}", $ptk->nip ?? '-');
+                    $sheet4->setCellValue("C{$row4}", $ptk->nama ?? '-');
+                    $sheet4->setCellValue("D{$row4}", $ptk->no_hp ?? '-');
+                    $sheet4->setCellValue("E{$row4}", $ptk->jenjang_jabatan ?? '-');
+                    $sheet4->setCellValue("F{$row4}", $ptk->entity ?? '-');
+                    $sheet4->setCellValue("G{$row4}", $ptk->nama_sekolah ?? '-');
+                    $sheet4->setCellValue("H{$row4}", $ptk->instansi ?? '-');
+                    $sheet4->setCellValue("I{$row4}", $ptk->nama_kota ?? '-');
+                    $sheet4->setCellValue("J{$row4}", $ptk->jumlah_sub_indikator);
+                    $sheet4->setCellValue("K{$row4}", $entityTarget);
+                    $sheet4->setCellValue("L{$row4}", $progressPercent . '%');
+                    $sheet4->setCellValue("M{$row4}", $kurang);
+
+
+                    // Progress bar visual berdasarkan persentase
+                    $barLength = min((int)($progressPercent / 10), 10);
+                    $progressBar = str_repeat('█', $barLength) . str_repeat('░', 10 - $barLength);
+                    $sheet4->setCellValue("M{$row4}", $progressBar);
+
+                    // Warna progress bar
+                    if ($progressPercent >= 70) {
+                        $sheet4->getStyle("M{$row4}")->getFont()->setColor(new Color('28a745'));
+                    } elseif ($progressPercent >= 40) {
+                        $sheet4->getStyle("M{$row4}")->getFont()->setColor(new Color('ffc107'));
+                    } else {
+                        $sheet4->getStyle("M{$row4}")->getFont()->setColor(new Color('dc3545'));
+                    }
+
+                    // Styling
+                    $bgColor = $row4 % 2 == 0 ? 'FFFBF0' : 'FFF9E6';
+                    $sheet4->getStyle("A{$row4}:M{$row4}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $sheet4->getStyle("H{$row4}:K{$row4}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $row4++;
+                    $noProses++;
+                }
+
+                $row4 += 2;
+            }
+
+            // ======================
+            // BAGIAN 3: PTK BELUM MULAI (0%)
+            // ======================
+            if (!empty($groupedProgress['belum_mulai'])) {
+                $sheet4->mergeCells("A{$row4}:L{$row4}");
+                $sheet4->setCellValue("A{$row4}", '3. PTK BELUM MULAI (0%)');
+                $sheet4->getStyle("A{$row4}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 14],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'dc3545']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $row4++;
+
+                // Header tabel belum mulai
+                $headersBelum = ['No', 'NIP', 'Nama', 'No Hp', 'Jenjang Jabatan', 'Entity', 'Sekolah', 'Instansi', 'Kota', 'Sub Indikator', 'Target', 'Status', 'Rekomendasi'];
+                foreach ($headersBelum as $col => $header) {
+                    $cell = chr(65 + $col) . $row4;
+                    $sheet4->setCellValue($cell, $header);
+                    $sheet4->getStyle($cell)->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2d3748']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+                }
+
+                $row4++;
+
+                $noBelum = 1;
+                foreach ($groupedProgress['belum_mulai'] as $ptk) {
+                    $entityTarget = $this->getEntityTarget($ptk->entity);
+
+                    $sheet4->setCellValue("A{$row4}", $noBelum);
+                    $sheet4->setCellValue("B{$row4}", $ptk->nip ?? '-');
+                    $sheet4->setCellValue("C{$row4}", $ptk->nama ?? '-');
+                    $sheet4->setCellValue("D{$row4}", $ptk->no_hp ?? '-');    // NO HP
+                    $sheet4->setCellValue("E{$row4}", $ptk->jenjang_jabatan ?? '-');
+                    $sheet4->setCellValue("F{$row4}", $ptk->entity ?? '-');
+                    $sheet4->setCellValue("G{$row4}", $ptk->nama_sekolah ?? '-');
+                    $sheet4->setCellValue("H{$row4}", $ptk->instansi ?? '-'); // INSTANSI
+                    $sheet4->setCellValue("I{$row4}", $ptk->nama_kota ?? '-');
+                    $sheet4->setCellValue("J{$row4}", $ptk->jumlah_sub_indikator);
+                    $sheet4->setCellValue("K{$row4}", $entityTarget);
+                    $sheet4->setCellValue("L{$row4}", 'BELUM MULAI');
+                    $sheet4->setCellValue("M{$row4}", 'Perlu follow up segera');
+
+                    // Styling
+                    $bgColor = $row4 % 2 == 0 ? 'FFF0F0' : 'FFE6E6';
+                    $sheet4->getStyle("A{$row4}:K{$row4}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                    ]);
+
+                    $sheet4->getStyle("H{$row4}:I{$row4}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet4->getStyle("J{$row4}")->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'dc3545']]
+                    ]);
+
+                    $row4++;
+                    $noBelum++;
+                }
+
+                $row4 += 2;
+            }
+
+            // ======================
+            // SUMMARY STATISTIK
+            // ======================
+            $totalPtk = count($progressData);
+            $selesaiCount = count($groupedProgress['selesai']);
+            $prosesCount = count($groupedProgress['dalam_proses']);
+            $belumCount = count($groupedProgress['belum_mulai']);
+
+            $sheet4->mergeCells("A{$row4}:L{$row4}");
+            $sheet4->setCellValue("A{$row4}", 'SUMMARY STATISTIK PROGRESS PTK');
+            $sheet4->getStyle("A{$row4}")->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 13],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1a5bb8']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            ]);
+
+            $row4++;
+
+            // Statistik dalam baris
+            $stats = [
+                ['TOTAL PTK', $totalPtk, '1a5bb8'],
+                ['SELESAI (100%)', $selesaiCount, '28a745'],
+                ['DALAM PROSES', $prosesCount, 'ffc107'],
+                ['BELUM MULAI (0%)', $belumCount, 'dc3545']
+            ];
+
+            $col = 0;
+            foreach ($stats as $stat) {
+                $startCol = chr(65 + ($col * 3));
+                $endCol = chr(65 + ($col * 3) + 2);
+
+                $sheet4->mergeCells("{$startCol}{$row4}:{$endCol}{$row4}");
+                $sheet4->setCellValue("{$startCol}{$row4}", $stat[0]);
+                $sheet4->getStyle("{$startCol}{$row4}")->applyFromArray([
+                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $stat[2]]],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $row4++;
+                $sheet4->mergeCells("{$startCol}{$row4}:{$endCol}{$row4}");
+                $sheet4->setCellValue("{$startCol}{$row4}", $stat[1]);
+                $sheet4->getStyle("{$startCol}{$row4}")->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 14],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                ]);
+
+                $col++;
+            }
+
+            $row4++;
+
+            // FOOTER
+            $sheet4->mergeCells("A{$row4}:L{$row4}");
+            $sheet4->setCellValue("A{$row4}", 'RINGKASAN SHEET:');
+            $sheet4->getStyle("A{$row4}")->applyFromArray([
+                'font' => ['bold' => true]
+            ]);
+
+            $row4++;
+            $sheet4->setCellValue("A{$row4}", '1. ANALISIS GRAFIK: Statistik dan grafik analisis data');
+            $sheet4->setCellValue("B{$row4}", '2. DETAIL HASIL: Detail hasil instrumen dengan rekomendasi gap');
+            $row4++;
+            $sheet4->setCellValue("A{$row4}", '3. PELATIHAN: Data pelatihan yang diperlukan PTK');
+            $sheet4->setCellValue("B{$row4}", '4. PTK PROGRESS: Monitoring progress penyelesaian instrumen');
+            $row4++;
+            $sheet4->setCellValue("A{$row4}", '© ' . date('Y') . ' - Sistem TanpaRagu | Dicetak: ' . now()->format('d F Y H:i:s'));
+            $sheet4->getStyle("A{$row4}")->applyFromArray([
+                'font' => ['color' => ['rgb' => '666666']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ]);
+
+            // Set column widths
+            $sheet4->getColumnDimension('A')->setWidth(6);   // No
+            $sheet4->getColumnDimension('B')->setWidth(18);  // NIP
+            $sheet4->getColumnDimension('C')->setWidth(25);  // Nama
+            $sheet4->getColumnDimension('D')->setWidth(15);  // Jenjang
+            $sheet4->getColumnDimension('E')->setWidth(12);  // Entity
+            $sheet4->getColumnDimension('F')->setWidth(25);  // Sekolah
+            $sheet4->getColumnDimension('G')->setWidth(15);  // Kota
+            $sheet4->getColumnDimension('H')->setWidth(12);  // Sub Indikator
+            $sheet4->getColumnDimension('I')->setWidth(10);  // Target
+            $sheet4->getColumnDimension('J')->setWidth(12);  // Progress
+            $sheet4->getColumnDimension('K')->setWidth(12);  // Kurang/Status
+            $sheet4->getColumnDimension('L')->setWidth(25);  // Rekomendasi
+            $sheet4->getColumnDimension('M')->setWidth(15);  // Progress Bar
+
+            // Set active sheet kembali ke sheet 1
+            $spreadsheet->setActiveSheetIndex(0);
+
             // Output file
-            $filename = 'analisis-hasil-instrumen-' . date('Ymd-His') . '.xlsx';
+            $filename = 'analisis-lengkap-' . date('Ymd-His') . '.xlsx';
 
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '"');
@@ -2545,10 +2947,17 @@ class AnalisisController extends Controller
 
             exit;
         } catch (\Exception $e) {
-            \Log::error('Export Excel Analisis Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            \Log::error('Export Excel Lengkap Error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat export: ' . $e->getMessage());
         }
     }
+
+
+
+
+
+
+
 
     // ======================
     // HELPER FUNCTIONS
@@ -2948,5 +3357,100 @@ class AnalisisController extends Controller
             'status_class' => $statusClass,
             'gap_terbesar' => $levelGapCount > 0 ? max(array_column($rekomendasiGap, 'gap')) : 0
         ];
+    }
+
+
+
+
+
+
+
+
+    /**
+     * Helper function untuk mendapatkan target sub indikator berdasarkan entity
+     */
+    private function getEntityTarget($entity)
+    {
+        $entity = strtolower($entity ?? '');
+
+        if (strpos($entity, 'guru') !== false) {
+            return 13;
+        } elseif (strpos($entity, 'kepala') !== false || strpos($entity, 'pengawas') !== false) {
+            return 9;
+        }
+
+        return 0; // default jika tidak diketahui
+    }
+
+    /**
+     * Ambil data progress PTK dari database (DENGAN INSTANSI & NO HP)
+     */
+    private function getPtkProgressData(Request $request)
+    {
+        // Query untuk menghitung jumlah sub indikator per PTK
+        $query = DB::table('ptk_jawaban')
+            ->select(
+                'ptk.ptk_id',
+                'ptk.nip',
+                'ptk.nama',
+                'ptk.instansi', // TAMBAHKAN INSTANSI
+                'ptk.no_hp',    // TAMBAHKAN NO HP
+                'pangkat_jabatan.jenjang_jabatan',
+                'kegiatan.entity',
+                'sekolah.nama_sekolah',
+                'kota.nama_kota',
+                DB::raw('COUNT(DISTINCT ptk_jawaban.sub_indikator_id) as jumlah_sub_indikator')
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+            ->where('ptk_jawaban.level', '>=', 1)
+            ->groupBy(
+                'ptk.ptk_id',
+                'ptk.nip',
+                'ptk.nama',
+                'ptk.instansi',  // TAMBAHKAN KE GROUP BY
+                'ptk.no_hp',     // TAMBAHKAN KE GROUP BY
+                'pangkat_jabatan.jenjang_jabatan',
+                'kegiatan.entity',
+                'sekolah.nama_sekolah',
+                'kota.nama_kota'
+            );
+
+        // TERAPKAN FILTER YANG SAMA DENGAN ANALISIS UTAMA
+        if ($request->filled('kegiatan_id')) {
+            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+        }
+
+        if ($request->filled('pangkat_jabatan_id')) {
+            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+        }
+
+        if ($request->filled('jenis_ptk_id')) {
+            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+        }
+
+        if ($request->filled('kota_id')) {
+            $query->where('ptk.kota_id', $request->kota_id);
+        }
+
+        if ($request->filled('jenjang_pendidikan_id')) {
+            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+        }
+
+        if ($request->filled('bentuk_pendidikan')) {
+            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+        }
+
+        if ($request->filled('jenis_kelamin')) {
+            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        return $query->orderBy('kegiatan.entity')
+            ->orderBy('ptk.nama')
+            ->get();
     }
 }
