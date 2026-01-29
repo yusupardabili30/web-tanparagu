@@ -865,7 +865,7 @@
 
                                                 {{-- REKOMENDASI --}}
                                                 <div>
-                                                    <div class="cell-title">Rekomendasi Pelatihan</div>
+                                                    <div class="cell-title">Rekomendasi Kebutuhan Belajar</div>
                                                     <div class="rek-box">
                                                         @if(count($rekomendasiGap) > 0)
                                                             @foreach($rekomendasiGap as $rkIndex => $rek)
