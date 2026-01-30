@@ -295,6 +295,7 @@
             font-size: 8px;
             color: #666;
         }
+
         /* Sub Indikator */
         .sub-indikator-name {
             font-size: 8px;
@@ -384,16 +385,16 @@
             <span class="filter-label">Tahap:</span>
             <span class="filter-value">{{ $tahap ? "Tahap $tahap" : 'Semua' }}</span>
         </div>
-          <div class="filter-row">
-    <span class="filter-label">Jenjang Jabatan:</span>
-    <span class="filter-value">{{ $pangkat_jabatan_id ?: 'Semua' }}</span>
-</div>
-<div class="filter-row">
-    <span class="filter-label">Jenis PTK:</span>
-    <span class="filter-value">{{ $jenis_ptk_id ?: 'Semua' }}</span>
-</div>
+        <div class="filter-row">
+            <span class="filter-label">Jenjang Jabatan:</span>
+            <span class="filter-value">{{ $pangkat_jabatan_id ?: 'Semua' }}</span>
+        </div>
+        <div class="filter-row">
+            <span class="filter-label">Jenis PTK:</span>
+            <span class="filter-value">{{ $jenis_ptk_id ?: 'Semua' }}</span>
+        </div>
         @php
-        $totalData = count($groupedData);
+            $totalData = count($groupedData);
         @endphp
         <div class="filter-row">
             <span class="filter-label">Jumlah PTK:</span>
@@ -402,295 +403,300 @@
     </div>
 
     <!-- Data per PTK -->
-    @foreach($groupedData as $nip => $dataRows)
-    @if($dataRows->isNotEmpty())
-    @php
-    $firstRow = $dataRows->first();
-    
-// Ambil data pelatihan untuk PTK ini
-    $pelatihanData = [];
-    if (isset($firstRow->ptk_id) && isset($firstRow->kegiatan_id)) {
-        // Simulasi query pelatihan (dalam real case, ini harus di-pass dari controller)
-        $pelatihanData = DB::table('ptk_pelatihan')
-            ->select(
-                'ptk_pelatihan.*',
-                'ms_pelatihan.nama_pelatihan',
-                DB::raw("CASE 
+    @foreach ($groupedData as $nip => $dataRows)
+        @if ($dataRows->isNotEmpty())
+            @php
+                $firstRow = $dataRows->first();
+
+                // Ambil data pelatihan untuk PTK ini
+                $pelatihanData = [];
+                if (isset($firstRow->ptk_id) && isset($firstRow->kegiatan_id)) {
+                    // Simulasi query pelatihan (dalam real case, ini harus di-pass dari controller)
+                    $pelatihanData = DB::table('ptk_pelatihan')
+                        ->select(
+                            'ptk_pelatihan.*',
+                            'ms_pelatihan.nama_pelatihan',
+                            DB::raw("CASE
                     WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN ms_pelatihan.nama_pelatihan
                     WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN ptk_pelatihan.pelatihan_lainnya
                     ELSE 'Belum Tersedia'
                 END as nama_pelatihan_lengkap"),
-                DB::raw("CASE 
+                            DB::raw("CASE
                     WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN 'Dari Daftar'
                     WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN 'Lainnya'
                     ELSE 'Belum Tersedia'
-                END as kategori_pelatihan")
-            )
-            ->leftJoin('ms_pelatihan', 'ptk_pelatihan.ms_pelatihan_id', '=', 'ms_pelatihan.ms_pelatihan_id')
-            ->where('ptk_pelatihan.ptk_id', $firstRow->ptk_id)
-            ->where('ptk_pelatihan.kegiatan_id', $firstRow->kegiatan_id)
-            ->get();
-    }
+                END as kategori_pelatihan"),
+                        )
+                        ->leftJoin('ms_pelatihan', 'ptk_pelatihan.ms_pelatihan_id', '=', 'ms_pelatihan.ms_pelatihan_id')
+                        ->where('ptk_pelatihan.ptk_id', $firstRow->ptk_id)
+                        ->where('ptk_pelatihan.kegiatan_id', $firstRow->kegiatan_id)
+                        ->get();
+                }
 
+                // Proses rekomendasi untuk setiap row
+                $processedRows = [];
+                foreach ($dataRows as $row) {
+                    // Simulasi fungsi getRekomendasiWithGap dari controller
+                    $jenjangJabatan = $row->jenjang_jabatan ?? 'Pertama';
+                    $levelJawaban = $row->level_jawaban ?? ($row->level ?? 0);
+                    $subIndikatorId = $row->sub_indikator_id;
+                    $tahap = $row->tahap;
+                    $entity = $row->entity;
+                    $subIndikatorCode = $row->sub_indikator_code;
 
-    // Proses rekomendasi untuk setiap row
-    $processedRows = [];
-    foreach($dataRows as $row) {
-        // Simulasi fungsi getRekomendasiWithGap dari controller
-        $jenjangJabatan = $row->jenjang_jabatan ?? 'Pertama';
-        $levelJawaban = $row->level_jawaban ?? $row->level ?? 0;
-        $subIndikatorId = $row->sub_indikator_id;
-        $tahap = $row->tahap;
-        $entity = $row->entity;
-        $subIndikatorCode = $row->sub_indikator_code;
-        
-        // Tentukan rentang level berdasarkan jenjang jabatan
-        $levelRanges = [
-            'Pertama' => ['min' => 2, 'max' => 2],
-            'Muda'    => ['min' => 2, 'max' => 3],
-            'Madya'   => ['min' => 2, 'max' => 4],
-            'Utama'   => ['min' => 2, 'max' => 5]
-        ];
-        
-        $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Pertama'];
-        $levelMin = $range['min'];
-        $levelMax = $range['max'];
-        
-        // Simulasi ambil rekomendasi dari database (dalam real case, ini query)
-        // Untuk contoh, kita buat dummy rekomendasi
-        $rekomendasiSemua = [];
-        for($i = $levelMin; $i <= $levelMax; $i++) {
-            $rekomendasiSemua[] = (object)[
-                'level' => $i,
-                'rekomendasi' => "Rekomendasi untuk Level $i: Pengembangan kompetensi pada level ini meliputi strategi lanjutan untuk meningkatkan kemampuan mengajar."
-            ];
-        }
-        
-        // Pisahkan rekomendasi yang dicapai vs gap
-        $rekomendasiDicapai = [];
-        $rekomendasiGap = [];
-        
-        foreach($rekomendasiSemua as $rek) {
-            if($rek->level <= $levelJawaban) {
-                $rekomendasiDicapai[] = [
-                    'level' => $rek->level,
-                    'rekomendasi' => $rek->rekomendasi
-                ];
-            } else {
-                $rekomendasiGap[] = [
-                    'level' => $rek->level,
-                    'rekomendasi' => $rek->rekomendasi
-                ];
-            }
-        }
-        
-        // Tentukan status
-        $levelGapCount = count($rekomendasiGap);
-        if($levelGapCount == 0) {
-            $status = 'Mencapai Semua Level';
-            $statusClass = 'success';
-        } elseif($levelGapCount == 1 && $levelMax - $levelJawaban == 1) {
-            $status = 'Mendekati Target';
-            $statusClass = 'warning';
-        } else {
-            $status = 'Perlu Peningkatan';
-            $statusClass = 'danger';
-        }
-        
-        $row->rekomendasi_info = [
-            'jenjang' => $jenjangJabatan,
-            'level_jawaban' => $levelJawaban,
-            'level_min' => $levelMin,
-            'level_max' => $levelMax,
-            'rekomendasi_dicapai' => $rekomendasiDicapai,
-            'rekomendasi_gap' => $rekomendasiGap,
-            'status' => $status,
-            'status_class' => $statusClass
-        ];
-        
-        $processedRows[] = $row;
-    }
-    @endphp
+                    // Tentukan rentang level berdasarkan jenjang jabatan
+                    $levelRanges = [
+                        'Pertama' => ['min' => 2, 'max' => 2],
+                        'Muda' => ['min' => 2, 'max' => 3],
+                        'Madya' => ['min' => 2, 'max' => 4],
+                        'Utama' => ['min' => 2, 'max' => 5],
+                    ];
 
-    <div class="ptk-card">
-        <!-- Header PTK -->
-        <div class="ptk-header">
-            <span>{{ $firstRow->nama ?? 'Nama tidak tersedia' }}</span>
-            <span class="kegiatan-badge">{{ $firstRow->kegiatan_name ?? 'Kegiatan' }}</span>
-        </div>
+                    $range = $levelRanges[$jenjangJabatan] ?? $levelRanges['Pertama'];
+                    $levelMin = $range['min'];
+                    $levelMax = $range['max'];
 
-        <!-- Info PTK -->
-        <div class="ptk-info">
-            <table class="info-table">
-                <tr>
-                    <td class="info-label">NIP:</td>
-                    <td class="info-value">{{ $nip }}</td>
-                    <td class="info-label">Jenjang:</td>
-                    <td class="info-value">{{ $firstRow->jenjang_jabatan ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Entity:</td>
-                    <td class="info-value">{{ $firstRow->entity ?? '-' }}</td>
-                    <td class="info-label">Tahap:</td>
-                    <td class="info-value">{{ $firstRow->tahap ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="info-label">Instansi:</td>
-                    <td class="info-value instansi-info" colspan="3">
-                        @if(!empty($firstRow->nama_sekolah))
-                            {{ $firstRow->nama_sekolah }}
-                            @if(!empty($firstRow->npsn))
-                                <span class="npsn-badge">NPSN: {{ $firstRow->npsn }}</span>
-                            @endif
-                        @elseif(!empty($firstRow->instansi))
-                            {{ $firstRow->instansi }}
-                        @else
-                            -
-                        @endif
-                    </td>
-                </tr>
-                <tr>
-                    <td class="info-label">Kota:</td>
-                    <td class="info-value">{{ $firstRow->nama_kota ?? '-' }}</td>
-                    <td class="info-label">Pangkat:</td>
-                    <td class="info-value">{{ $firstRow->pangkat ?? '-' }} {{ $firstRow->golongan_ruang ? '('.$firstRow->golongan_ruang.')' : '' }}</td>
-                </tr>
-            </table>
-         <!-- Pelatihan Section -->
-            @if(count($pelatihanData) > 0)
-            <div class="pelatihan-section">
-                <div class="pelatihan-title">
-                    <i class="fas fa-book-open"></i> Pelatihan yang Anda Perlukan:
-                </div>
-                <div>
-                    @foreach($pelatihanData as $pelatihan)
-                    <div class="pelatihan-badge">
-                        {{ $pelatihan->nama_pelatihan_lengkap ?? 'Belum Tersedia' }}
-                        <span class="pelatihan-kategori">{{ $pelatihan->kategori_pelatihan ?? 'Tidak Diketahui' }}</span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @else
-            <div class="pelatihan-section">
-                <div class="pelatihan-title">
-                    <i class="fas fa-book-open"></i> Pelatihan yang Anda Perlukan:
-                </div>
-                <div class="text-muted">Belum ada data pelatihan</div>
-            </div>
-            @endif
-        </div>
-
-        <!-- Tabel Data -->
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th width="5%">NO</th>
-                    <th width="15%">SUB INDIKATOR</th>
-                    <th width="25%">DESKRIPSI</th>
-                    <th width="10%">LEVEL DICAPAI</th>
-                    <th width="10%">LEVEL HARUS</th>
-                    <th width="10%">STATUS</th>
-                    <th width="25%">REKOMENDASI</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($processedRows as $index => $row)
-                @php
-                $info = $row->rekomendasi_info;
-                @endphp
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td>
-                        <div class="sub-indikator-code">{{ $row->sub_indikator_code }}</div>
-                        <div class="sub-indikator-name">{{ Str::limit($row->sub_indikator_name ?? '-', 30) }}</div>
-                    </td>
-                    <td>{{ Str::limit($row->sub_indikator_name ?? '-', 50) }}</td>
-                    <td class="text-center">
-                        @if($info['level_jawaban'] > 0)
-                        <span class="level-badge badge-level-{{ $info['level_jawaban'] }}">
-                            Level {{ $info['level_jawaban'] }}
-                        </span>
-                        @else
-                        <span class="level-badge badge-secondary">-</span>
-                        @endif
-                    </td>
-                    <td>
-                        <div class="level-harus-container">
-                            @for($i = $info['level_min']; $i <= $info['level_max']; $i++)
-                            <span class="level-harus-badge badge-level-{{ $i }}">
-                                Level {{ $i }}
-                            </span>
-                            @endfor
-                        </div>
-                    </td>
-                    <td class="text-center">
-                        <span class="badge-status badge-{{ $info['status_class'] }}">
-                            {{ $info['status'] }}
-                        </span>
-                    </td>
-                    <td>
-                        @if(count($info['rekomendasi_gap']) > 0)
-                        <div class="rekomendasi-gap">
-                            @foreach($info['rekomendasi_gap'] as $rek)
-                            <div class="gap-item">
-                                <div class="gap-level">Gap Level {{ $rek['level'] }}</div>
-                                <div class="gap-text">{{ Str::limit($rek['rekomendasi'], 80) }}</div>
-                            </div>
-                            @endforeach
-                        </div>
-                        @else
-                        <div class="text-center text-success">
-                            <span class="badge-status badge-success">
-                                Sudah mencapai semua level
-                            </span>
-                        </div>
-                        @endif
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <!-- Summary PTK -->
-        <div class="summary">
-            <div class="summary-row">
-                <span class="summary-label">Jumlah Indikator:</span>
-                <span class="summary-value text-bold">{{ count($processedRows) }} indikator</span>
-            </div>
-            <div class="summary-row">
-                <span class="summary-label">Status Keseluruhan:</span>
-                <span class="summary-value">
-                    @php
-                    $statusCounts = ['Mencapai Semua Level' => 0, 'Mendekati Target' => 0, 'Perlu Peningkatan' => 0];
-                    foreach($processedRows as $row) {
-                        $statusCounts[$row->rekomendasi_info['status']]++;
+                    // Simulasi ambil rekomendasi dari database (dalam real case, ini query)
+                    // Untuk contoh, kita buat dummy rekomendasi
+                    $rekomendasiSemua = [];
+                    for ($i = $levelMin; $i <= $levelMax; $i++) {
+                        $rekomendasiSemua[] = (object) [
+                            'level' => $i,
+                            'rekomendasi' => "Rekomendasi untuk Level $i: Pengembangan kompetensi pada level ini meliputi strategi lanjutan untuk meningkatkan kemampuan mengajar.",
+                        ];
                     }
-                    @endphp
-                    @foreach($statusCounts as $status => $count)
-                    @if($count > 0)
-                    <span class="badge-status badge-{{ 
-                        $status == 'Mencapai Semua Level' ? 'success' : 
-                        ($status == 'Mendekati Target' ? 'warning' : 'danger') 
-                    }}" style="margin-right: 5px;">
-                        {{ $status }}: {{ $count }}
-                    </span>
-                    @endif
-                    @endforeach
-                </span>
-            </div>
-        </div>
-    </div>
 
-  
-    @endif
+                    // Pisahkan rekomendasi yang dicapai vs gap
+                    $rekomendasiDicapai = [];
+                    $rekomendasiGap = [];
+
+                    foreach ($rekomendasiSemua as $rek) {
+                        if ($rek->level <= $levelJawaban) {
+                            $rekomendasiDicapai[] = [
+                                'level' => $rek->level,
+                                'rekomendasi' => $rek->rekomendasi,
+                            ];
+                        } else {
+                            $rekomendasiGap[] = [
+                                'level' => $rek->level,
+                                'rekomendasi' => $rek->rekomendasi,
+                            ];
+                        }
+                    }
+
+                    // Tentukan status
+                    $levelGapCount = count($rekomendasiGap);
+                    if ($levelGapCount == 0) {
+                        $status = 'Mencapai Semua Level';
+                        $statusClass = 'success';
+                    } elseif ($levelGapCount == 1 && $levelMax - $levelJawaban == 1) {
+                        $status = 'Mendekati Target';
+                        $statusClass = 'warning';
+                    } else {
+                        $status = 'Perlu Peningkatan';
+                        $statusClass = 'danger';
+                    }
+
+                    $row->rekomendasi_info = [
+                        'jenjang' => $jenjangJabatan,
+                        'level_jawaban' => $levelJawaban,
+                        'level_min' => $levelMin,
+                        'level_max' => $levelMax,
+                        'rekomendasi_dicapai' => $rekomendasiDicapai,
+                        'rekomendasi_gap' => $rekomendasiGap,
+                        'status' => $status,
+                        'status_class' => $statusClass,
+                    ];
+
+                    $processedRows[] = $row;
+                }
+            @endphp
+
+            <div class="ptk-card">
+                <!-- Header PTK -->
+                <div class="ptk-header">
+                    <span>{{ $firstRow->nama ?? 'Nama tidak tersedia' }}</span>
+                    <span class="kegiatan-badge">{{ $firstRow->kegiatan_name ?? 'Kegiatan' }}</span>
+                </div>
+
+                <!-- Info PTK -->
+                <div class="ptk-info">
+                    <table class="info-table">
+                        <tr>
+                            <td class="info-label">NIP:</td>
+                            <td class="info-value">{{ $nip }}</td>
+                            <td class="info-label">Jenjang:</td>
+                            <td class="info-value">{{ $firstRow->jenjang_jabatan ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="info-label">Entity:</td>
+                            <td class="info-value">{{ $firstRow->entity ?? '-' }}</td>
+                            <td class="info-label">Tahap:</td>
+                            <td class="info-value">{{ $firstRow->tahap ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td class="info-label">Instansi:</td>
+                            <td class="info-value instansi-info" colspan="3">
+                                @if (!empty($firstRow->nama_sekolah))
+                                    {{ $firstRow->nama_sekolah }}
+                                    @if (!empty($firstRow->npsn))
+                                        <span class="npsn-badge">NPSN: {{ $firstRow->npsn }}</span>
+                                    @endif
+                                @elseif(!empty($firstRow->instansi))
+                                    {{ $firstRow->instansi }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="info-label">Kota:</td>
+                            <td class="info-value">{{ $firstRow->nama_kota ?? '-' }}</td>
+                            <td class="info-label">Pangkat:</td>
+                            <td class="info-value">{{ $firstRow->pangkat ?? '-' }}
+                                {{ $firstRow->golongan_ruang ? '(' . $firstRow->golongan_ruang . ')' : '' }}</td>
+                        </tr>
+                    </table>
+                    <!-- Pelatihan Section -->
+                    @if (count($pelatihanData) > 0)
+                        <div class="pelatihan-section">
+                            <div class="pelatihan-title">
+                                <i class="fas fa-book-open"></i> Pelatihan yang Anda Perlukan:
+                            </div>
+                            <div>
+                                @foreach ($pelatihanData as $pelatihan)
+                                    <div class="pelatihan-badge">
+                                        {{ $pelatihan->nama_pelatihan_lengkap ?? 'Belum Tersedia' }}
+                                        <span
+                                            class="pelatihan-kategori">{{ $pelatihan->kategori_pelatihan ?? 'Tidak Diketahui' }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <div class="pelatihan-section">
+                            <div class="pelatihan-title">
+                                <i class="fas fa-book-open"></i> Pelatihan yang Anda Perlukan:
+                            </div>
+                            <div class="text-muted">Belum ada data pelatihan</div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Tabel Data -->
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th width="5%">NO</th>
+                            <th width="15%">SUB INDIKATOR</th>
+                            <th width="25%">DESKRIPSI</th>
+                            <th width="10%">LEVEL DICAPAI</th>
+                            <th width="10%">LEVEL HARUS</th>
+                            <th width="10%">STATUS</th>
+                            <th width="25%">REKOMENDASI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($processedRows as $index => $row)
+                            @php
+                                $info = $row->rekomendasi_info;
+                            @endphp
+                            <tr>
+                                <td class="text-center">{{ $index + 1 }}</td>
+                                <td>
+                                    <div class="sub-indikator-code">{{ $row->sub_indikator_code }}</div>
+                                    <div class="sub-indikator-name">
+                                        {{ Str::limit($row->sub_indikator_name ?? '-', 30) }}</div>
+                                </td>
+                                <td>{{ Str::limit($row->sub_indikator_name ?? '-', 50) }}</td>
+                                <td class="text-center">
+                                    @if ($info['level_jawaban'] > 0)
+                                        <span class="level-badge badge-level-{{ $info['level_jawaban'] }}">
+                                            Level {{ $info['level_jawaban'] }}
+                                        </span>
+                                    @else
+                                        <span class="level-badge badge-secondary">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="level-harus-container">
+                                        @for ($i = $info['level_min']; $i <= $info['level_max']; $i++)
+                                            <span class="level-harus-badge badge-level-{{ $i }}">
+                                                Level {{ $i }}
+                                            </span>
+                                        @endfor
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge-status badge-{{ $info['status_class'] }}">
+                                        {{ $info['status'] }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (count($info['rekomendasi_gap']) > 0)
+                                        <div class="rekomendasi-gap">
+                                            @foreach ($info['rekomendasi_gap'] as $rek)
+                                                <div class="gap-item">
+                                                    <div class="gap-level">Gap Level {{ $rek['level'] }}</div>
+                                                    <div class="gap-text">{{ Str::limit($rek['rekomendasi'], 80) }}
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="text-center text-success">
+                                            <span class="badge-status badge-success">
+                                                Sudah mencapai semua level
+                                            </span>
+                                        </div>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <!-- Summary PTK -->
+                <div class="summary">
+                    <div class="summary-row">
+                        <span class="summary-label">Jumlah Indikator:</span>
+                        <span class="summary-value text-bold">{{ count($processedRows) }} indikator</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Status Keseluruhan:</span>
+                        <span class="summary-value">
+                            @php
+                                $statusCounts = [
+                                    'Mencapai Semua Level' => 0,
+                                    'Mendekati Target' => 0,
+                                    'Perlu Peningkatan' => 0,
+                                ];
+                                foreach ($processedRows as $row) {
+                                    $statusCounts[$row->rekomendasi_info['status']]++;
+                                }
+                            @endphp
+                            @foreach ($statusCounts as $status => $count)
+                                @if ($count > 0)
+                                    <span
+                                        class="badge-status badge-{{ $status == 'Mencapai Semua Level' ? 'success' : ($status == 'Mendekati Target' ? 'warning' : 'danger') }}"
+                                        style="margin-right: 5px;">
+                                        {{ $status }}: {{ $count }}
+                                    </span>
+                                @endif
+                            @endforeach
+                        </span>
+                    </div>
+                </div>
+            </div>
+        @endif
     @endforeach
 
     <!-- Footer -->
     <div class="footer">
         <div style="margin-bottom: 10px;">
             <p style="margin: 2px 0;"><strong>Catatan:</strong> Dokumen untuk keperluan internal evaluasi</p>
-            <p style="margin: 2px 0;">Laporan ini menunjukkan gap antara level kompetensi yang dicapai dengan level yang harus dicapai berdasarkan jenjang jabatan</p>
+            <p style="margin: 2px 0;">Laporan ini menunjukkan gap antara level kompetensi yang dicapai dengan level yang
+                harus dicapai berdasarkan jenjang jabatan</p>
         </div>
 
         <div style="margin-top: 20px;">

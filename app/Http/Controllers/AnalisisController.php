@@ -431,6 +431,9 @@ class AnalisisController extends Controller
         // Data pelatihan PTK
         $pelatihanData = $this->getPelatihanData($request);
 
+
+        $rekomendasiGapPerJenjang = $this->getRekomendasiGapPerJenjang($request);
+
         return [
             'statistik' => $statistik,
             'level_distribution' => $levelDistribution,
@@ -444,6 +447,7 @@ class AnalisisController extends Controller
             'progress_kota' => $progressKota,
             'modus_per_kota' => $modusPerKota,
             'pelatihan_data' => $pelatihanData,
+            'rekomendasi_gap_per_jenjang' => $rekomendasiGapPerJenjang,
         ];
     }
 
@@ -2974,14 +2978,14 @@ class AnalisisController extends Controller
                 'ptk_jawaban.sub_indikator_code',
                 'sub_indikator.sub_indikator_name',
                 'ptk_jawaban.level as level_dicapai',
-                DB::raw('CASE 
+                DB::raw('CASE
                 WHEN pangkat_jabatan.jenjang_jabatan = "Pertama" THEN 2
                 WHEN pangkat_jabatan.jenjang_jabatan = "Muda" THEN 3
                 WHEN pangkat_jabatan.jenjang_jabatan = "Madya" THEN 4
                 WHEN pangkat_jabatan.jenjang_jabatan = "Utama" THEN 5
                 ELSE 2
             END as level_min_wajib'),
-                DB::raw('CASE 
+                DB::raw('CASE
                 WHEN pangkat_jabatan.jenjang_jabatan = "Pertama" THEN 2
                 WHEN pangkat_jabatan.jenjang_jabatan = "Muda" THEN 3
                 WHEN pangkat_jabatan.jenjang_jabatan = "Madya" THEN 4
@@ -3041,14 +3045,14 @@ class AnalisisController extends Controller
                 'pangkat_jabatan.jenjang_jabatan',
                 'kota.nama_kota',
                 DB::raw('COALESCE(ms_pelatihan.nama_pelatihan, ptk_pelatihan.pelatihan_lainnya) as nama_pelatihan'),
-                DB::raw('CASE 
+                DB::raw('CASE
                 WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL THEN "master"
                 ELSE "manual"
             END as tipe'),
-                DB::raw('(SELECT COUNT(*) FROM ptk_jawaban pj 
-                 WHERE pj.ptk_id = ptk.ptk_id 
-                 AND pj.level < 
-                     CASE 
+                DB::raw('(SELECT COUNT(*) FROM ptk_jawaban pj
+                 WHERE pj.ptk_id = ptk.ptk_id
+                 AND pj.level <
+                     CASE
                          WHEN pangkat_jabatan.jenjang_jabatan = "Pertama" THEN 2
                          WHEN pangkat_jabatan.jenjang_jabatan = "Muda" THEN 3
                          WHEN pangkat_jabatan.jenjang_jabatan = "Madya" THEN 4
@@ -3257,13 +3261,13 @@ class AnalisisController extends Controller
                 'ptk_pelatihan.*',
                 'ms_pelatihan.nama_pelatihan',
                 // Tentukan nama pelatihan lengkap berdasarkan ms_pelatihan_id atau pelatihan_lainnya
-                DB::raw("CASE 
+                DB::raw("CASE
                 WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN ms_pelatihan.nama_pelatihan
                 WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN ptk_pelatihan.pelatihan_lainnya
                 ELSE 'Belum Tersedia'
             END as nama_pelatihan_lengkap"),
                 // Tentukan kategori pelatihan
-                DB::raw("CASE 
+                DB::raw("CASE
                 WHEN ptk_pelatihan.ms_pelatihan_id IS NOT NULL AND ptk_pelatihan.ms_pelatihan_id != 0 THEN 'Dari Daftar'
                 WHEN ptk_pelatihan.pelatihan_lainnya IS NOT NULL AND ptk_pelatihan.pelatihan_lainnya != '' THEN 'Lainnya'
                 ELSE 'Belum Tersedia'
@@ -3381,6 +3385,255 @@ class AnalisisController extends Controller
 
         return 0; // default jika tidak diketahui
     }
+
+
+
+
+
+    private function getRekomendasiGapPerJenjang(Request $request)
+    {
+        // Tentukan target level per jenjang dan level minimal yang harus dicapai
+        $targetLevels = [
+            'Pertama' => ['min' => 2, 'max' => 2],  // Hanya level 2
+            'Muda'    => ['min' => 2, 'max' => 3],  // Level 2-3
+            'Madya'   => ['min' => 2, 'max' => 4],  // Level 2-4
+            'Utama'   => ['min' => 2, 'max' => 5]   // Level 2-5
+        ];
+
+        // FILTER PERTAMA: Ambil jenjang-jenjang yang ada di data berdasarkan filter
+        $jenjangQuery = DB::table('ptk_jawaban')
+            ->select('pangkat_jabatan.jenjang_jabatan')
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+            ->where('ptk_jawaban.level', '>=', 1)
+            ->whereNotNull('pangkat_jabatan.jenjang_jabatan');
+
+        // Terapkan filter yang sama dengan analisis utama
+        if ($request->filled('kegiatan_id')) {
+            $jenjangQuery->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+        }
+        if ($request->filled('pangkat_jabatan_id')) {
+            $pangkat = DB::table('pangkat_jabatan')
+                ->where('pangkat_jabatan_id', $request->pangkat_jabatan_id)
+                ->first();
+            if ($pangkat && $pangkat->jenjang_jabatan) {
+                $jenjangQuery->where('pangkat_jabatan.jenjang_jabatan', $pangkat->jenjang_jabatan);
+            }
+        }
+        if ($request->filled('kota_id')) {
+            $jenjangQuery->where('ptk.kota_id', $request->kota_id);
+        }
+        if ($request->filled('jenis_ptk_id')) {
+            $jenjangQuery->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+        }
+        if ($request->filled('jenjang_pendidikan_id')) {
+            $jenjangQuery->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+        }
+        if ($request->filled('bentuk_pendidikan')) {
+            $jenjangQuery->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+        }
+        if ($request->filled('jenis_kelamin')) {
+            $jenjangQuery->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        $jenjangList = $jenjangQuery
+            ->groupBy('pangkat_jabatan.jenjang_jabatan')
+            ->pluck('jenjang_jabatan')
+            ->toArray();
+
+        if (empty($jenjangList)) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($jenjangList as $jenjang) {
+            // Pastikan jenjang ini ada dalam $targetLevels
+            if (!isset($targetLevels[$jenjang])) {
+                continue;
+            }
+
+            $levelMin = $targetLevels[$jenjang]['min'];
+            $levelMax = $targetLevels[$jenjang]['max'];
+
+            // Query untuk mengambil data PTK dengan jenjang ini yang sudah menjawab
+            $ptkQuery = DB::table('ptk_jawaban')
+                ->select(
+                    'ptk.ptk_id',
+                    'ptk_jawaban.sub_indikator_id',
+                    'ptk_jawaban.sub_indikator_code',
+                    'ptk_jawaban.level as level_dicapai',
+                    'sub_indikator.sub_indikator_name',
+                    'ptk_jawaban.tahap',
+                    'kegiatan.entity'
+                )
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+                ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+                ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+                ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                ->where('pangkat_jabatan.jenjang_jabatan', $jenjang)
+                ->where('ptk_jawaban.level', '>=', 1);
+
+            // Terapkan filter yang sama
+            if ($request->filled('kegiatan_id')) {
+                $ptkQuery->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            }
+            if ($request->filled('kota_id')) {
+                $ptkQuery->where('ptk.kota_id', $request->kota_id);
+            }
+            if ($request->filled('jenis_ptk_id')) {
+                $ptkQuery->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            }
+            if ($request->filled('jenjang_pendidikan_id')) {
+                $ptkQuery->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+            }
+            if ($request->filled('bentuk_pendidikan')) {
+                $ptkQuery->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            }
+            if ($request->filled('jenis_kelamin')) {
+                $ptkQuery->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            }
+
+            $data = $ptkQuery->get();
+
+            if ($data->isEmpty()) {
+                continue;
+            }
+
+            // Hitung total PTK per jenjang
+            $totalPtk = $data->groupBy('ptk_id')->count();
+
+            // Kelompokkan per sub indikator
+            $groupedBySubIndikator = $data->groupBy('sub_indikator_id');
+
+            $rekomendasiData = [];
+
+            foreach ($groupedBySubIndikator as $subIndikatorId => $subData) {
+                $firstData = $subData->first();
+
+                // Hitung PTK per level dicapai
+                $ptkPerLevel = $subData->groupBy('level_dicapai');
+
+                $detailGap = [];
+
+                foreach ($ptkPerLevel as $levelDicapai => $ptkLevelData) {
+                    $jumlahPtk = $ptkLevelData->count();
+
+                    // PERUBAHAN UTAMA DI SINI:
+                    // Tentukan semua level yang belum dicapai (GAP) dari levelDicapai+1 sampai levelMax
+                    $levelGaps = [];
+                    for ($level = $levelDicapai + 1; $level <= $levelMax; $level++) {
+                        // Cek jika level ini dalam rentang yang harus dicapai
+                        if ($level >= $levelMin && $level <= $levelMax) {
+                            $levelGaps[] = $level;
+                        }
+                    }
+
+                    // Jika ada gap (level yang belum dicapai)
+                    if (!empty($levelGaps)) {
+                        // Untuk setiap level gap, buat entry terpisah
+                        foreach ($levelGaps as $levelGap) {
+                            $rekomendasiText = $this->getRekomendasiText(
+                                $subIndikatorId,
+                                $firstData->sub_indikator_code,
+                                $firstData->tahap ?? '',
+                                $firstData->entity ?? '',
+                                $levelDicapai,
+                                $levelGap
+                            );
+
+                            $detailGap[] = [
+                                'level_dicapai' => $levelDicapai,
+                                'level_harus' => $levelGap,
+                                'level_gap' => $levelGap - $levelDicapai,
+                                'rekomendasi' => $rekomendasiText,
+                                'jumlah_ptk' => $jumlahPtk  // PERUBAHAN: jumlah PTK per level dicapai
+                            ];
+                        }
+                    }
+                }
+
+                // Hanya tambahkan jika ada gap
+                if (!empty($detailGap)) {
+                    $rekomendasiData[] = [
+                        'sub_indikator_id' => $subIndikatorId,
+                        'sub_indikator_code' => $firstData->sub_indikator_code,
+                        'sub_indikator_name' => $firstData->sub_indikator_name,
+                        'detail_gap' => $detailGap,
+                        'total_ptk_sub_indikator' => $subData->count()  // Total PTK untuk sub indikator ini
+                    ];
+                }
+            }
+
+            // Hanya tambahkan jika ada rekomendasi gap
+            if (!empty($rekomendasiData)) {
+                $result[] = [
+                    'jenjang_jabatan' => $jenjang,
+                    'level_min' => $levelMin,
+                    'level_max' => $levelMax,
+                    'total_ptk' => $totalPtk,
+                    'rekomendasi' => $rekomendasiData
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+
+    private function getRekomendasiText($subIndikatorId, $subIndikatorCode, $tahap, $entity, $levelDicapai, $levelTarget)
+    {
+        // Coba ambil rekomendasi spesifik dari database terlebih dahulu
+        $rekomendasi = DB::table('ptk_rekomendasi')
+            ->where('sub_indikator_id', $subIndikatorId)
+            ->where('sub_indikator_code', $subIndikatorCode)
+            ->where('tahap', $tahap)
+            ->where('entity', $entity)
+            ->where('level', $levelTarget)
+            ->first();
+
+        if ($rekomendasi) {
+            return $rekomendasi->rekomendasi;
+        }
+
+        // Jika tidak ada rekomendasi spesifik, cari yang umum
+        $rekomendasi = DB::table('ptk_rekomendasi')
+            ->where('sub_indikator_id', $subIndikatorId)
+            ->where('sub_indikator_code', $subIndikatorCode)
+            ->where('level', $levelTarget)
+            ->first();
+
+        if ($rekomendasi) {
+            return $rekomendasi->rekomendasi;
+        }
+
+        // Jika masih tidak ada, buat rekomendasi dinamis
+        $gap = $levelTarget - $levelDicapai;
+
+        $levelNames = [
+            1 => 'Gagal',
+            2 => 'Penerapan',
+            3 => 'Analisis',
+            4 => 'Evaluasi',
+            5 => 'Pembimbingan'
+        ];
+
+        $levelDicapaiName = $levelNames[$levelDicapai] ?? "Level $levelDicapai";
+        $levelTargetName = $levelNames[$levelTarget] ?? "Level $levelTarget";
+
+        if ($gap == 1) {
+            return "Perlu meningkatkan dari $levelDicapaiName ke $levelTargetName (naik 1 level)";
+        } else {
+            return "Perlu meningkatkan dari $levelDicapaiName ke $levelTargetName (naik $gap level)";
+        }
+    }
+
+
+
 
     /**
      * Ambil data progress PTK dari database (DENGAN INSTANSI & NO HP)
