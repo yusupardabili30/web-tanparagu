@@ -15,6 +15,7 @@ use App\Http\Controllers\BiodataController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Controllers\ManagementUsersController;
 use App\Http\Controllers\PelatihanController;
+use App\Http\Controllers\ExportGapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -282,3 +283,10 @@ Route::get('/hasil-instrumen/export-excel-all', [HasilInstrumenController::class
 Route::post('/analisis/export-excel', [AnalisisController::class, 'exportExcel'])->name('analisis.export-excel');
 // ATAU
 Route::get('/analisis/export-excel', [AnalisisController::class, 'exportExcel'])->name('analisis.export-excel');
+
+
+
+
+// routes/web.php - tambahkan route ini
+Route::get('/export/rekomendasi-gap', [ExportGapController::class, 'exportRekomendasiGap'])
+    ->name('export.rekomendasi-gap');
