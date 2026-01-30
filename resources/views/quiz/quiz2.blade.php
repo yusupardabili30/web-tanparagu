@@ -229,6 +229,11 @@
                                             <i class="ri-checkbox-circle-line me-2"></i> Kirim Jawaban
                                         </button>
                                     </form>
+                                        <div class="d-flex justify-content-end mt-2">
+                                            <button type="button" id="pauseBtn" class="btn btn-primary btn-lg pause-btn">
+                                                <i class="ri-pause-circle-line me-2"></i> Jeda
+                                            </button>
+                                        </div>
 
                                 </div>
                             </div>
@@ -755,11 +760,148 @@
         .shake-modal{
             animation: shake .5s ease-in-out;
         }
+
+.pause-btn{
+    border-radius: 10px;
+    font-weight: 700;
+    padding-left: 22px;
+    padding-right: 22px;
+    background: #163f74 !important;
+    border-color: #163f74 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+/* matiin hover/focus/active supaya ga berubah */
+.pause-btn:hover,
+.pause-btn:active,
+.pause-btn:focus,
+.pause-btn:focus-visible{
+    background: #163f74 !important;
+    border-color: #163f74 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+.swal2-confirm.btn-primary{
+    background: var(--mm-primary) !important;
+    border: none;
+}
+.swal2-confirm.btn-primary:hover{
+    background: var(--mm-primary-hover) !important;
+}
+/* kasih jarak antar tombol SweetAlert2 */
+.swal2-actions{
+    gap: 12px;               /* ubah sesuai mau: 8px / 12px / 16px */
+}
+
+/* optional: biar tombolnya seimbang */
+.swal2-actions .btn{
+    min-width: 110px;
+}
+/* Jarak antar tombol */
+.swal2-actions{
+    gap: 12px;
+}
+
+/* Style tombol swal ikut tema (tanpa hover) */
+.swal2-actions .btn{
+    border-radius: 12px;
+    font-weight: 700;
+    min-width: 110px;
+}
+
+/* Tombol confirm (Ya, Jeda) */
+.swal2-actions .btn.btn-primary,
+.swal2-actions .btn.btn-primary:hover,
+.swal2-actions .btn.btn-primary:active,
+.swal2-actions .btn.btn-primary:focus,
+.swal2-actions .btn.btn-primary:focus-visible{
+    background: #163f74 !important;
+    border-color: #163f74 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+/* Tombol cancel (Batal) */
+.swal2-actions .btn.btn-outline-secondary{
+    border-color: #163f74 !important;
+    color: #163f74 !important;
+    background: transparent !important;
+}
+
+.swal2-actions .btn.btn-outline-secondary:hover,
+.swal2-actions .btn.btn-outline-secondary:active,
+.swal2-actions .btn.btn-outline-secondary:focus,
+.swal2-actions .btn.btn-outline-secondary:focus-visible{
+    border-color: #163f74 !important;
+    color: #163f74 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
     </style>
 
 @endsection
 
 @section('sipproja-js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pauseBtn = document.getElementById('pauseBtn');
+        if (!pauseBtn) return;
+
+        pauseBtn.addEventListener('click', function() {
+            Swal.fire({
+                title: 'Jeda Pengerjaan?',
+                text: 'Waktu akan disimpan dan Anda akan kembali ke halaman Profil PTK.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Jeda',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                focusCancel: true,
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-outline-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    if (typeof saveTimeToLocalStorage === 'function') {
+                        saveTimeToLocalStorage();
+                    }
+
+                    Swal.fire({
+                        title: 'Menyimpan progres...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    setTimeout(() => {
+                        window.location.href = `{{ route('ptk.show', [
+                            'encode_kegiatan_id' => $encoded_kegiatan_id,
+                            'nip' => $nip
+                        ]) }}`;
+                    }, 800);
+                }
+            });
+        });
+    });
+</script>
 
 <script>
     // OPEN PANEL
@@ -988,7 +1130,7 @@
                 <i class="ri-error-warning-line me-2"></i>
                 <span>${message}</span>
             `;
-            warning.style.backgroundColor = type === 'warning' ? '#dc3545' : '#1a4d8e';
+            warning.style.backgroundColor = type === 'warning' ? '#dc3545' : '#163f74';
 
             document.body.appendChild(warning);
 

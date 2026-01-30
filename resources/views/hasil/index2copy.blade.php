@@ -4,6 +4,10 @@
     $tittle = $tittle ?? 'Hasil Instrumen PTK';
     $kegiatans = DB::table('kegiatan')->get();
 
+    // ✅ map kegiatan_id => kegiatan_name (biar cepat & gak query di loop)
+    $kegiatanMap = $kegiatans->pluck('kegiatan_name', 'kegiatan_id')->toArray();
+
+
     $levelNames = [
         2 => 'Penerapan',
         3 => 'Analisis',
@@ -314,12 +318,30 @@
         white-space: nowrap;
     }
 
-    /* Baris indikator */
-    .indikator-row{
+    /* =========================
+       ✅ TIAP INDIKATOR JADI CARD
+       ========================= */
+    .indikator-item{
         padding: 12px 14px;
+        background: #fff;
         border-top: 1px dashed rgba(229,231,235,.9);
     }
-    .indikator-row:first-child{ border-top: none; }
+    .indikator-item:first-of-type{ border-top: none; }
+
+    .indikator-row{
+        border: 1px solid rgba(229,231,235,.95);
+        border-radius: 16px;
+        background: #fff;
+
+        /* ✅ shadow lebih gelap & tegas */
+        box-shadow: 0 3px 15px rgba(26,75,184,.25);
+
+        padding: 12px 14px;
+    }
+    /* biar ada jarak antar card indikator */
+    .indikator-item + .indikator-item .indikator-row{
+        margin-top: 12px;
+    }
 
     .indikator-grid{
         display:grid;
@@ -467,6 +489,18 @@
         font-size: 12.5px;
         font-weight: 500;
     }
+    .ptk-kegiatan{
+        margin-top: 2px;
+        margin-bottom: 8px;
+        font-size: 20px;
+        color: var(--mm-muted);
+        font-weight: 800;
+        display:flex;
+        align-items:center;
+        gap: 6px;
+        word-break: break-word;
+        padding-left: 10px; 
+    }
 </style>
 
 <div class="container-fluid">
@@ -501,57 +535,92 @@
             </div>
         </div>
 
-        {{-- FILTER --}}
-        <div class="hi-filter">
-            <form action="{{ route('hasil-instrumen.index') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Pencarian</label>
-                    <input type="text" class="form-control" name="search"
-                           value="{{ request('search') }}"
-                           placeholder="Cari Nama/NIP PTK/Sub Indikator...">
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Kegiatan</label>
-                    <select class="form-select" name="kegiatan_id">
-                        <option value="">Semua Kegiatan</option>
-                        @foreach($kegiatans as $kegiatan)
-                            <option value="{{ $kegiatan->kegiatan_id }}"
-                                {{ request('kegiatan_id') == $kegiatan->kegiatan_id ? 'selected' : '' }}>
-                                {{ $kegiatan->kegiatan_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Tahap</label>
-                    <select class="form-select" name="tahap">
-                        <option value="">Semua Tahap</option>
-                        @for($i = 1; $i <= 10; $i++)
-                            <option value="{{ $i }}" {{ request('tahap') == $i ? 'selected' : '' }}>
-                                Tahap {{ $i }}
-                            </option>
-                        @endfor
-                    </select>
-                </div>
-
-                <div class="col-md-2">
-                    @if($data->isNotEmpty())
-                        <div class="w-100 mb-2">
-                            <a class="btn btn-success w-100 btn-export-pill"
-                               href="{{ route('hasil-instrumen.export-all', request()->query()) }}">
-                                <i class="ri-file-pdf-line align-bottom me-1"></i> Export PDF
-                            </a>
-                        </div>
-                    @endif
-
-                    <button type="submit" class="btn btn-primary w-100 btn-cari">
-                        <i class="ri-search-line align-bottom me-1"></i> Cari
-                    </button>
-                </div>
-            </form>
+      {{-- FILTER --}}
+<div class="hi-filter">
+    <form action="{{ route('hasil-instrumen.index') }}" method="GET" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label">Pencarian</label>
+            <input type="text" class="form-control" name="search"
+                   value="{{ request('search') }}"
+                   placeholder="Cari Nama/NIP PTK/Sub Indikator...">
         </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Kegiatan</label>
+            <select class="form-select" name="kegiatan_id">
+                <option value="">Semua Kegiatan</option>
+                @foreach($kegiatans as $kegiatan)
+                    <option value="{{ $kegiatan->kegiatan_id }}"
+                        {{ request('kegiatan_id') == $kegiatan->kegiatan_id ? 'selected' : '' }}>
+                        {{ $kegiatan->kegiatan_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Tahap</label>
+            <select class="form-select" name="tahap">
+                <option value="">Semua Tahap</option>
+                @for($i = 1; $i <= 10; $i++)
+                    <option value="{{ $i }}" {{ request('tahap') == $i ? 'selected' : '' }}>
+                        Tahap {{ $i }}
+                    </option>
+                @endfor
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Jenjang Jabatan</label>
+            <select class="form-select" name="pangkat_jabatan_id">
+                <option value="">Semua</option>
+                @foreach($pangkatJabatans as $pangkat)
+                    <option value="{{ $pangkat->jenjang_jabatan }}"
+                        {{ request('pangkat_jabatan_id') == $pangkat->jenjang_jabatan ? 'selected' : '' }}>
+                        {{ $pangkat->jenjang_jabatan }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Jenis PTK</label>
+            <select class="form-select" name="jenis_ptk_id">
+                <option value="">Semua</option>
+                @foreach($jenisPtk as $jenis)
+                    <option value="{{ $jenis->jenis_ptk_id }}"
+                        {{ request('jenis_ptk_id') == $jenis->jenis_ptk_id ? 'selected' : '' }}>
+                        {{ $jenis->jenis_ptk }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- di dalam div col-md-1 di bagian filter --}}
+<div class="col-md-1">
+    @if($data->isNotEmpty())
+        <div class="w-100 mb-2">
+            <a class="btn btn-success w-100 btn-export-pill"
+               href="{{ route('hasil-instrumen.export-all', request()->query()) }}"
+               title="Export ke PDF">
+                <i class="ri-file-pdf-line align-bottom"></i>
+            </a>
+        </div>
+        
+        {{-- TAMBAHKAN TOMBOL EXCEL INI --}}
+        <div class="w-100 mb-2">
+            <a class="btn btn-warning w-100 btn-export-pill"
+               href="{{ route('hasil-instrumen.export-excel-all', request()->query()) }}"
+               title="Export ke Excel">
+                <i class="ri-file-excel-line align-bottom"></i>
+            </a>
+        </div>
+    @endif
+
+    <button type="submit" class="btn btn-primary w-100 btn-cari" title="Cari Data">
+        <i class="ri-search-line align-bottom"></i>
+    </button>
+</div>
 
         {{-- EMPTY --}}
         @if($data->isEmpty())
@@ -619,6 +688,12 @@
 
                         {{-- ✅ IDENTITAS SEKALI (JADI CARD PROFIL) --}}
                         <div class="ptk-head">
+                                    <div class="ptk-kegiatan">
+                                        <i class="ri-calendar-event-line"></i>
+                                        <span>
+                                            {{ $kegiatanMap[$first->kegiatan_id] ?? '-' }}
+                                        </span>
+                                    </div>
                             <div class="ptk-profile">
                                 <div class="ptk-avatar">
                                     <i class="ri-user-3-line"></i>
@@ -724,123 +799,126 @@
                                         $cid = 'rek_' . preg_replace('/[^a-zA-Z0-9]/', '', (string)($row->nip ?? 'x')) . '_' . $idx;
                                     @endphp
 
-                                    <div class="indikator-row">
-                                        <div class="indikator-grid">
+                                    {{-- ✅ TIAP INDIKATOR JADI CARD --}}
+                                    <div class="indikator-item">
+                                        <div class="indikator-row">
+                                            <div class="indikator-grid">
 
-                                            {{-- NOMOR --}}
-                                            <div>
-                                                <div class="cell-title">Nomor</div>
-                                                <div class="no-box">{{ $nomor }}</div>
-                                            </div>
+                                                {{-- NOMOR --}}
+                                                <div>
+                                                    <div class="cell-title">Nomor</div>
+                                                    <div class="no-box">{{ $nomor }}</div>
+                                                </div>
 
-                                            {{-- LEVEL (DICAPAI + HARUS) --}}
-                                            <div>
-                                                <div class="cell-title">Level yang dicapai</div>
+                                                {{-- LEVEL (DICAPAI + HARUS) --}}
+                                                <div>
+                                                    <div class="cell-title">Level yang dicapai</div>
 
-                                                <div class="lv-box">
-                                                    @if($levelJawaban > 0)
-                                                        <span class="badge bg-{{ $levelColors[$levelJawaban] ?? 'secondary' }}-subtle text-{{ $levelColors[$levelJawaban] ?? 'secondary' }}"
-                                                              style="border-radius:999px; padding:8px 12px; font-weight:900;">
-                                                            Level {{ $levelJawaban }}
-                                                        </span>
-                                                        <div class="mt-2" style="color:var(--mm-muted); font-weight:800; font-size:12px;">
-                                                            {{ $levelNames[$levelJawaban] ?? '' }}
+                                                    <div class="lv-box">
+                                                        @if($levelJawaban > 0)
+                                                            <span class="badge bg-{{ $levelColors[$levelJawaban] ?? 'secondary' }}-subtle text-{{ $levelColors[$levelJawaban] ?? 'secondary' }}"
+                                                                  style="border-radius:999px; padding:8px 12px; font-weight:900;">
+                                                                Level {{ $levelJawaban }}
+                                                            </span>
+                                                            <div class="mt-2" style="color:var(--mm-muted); font-weight:800; font-size:12px;">
+                                                                {{ $levelNames[$levelJawaban] ?? '' }}
+                                                            </div>
+                                                        @else
+                                                            <span class="badge bg-secondary"
+                                                                  style="border-radius:999px; padding:8px 12px; font-weight:900;">-</span>
+                                                        @endif
+
+                                                        <div class="lv-sub">
+                                                            <i class="ri-flag-line"></i>
+                                                            <span>Level yang harus</span>
                                                         </div>
-                                                    @else
-                                                        <span class="badge bg-secondary"
-                                                              style="border-radius:999px; padding:8px 12px; font-weight:900;">-</span>
-                                                    @endif
 
-                                                    <div class="lv-sub">
-                                                        <i class="ri-flag-line"></i>
-                                                        <span>Level yang harus</span>
-                                                    </div>
-
-                                                    <div class="lv-badges">
-                                                        @if(count($wajibLevels))
-                                                            @foreach($wajibLevels as $i)
-                                                                <span class="badge bg-{{ $levelColors[$i] ?? 'secondary' }}-subtle text-{{ $levelColors[$i] ?? 'secondary' }}"
+                                                        <div class="lv-badges">
+                                                            @if(count($wajibLevels))
+                                                                @foreach($wajibLevels as $i)
+                                                                    <span class="badge bg-{{ $levelColors[$i] ?? 'secondary' }}-subtle text-{{ $levelColors[$i] ?? 'secondary' }}"
+                                                                          style="border-radius:999px; padding:8px 12px; font-weight:900;">
+                                                                        Lv {{ $i }}
+                                                                    </span>
+                                                                @endforeach
+                                                            @else
+                                                                <span class="badge bg-secondary-subtle text-secondary"
                                                                       style="border-radius:999px; padding:8px 12px; font-weight:900;">
-                                                                    Lv {{ $i }}
+                                                                    -
                                                                 </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {{-- INDIKATOR --}}
+                                                <div>
+                                                    <div class="cell-title">Indikator</div>
+                                                    <div class="ind-box">
+                                                        <div class="ind-name">{{ $row->sub_indikator_name }}</div>
+                                                        <div class="ind-code">
+                                                            <i class="ri-hashtag"></i>
+                                                            <span>Kode: <strong>{{ $row->sub_indikator_code }}</strong></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {{-- REKOMENDASI --}}
+                                                <div>
+                                                    <div class="cell-title">Rekomendasi Kebutuhan Belajar</div>
+                                                    <div class="rek-box">
+                                                        @if(count($rekomendasiGap) > 0)
+                                                            @foreach($rekomendasiGap as $rkIndex => $rek)
+                                                                @php
+                                                                    $rekLevel = (int)($rek['level'] ?? 0);
+                                                                    $rekText  = (string)($rek['rekomendasi'] ?? '');
+                                                                    $short    = \Illuminate\Support\Str::limit($rekText, 160);
+                                                                    $needMore = strlen($rekText) > 160;
+                                                                    $collapseId = $cid . '_' . $rkIndex;
+                                                                @endphp
+
+                                                                <div class="rek-item">
+                                                                    <div class="rek-top">
+                                                                        <span class="badge bg-danger-subtle text-danger"
+                                                                              style="border-radius:999px; font-weight:900; padding:8px 12px;">
+                                                                            Gap Level {{ $rekLevel }}
+                                                                        </span>
+                                                                        <small class="text-muted fw-semibold">
+                                                                            {{ $levelNames[$rekLevel] ?? '' }}
+                                                                        </small>
+                                                                    </div>
+
+                                                                    <div class="rek-desc">{{ $short }}</div>
+
+                                                                    @if($needMore)
+                                                                        <button type="button"
+                                                                                class="btn btn-sm btn-outline-primary mt-2"
+                                                                                data-bs-toggle="collapse"
+                                                                                data-bs-target="#{{ $collapseId }}"
+                                                                                aria-expanded="false"
+                                                                                style="border-radius:10px; font-weight:900;">
+                                                                            Selengkapnya
+                                                                        </button>
+                                                                        <div class="collapse mt-2" id="{{ $collapseId }}">
+                                                                            <div class="small text-muted fw-semibold" style="line-height:1.35;">
+                                                                                {{ $rekText }}
+                                                                            </div>
+                                                                        </div>
+                                                                    @endif
+                                                                </div>
                                                             @endforeach
                                                         @else
-                                                            <span class="badge bg-secondary-subtle text-secondary"
-                                                                  style="border-radius:999px; padding:8px 12px; font-weight:900;">
-                                                                -
-                                                            </span>
+                                                            <div class="text-center p-2">
+                                                                <span class="badge bg-success-subtle text-success px-3 py-2"
+                                                                      style="border-radius:999px; font-weight:900;">
+                                                                    <i class="ri-check-line me-1"></i> Memenuhi standar kompetensi jabatan
+                                                                </span>
+                                                            </div>
                                                         @endif
                                                     </div>
                                                 </div>
+
                                             </div>
-
-                                            {{-- INDIKATOR --}}
-                                            <div>
-                                                <div class="cell-title">Indikator</div>
-                                                <div class="ind-box">
-                                                    <div class="ind-name">{{ $row->sub_indikator_name }}</div>
-                                                    <div class="ind-code">
-                                                        <i class="ri-hashtag"></i>
-                                                        <span>Kode: <strong>{{ $row->sub_indikator_code }}</strong></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {{-- REKOMENDASI GAP --}}
-                                            <div>
-                                                <div class="cell-title">Rekomendasi GAP</div>
-                                                <div class="rek-box">
-                                                    @if(count($rekomendasiGap) > 0)
-                                                        @foreach($rekomendasiGap as $rkIndex => $rek)
-                                                            @php
-                                                                $rekLevel = (int)($rek['level'] ?? 0);
-                                                                $rekText  = (string)($rek['rekomendasi'] ?? '');
-                                                                $short    = \Illuminate\Support\Str::limit($rekText, 160);
-                                                                $needMore = strlen($rekText) > 160;
-                                                                $collapseId = $cid . '_' . $rkIndex;
-                                                            @endphp
-
-                                                            <div class="rek-item">
-                                                                <div class="rek-top">
-                                                                    <span class="badge bg-danger-subtle text-danger"
-                                                                          style="border-radius:999px; font-weight:900; padding:8px 12px;">
-                                                                        Gap Level {{ $rekLevel }}
-                                                                    </span>
-                                                                    <small class="text-muted fw-semibold">
-                                                                        {{ $levelNames[$rekLevel] ?? '' }}
-                                                                    </small>
-                                                                </div>
-
-                                                                <div class="rek-desc">{{ $short }}</div>
-
-                                                                @if($needMore)
-                                                                    <button type="button"
-                                                                            class="btn btn-sm btn-outline-primary mt-2"
-                                                                            data-bs-toggle="collapse"
-                                                                            data-bs-target="#{{ $collapseId }}"
-                                                                            aria-expanded="false"
-                                                                            style="border-radius:10px; font-weight:900;">
-                                                                        Selengkapnya
-                                                                    </button>
-                                                                    <div class="collapse mt-2" id="{{ $collapseId }}">
-                                                                        <div class="small text-muted fw-semibold" style="line-height:1.35;">
-                                                                            {{ $rekText }}
-                                                                        </div>
-                                                                    </div>
-                                                                @endif
-                                                            </div>
-                                                        @endforeach
-                                                    @else
-                                                        <div class="text-center p-2">
-                                                            <span class="badge bg-success-subtle text-success px-3 py-2"
-                                                                  style="border-radius:999px; font-weight:900;">
-                                                                <i class="ri-check-line me-1"></i> Memenuhi standar kompetensi jabatan
-                                                            </span>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </div>
-
                                         </div>
                                     </div>
                                 @endforeach
