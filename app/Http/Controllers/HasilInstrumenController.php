@@ -28,132 +28,190 @@ class HasilInstrumenController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-        $tittle = 'Hasil Instrumen PTK';
+public function index(Request $request)
+{
+    $tittle = 'Hasil Instrumen PTK';
 
-        // Query dengan INNER JOIN termasuk tabel pangkat_jabatan, kota, dan sub_indikator
-        $query = DB::table('ptk_jawaban')
-            ->select(
-                'ptk_jawaban.ptk_jawaban_id',
-                'ptk_jawaban.tahap',
-                'ptk_jawaban.level as level_jawaban',
-                'ptk_jawaban.sub_indikator_code',
-                'ptk_jawaban.sub_indikator_id',
-                'ptk_jawaban.bobot',
-                'ptk_jawaban.created_at',
-                'ptk.nama',
-                'ptk.nip',
-                'ptk.ptk_id',
-                'ptk.pangkat_jabatan_id',
-                'ptk.jenis_ptk_id', // TAMBAHKAN ini
-                'ptk.instansi',
-                'ptk.kota_id',
-                // Ambil data dari tabel pangkat_jabatan
-                'pangkat_jabatan.golongan_ruang',
-                'pangkat_jabatan.pangkat',
-                'pangkat_jabatan.jenjang_jabatan',
-                'pangkat_jabatan.level_kompetensi',
-                // Ambil data dari tabel kota
-                'kota.nama_kota',
-                // Ambil data dari tabel sub_indikator
-                'sub_indikator.sub_indikator_name',
-                'kegiatan.kegiatan_name',
-                'kegiatan.entity',
-                'kegiatan.kegiatan_id',
-                'ptk_jawaban.kegiatan_id as jawaban_kegiatan_id',
-                // Ambil data dari tabel jenis_ptk
-                'jenis_ptk.jenis_ptk' // TAMBAHKAN ini
-            )
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
-            ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
-            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
-            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
-            ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
-            ->leftJoin('jenis_ptk', 'ptk.jenis_ptk_id', '=', 'jenis_ptk.jenis_ptk_id'); // TAMBAHKAN join ini
+    // =========================
+    // 1) BASE QUERY (untuk paginate UI)
+    // =========================
+    $query = DB::table('ptk_jawaban')
+        ->select(
+            'ptk_jawaban.ptk_jawaban_id',
+            'ptk_jawaban.tahap',
+            'ptk_jawaban.level as level_jawaban',
+            'ptk_jawaban.sub_indikator_code',
+            'ptk_jawaban.sub_indikator_id',
+            'ptk_jawaban.bobot',
+            'ptk_jawaban.created_at',
+            'ptk.nama',
+            'ptk.nip',
+            'ptk.ptk_id',
+            'ptk.pangkat_jabatan_id',
+            'ptk.jenis_ptk_id',
+            'ptk.instansi',
+            'ptk.kota_id',
+            'pangkat_jabatan.golongan_ruang',
+            'pangkat_jabatan.pangkat',
+            'pangkat_jabatan.jenjang_jabatan',
+            'pangkat_jabatan.level_kompetensi',
+            'kota.nama_kota',
+            'sub_indikator.sub_indikator_name',
+            'kegiatan.kegiatan_name',
+            'kegiatan.entity',
+            'kegiatan.kegiatan_id',
+            'ptk_jawaban.kegiatan_id as jawaban_kegiatan_id',
+            'jenis_ptk.jenis_ptk'
+        )
+        ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+        ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+        ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+        ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+        ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+        ->leftJoin('jenis_ptk', 'ptk.jenis_ptk_id', '=', 'jenis_ptk.jenis_ptk_id');
 
-        // Filter pencarian
+    // =========================
+    // 2) APPLY FILTERS (biar query paginate & query summary sama persis)
+    // =========================
+    $applyFilters = function ($q) use ($request) {
+
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('ptk.nip', 'like', "%{$search}%")
+            $q->where(function ($qq) use ($search) {
+                $qq->where('ptk.nip', 'like', "%{$search}%")
                     ->orWhere('ptk.nama', 'like', "%{$search}%")
                     ->orWhere('pangkat_jabatan.pangkat', 'like', "%{$search}%")
                     ->orWhere('pangkat_jabatan.jenjang_jabatan', 'like', "%{$search}%")
                     ->orWhere('kota.nama_kota', 'like', "%{$search}%")
                     ->orWhere('sub_indikator.sub_indikator_name', 'like', "%{$search}%")
-                    ->orWhere('jenis_ptk.jenis_ptk', 'like', "%{$search}%"); // TAMBAHKAN filter jenis_ptk
+                    ->orWhere('jenis_ptk.jenis_ptk', 'like', "%{$search}%");
             });
         }
 
         if ($request->filled('kegiatan_id')) {
-            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
         }
 
         if ($request->filled('tahap')) {
-            $query->where('ptk_jawaban.tahap', $request->tahap);
+            $q->where('ptk_jawaban.tahap', $request->tahap);
         }
 
-        // Filter pangkat_jabatan_id (ubah dari ID ke jenjang_jabatan)
         if ($request->filled('pangkat_jabatan_id')) {
-            $query->where('pangkat_jabatan.jenjang_jabatan', $request->pangkat_jabatan_id);
+            // value ini udah jenjang_jabatan
+            $q->where('pangkat_jabatan.jenjang_jabatan', $request->pangkat_jabatan_id);
         }
 
-        // TAMBAHKAN FILTER JENIS PTK
         if ($request->filled('jenis_ptk_id')) {
-            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
         }
+    };
 
-        // HAPUS orderBy sub_indikator_code di sini (biarkan seperti semula)
-        $query->orderBy('ptk_jawaban.ptk_jawaban_id', 'desc');
+    // apply ke query paginate
+    $applyFilters($query);
 
-        $data = $query->paginate(10);
+    // paginate (UI)
+    $query->orderBy('ptk_jawaban.ptk_jawaban_id', 'desc');
+    $data = $query->paginate(65);
 
-        // Untuk setiap data, tambahkan rekomendasi dengan gap
-        foreach ($data as $item) {
-            $rekomendasiInfo = $this->getRekomendasiWithGap(
-                $item->jenjang_jabatan,
-                $item->level_jawaban,
-                $item->sub_indikator_id,
-                $item->tahap,
-                $item->entity,
-                $item->sub_indikator_code
-            );
+    // =========================
+    // 3) SUMMARY GLOBAL PER NIP (tanpa paginate)
+    //    -> ini yang bikin 13/13 tetap 13/13 walau beda page
+    // =========================
+    $targetLevelSql = "
+        CASE
+            WHEN LOWER(COALESCE(pangkat_jabatan.jenjang_jabatan,'')) LIKE '%utama%'   THEN 5
+            WHEN LOWER(COALESCE(pangkat_jabatan.jenjang_jabatan,'')) LIKE '%madya%'   THEN 4
+            WHEN LOWER(COALESCE(pangkat_jabatan.jenjang_jabatan,'')) LIKE '%muda%'    THEN 3
+            WHEN LOWER(COALESCE(pangkat_jabatan.jenjang_jabatan,'')) LIKE '%pertama%' THEN 2
+            WHEN LOWER(COALESCE(pangkat_jabatan.jenjang_jabatan,'')) LIKE '%pratama%' THEN 2
+            ELSE NULL
+        END
+    ";
 
-            $item->rekomendasi_info = $rekomendasiInfo;
+    $summaryQuery = DB::table('ptk_jawaban')
+        ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+        ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+        ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+        ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+        ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+        ->leftJoin('jenis_ptk', 'ptk.jenis_ptk_id', '=', 'jenis_ptk.jenis_ptk_id');
 
-            // Ambil data pelatihan untuk PTK ini
-            $kegiatanId = $item->jawaban_kegiatan_id ?? $item->kegiatan_id;
-            if (isset($item->ptk_id) && isset($kegiatanId)) {
-                $item->pelatihan = $this->getPelatihanByPtk($item->ptk_id, $kegiatanId);
-            } else {
-                $item->pelatihan = collect();
-            }
-        }
+    // apply filter yang sama persis
+    $applyFilters($summaryQuery);
 
-        // Ambil semua kegiatan untuk dropdown
-        $kegiatans = DB::table('kegiatan')->get();
+$summaryRows = $summaryQuery
+    ->select(
+        DB::raw("TRIM(ptk.nip) as nip"),
+        DB::raw("COUNT(DISTINCT ptk_jawaban.sub_indikator_id) as total_indikator"),
+        DB::raw("COUNT(DISTINCT CASE
+                    WHEN ptk_jawaban.level >= ($targetLevelSql)
+                    THEN ptk_jawaban.sub_indikator_id
+                END) as memenuhi")
+    )
+    ->groupBy(DB::raw("TRIM(ptk.nip)"))
+    ->get();
 
-        // Ambil semua pangkat_jabatan untuk dropdown (gunakan jenjang_jabatan sebagai value)
-        $pangkatJabatans = DB::table('pangkat_jabatan')
-            ->select('jenjang_jabatan') // Hanya ambil jenjang_jabatan
-            ->distinct()
-            ->orderByRaw("CASE jenjang_jabatan 
-                WHEN 'Utama' THEN 1 
-                WHEN 'Madya' THEN 2 
-                WHEN 'Muda' THEN 3 
-                WHEN 'Pertama' THEN 4 
-                WHEN 'Pratama' THEN 5 
-                ELSE 6 END")
-            ->get();
-
-        // Ambil semua jenis_ptk untuk dropdown
-        $jenisPtk = DB::table('jenis_ptk')
-            ->orderBy('jenis_ptk', 'asc')
-            ->get();
-
-        return view('hasil.index', compact('tittle', 'data', 'kegiatans', 'pangkatJabatans', 'jenisPtk'));
+    // jadikan map: nip => ['total'=>..,'memenuhi'=>..]
+    $summaryByNip = [];
+    foreach ($summaryRows as $sr) {
+        $nipKey = (string)($sr->nip ?? 'tanpa_nip');
+        $summaryByNip[$nipKey] = [
+            'total'    => (int) ($sr->total_indikator ?? 0),
+            'memenuhi' => (int) ($sr->memenuhi ?? 0),
+        ];
     }
+
+    // =========================
+    // 4) rekomendasi & pelatihan (tetap seperti punya kamu)
+    // =========================
+    foreach ($data as $item) {
+        $rekomendasiInfo = $this->getRekomendasiWithGap(
+            $item->jenjang_jabatan,
+            $item->level_jawaban,
+            $item->sub_indikator_id,
+            $item->tahap,
+            $item->entity,
+            $item->sub_indikator_code
+        );
+
+        $item->rekomendasi_info = $rekomendasiInfo;
+
+        $kegiatanId = $item->jawaban_kegiatan_id ?? $item->kegiatan_id;
+        if (isset($item->ptk_id) && isset($kegiatanId)) {
+            $item->pelatihan = $this->getPelatihanByPtk($item->ptk_id, $kegiatanId);
+        } else {
+            $item->pelatihan = collect();
+        }
+    }
+
+    // dropdown
+    $kegiatans = DB::table('kegiatan')->get();
+
+    $pangkatJabatans = DB::table('pangkat_jabatan')
+        ->select('jenjang_jabatan')
+        ->distinct()
+        ->orderByRaw("CASE jenjang_jabatan
+            WHEN 'Utama' THEN 1
+            WHEN 'Madya' THEN 2
+            WHEN 'Muda' THEN 3
+            WHEN 'Pertama' THEN 4
+            WHEN 'Pratama' THEN 5
+            ELSE 6 END")
+        ->get();
+
+    $jenisPtk = DB::table('jenis_ptk')
+        ->orderBy('jenis_ptk', 'asc')
+        ->get();
+
+    return view('hasil.index', compact(
+        'tittle',
+        'data',
+        'kegiatans',
+        'pangkatJabatans',
+        'jenisPtk',
+        'summaryByNip' // ✅ WAJIB dikirim ke blade
+    ));
+}   
 
     /**
      * Export PDF per PTK
