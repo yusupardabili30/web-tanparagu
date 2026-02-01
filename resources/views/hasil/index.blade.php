@@ -651,6 +651,41 @@
     color: var(--mm-muted);
     font-weight: 800;
 }
+
+/* ✅ HEADER "DETAIL INDIKATOR & REKOMENDASI" TANPA GRADASI */
+.indikator-card .head{
+    background: #1a4d8e !important; /* solid */
+    border-bottom: 1px solid rgba(255,255,255,.22) !important;
+}
+
+.indikator-card .head .ttl,
+.indikator-card .head .ttl i{
+    color: #fff !important;
+}
+
+/* count jadi pill biar kebaca */
+.indikator-card .head .count{
+    color: #fff !important;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.28);
+    padding: 6px 10px;
+    border-radius: 999px;
+}
+
+/* tombol toggle ikut kontras */
+.btn-toggle-indikator{
+    background: rgba(255,255,255,.18) !important;
+    border: 1px solid rgba(255,255,255,.28) !important;
+    color: #fff !important;
+}
+.btn-toggle-indikator:hover,
+.btn-toggle-indikator:active,
+.btn-toggle-indikator:focus{
+    background: rgba(255,255,255,.28) !important;
+    border-color: rgba(255,255,255,.36) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
 </style>
 
 <div class="container-fluid">
