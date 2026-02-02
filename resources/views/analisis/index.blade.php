@@ -29,8 +29,8 @@
 
     <style>
         /* =====================================================
-                                                           ANALISIS LAYOUT STYLES - FULL CSS
-                                                        ===================================================== */
+                                                               ANALISIS LAYOUT STYLES - FULL CSS
+                                                            ===================================================== */
 
         /* Base Container & Global Styles */
         .analisis-wrap {
@@ -237,8 +237,8 @@
         }
 
         /* =====================================================
-                                                           CHART FIXES - ADD THESE TO YOUR EXISTING CSS
-                                                        ===================================================== */
+                                                               CHART FIXES - ADD THESE TO YOUR EXISTING CSS
+                                                            ===================================================== */
 
         /* Fix untuk chart container */
         .chart-container {
@@ -1109,7 +1109,7 @@
                                     <i class="ri-file-excel-2-line align-bottom me-1"></i> Export Excel
                                 </button>
                                 <button type="button" class="btn btn-success" id="btnExportRekomendasi">
-                                    <i class="ri-file-excel-2-line align-bottom me-1"></i> Export Rekomendasi Gap
+                                    <i class="ri-file-excel-2-line align-bottom me-1"></i> Export Rekomendasi KB
                                 </button>
                             </div>
                         </div>
@@ -1642,8 +1642,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         /* =====================================================
-                                                           GLOBAL CHART INSTANCE
-                                                        ===================================================== */
+                                                               GLOBAL CHART INSTANCE
+                                                            ===================================================== */
         let levelDistributionChart = null;
         let jenjangDistributionChart = null;
         let jenjangPendidikanChart = null;
@@ -1760,13 +1760,13 @@
                             modusRows += `
                     <tr>
                         ${subIndex === 0 ? `
-                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; font-weight: 600;">
-                                                                                        ${kota.nama_kota}
-                                                                                    </td>
-                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; text-align: center;">
-                                                                                        ${kota.total_jawaban}
-                                                                                    </td>
-                                                                                ` : ''}
+                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; font-weight: 600;">
+                                                                                            ${kota.nama_kota}
+                                                                                        </td>
+                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; text-align: center;">
+                                                                                            ${kota.total_jawaban}
+                                                                                        </td>
+                                                                                    ` : ''}
                         <td>
                             <small class="text-muted">${sub.sub_indikator_code}</small><br>
                             <span class="fw-medium">${sub.sub_indikator_name ? sub.sub_indikator_name.substring(0, 40) + (sub.sub_indikator_name.length > 40 ? '...' : '') : '-'}</span>
@@ -1933,13 +1933,13 @@
                                     <td class="text-center">${counter++}</td>
                                     <td>
                                         ${gapIndex === 0 ? `
-                                                                                    <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                    <span class="fw-medium">${rek.sub_indikator_name ?
-                                                                                        (rek.sub_indikator_name.length > 40 ?
-                                                                                            rek.sub_indikator_name.substring(0, 40) + '...' :
-                                                                                            rek.sub_indikator_name
-                                                                                        ) : '-'}</span>
-                                                                                ` : ''}
+                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                        <span class="fw-medium">${rek.sub_indikator_name ?
+                                                                                            (rek.sub_indikator_name.length > 40 ?
+                                                                                                rek.sub_indikator_name.substring(0, 40) + '...' :
+                                                                                                rek.sub_indikator_name
+                                                                                            ) : '-'}</span>
+                                                                                    ` : ''}
                                     </td>
                                     <td class="text-center">
                                         <span class="badge-level" style="background-color: ${getLevelColor(gap.level_dicapai)}; color: white;">

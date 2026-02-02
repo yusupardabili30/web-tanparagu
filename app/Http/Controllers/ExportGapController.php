@@ -38,7 +38,7 @@ class ExportGapController extends Controller
             // SHEET 1: SUMMARY GAP PER JENJANG
             // ======================
             $sheet = $spreadsheet->getActiveSheet();
-            $sheet->setTitle('SUMMARY GAP');
+            $sheet->setTitle('SUMMARY REKOMENDASI');
 
             // Set page setup
             $sheet->getPageSetup()
@@ -51,7 +51,7 @@ class ExportGapController extends Controller
 
             // JUDUL UTAMA
             $sheet->mergeCells("A{$currentRow}:K{$currentRow}");
-            $sheet->setCellValue("A{$currentRow}", 'LAPORAN ANALISIS GAP KOMPETENSI PTK PER JENJANG JABATAN');
+            $sheet->setCellValue("A{$currentRow}", 'LAPORAN ANALISIS REKOMENDASI KEBUTUHAN BELAJAR KOMPETENSI PTK PER JENJANG JABATAN');
             $sheet->getStyle("A{$currentRow}")->applyFromArray([
                 'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => '1a5bb8']],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
@@ -158,7 +158,7 @@ class ExportGapController extends Controller
             }
 
             $sheet->mergeCells("A{$currentRow}:K{$currentRow}");
-            $sheet->setCellValue("A{$currentRow}", 'SUMMARY ANALISIS GAP');
+            $sheet->setCellValue("A{$currentRow}", 'SUMMARY ANALISIS KEBUTUHAN BELAJAR');
             $sheet->getStyle("A{$currentRow}")->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 14],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2d3748']],
@@ -255,7 +255,7 @@ class ExportGapController extends Controller
                     'JUMLAH PTK (LEVEL INI)',
                     'TARGET LEVEL',
                     'GAP LEVEL',
-                    'REKOMENDASI BELAJAR',
+                    'REKOMENDASI KEBUTUHAN BELAJAR',
                     'JUMLAH PTK (BUTUH)',
                     '% DARI TOTAL PTK',
                     'PRIORITAS'
@@ -355,7 +355,7 @@ class ExportGapController extends Controller
             // SHEET 2: DAFTAR PTK DENGAN GAP DETAIL
             // ======================
             $sheet2 = $spreadsheet->createSheet();
-            $sheet2->setTitle('DETAIL PTK GAP');
+            $sheet2->setTitle('DETAIL PTK REKOMENDASI');
             $sheet2->getPageSetup()
                 ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
                 ->setPaperSize(PageSetup::PAPERSIZE_A4);
@@ -398,7 +398,7 @@ class ExportGapController extends Controller
                 foreach ($jenjang['ptk_detail'] as $ptkIndex => $ptk) {
                     $startRow = $row2;
 
-                    // INFO PTK
+                    // INFO PTK - BARIS 1
                     $sheet2->setCellValue("A{$row2}", 'NIP:');
                     $sheet2->setCellValue("B{$row2}", $ptk['nip'] ?? '-');
                     $sheet2->mergeCells("B{$row2}:D{$row2}");
@@ -407,23 +407,31 @@ class ExportGapController extends Controller
                     $sheet2->setCellValue("F{$row2}", $ptk['nama'] ?? '-');
                     $sheet2->mergeCells("F{$row2}:H{$row2}");
 
-                    $sheet2->setCellValue("I{$row2}", 'Sekolah:');
-                    $sheet2->setCellValue("J{$row2}", $ptk['nama_sekolah'] ?? '-');
+                    $sheet2->setCellValue("I{$row2}", 'Jenjang:');
+                    $sheet2->setCellValue("J{$row2}", $ptk['jenjang_jabatan'] ?? '-');
                     $sheet2->mergeCells("J{$row2}:L{$row2}");
 
                     $row2++;
 
-                    $sheet2->setCellValue("A{$row2}", 'Jenjang:');
-                    $sheet2->setCellValue("B{$row2}", $ptk['jenjang_jabatan'] ?? '-');
+                    // INFO PTK - BARIS 2
+                    $sheet2->setCellValue("A{$row2}", 'Sekolah:');
+                    $sheet2->setCellValue("B{$row2}", $ptk['nama_sekolah'] ?? '-');
                     $sheet2->mergeCells("B{$row2}:D{$row2}");
 
-                    $sheet2->setCellValue("E{$row2}", 'Kota:');
-                    $sheet2->setCellValue("F{$row2}", $ptk['nama_kota'] ?? '-');
+                    $sheet2->setCellValue("E{$row2}", 'Instansi:');
+                    $sheet2->setCellValue("F{$row2}", $ptk['instansi'] ?? '-'); // TAMBAHKAN INI
                     $sheet2->mergeCells("F{$row2}:H{$row2}");
 
-                    $sheet2->setCellValue("I{$row2}", 'Total Kebutuhan:');
-                    $sheet2->setCellValue("J{$row2}", $ptk['total_gap'] ?? 0);
+                    $sheet2->setCellValue("I{$row2}", 'Kota:');
+                    $sheet2->setCellValue("J{$row2}", $ptk['nama_kota'] ?? '-');
                     $sheet2->mergeCells("J{$row2}:L{$row2}");
+
+                    $row2++;
+
+                    // INFO PTK - BARIS 3
+                    $sheet2->setCellValue("A{$row2}", 'Total Kebutuhan:');
+                    $sheet2->setCellValue("B{$row2}", $ptk['total_gap'] ?? 0);
+                    $sheet2->mergeCells("B{$row2}:D{$row2}");
 
                     // Styling info PTK
                     $sheet2->getStyle("A{$startRow}:L{$row2}")->applyFromArray([
@@ -489,6 +497,327 @@ class ExportGapController extends Controller
 
                     $row2 += 2;
                 }
+
+
+
+
+
+
+                // ======================
+                // SHEET 3: REKOMENDASI PER JENJANG
+                // ======================
+                $sheet3 = $spreadsheet->getSheetByName('REKOMENDASI PER JENJANG');
+
+                if (!$sheet3) {
+                    $sheet3 = $spreadsheet->createSheet();
+                    $sheet3->setTitle('REKOMENDASI PER JENJANG');
+                }
+
+                $sheet3->getPageSetup()
+                    ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+                    ->setPaperSize(PageSetup::PAPERSIZE_A4);
+
+                $row3 = 1;
+
+                // JUDUL SHEET 3
+                $sheet3->mergeCells("A{$row3}:O{$row3}");
+                $sheet3->setCellValue("A{$row3}", 'REKOMENDASI PER JENJANG DAN SUB INDIKATOR');
+                $sheet3->getStyle("A{$row3}")->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => '1a5bb8']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                ]);
+
+                $row3++;
+                $sheet3->mergeCells("A{$row3}:O{$row3}");
+                $sheet3->setCellValue("A{$row3}", 'Detail PTK pada Setiap Level Pencapaian');
+                $sheet3->getStyle("A{$row3}")->applyFromArray([
+                    'font' => ['size' => 12],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                ]);
+
+                $row3 += 2;
+
+                foreach ($rekomendasiGapData as $jenjangIndex => $jenjang) {
+                    $targetLevel = $jenjang['target_level'];
+                    $jenjangName = $jenjang['jenjang_jabatan'];
+
+                    // HEADER JENJANG
+                    $sheet3->mergeCells("A{$row3}:O{$row3}");
+                    $sheet3->setCellValue("A{$row3}", 'JENJANG: ' . strtoupper($jenjangName) . ' - TARGET LEVEL: ' . $targetLevel);
+                    $sheet3->getStyle("A{$row3}")->applyFromArray([
+                        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 14],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2c5282']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ]);
+
+                    $row3++;
+
+                    // STATISTIK JENJANG - PERBAIKAN FORMAT
+                    $totalPtk = $jenjang['total_ptk'];
+                    $ptkDenganGap = $jenjang['ptk_dengan_gap'];
+                    $persentaseGap = $totalPtk > 0 ? round(($ptkDenganGap / $totalPtk) * 100, 1) : 0;
+                    $totalKebutuhan = $jenjang['total_gap_jumlah'];
+                    $subIndikatorBermasalah = count($jenjang['sub_indikator_gap']);
+
+                    // Baris 1: Label
+                    $sheet3->setCellValue("A{$row3}", 'Total PTK:');
+                    $sheet3->setCellValue("E{$row3}", 'PTK dengan Gap:');
+                    $sheet3->setCellValue("I{$row3}", 'Total Kebutuhan:');
+                    $sheet3->setCellValue("M{$row3}", 'Sub Indikator Bermasalah:');
+
+                    // Styling label
+                    $sheet3->getStyle("A{$row3}")->applyFromArray(['font' => ['bold' => true]]);
+                    $sheet3->getStyle("E{$row3}")->applyFromArray(['font' => ['bold' => true]]);
+                    $sheet3->getStyle("I{$row3}")->applyFromArray(['font' => ['bold' => true]]);
+                    $sheet3->getStyle("M{$row3}")->applyFromArray(['font' => ['bold' => true]]);
+
+                    $row3++;
+
+                    // Baris 2: Nilai
+                    $sheet3->setCellValue("A{$row3}", $totalPtk);
+                    $sheet3->setCellValue("E{$row3}", $ptkDenganGap . ' (' . $persentaseGap . '%)');
+                    $sheet3->setCellValue("I{$row3}", $totalKebutuhan);
+                    $sheet3->setCellValue("M{$row3}", $subIndikatorBermasalah);
+
+                    // Merge cells untuk setiap kolom statistik
+                    $sheet3->mergeCells("A{$row3}:D{$row3}");
+                    $sheet3->mergeCells("E{$row3}:H{$row3}");
+                    $sheet3->mergeCells("I{$row3}:L{$row3}");
+                    $sheet3->mergeCells("M{$row3}:O{$row3}");
+
+                    // Merge cells untuk label (baris sebelumnya)
+                    $sheet3->mergeCells("A" . ($row3 - 1) . ":D" . ($row3 - 1));
+                    $sheet3->mergeCells("E" . ($row3 - 1) . ":H" . ($row3 - 1));
+                    $sheet3->mergeCells("I" . ($row3 - 1) . ":L" . ($row3 - 1));
+                    $sheet3->mergeCells("M" . ($row3 - 1) . ":O" . ($row3 - 1));
+
+                    // Styling untuk statistik
+                    $sheet3->getStyle("A" . ($row3 - 1) . ":O{$row3}")->applyFromArray([
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'e6fffa']],
+                    ]);
+
+                    // Alignment untuk nilai
+                    $sheet3->getStyle("A{$row3}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet3->getStyle("E{$row3}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet3->getStyle("I{$row3}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet3->getStyle("M{$row3}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    // Alignment untuk label
+                    $sheet3->getStyle("A" . ($row3 - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet3->getStyle("E" . ($row3 - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet3->getStyle("I" . ($row3 - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet3->getStyle("M" . ($row3 - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $row3 += 2;
+
+                    // Untuk setiap sub indikator
+                    foreach ($jenjang['sub_indikator_gap'] as $subIndex => $subIndikator) {
+                        // HEADER SUB INDIKATOR
+                        $sheet3->mergeCells("A{$row3}:O{$row3}");
+                        $sheet3->setCellValue("A{$row3}", 'SUB INDIKATOR: ' . $subIndikator['sub_indikator_code'] . ' - ' . $subIndikator['sub_indikator_name']);
+                        $sheet3->getStyle("A{$row3}")->applyFromArray([
+                            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4a5568']],
+                            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                        ]);
+
+                        $row3++;
+
+                        // Kumpulkan semua PTK untuk sub indikator ini
+                        $ptkByLevel = [];
+
+                        foreach ($jenjang['ptk_detail'] as $ptk) {
+                            foreach ($ptk['detail_gap'] as $gap) {
+                                if ($gap['sub_indikator_id'] == $subIndikator['sub_indikator_id']) {
+                                    $levelDicapai = $gap['level_dicapai'];
+
+                                    if (!isset($ptkByLevel[$levelDicapai])) {
+                                        $ptkByLevel[$levelDicapai] = [];
+                                    }
+
+                                    // Cek apakah PTK sudah ada di level ini
+                                    $ptkExists = false;
+                                    foreach ($ptkByLevel[$levelDicapai] as $existingPtk) {
+                                        if ($existingPtk['ptk_id'] == $ptk['ptk_id']) {
+                                            $ptkExists = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!$ptkExists) {
+                                        $ptkByLevel[$levelDicapai][] = [
+                                            'ptk_id' => $ptk['ptk_id'],
+                                            'nip' => $ptk['nip'],
+                                            'nama' => $ptk['nama'],
+                                            'sekolah' => $ptk['nama_sekolah'],
+                                            'instansi' => $ptk['instansi'] ?? '-',
+                                            'kota' => $ptk['nama_kota'] ?? '-'
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+
+                        // Urutkan level dari rendah ke tinggi
+                        ksort($ptkByLevel);
+
+                        // Tampilkan per level
+                        foreach ($ptkByLevel as $level => $ptkList) {
+                            $levelName = "LEVEL " . $level;
+                            $ptkCount = count($ptkList);
+
+                            $sheet3->mergeCells("A{$row3}:O{$row3}");
+                            $sheet3->setCellValue("A{$row3}", $levelName . ' (Total: ' . $ptkCount . ' PTK)');
+
+                            $bgColor = '';
+                            if ($level < $targetLevel) {
+                                $bgColor = ($targetLevel - $level >= 3) ? 'fed7d7' : (($targetLevel - $level >= 2) ? 'feebc8' : 'c6f6d5');
+                            } else {
+                                $bgColor = 'c6f6d5'; // Hijau untuk yang sudah mencapai target
+                            }
+
+                            $sheet3->getStyle("A{$row3}")->applyFromArray([
+                                'font' => ['bold' => true],
+                                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
+                                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                            ]);
+
+                            $row3++;
+
+                            // HEADER TABEL PTK
+                            $headers = ['NO', 'NIP', 'NAMA', 'SEKOLAH', 'INSTANSI', 'KOTA'];
+                            $colIndex = 0;
+
+                            foreach ($headers as $header) {
+                                $colLetter = chr(65 + $colIndex);
+                                $mergeEnd = $colLetter;
+
+                                // Atur lebar kolom yang lebih baik
+                                if ($header == 'NAMA') {
+                                    $sheet3->mergeCells("{$colLetter}{$row3}:" . chr(65 + $colIndex + 2) . "{$row3}");
+                                    $mergeEnd = chr(65 + $colIndex + 2);
+                                    $colIndex += 2;
+                                } elseif ($header == 'SEKOLAH') {
+                                    $sheet3->mergeCells("{$colLetter}{$row3}:" . chr(65 + $colIndex + 3) . "{$row3}");
+                                    $mergeEnd = chr(65 + $colIndex + 3);
+                                    $colIndex += 3;
+                                } elseif ($header == 'INSTANSI') {
+                                    $sheet3->mergeCells("{$colLetter}{$row3}:" . chr(65 + $colIndex + 3) . "{$row3}");
+                                    $mergeEnd = chr(65 + $colIndex + 3);
+                                    $colIndex += 3;
+                                } elseif ($header == 'KOTA') {
+                                    $sheet3->mergeCells("{$colLetter}{$row3}:" . chr(65 + $colIndex + 2) . "{$row3}");
+                                    $mergeEnd = chr(65 + $colIndex + 2);
+                                    $colIndex += 2;
+                                }
+
+                                $sheet3->setCellValue("{$colLetter}{$row3}", $header);
+                                $sheet3->getStyle("{$colLetter}{$row3}:{$mergeEnd}{$row3}")->applyFromArray([
+                                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '718096']],
+                                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                                ]);
+
+                                $colIndex++;
+                            }
+
+                            $row3++;
+
+                            // DATA PTK
+                            $no = 1;
+                            foreach ($ptkList as $ptkItem) {
+                                // Kolom A: NO
+                                $sheet3->setCellValue("A{$row3}", $no);
+
+                                // Kolom B: NIP
+                                $sheet3->setCellValue("B{$row3}", $ptkItem['nip'] ?? '-');
+
+                                // Kolom C-E: NAMA (merge 3 kolom)
+                                $sheet3->mergeCells("C{$row3}:E{$row3}");
+                                $sheet3->setCellValue("C{$row3}", $ptkItem['nama'] ?? '-');
+
+                                // Kolom F-H: SEKOLAH (merge 3 kolom)
+                                $sheet3->mergeCells("F{$row3}:H{$row3}");
+                                $sheet3->setCellValue("F{$row3}", $ptkItem['sekolah'] ?? '-');
+
+                                // Kolom I-K: INSTANSI (merge 3 kolom)
+                                $sheet3->mergeCells("I{$row3}:K{$row3}");
+                                $sheet3->setCellValue("I{$row3}", $ptkItem['instansi'] ?? '-');
+
+                                // Kolom L-N: KOTA (merge 3 kolom)
+                                $sheet3->mergeCells("L{$row3}:N{$row3}");
+                                $sheet3->setCellValue("L{$row3}", $ptkItem['kota'] ?? '-');
+
+                                // Kolom O: KOSONG untuk padding
+                                $sheet3->setCellValue("O{$row3}", '');
+
+                                // Styling
+                                $bgColor = $row3 % 2 == 0 ? 'FFFFFF' : 'F7FAFC';
+                                $sheet3->getStyle("A{$row3}:O{$row3}")->applyFromArray([
+                                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]]
+                                ]);
+
+                                // Alignment
+                                $sheet3->getStyle("A{$row3}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                                $sheet3->getStyle("B{$row3}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                                $sheet3->getStyle("L{$row3}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                                $row3++;
+                                $no++;
+                            }
+
+                            $row3++;
+                        }
+
+                        // REKOMENDASI UNTUK SUB INDIKATOR INI
+                        if (!empty($subIndikator['detail_gap'])) {
+                            $sheet3->mergeCells("A{$row3}:O{$row3}");
+                            $sheet3->setCellValue("A{$row3}", 'REKOMENDASI KEBUTUHAN BELAJAR:');
+                            $sheet3->getStyle("A{$row3}")->applyFromArray([
+                                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2b6cb0']],
+                                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                            ]);
+
+                            $row3++;
+
+                            // Tampilkan rekomendasi dari detail_gap
+                            $rekomendasiShown = [];
+                            foreach ($subIndikator['detail_gap'] as $gap) {
+                                $rekomKey = $gap['level_dicapai'] . '_' . $gap['target_level'];
+                                if (!in_array($rekomKey, $rekomendasiShown)) {
+                                    $rekomendasiShown[] = $rekomKey;
+
+                                    $sheet3->mergeCells("A{$row3}:O{$row3}");
+                                    $sheet3->setCellValue(
+                                        "A{$row3}",
+                                        "• Dari Level " . $gap['level_dicapai'] . " ke Level " . $gap['target_level'] .
+                                            " (" . $gap['jumlah_ptk_gap'] . " PTK): " . $gap['rekomendasi']
+                                    );
+
+                                    $sheet3->getStyle("A{$row3}:O{$row3}")->applyFromArray([
+                                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'ebf8ff']],
+                                        'alignment' => ['vertical' => Alignment::VERTICAL_TOP, 'wrapText' => true]
+                                    ]);
+
+                                    $sheet3->getRowDimension($row3)->setRowHeight(40);
+                                    $row3++;
+                                }
+                            }
+                        }
+
+                        $row3 += 2;
+                    }
+
+                    // Tambah spasi antar jenjang
+                    $row3 += 2;
+                }
             }
 
             // Set column widths
@@ -517,11 +846,28 @@ class ExportGapController extends Controller
             $sheet2->getColumnDimension('K')->setWidth(30);
             $sheet2->getColumnDimension('L')->setWidth(30);
 
+
+            // Atur lebar kolom untuk SHEET 3
+            $sheet3->getColumnDimension('A')->setWidth(5);  // NO
+            $sheet3->getColumnDimension('B')->setWidth(20); // NIP
+            $sheet3->getColumnDimension('C')->setWidth(8);  // NAMA (bagian 1)
+            $sheet3->getColumnDimension('D')->setWidth(8);  // NAMA (bagian 2)
+            $sheet3->getColumnDimension('E')->setWidth(8);  // NAMA (bagian 3)
+            $sheet3->getColumnDimension('F')->setWidth(15); // SEKOLAH (bagian 1)
+            $sheet3->getColumnDimension('G')->setWidth(15); // SEKOLAH (bagian 2)
+            $sheet3->getColumnDimension('H')->setWidth(15); // SEKOLAH (bagian 3)
+            $sheet3->getColumnDimension('I')->setWidth(15); // INSTANSI (bagian 1)
+            $sheet3->getColumnDimension('J')->setWidth(15); // INSTANSI (bagian 2)
+            $sheet3->getColumnDimension('K')->setWidth(15); // INSTANSI (bagian 3)
+            $sheet3->getColumnDimension('L')->setWidth(10); // KOTA (bagian 1)
+            $sheet3->getColumnDimension('M')->setWidth(10); // KOTA (bagian 2)
+            $sheet3->getColumnDimension('N')->setWidth(10); // KOTA (bagian 3)
+            $sheet3->getColumnDimension('O')->setWidth(5);  // Padding
             // Set active sheet kembali ke sheet 1
             $spreadsheet->setActiveSheetIndex(0);
 
             // Output file menggunakan Laravel Response
-            $filename = 'analisis-gap-ptk-' . date('Ymd-His') . '.xlsx';
+            $filename = 'analisis-rekomendasi belajar-ptk-' . date('Ymd-His') . '.xlsx';
 
             return response()->streamDownload(
                 function () use ($spreadsheet) {
@@ -618,6 +964,7 @@ class ExportGapController extends Controller
                     'ptk.ptk_id',
                     'ptk.nip',
                     'ptk.nama',
+                    'ptk.instansi',
                     'pangkat_jabatan.jenjang_jabatan',
                     'sekolah.nama_sekolah',
                     'kota.nama_kota',
@@ -762,6 +1109,7 @@ class ExportGapController extends Controller
                         'nama' => $firstPtkData->nama,
                         'jenjang_jabatan' => $firstPtkData->jenjang_jabatan,
                         'nama_sekolah' => $firstPtkData->nama_sekolah,
+                        'instansi' => $firstPtkData->instansi,
                         'nama_kota' => $firstPtkData->nama_kota,
                         'detail_gap' => $ptkGap,
                         'total_gap' => count($ptkGap)
