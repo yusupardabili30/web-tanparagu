@@ -15,7 +15,9 @@ class PangkatJabatan extends Model
     protected $fillable = [
         'golongan_ruang',
         'pangkat',
-        'jenjang_jabatan'
+        'jenjang_jabatan',
+        'level_kompetensi_desc',
+        'level_komptensi',
     ];
 
     public $timestamps = false;
