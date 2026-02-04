@@ -13,6 +13,8 @@ use App\Models\PtkJawaban;
 use App\Models\SoalJawaban;
 use App\Models\SubIndikator;
 use App\Models\PtkJawabanDetail;
+use App\Models\PangkatJabatan;
+use App\Models\PtkJawabanRekomendasi;
 use Illuminate\Http\Request;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -198,6 +200,8 @@ class SoalController extends Controller
         if (!$sub_indikator_id || !$no_urut) abort(404, 'Parameter tidak valid');
 
         $ptk = Ptk::where('nip', $nip)->first();
+
+
         if (!$ptk) abort(404, 'Data PTK tidak ditemukan');
 
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)->first();
@@ -499,6 +503,7 @@ class SoalController extends Controller
         $kegiatan_id = Hashids::decode($encoded_kegiatan_id)[0];
 
         $ptk = Ptk::where('nip', $nip)->first();
+        $pangkat_jabatan = PangkatJabatan::where('pangkat_jabatan_id', $ptk->pangkat_jabatan_id)->first();
         if (!$ptk) abort(404, 'Data PTK tidak ditemukan');
 
         // ==============================================
@@ -685,7 +690,7 @@ class SoalController extends Controller
                         ]);
                     }
                 } else {
-                    $level_final = $soal->level == 2 ? 2 : $soal->level - 1;
+                    $level_final = $soal->level == 2 ? 1 : $soal->level - 1;
 
                     PtkJawaban::updateOrCreate([
                         'kegiatan_id' => $kegiatan_id,
@@ -699,6 +704,25 @@ class SoalController extends Controller
                         'selisih' => $durasi_sub,
                         'level' => $level_final
                     ]);
+
+
+                    //start insert tabel ptk_jawaban_rekomendasi
+                    $i = 0;
+
+                    while ($level_final < $pangkat_jabatan->level_kompetensi) {
+                        PtkJawabanRekomendasi::Create([
+                            'kegiatan_id' => $kegiatan_id,
+                            'sub_indikator_id' => $sub_indikator->sub_indikator_id,
+                            'sub_indikator_code' => $sub_indikator->sub_indikator_code,
+                            'tahap' => $tahap,
+                            'ptk_id' => $ptk->ptk_id,
+                            'level_gap' => $pangkat_jabatan->level_kompetensi - $i
+                        ]);
+                        $i = $i + 1;
+                        $level_final = $level_final + 1;
+                    }
+                    //end insert tabel ptk_jawaban_rekomendasi
+
                 }
                 break;
 
@@ -749,6 +773,23 @@ class SoalController extends Controller
                         'selisih' => $durasi_sub,
                         'level' => $level_final
                     ]);
+
+
+                    //start insert tabel ptk_jawaban_rekomendasi
+                    $i = 0;
+                    while ($level_final < $pangkat_jabatan->level_kompetensi) {
+                        PtkJawabanRekomendasi::updateOrCreate([
+                            'kegiatan_id' => $kegiatan_id,
+                            'sub_indikator_id' => $sub_indikator->sub_indikator_id,
+                            'sub_indikator_code' => $sub_indikator->sub_indikator_code,
+                            'tahap' => $tahap,
+                            'ptk_id' => $ptk->ptk_id,
+                            'level_gap' => $pangkat_jabatan->level_kompetensi - $i
+                        ]);
+                        $i = $i + 1;
+                        $level_final = $level_final + 1;
+                    }
+                    //end insert tabel ptk_jawaban_rekomendasi
                 }
                 break;
 
