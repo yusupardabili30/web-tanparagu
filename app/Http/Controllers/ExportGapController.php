@@ -889,8 +889,12 @@ class ExportGapController extends Controller
     /**
      * Method baru untuk mengambil data gap dengan detail PTK
      */
+    /**
+     * Method untuk mengambil data gap dengan detail PTK (sesuai dengan AnalisisController)
+     */
     private function getRekomendasiGapWithDetail(Request $request)
     {
+        // Tentukan target level per jenjang (sesuai dengan target di AnalisisController)
         $targetLevels = [
             'Pertama' => 2,  // Target level 2
             'Muda'    => 3,  // Target level 3
@@ -898,7 +902,7 @@ class ExportGapController extends Controller
             'Utama'   => 5   // Target level 5
         ];
 
-        // Ambil semua jenjang yang ada
+        // 1. Ambil jenjang yang ada berdasarkan filter (sama dengan AnalisisController)
         $jenjangQuery = DB::table('pangkat_jabatan')
             ->select('jenjang_jabatan')
             ->whereNotNull('jenjang_jabatan')
@@ -923,7 +927,8 @@ class ExportGapController extends Controller
 
             $targetLevel = $targetLevels[$jenjang];
 
-            // 1. Hitung total PTK per jenjang (HANYA PTK yang memiliki jawaban di kegiatan yang dipilih)
+            // 2. Hitung total PTK per jenjang (HANYA PTK yang memiliki jawaban di kegiatan yang dipilih)
+            // Sama dengan query totalPtkQuery di AnalisisController
             $totalPtkQuery = DB::table('ptk')
                 ->select(DB::raw('COUNT(DISTINCT ptk.ptk_id) as total_ptk'))
                 ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
@@ -933,7 +938,7 @@ class ExportGapController extends Controller
                 ->where('pangkat_jabatan.jenjang_jabatan', $jenjang)
                 ->where('ptk_jawaban.level', '>=', 1);
 
-            // Terapkan filter untuk totalPtkQuery
+            // Terapkan filter yang sama dengan AnalisisController
             if ($request->filled('kegiatan_id')) {
                 $totalPtkQuery->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
             }
@@ -958,7 +963,7 @@ class ExportGapController extends Controller
 
             if ($totalPtk == 0) continue;
 
-            // 2. Ambil data jawaban PTK untuk analisis gap
+            // 3. Ambil data jawaban PTK untuk analisis gap (sama dengan jawabanQuery di AnalisisController)
             $jawabanQuery = DB::table('ptk_jawaban')
                 ->select(
                     'ptk.ptk_id',
@@ -985,7 +990,7 @@ class ExportGapController extends Controller
                 ->where('pangkat_jabatan.jenjang_jabatan', $jenjang)
                 ->where('ptk_jawaban.level', '>=', 1);
 
-            // Terapkan filter ke jawabanQuery
+            // Terapkan filter yang sama dengan AnalisisController
             if ($request->filled('kegiatan_id')) {
                 $jawabanQuery->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
             }
@@ -1009,7 +1014,7 @@ class ExportGapController extends Controller
 
             if ($jawabanData->isEmpty()) continue;
 
-            // 3. Kelompokkan data
+            // 4. Kelompokkan data (sama dengan AnalisisController)
             $groupedBySubIndikator = $jawabanData->groupBy('sub_indikator_id');
             $groupedByPtk = $jawabanData->groupBy('ptk_id');
 
@@ -1018,7 +1023,7 @@ class ExportGapController extends Controller
             $totalGapJumlah = 0;
             $ptkDenganGap = 0;
 
-            // 4. Analisis per sub indikator
+            // 5. Analisis per sub indikator (LOGIKA YANG SAMA)
             foreach ($groupedBySubIndikator as $subIndikatorId => $subData) {
                 $firstData = $subData->first();
                 $ptkPerLevel = $subData->groupBy('level_dicapai');
@@ -1034,6 +1039,7 @@ class ExportGapController extends Controller
                         for ($target = $levelDicapai + 1; $target <= $targetLevel; $target++) {
                             $gapLevel = $target - $levelDicapai;
 
+                            // Gunakan fungsi getRekomendasiText yang SAMA
                             $rekomendasi = $this->getRekomendasiText(
                                 $subIndikatorId,
                                 $firstData->sub_indikator_code,
@@ -1068,7 +1074,7 @@ class ExportGapController extends Controller
                 }
             }
 
-            // 5. Analisis per PTK
+            // 6. Analisis per PTK (LOGIKA YANG SAMA)
             foreach ($groupedByPtk as $ptkId => $ptkData) {
                 $firstPtkData = $ptkData->first();
                 $ptkGap = [];
@@ -1080,6 +1086,7 @@ class ExportGapController extends Controller
                     if ($levelDicapai < $targetLevel) {
                         // Buat gap untuk SETIAP level dari level dicapai + 1 sampai target level
                         for ($target = $levelDicapai + 1; $target <= $targetLevel; $target++) {
+                            // Gunakan fungsi getRekomendasiText yang SAMA
                             $rekomendasi = $this->getRekomendasiText(
                                 $jawaban->sub_indikator_id,
                                 $jawaban->sub_indikator_code,
@@ -1134,10 +1141,11 @@ class ExportGapController extends Controller
     }
 
     /**
-     * Get rekomendasi text
+     * Get rekomendasi text (SAMA dengan di AnalisisController)
      */
     private function getRekomendasiText($subIndikatorId, $subIndikatorCode, $tahap, $entity, $levelDicapai, $levelTarget)
     {
+        // Coba ambil rekomendasi spesifik dari database terlebih dahulu
         $rekomendasi = DB::table('ptk_rekomendasi')
             ->where('sub_indikator_id', $subIndikatorId)
             ->where('sub_indikator_code', $subIndikatorCode)
@@ -1150,6 +1158,7 @@ class ExportGapController extends Controller
             return $rekomendasi->rekomendasi;
         }
 
+        // Jika tidak ada rekomendasi spesifik, cari yang umum
         $rekomendasi = DB::table('ptk_rekomendasi')
             ->where('sub_indikator_id', $subIndikatorId)
             ->where('sub_indikator_code', $subIndikatorCode)
@@ -1160,7 +1169,9 @@ class ExportGapController extends Controller
             return $rekomendasi->rekomendasi;
         }
 
+        // Jika masih tidak ada, buat rekomendasi dinamis
         $gap = $levelTarget - $levelDicapai;
+
         $levelNames = [
             1 => 'Gagal',
             2 => 'Penerapan',

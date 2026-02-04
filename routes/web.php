@@ -13,6 +13,7 @@ use App\Http\Controllers\InstrumenController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\BiodataController;
 use App\Http\Controllers\AnalisisController;
+use App\Http\Controllers\AnalisisRekomendasiGapController;
 use App\Http\Controllers\ManagementUsersController;
 use App\Http\Controllers\PelatihanController;
 use App\Http\Controllers\ExportGapController;
@@ -239,12 +240,16 @@ Route::prefix('users')->name('users.')->group(function () {
 
 
 
-
+// Di dalam group yang sama dengan route analisis lainnya
+Route::get('/analisis/ptk-belum-menjawab', [AnalisisController::class, 'getPtkBelumMenjawab'])->name('analisis.ptk-belum-menjawab');
 
 
 Route::get('/ptk/export-hasil/{encode_kegiatan_id}/{nip}', [PtkController::class, 'exportHasilPdf'])
     ->name('ptk.export-hasil');
 
+
+Route::get('/analisis/rekomendasi-gap', [AnalisisRekomendasiGapController::class, 'index'])
+    ->name('analisis.rekomendasi-gap.index');
 
 
 

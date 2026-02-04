@@ -29,8 +29,8 @@
 
     <style>
         /* =====================================================
-                                                               ANALISIS LAYOUT STYLES - FULL CSS
-                                                            ===================================================== */
+                                                                                                                                                               ANALISIS LAYOUT STYLES - FULL CSS
+                                                                                                                                                            ===================================================== */
 
         /* Base Container & Global Styles */
         .analisis-wrap {
@@ -237,8 +237,8 @@
         }
 
         /* =====================================================
-                                                               CHART FIXES - ADD THESE TO YOUR EXISTING CSS
-                                                            ===================================================== */
+                                                                                                                                                               CHART FIXES - ADD THESE TO YOUR EXISTING CSS
+                                                                                                                                                            ===================================================== */
 
         /* Fix untuk chart container */
         .chart-container {
@@ -989,6 +989,34 @@
             font-size: 0.7rem;
             padding: 2px 6px;
         }
+
+        /* Styling untuk tabel PTK Belum Menjawab */
+        .table-card .badge.bg-danger {
+            background: linear-gradient(135deg, #dc3545, #e74c3c) !important;
+            border: none;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+
+        /* Highlight untuk baris PTK belum menjawab */
+        .table-card tbody tr:hover {
+            background-color: #fff5f5 !important;
+        }
+
+        /* Responsive untuk tabel */
+        @media (max-width: 768px) {
+
+            .table-card .modus-table th,
+            .table-card .modus-table td {
+                font-size: 0.8rem;
+                padding: 8px 10px;
+            }
+
+            .table-card .badge.bg-danger {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+        }
     </style>
 
     <div class="container-fluid">
@@ -1152,15 +1180,16 @@
                                 <div class="stat-label">PTK Menjawab (Kegiatan)</div>
                             </div>
                         </div>
-                        {{-- <div class="col-md-3">
-                        <div class="stat-card">
-                            <div class="stat-icon" style="background: rgba(255,193,7,.12); color: #ffc107;">
-                                <i class="ri-bar-chart-line fs-4"></i>
+                        <!-- Di bagian stats cards, tambahkan ini -->
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-icon" style="background: rgba(220,53,69,.12); color: #dc3545;">
+                                    <i class="ri-user-forbid-line fs-4"></i>
+                                </div>
+                                <div class="stat-number">{{ $analisisData['statistik']['ptk_belum_menjawab'] ?? 0 }}</div>
+                                <div class="stat-label">PTK Belum Menjawab</div>
                             </div>
-                            <div class="stat-number">{{ number_format($analisisData['statistik']['rata_level'] ?? 0, 2) }}</div>
-                            <div class="stat-label">Rata-rata Level</div>
                         </div>
-                    </div> --}}
                         <div class="col-md-3">
                             <div class="stat-card">
                                 <div class="stat-icon" style="background: rgba(220,53,69,.12); color: #dc3545;">
@@ -1171,6 +1200,92 @@
                             </div>
                         </div>
                     </div>
+
+
+
+                    <!-- Tambahkan di dalam div#analisisContent, setelah bagian Progress Pengisian per Kota -->
+                    @if (!empty($analisisData['ptk_belum_menjawab']))
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="table-card">
+                                    <div class="chart-title">
+                                        <i class="ri-user-forbid-line"></i> PTK yang Belum Menjawab Instrumen
+                                        <span
+                                            class="badge bg-danger ms-2">{{ count($analisisData['ptk_belum_menjawab']) }}
+                                            PTK</span>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered modus-table">
+                                            <thead>
+                                                <tr>
+                                                    <th width="5%">No</th>
+                                                    <th width="15%">NIP</th>
+                                                    <th>Nama</th>
+                                                    <th width="12%">Jenjang Jabatan</th>
+                                                    <th width="10%">Jenis PTK</th>
+                                                    <th width="12%">Kota</th>
+                                                    <th width="10%">Jenjang Pendidikan</th>
+                                                    <th width="8%">No. HP</th>
+                                                    <th width="15%">Sekolah/Instansi</th>
+                                                    <th width="8%">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($analisisData['ptk_belum_menjawab'] as $index => $ptk)
+                                                    <tr>
+                                                        <td class="text-center">{{ $index + 1 }}</td>
+                                                        <td>{{ $ptk->nip ?: '-' }}</td>
+                                                        <td>
+                                                            <strong>{{ $ptk->nama }}</strong>
+                                                        </td>
+                                                        <td>{{ $ptk->jenjang_jabatan ?: '-' }}</td>
+                                                        <td>{{ $ptk->jenis_ptk ?: '-' }}</td>
+                                                        <td>{{ $ptk->nama_kota ?: '-' }}</td>
+                                                        <td>{{ $ptk->jenjang_pendidikan ?: '-' }}</td>
+                                                        <td>{{ $ptk->no_hp ?: '-' }}</td>
+                                                        <td>
+                                                            @if ($ptk->nama_sekolah)
+                                                                <small>{{ $ptk->nama_sekolah }}</small>
+                                                            @elseif($ptk->instansi)
+                                                                <small>{{ $ptk->instansi }}</small>
+                                                            @else
+                                                                -
+                                                            @endif
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-danger">Belum Isi</span>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                            @if (count($analisisData['ptk_belum_menjawab']) > 10)
+                                                <tfoot>
+                                                    <tr class="table-light">
+                                                        <td colspan="9" class="text-end fw-bold">Total PTK Belum
+                                                            Menjawab:</td>
+                                                        <td class="text-center fw-bold">
+                                                            {{ count($analisisData['ptk_belum_menjawab']) }}</td>
+                                                    </tr>
+                                                </tfoot>
+                                            @endif
+                                        </table>
+                                    </div>
+
+                                    @if (count($analisisData['ptk_belum_menjawab']) > 10)
+                                        <div class="text-center mt-3">
+                                            <small class="text-muted">
+                                                <i class="ri-information-line"></i>
+                                                Menampilkan {{ count($analisisData['ptk_belum_menjawab']) }} PTK yang belum
+                                                menjawab instrumen
+                                            </small>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
 
                     <!-- Charts Row 1: Distribusi Berdasarkan Jawaban -->
                     <div class="row">
@@ -1428,6 +1543,7 @@
                                                                     <th width="6%" class="text-center">Gap</th>
                                                                     <th>Rekomendasi Kebutuhan Belajar</th>
                                                                     <th width="10%" class="text-center">Jumlah PTK</th>
+                                                                    <th width="10%" class="text-center">Detail PTK</th>
                                                                     <th width="12%" class="text-center">% dari Total
                                                                     </th>
                                                                 </tr>
@@ -1508,6 +1624,16 @@
                                                                                         style="vertical-align: middle;">
                                                                                         {{ $jumlahPtKSubIndikator }}
                                                                                     </td>
+
+                                                                                    <td class="text-center">
+                                                                                        <a href="{{ route('analisis.rekomendasi-gap.index') }}?kegiatan_id={{ request('kegiatan_id', '') }}&pangkat_jabatan_id={{ request('pangkat_jabatan_id', '') }}&jenis_ptk_id={{ request('jenis_ptk_id', '') }}&kota_id={{ request('kota_id', '') }}&jenjang_pendidikan_id={{ request('jenjang_pendidikan_id', '') }}&jenis_kelamin={{ request('jenis_kelamin', '') }}&sub_indikator_id=${rek.sub_indikator_id || ''}&jenjang_jabatan=${jenjang.jenjang_jabatan || ''}"
+                                                                                            class="btn btn-sm btn-info"
+                                                                                            target="_blank">
+                                                                                            <i class="ri-eye-line"></i>
+                                                                                            Lihat Detail PTK
+                                                                                        </a>
+                                                                                    </td>
+
                                                                                     <td rowspan="{{ count($rek['detail_gap']) }}"
                                                                                         class="text-center"
                                                                                         style="vertical-align: middle;">
@@ -1642,8 +1768,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         /* =====================================================
-                                                               GLOBAL CHART INSTANCE
-                                                            ===================================================== */
+                                                                                                                                                               GLOBAL CHART INSTANCE
+                                                                                                                                                            ===================================================== */
         let levelDistributionChart = null;
         let jenjangDistributionChart = null;
         let jenjangPendidikanChart = null;
@@ -1716,9 +1842,13 @@
     <div class="row">
         ${statCard('ri-user-3-line','Total PTK<br><small>Semua Filter</small>',data.statistik?.total_ptk ?? 0,'#1a5bb8')}
         ${statCard('ri-checkbox-circle-line','PTK Menjawab<br><small>Kegiatan</small>',data.statistik?.ptk_menjawab ?? 0,'#28a745')}
-
+ ${statCard('ri-user-forbid-line','PTK Belum<br>Menjawab',data.statistik?.ptk_belum_menjawab ?? 0,'#dc3545')}
         ${statCard('ri-progress-4-line','Progress<br>Pengisian',(data.statistik?.persentase_isi ?? 0)+'%','#dc3545')}
     </div>
+
+
+
+
 
     <div class="row">
         <div class="col-md-6">
@@ -1751,6 +1881,107 @@
     </div>`;
 
 
+            /* =====================================================
+               TABEL PTK BELUM MENJAWAB - YANG SUDAH DIPERBAIKI
+            ===================================================== */
+            if (data.ptk_belum_menjawab && Array.isArray(data.ptk_belum_menjawab) && data.ptk_belum_menjawab.length > 0) {
+                let ptkRows = '';
+
+                // Loop melalui setiap PTK yang belum menjawab
+                data.ptk_belum_menjawab.forEach((ptk, index) => {
+                    // Format sekolah/instansi
+                    let sekolahInstansi = '-';
+                    if (ptk.nama_sekolah) {
+                        sekolahInstansi = `<small>${ptk.nama_sekolah}</small>`;
+                    } else if (ptk.instansi) {
+                        sekolahInstansi = `<small>${ptk.instansi}</small>`;
+                    }
+
+                    // Format jenis PTK (pastikan tidak undefined)
+                    const jenisPtk = ptk.jenis_ptk || '-';
+
+                    // Format jenjang pendidikan
+                    const jenjangPendidikan = ptk.jenjang_pendidikan || '-';
+
+                    // Format no HP
+                    const noHp = ptk.no_hp || '-';
+
+                    ptkRows += `
+                <tr>
+                    <td class="text-center">${index + 1}</td>
+                    <td>${ptk.nip || '-'}</td>
+                    <td><strong>${ptk.nama || '-'}</strong></td>
+                    <td>${ptk.jenjang_jabatan || '-'}</td>
+                    <td>${jenisPtk}</td>
+                    <td>${ptk.nama_kota || '-'}</td>
+                    <td>${jenjangPendidikan}</td>
+                    <td>${noHp}</td>
+                    <td>${sekolahInstansi}</td>
+                    <td class="text-center">
+                        <span class="badge bg-danger">Belum Isi</span>
+                    </td>
+                </tr>`;
+                });
+
+                // HTML untuk tabel
+                html += `
+        <div class="row">
+            <div class="col-12">
+                <div class="table-card">
+                    <div class="chart-title">
+                        <i class="ri-user-forbid-line"></i> PTK yang Belum Menjawab Instrumen
+                        <span class="badge bg-danger ms-2">${data.ptk_belum_menjawab.length} PTK</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered modus-table">
+                            <thead>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="15%">NIP</th>
+                                    <th>Nama</th>
+                                    <th width="12%">Jenjang Jabatan</th>
+                                    <th width="10%">Jenis PTK</th>
+                                    <th width="12%">Kota</th>
+                                    <th width="10%">Jenjang Pendidikan</th>
+                                    <th width="8%">No. HP</th>
+                                    <th width="15%">Sekolah/Instansi</th>
+                                    <th width="8%">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${ptkRows}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="ri-information-line"></i>
+                            Menampilkan ${data.ptk_belum_menjawab.length} PTK yang belum menjawab instrumen
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+            } else if (data.ptk_belum_menjawab && data.ptk_belum_menjawab.length === 0) {
+                // Jika tidak ada PTK yang belum menjawab
+                html += `
+        <div class="row">
+            <div class="col-12">
+                <div class="table-card">
+                    <div class="chart-title">
+                        <i class="ri-user-forbid-line"></i> PTK yang Belum Menjawab Instrumen
+                        <span class="badge bg-success ms-2">0 PTK</span>
+                    </div>
+                    <div class="alert alert-success text-center py-4">
+                        <i class="ri-checkbox-circle-fill fs-4 text-success"></i>
+                        <h5 class="mt-2 mb-0">Semua PTK sudah menjawab instrumen!</h5>
+                        <p class="text-muted mb-0">Tidak ada PTK yang belum mengisi instrumen</p>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+            }
+
             // Tambahkan tabel modus per kota jika ada
             if (data.modus_per_kota?.length > 0) {
                 let modusRows = '';
@@ -1760,13 +1991,13 @@
                             modusRows += `
                     <tr>
                         ${subIndex === 0 ? `
-                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; font-weight: 600;">
-                                                                                            ${kota.nama_kota}
-                                                                                        </td>
-                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; text-align: center;">
-                                                                                            ${kota.total_jawaban}
-                                                                                        </td>
-                                                                                    ` : ''}
+                                                                                                                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; font-weight: 600;">
+                                                                                                                                                                                            ${kota.nama_kota}
+                                                                                                                                                                                        </td>
+                                                                                                                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; text-align: center;">
+                                                                                                                                                                                            ${kota.total_jawaban}
+                                                                                                                                                                                        </td>
+                                                                                                                                                                                    ` : ''}
                         <td>
                             <small class="text-muted">${sub.sub_indikator_code}</small><br>
                             <span class="fw-medium">${sub.sub_indikator_name ? sub.sub_indikator_name.substring(0, 40) + (sub.sub_indikator_name.length > 40 ? '...' : '') : '-'}</span>
@@ -1911,6 +2142,7 @@
                                     <th width="10%" class="text-center">Gap</th>
                                     <th>Rekomendasi Kebutuhan Belajar</th>
                                     <th width="10%" class="text-center">Jumlah PTK</th>
+                                    <th width="10%" class="text-center">Detail PTK</th>
                                     <th width="12%" class="text-center">% dari Total</th>
                                 </tr>
                             </thead>
@@ -1933,13 +2165,13 @@
                                     <td class="text-center">${counter++}</td>
                                     <td>
                                         ${gapIndex === 0 ? `
-                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                        <span class="fw-medium">${rek.sub_indikator_name ?
-                                                                                            (rek.sub_indikator_name.length > 40 ?
-                                                                                                rek.sub_indikator_name.substring(0, 40) + '...' :
-                                                                                                rek.sub_indikator_name
-                                                                                            ) : '-'}</span>
-                                                                                    ` : ''}
+                                                                                                                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                                                                                                                        <span class="fw-medium">${rek.sub_indikator_name ?
+                                                                                                                                                                                            (rek.sub_indikator_name.length > 40 ?
+                                                                                                                                                                                                rek.sub_indikator_name.substring(0, 40) + '...' :
+                                                                                                                                                                                                rek.sub_indikator_name
+                                                                                                                                                                                            ) : '-'}</span>
+                                                                                                                                                                                    ` : ''}
                                     </td>
                                     <td class="text-center">
                                         <span class="badge-level" style="background-color: ${getLevelColor(gap.level_dicapai)}; color: white;">
@@ -1961,6 +2193,14 @@
                                         <small>${gap.rekomendasi || '-'}</small>
                                     </td>
                                     <td class="text-center">${gap.jumlah_ptk || 0}</td>
+
+<td class="text-center">
+    <a href="{{ route('analisis.rekomendasi-gap.index') }}?kegiatan_id={{ request('kegiatan_id', '') }}&pangkat_jabatan_id={{ request('pangkat_jabatan_id', '') }}&jenis_ptk_id={{ request('jenis_ptk_id', '') }}&kota_id={{ request('kota_id', '') }}&jenjang_pendidikan_id={{ request('jenjang_pendidikan_id', '') }}&jenis_kelamin={{ request('jenis_kelamin', '') }}&sub_indikator_id=${rek.sub_indikator_id || ''}&jenjang_jabatan=${jenjang.jenjang_jabatan || ''}"
+       class="btn btn-sm btn-info" target="_blank">
+        <i class="ri-eye-line"></i> Lihat Detail PTK
+    </a>
+</td>
+
                                     <td class="text-center">
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="fw-bold">${percentage}%</span>
@@ -2825,7 +3065,33 @@
 
 
 
+    <SCRIPT>
+        // Event handler untuk tombol lihat detail (TANPA level_dicapai)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-view-gap-detail').forEach(button => {
+                button.addEventListener('click', function() {
+                    const subIndikatorId = this.getAttribute('data-sub-indikator-id');
+                    const jenjang = this.getAttribute('data-jenjang');
 
+                    // Buat URL TANPA level_dicapai
+                    const params = new URLSearchParams({
+                        kegiatan_id: '{{ request('kegiatan_id') }}',
+                        pangkat_jabatan_id: '{{ request('pangkat_jabatan_id') }}',
+                        jenis_ptk_id: '{{ request('jenis_ptk_id') }}',
+                        kota_id: '{{ request('kota_id') }}',
+                        jenjang_pendidikan_id: '{{ request('jenjang_pendidikan_id') }}',
+                        jenis_kelamin: '{{ request('jenis_kelamin') }}',
+                        sub_indikator_id: subIndikatorId,
+                        jenjang_jabatan: jenjang
+                        // TIDAK ADA level_dicapai di sini!
+                    });
+
+                    window.location.href = '{{ route('analisis.rekomendasi-gap.index') }}?' +
+                        params.toString();
+                });
+            });
+        });
+    </SCRIPT>
 
     <script>
         // Tambahkan di bagian akhir script JavaScript Anda
