@@ -26,7 +26,6 @@
     $jenjangLevelMap = [
         'pertama' => [2],
         'pratama' => [2],
-
         'muda'    => [3],
         'madya'   => [4],
         'utama'   => [5],
@@ -38,11 +37,10 @@
 
         foreach ($jenjangLevelMap as $key => $levels) {
             if ($j !== '' && str_contains($j, $key)) {
-                return $levels; // level wajib sesuai jenjang
+                return $levels;
             }
         }
 
-        // fallback kalau jenjangnya gak match mapping
         $fallbackMin = (int)$fallbackMin;
         $fallbackMax = (int)$fallbackMax;
 
@@ -78,9 +76,6 @@
         padding: 18px;
     }
 
-    /* =========================
-       HEADER PAGE
-       ========================= */
     .hi-head{
         position: relative;
         overflow: hidden;
@@ -141,9 +136,7 @@
     }
     .hi-title-icon i{ font-size: 18px; }
 
-    /* =========================
-       FILTER
-       ========================= */
+    /* FILTER */
     .hi-filter{
         border-radius: var(--radius);
         background: var(--mm-card);
@@ -189,9 +182,7 @@
         box-shadow: 0 10px 18px rgba(0,0,0,.10);
     }
 
-    /* =========================
-       LIST PER PTK
-       ========================= */
+    /* LIST PER PTK */
     .hi-list{ display:flex; flex-direction:column; gap:14px; }
 
     .ptk-card{
@@ -202,9 +193,6 @@
         overflow: hidden;
     }
 
-    /* =========================
-       ✅ PROFIL CARD (NAMA JADI CARD)
-       ========================= */
     .ptk-head{
         padding: 14px;
         background: #fff;
@@ -271,7 +259,6 @@
         min-width: 200px;
     }
 
-    /* info kegiatan di atas profil */
     .ptk-kegiatan{
         margin-top: 2px;
         margin-bottom: 8px;
@@ -285,10 +272,7 @@
         padding-left: 10px;
     }
 
-    /* BODY indikator 1 card */
-    .ptk-body{
-        padding: 14px;
-    }
+    .ptk-body{ padding: 14px; }
 
     .indikator-card{
         border: 1px solid rgba(229,231,235,.95);
@@ -296,34 +280,60 @@
         background: #fff;
         overflow: hidden;
     }
+
     .indikator-card .head{
         padding: 12px 14px;
-        background: var(--mm-soft);
-        border-bottom: 1px solid rgba(229,231,235,.9);
+        background: #1a4d8e !important;
+        border-bottom: 1px solid rgba(255,255,255,.22) !important;
         display:flex;
         justify-content: space-between;
         align-items:center;
         gap: 10px;
         flex-wrap: wrap;
     }
-    .indikator-card .head .ttl{
+    .indikator-card .head .ttl,
+    .indikator-card .head .ttl i{
         font-weight: 900;
-        color: var(--mm-text);
         margin: 0;
         display:flex;
         align-items:center;
         gap: 8px;
+        color:#fff !important;
     }
     .indikator-card .head .count{
-        color: var(--mm-muted);
+        color: #fff !important;
+        background: rgba(255,255,255,.18);
+        border: 1px solid rgba(255,255,255,.28);
+        padding: 6px 10px;
+        border-radius: 999px;
         font-weight: 900;
         font-size: 12px;
         white-space: nowrap;
     }
 
-    /* =========================
-       ✅ TIAP INDIKATOR JADI CARD
-       ========================= */
+    .btn-toggle-indikator{
+        border-radius: 12px !important;
+        padding: 8px 10px !important;
+        font-weight: 900 !important;
+        background: rgba(255,255,255,.18) !important;
+        border: 1px solid rgba(255,255,255,.28) !important;
+        color: #fff !important;
+        line-height: 1;
+    }
+    .btn-toggle-indikator:hover,
+    .btn-toggle-indikator:active,
+    .btn-toggle-indikator:focus{
+        background: rgba(255,255,255,.28) !important;
+        border-color: rgba(255,255,255,.36) !important;
+        color: #fff !important;
+        box-shadow: none !important;
+    }
+    .btn-toggle-indikator i{
+        font-size: 18px;
+        transition: transform .2s ease;
+    }
+    .btn-toggle-indikator.collapsed i{ transform: rotate(180deg); }
+
     .indikator-item{
         padding: 12px 14px;
         background: #fff;
@@ -338,9 +348,7 @@
         box-shadow: 0 3px 15px rgba(26,75,184,.25);
         padding: 12px 14px;
     }
-    .indikator-item + .indikator-item .indikator-row{
-        margin-top: 12px;
-    }
+    .indikator-item + .indikator-item .indikator-row{ margin-top: 12px; }
 
     .indikator-grid{
         display:grid;
@@ -361,7 +369,6 @@
         margin-bottom: 6px;
     }
 
-    /* Nomor */
     .no-box{
         width: 52px;
         height: 52px;
@@ -375,7 +382,6 @@
         font-size: 14px;
     }
 
-    /* Level box */
     .lv-box{
         border: 1px solid rgba(229,231,235,.95);
         background: var(--mm-soft);
@@ -393,7 +399,6 @@
     }
     .lv-badges{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px; }
 
-    /* Indikator box */
     .ind-box{
         border: 1px solid rgba(229,231,235,.95);
         background: #fff;
@@ -416,7 +421,6 @@
         gap: 8px;
     }
 
-    /* Rekomendasi */
     .rek-box{
         border: 1px solid rgba(229,231,235,.95);
         background: #fff;
@@ -444,76 +448,7 @@
         line-height: 1.35;
     }
 
-    .page-link{ border-radius: 10px !important; font-weight: 800; }
-
-    /* =========================
-       PELATIHAN STYLE
-       ========================= */
-    .pelatihan-section {
-        margin-top: 12px;
-        border-top: 1px dashed rgba(229,231,235,.7);
-        padding-top: 12px;
-    }
-    .pelatihan-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(26,91,184,.08);
-        border: 1px solid rgba(26,91,184,.2);
-        color: var(--mm-blue);
-        border-radius: 10px;
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 800;
-        margin-right: 8px;
-        margin-bottom: 8px;
-    }
-    .pelatihan-badge i { font-size: 14px; }
-    .pelatihan-kategori {
-        font-size: 11px;
-        color: var(--mm-muted);
-        font-weight: 800;
-        display: block;
-        margin-top: 4px;
-    }
-    .no-pelatihan {
-        color: var(--mm-muted);
-        font-style: italic;
-        font-size: 12.5px;
-        font-weight: 500;
-    }
-
-    /* =========================
-       ✅ TOGGLE CARD INDIKATOR & REKOMENDASI (COLLAPSE)
-       ========================= */
-    .btn-toggle-indikator{
-        border-radius: 12px !important;
-        padding: 8px 10px !important;
-        font-weight: 900 !important;
-        background: var(--mm-soft) !important;
-        border: 1px solid rgba(229,231,235,.95) !important;
-        color: var(--mm-text) !important;
-        line-height: 1;
-    }
-    .btn-toggle-indikator:hover,
-    .btn-toggle-indikator:active,
-    .btn-toggle-indikator:focus{
-        background: var(--mm-soft) !important;
-        border-color: rgba(229,231,235,.95) !important;
-        color: var(--mm-text) !important;
-        box-shadow: none !important;
-    }
-    .btn-toggle-indikator i{
-        font-size: 18px;
-        transition: transform .2s ease;
-    }
-    .btn-toggle-indikator.collapsed i{
-        transform: rotate(180deg);
-    }
-
-    /* =========================
-       ✅ SUMMARY CAPAIAN: SPLIT
-       ========================= */
+    /* SUMMARY */
     .summary-box{
         border: 1px solid rgba(229,231,235,.95);
         border-radius: 16px;
@@ -617,35 +552,44 @@
         font-weight: 800;
     }
 
-    /* ✅ HEADER "DETAIL INDIKATOR & REKOMENDASI" TANPA GRADASI */
-    .indikator-card .head{
-        background: #1a4d8e !important; /* solid */
-        border-bottom: 1px solid rgba(255,255,255,.22) !important;
+    /* PELATIHAN */
+    .pelatihan-section {
+        margin-top: 12px;
+        border-top: 1px dashed rgba(229,231,235,.7);
+        padding-top: 12px;
     }
-    .indikator-card .head .ttl,
-    .indikator-card .head .ttl i{
-        color: #fff !important;
+    .pelatihan-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(26,91,184,.08);
+        border: 1px solid rgba(26,91,184,.2);
+        color: var(--mm-blue);
+        border-radius: 10px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 800;
+        margin-right: 8px;
+        margin-bottom: 8px;
     }
-    .indikator-card .head .count{
-        color: #fff !important;
-        background: rgba(255,255,255,.18);
-        border: 1px solid rgba(255,255,255,.28);
-        padding: 6px 10px;
-        border-radius: 999px;
+    .pelatihan-badge i { font-size: 14px; }
+    .pelatihan-kategori {
+        font-size: 11px;
+        color: var(--mm-muted);
+        font-weight: 800;
+        display: block;
+        margin-top: 4px;
     }
-    .btn-toggle-indikator{
-        background: rgba(255,255,255,.18) !important;
-        border: 1px solid rgba(255,255,255,.28) !important;
-        color: #fff !important;
+    .no-pelatihan {
+        color: var(--mm-muted);
+        font-style: italic;
+        font-size: 12.5px;
+        font-weight: 500;
     }
-    .btn-toggle-indikator:hover,
-    .btn-toggle-indikator:active,
-    .btn-toggle-indikator:focus{
-        background: rgba(255,255,255,.28) !important;
-        border-color: rgba(255,255,255,.36) !important;
-        color: #fff !important;
-        box-shadow: none !important;
-    }
+
+    .page-link{ border-radius: 10px !important; font-weight: 800; }
+
+    
 </style>
 
 <div class="container-fluid">
@@ -743,7 +687,6 @@
                     </select>
                 </div>
 
-                {{-- tombol kanan (PDF/EXCEL/CARI) --}}
                 <div class="col-md-1">
                     @if($data->isNotEmpty())
                         <div class="w-100 mb-2">
@@ -767,7 +710,6 @@
                     </button>
                 </div>
 
-                {{-- EMPTY --}}
                 @if($data->isEmpty())
                     <div class="alert alert-info mb-0 mt-2">
                         @if(request()->hasAny(['search', 'kegiatan_id', 'tahap', 'pangkat_jabatan_id', 'jenis_ptk_id']))
@@ -777,8 +719,6 @@
                         @endif
                     </div>
                 @else
-
-                    {{-- ALERT FILTER --}}
                     @if(request()->hasAny(['search', 'kegiatan_id', 'tahap', 'pangkat_jabatan_id', 'jenis_ptk_id']))
                         <div class="alert alert-info alert-dismissible fade show mb-0 mt-2" role="alert">
                             <i class="ri-information-line me-2"></i>
@@ -796,18 +736,15 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     @endif
-
                 @endif
 
             </form>
         </div>
 
-        {{-- ✅ GLOBAL COUNTER BIAR NOMOR LANJUT ANTAR HALAMAN --}}
         @php
             $globalNo = $data->firstItem() ?? 1;
         @endphp
 
-        {{-- ✅ LIST PER PTK --}}
         @if($data->isNotEmpty())
             <div class="hi-list">
                 @foreach($groups as $nipKey => $rows)
@@ -831,26 +768,17 @@
                         $levelMinFirst = (int)($infoFirst['level_min'] ?? 0);
                         $levelMaxFirst = (int)($infoFirst['level_max'] ?? 0);
 
-                        // ✅ target tampil sesuai jenjang (1 level), fallback min-max kalau jenjang tidak match mapping
                         $wajibFirst = $getWajibLevels($jenjang, $levelMinFirst, $levelMaxFirst);
-
-                        // ✅ ID collapse per PTK (unik)
-                        $panelId = 'indikatorPanel_' . preg_replace('/[^a-zA-Z0-9]/', '', (string)$nipKey);
-
-                        /* =========================
-                           ✅ SUMMARY LOGIC (GLOBAL PER PTK, BUKAN PER PAGE)
-                           ========================= */
                         $targetLevel = (int)(count($wajibFirst) ? $wajibFirst[0] : 0);
 
-                        // ambil summary global dari controller (trim biar konsisten)
+                        $panelId = 'indikatorPanel_' . preg_replace('/[^a-zA-Z0-9]/', '', (string)$nipKey);
+
                         $nipKeyTrim = trim((string)$nipKey);
                         $sum = $summaryByNip[$nipKeyTrim] ?? null;
 
-                        // GLOBAL (biar tidak berubah-ubah antar halaman)
                         $totalIndikator = $sum ? (int)($sum['total'] ?? 0) : (int)$rows->unique('sub_indikator_id')->count();
                         $cntMeet        = $sum ? (int)($sum['memenuhi'] ?? 0) : 0;
 
-                        // kalau gak ada summary global, baru hitung memenuhi dari rows (PAGE INI)
                         if (!$sum) {
                             $meetSet = [];
                             foreach ($rows as $r) {
@@ -866,29 +794,15 @@
                         $cntNot = max(0, $totalIndikator - $cntMeet);
                         $isAllMeet = ($totalIndikator > 0 && $cntNot === 0);
 
-                        // list untuk UI (dibentuk dari rows PAGE INI saja)
-                        $summaryRek = [];  // rekomendasi gabungan (unique)
-                        $summaryAch = [];  // indikator tercapai (unique)
+                        // ✅ LIST UNTUK UI SUMMARY (TERCAPAI + REKOMENDASI)
+                        $summaryRek = [];
+                        $summaryAch = [];
 
                         foreach ($rows as $r) {
                             $lvlJawab = (int)($r->level_jawaban ?? 0);
 
-                            // indikator tercapai (untuk tampilan)
-                            if ($targetLevel > 0 && $lvlJawab >= $targetLevel) {
-                                $nm = trim((string)($r->sub_indikator_name ?? ''));
-                                $cd = trim((string)($r->sub_indikator_code ?? ''));
-                                if ($nm !== '') {
-                                    $key = md5($nm.'|'.$cd);
-                                    $summaryAch[$key] = [
-                                        'level' => $lvlJawab,
-                                        'name'  => $nm,
-                                        'code'  => $cd,
-                                    ];
-                                }
-                                continue;
-                            }
-
-                            // rekomendasi gap (untuk tampilan)
+                            // ✅ TERCAPAI: simpen juga "isi" rekomendasi level yang tercapai (kalau ada)
+                            // (ambil dari rekomendasi_gap yang levelnya sama dengan level jawaban)
                             $infoRawSum = $r->rekomendasi_info ?? [];
                             if (is_string($infoRawSum)) {
                                 $infoSum = json_decode($infoRawSum, true) ?: [];
@@ -914,17 +828,44 @@
                             $nm = trim((string)($r->sub_indikator_name ?? ''));
                             $cd = trim((string)($r->sub_indikator_code ?? ''));
 
+                            // ✅ kalau tercapai (>= target), masuk "sudah tercapai"
+                            if ($targetLevel > 0 && $lvlJawab >= $targetLevel) {
+                                $achText = '';
+
+                                // cari "isi" yang paling relevan untuk level jawaban (kalau ada)
+                                foreach ($rg as $g) {
+                                    $gl = (int)($g['level'] ?? 0);
+                                    $gt = trim((string)($g['rekomendasi'] ?? ''));
+                                    if ($gt !== '' && $gl === $lvlJawab) {
+                                        $achText = $gt;
+                                        break;
+                                    }
+                                }
+
+                                if ($nm !== '') {
+                                    $key = md5($nm.'|'.$cd.'|'.$achText);
+                                    $summaryAch[$key] = [
+                                        'level'       => $lvlJawab,
+                                        'name'        => $nm,
+                                        'code'        => $cd,
+                                        'rekomendasi' => $achText, // ✅ isi ikut tampil (kalau ketemu)
+                                    ];
+                                }
+                                continue;
+                            }
+
+                            // ✅ rekomendasi gap (untuk tampilan) -> level target
                             foreach ($rg as $g) {
                                 $gl = (int)($g['level'] ?? 0);
                                 $gt = trim((string)($g['rekomendasi'] ?? ''));
 
                                 if ($gt !== '' && $targetLevel > 0 && $gl === $targetLevel) {
-                                    // ✅ UNIK PER INDIKATOR (biar gak dobel antar indikator)
                                     $key = md5($gt.'|'.$nm.'|'.$cd);
                                     $summaryRek[$key] = [
-                                        'level' => $gl,
-                                        'name'  => $nm,
-                                        'code'  => $cd,
+                                        'level'       => $gl,
+                                        'name'        => $nm,
+                                        'code'        => $cd,
+                                        'rekomendasi' => $gt,
                                     ];
                                 }
                             }
@@ -935,8 +876,6 @@
                     @endphp
 
                     <div class="ptk-card">
-
-                        {{-- ✅ IDENTITAS SEKALI --}}
                         <div class="ptk-head">
                             <div class="ptk-kegiatan">
                                 <i class="ri-calendar-event-line"></i>
@@ -974,7 +913,7 @@
                                         </div>
                                     </div>
 
-                                    {{-- ✅ PELATIHAN --}}
+                                    {{-- PELATIHAN --}}
                                     @if(isset($first->pelatihan) && $first->pelatihan->count() > 0)
                                         <div class="pelatihan-section">
                                             <div style="margin-bottom: 8px; color: var(--mm-text); font-weight: 900; font-size: 13px;">
@@ -1002,10 +941,9 @@
                             </div>
                         </div>
 
-                        {{-- ✅ SEMUA INDIKATOR JADI 1 CARD --}}
                         <div class="ptk-body">
 
-                            {{-- ✅ SUMMARY (SAMA KAYA "ATAS": kanan cuma name+kode, bukan teks rekom) --}}
+                            {{-- SUMMARY --}}
                             <div class="summary-box">
                                 <div class="summary-top">
                                     <p class="summary-title mb-0">
@@ -1052,7 +990,14 @@
                                                     </div>
 
                                                     @if(count($summaryAchList))
-                                                        @foreach($summaryAchList as $sa)
+                                                        @foreach($summaryAchList as $i => $sa)
+                                                            @php
+                                                                $fullA = (string)($sa['rekomendasi'] ?? '');
+                                                                $shortA = \Illuminate\Support\Str::limit($fullA, 140);
+                                                                $needMoreA = strlen($fullA) > 140;
+                                                                $aid = $panelId.'_sumach_'.$i;
+                                                            @endphp
+
                                                             <div class="summary-item">
                                                                 <span class="badge bg-success-subtle text-success"
                                                                       style="border-radius:999px; font-weight:900; padding:8px 12px;">
@@ -1062,6 +1007,30 @@
                                                                     {{ $sa['name'] ?? '-' }}
                                                                     @if(!empty($sa['code']))
                                                                         <small>Kode: {{ $sa['code'] }}</small>
+                                                                    @endif
+
+                                                                    {{-- ✅ isi untuk yang tercapai (kalau ada) --}}
+                                                                    @if($fullA !== '')
+                                                                        <small style="margin-top:6px;">
+                                                                            {{ $shortA }}
+                                                                        </small>
+
+                                                                        @if($needMoreA)
+                                                                            <button type="button"
+                                                                                    class="btn btn-sm btn-outline-primary mt-2"
+                                                                                    data-bs-toggle="collapse"
+                                                                                    data-bs-target="#{{ $aid }}"
+                                                                                    aria-expanded="false"
+                                                                                    style="border-radius:10px; font-weight:900;">
+                                                                                Selengkapnya
+                                                                            </button>
+
+                                                                            <div class="collapse mt-2" id="{{ $aid }}">
+                                                                                <div class="small text-muted fw-semibold" style="line-height:1.35;">
+                                                                                    {{ $fullA }}
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
                                                                     @endif
                                                                 </div>
                                                             </div>
@@ -1090,7 +1059,7 @@
                                         <div class="summary-rek">
                                             <div class="summary-sections">
 
-                                                {{-- KIRI: YANG TERCAPAI --}}
+                                                {{-- KIRI: YANG TERCAPAI + ISI --}}
                                                 <div class="summary-sec">
                                                     <div class="summary-sec-head">
                                                         <div class="summary-sec-title">
@@ -1100,7 +1069,14 @@
                                                     </div>
 
                                                     @if(count($summaryAchList))
-                                                        @foreach($summaryAchList as $sa)
+                                                        @foreach($summaryAchList as $i => $sa)
+                                                            @php
+                                                                $fullA = (string)($sa['rekomendasi'] ?? '');
+                                                                $shortA = \Illuminate\Support\Str::limit($fullA, 140);
+                                                                $needMoreA = strlen($fullA) > 140;
+                                                                $aid = $panelId.'_sumach_'.$i;
+                                                            @endphp
+
                                                             <div class="summary-item">
                                                                 <span class="badge bg-success-subtle text-success"
                                                                       style="border-radius:999px; font-weight:900; padding:8px 12px;">
@@ -1110,6 +1086,29 @@
                                                                     {{ $sa['name'] ?? '-' }}
                                                                     @if(!empty($sa['code']))
                                                                         <small>Kode: {{ $sa['code'] }}</small>
+                                                                    @endif
+
+                                                                    @if($fullA !== '')
+                                                                        <small style="margin-top:6px;">
+                                                                            {{ $shortA }}
+                                                                        </small>
+
+                                                                        @if($needMoreA)
+                                                                            <button type="button"
+                                                                                    class="btn btn-sm btn-outline-primary mt-2"
+                                                                                    data-bs-toggle="collapse"
+                                                                                    data-bs-target="#{{ $aid }}"
+                                                                                    aria-expanded="false"
+                                                                                    style="border-radius:10px; font-weight:900;">
+                                                                                Selengkapnya
+                                                                            </button>
+
+                                                                            <div class="collapse mt-2" id="{{ $aid }}">
+                                                                                <div class="small text-muted fw-semibold" style="line-height:1.35;">
+                                                                                    {{ $fullA }}
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
                                                                     @endif
                                                                 </div>
                                                             </div>
@@ -1123,7 +1122,7 @@
                                                     @endif
                                                 </div>
 
-                                                {{-- KANAN: PERLU DITINGKATKAN (✅ TAMPIL NAME+KODE, BUKAN TEKS REKOM) --}}
+                                                {{-- KANAN: PERLU DITINGKATKAN + ISI --}}
                                                 <div class="summary-sec">
                                                     <div class="summary-sec-head">
                                                         <div class="summary-sec-title">
@@ -1133,16 +1132,47 @@
                                                     </div>
 
                                                     @if(count($summaryRekList))
-                                                        @foreach($summaryRekList as $sr)
+                                                        @foreach($summaryRekList as $i => $sr)
+                                                            @php
+                                                                $full = (string)($sr['rekomendasi'] ?? '');
+                                                                $short = \Illuminate\Support\Str::limit($full, 140);
+                                                                $needMore = strlen($full) > 140;
+                                                                $sid = $panelId.'_sumrek_'.$i;
+                                                            @endphp
+
                                                             <div class="summary-item">
                                                                 <span class="badge bg-danger-subtle text-danger"
                                                                       style="border-radius:999px; font-weight:900; padding:8px 12px;">
                                                                     Rekom Lv {{ (int)($sr['level'] ?? 0) }}
                                                                 </span>
+
                                                                 <div class="tx">
                                                                     {{ $sr['name'] ?? '-' }}
                                                                     @if(!empty($sr['code']))
                                                                         <small>Kode: {{ $sr['code'] }}</small>
+                                                                    @endif
+
+                                                                    @if($full !== '')
+                                                                        <small style="margin-top:6px;">
+                                                                            {{ $short }}
+                                                                        </small>
+
+                                                                        @if($needMore)
+                                                                            <button type="button"
+                                                                                    class="btn btn-sm btn-outline-primary mt-2"
+                                                                                    data-bs-toggle="collapse"
+                                                                                    data-bs-target="#{{ $sid }}"
+                                                                                    aria-expanded="false"
+                                                                                    style="border-radius:10px; font-weight:900;">
+                                                                                Selengkapnya
+                                                                            </button>
+
+                                                                            <div class="collapse mt-2" id="{{ $sid }}">
+                                                                                <div class="small text-muted fw-semibold" style="line-height:1.35;">
+                                                                                    {{ $full }}
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
                                                                     @endif
                                                                 </div>
                                                             </div>
@@ -1171,7 +1201,7 @@
                                 </div>
                             </div>
 
-                            {{-- ✅ DETAIL (COLLAPSE) --}}
+                            {{-- DETAIL (COLLAPSE) --}}
                             <div class="indikator-card">
                                 <div class="head">
                                     <p class="ttl mb-0"><i class="ri-list-check-2"></i> Detail Indikator & Rekomendasi</p>
@@ -1220,13 +1250,10 @@
                                                 $rekomendasiGap = [];
                                             }
 
-                                            // ✅ NOMOR GLOBAL: lanjut antar halaman
                                             $nomor = $globalNo;
                                             $globalNo++;
 
-                                            // ✅ level yang harus sesuai jenjang (1 level), fallback min-max kalau jenjang tidak match mapping
                                             $wajibLevels = $getWajibLevels($jenjang, $levelMin, $levelMax);
-
                                             $cid = 'rek_' . preg_replace('/[^a-zA-Z0-9]/', '', (string)($row->nip ?? 'x')) . '_' . $idx;
                                         @endphp
 
@@ -1350,7 +1377,6 @@
 
                             </div>
                         </div>
-
                     </div>
                 @endforeach
             </div>
