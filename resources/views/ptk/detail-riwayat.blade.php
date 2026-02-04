@@ -302,9 +302,17 @@
         }
 
         @media (max-width: 1200px) {
-            .indikator-grid { grid-template-columns: 1fr; }
-            .ptk-line .k { width: 110px; }
-            .ptk-line .v { min-width: 0; }
+            .indikator-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ptk-line .k {
+                width: 110px;
+            }
+
+            .ptk-line .v {
+                min-width: 0;
+            }
         }
 
         .cell-title {
@@ -389,7 +397,9 @@
             padding: 10px;
         }
 
-        .rek-item+.rek-item { margin-top: 10px; }
+        .rek-item+.rek-item {
+            margin-top: 10px;
+        }
 
         .rek-top {
             display: flex;
@@ -431,7 +441,10 @@
             gap: 12px;
         }
 
-        .kegiatan-detail-item { display: flex; flex-direction: column; }
+        .kegiatan-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
 
         .kegiatan-detail-label {
             font-size: 12px;
@@ -472,11 +485,35 @@
         }
 
         /* Badge level colors */
-        .badge-info-subtle    { background-color: rgba(13, 202, 240, .1) !important; color: #0dcaf0 !important; border-color: rgba(13, 202, 240, .2) !important; }
-        .badge-primary-subtle { background-color: rgba(13, 110, 253, .1) !important; color: #0d6efd !important; border-color: rgba(13, 110, 253, .2) !important; }
-        .badge-warning-subtle { background-color: rgba(255, 193, 7, .1) !important; color: #ffc107 !important; border-color: rgba(255, 193, 7, .2) !important; }
-        .badge-success-subtle { background-color: rgba(25, 135, 84, .1) !important; color: #198754 !important; border-color: rgba(25, 135, 84, .2) !important; }
-        .badge-danger-subtle  { background-color: rgba(220, 53, 69, .1) !important; color: #dc3545 !important; border-color: rgba(220, 53, 69, .2) !important; }
+        .badge-info-subtle {
+            background-color: rgba(13, 202, 240, .1) !important;
+            color: #0dcaf0 !important;
+            border-color: rgba(13, 202, 240, .2) !important;
+        }
+
+        .badge-primary-subtle {
+            background-color: rgba(13, 110, 253, .1) !important;
+            color: #0d6efd !important;
+            border-color: rgba(13, 110, 253, .2) !important;
+        }
+
+        .badge-warning-subtle {
+            background-color: rgba(255, 193, 7, .1) !important;
+            color: #ffc107 !important;
+            border-color: rgba(255, 193, 7, .2) !important;
+        }
+
+        .badge-success-subtle {
+            background-color: rgba(25, 135, 84, .1) !important;
+            color: #198754 !important;
+            border-color: rgba(25, 135, 84, .2) !important;
+        }
+
+        .badge-danger-subtle {
+            background-color: rgba(220, 53, 69, .1) !important;
+            color: #dc3545 !important;
+            border-color: rgba(220, 53, 69, .2) !important;
+        }
 
         /* =========================
            ✅ TOGGLE CARD INDIKATOR & REKOMENDASI (COLLAPSE)
@@ -581,69 +618,41 @@
             font-size: 12px;
             white-space: nowrap;
         }
-
-        /* =========================
-           ✅ SUMMARY ITEM versi "samain kaya yang atas": ada header nama sub indikator
-           ========================= */
         .summary-item{
-            display:block;
-            padding: 0;
-            overflow: hidden;
+            display:flex;
+            align-items:flex-start;
+            gap: 10px;
+            padding: 8px;
             border-radius: 12px;
             background: var(--mm-soft);
             border: 1px solid rgba(229,231,235,.9);
         }
         .summary-item + .summary-item{ margin-top: 8px; }
-
-        .summary-item-head{
-            display:flex;
-            align-items:flex-start;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 10px 10px 8px 10px;
-            background: #fff;
-            border-bottom: 1px dashed rgba(229,231,235,.9);
-        }
-        .summary-item-title{
-            font-weight: 900;
-            color: var(--mm-text);
-            font-size: 13px;
-            line-height: 1.25;
-            margin: 0;
-        }
-        .summary-item-code{
-            margin-top: 3px;
-            color: var(--mm-muted);
-            font-weight: 800;
-            font-size: 12px;
-            display:flex;
-            align-items:center;
-            gap: 6px;
-        }
-        .summary-item-body{
-            display:flex;
-            align-items:flex-start;
-            gap: 10px;
-            padding: 10px;
-            background: var(--mm-soft);
-        }
-        .summary-item-body .tx{
+        .summary-item .tx{
             flex: 1;
             font-size: 12.5px;
             line-height: 1.45;
             color: var(--mm-text);
             font-weight: 700;
         }
+        .summary-item .tx small{
+            display:block;
+            margin-top: 3px;
+            color: var(--mm-muted);
+            font-weight: 800;
+        }
 
         /* ✅ HEADER "DETAIL INDIKATOR & REKOMENDASI" TANPA GRADASI */
         .indikator-card .head{
-            background: #1a4d8e !important;
+            background: #1a4d8e !important; /* solid */
             border-bottom: 1px solid rgba(255,255,255,.22) !important;
         }
+
         .indikator-card .head .ttl,
         .indikator-card .head .ttl i{
             color: #fff !important;
         }
+
         .indikator-card .head .count{
             color: #fff !important;
             background: rgba(255,255,255,.18);
@@ -651,6 +660,7 @@
             padding: 6px 10px;
             border-radius: 999px;
         }
+
         .btn-toggle-indikator{
             background: rgba(255,255,255,.18) !important;
             border: 1px solid rgba(255,255,255,.28) !important;
@@ -679,12 +689,12 @@
             </div>
 
             @if($data && $data->count() > 0)
-            <div>
-                <a class="btn btn-success btn-export-pill"
-                   href="{{ route('ptk.export-hasil', ['encode_kegiatan_id' => $encode_kegiatan_id, 'nip' => $nip]) }}">
-                    <i class="ri-file-pdf-line align-bottom me-1"></i> Export PDF
-                </a>
-            </div>
+                <div>
+                    <a class="btn btn-success btn-export-pill"
+                       href="{{ route('ptk.export-hasil', ['encode_kegiatan_id' => $encode_kegiatan_id, 'nip' => $nip]) }}">
+                        <i class="ri-file-pdf-line align-bottom me-1"></i> Export PDF
+                    </a>
+                </div>
             @endif
         </div>
 
@@ -842,12 +852,12 @@
                             $wajib = $getWajibLevels($jenjangPtk, 0, 0);
                             $targetLevel = (int)(count($wajib) ? $wajib[0] : 0);
 
-                            // ✅ hitung ringkasan (tanpa backend)
+                            // ✅ hitung ringkasan
                             $totalIndikator = $data->unique('sub_indikator_id')->count();
 
                             $meetSet = [];
                             $summaryAch = []; // indikator tercapai (unique)
-                            $summaryRek = []; // rekomendasi gap (unique, match targetLevel)
+                            $summaryRek = []; // rekomendasi gap (unique, match targetLevel) ✅ include name+code
 
                             foreach ($data as $r) {
                                 // decode rekomendasi_info biar aman (string/object/array)
@@ -894,21 +904,21 @@
                                     $rg = [];
                                 }
 
+                                // ✅ ambil sub indikator dari row yg belum memenuhi
+                                $nm = trim((string)($r->sub_indikator_name ?? ''));
+                                $cd = trim((string)($r->sub_indikator_code ?? ''));
+
                                 foreach ($rg as $g) {
                                     $gl = (int)($g['level'] ?? 0);
                                     $gt = trim((string)($g['rekomendasi'] ?? ''));
 
-                                    // ✅ simpan nama + kode sub indikator buat header item (samain kaya yang atas)
-                                    $nm = trim((string)($r->sub_indikator_name ?? ''));
-                                    $cd = trim((string)($r->sub_indikator_code ?? ''));
-
                                     if ($gt !== '' && $targetLevel > 0 && $gl === $targetLevel) {
-                                        // ✅ unik per rekom + indikator (biar ga ketiban)
+                                        // ✅ unik: rekom + indikatornya (biar gak ke-merge antar indikator)
                                         $key = md5($gt.'|'.$nm.'|'.$cd);
 
                                         $summaryRek[$key] = [
                                             'level' => $gl,
-                                            'text'  => $gt,
+                                            'text'  => $gt,   // disimpan aja (kalau suatu saat perlu), tapi UI ga nampilin
                                             'name'  => $nm,
                                             'code'  => $cd,
                                         ];
@@ -924,7 +934,7 @@
                             $summaryRekList = array_values($summaryRek);
                         @endphp
 
-                        {{-- ✅ SUMMARY (DISAMAININ KAYA YG ATAS: item ada header nama sub indikator) --}}
+                        {{-- ✅ SUMMARY (MODEL SAMA KODE ATAS) --}}
                         <div class="summary-box">
                             <div class="summary-top">
                                 <p class="summary-title mb-0">
@@ -973,39 +983,23 @@
                                                 @if(count($summaryAchList))
                                                     @foreach($summaryAchList as $sa)
                                                         <div class="summary-item">
-                                                            <div class="summary-item-head">
-                                                                <div>
-                                                                    <div class="summary-item-title">{{ $sa['name'] }}</div>
-                                                                    @if(!empty($sa['code']))
-                                                                        <div class="summary-item-code">
-                                                                            <i class="ri-hashtag"></i> <span>Kode: {{ $sa['code'] }}</span>
-                                                                        </div>
-                                                                    @endif
-                                                                </div>
-
-                                                                <span class="badge bg-success-subtle text-success"
-                                                                      style="border-radius:999px; font-weight:900; padding:8px 12px; white-space:nowrap;">
-                                                                    Tercapai Lv {{ (int)$sa['level'] }}
-                                                                </span>
-                                                            </div>
-
-                                                            <div class="summary-item-body">
-                                                                <div class="tx">Indikator ini sudah memenuhi capaian level Anda.</div>
+                                                            <span class="badge bg-success-subtle text-success"
+                                                                  style="border-radius:999px; font-weight:900; padding:8px 12px;">
+                                                                Tercapai Lv {{ (int)($sa['level'] ?? 0) }}
+                                                            </span>
+                                                            <div class="tx">
+                                                                {{ $sa['name'] ?? '-' }}
+                                                                @if(!empty($sa['code']))
+                                                                    <small>Kode: {{ $sa['code'] }}</small>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                     @endforeach
                                                 @else
                                                     <div class="summary-item">
-                                                        <div class="summary-item-head">
-                                                            <div>
-                                                                <div class="summary-item-title">Tidak ada data indikator tercapai.</div>
-                                                            </div>
-                                                            <span class="badge bg-secondary-subtle text-secondary"
-                                                                  style="border-radius:999px; font-weight:900; padding:8px 12px; white-space:nowrap;">-</span>
-                                                        </div>
-                                                        <div class="summary-item-body">
-                                                            <div class="tx">Tidak ada data indikator tercapai.</div>
-                                                        </div>
+                                                        <span class="badge bg-secondary-subtle text-secondary"
+                                                              style="border-radius:999px; font-weight:900; padding:8px 12px;">-</span>
+                                                        <div class="tx">Tidak ada data indikator tercapai.</div>
                                                     </div>
                                                 @endif
                                             </div>
@@ -1025,6 +1019,7 @@
                                     <div class="summary-rek">
                                         <div class="summary-sections">
 
+                                            {{-- KIRI: SUDAH TERCAPAI --}}
                                             <div class="summary-sec">
                                                 <div class="summary-sec-head">
                                                     <div class="summary-sec-title">
@@ -1036,43 +1031,28 @@
                                                 @if(count($summaryAchList))
                                                     @foreach($summaryAchList as $sa)
                                                         <div class="summary-item">
-                                                            <div class="summary-item-head">
-                                                                <div>
-                                                                    <div class="summary-item-title">{{ $sa['name'] }}</div>
-                                                                    @if(!empty($sa['code']))
-                                                                        <div class="summary-item-code">
-                                                                            <i class="ri-hashtag"></i> <span>Kode: {{ $sa['code'] }}</span>
-                                                                        </div>
-                                                                    @endif
-                                                                </div>
-
-                                                                <span class="badge bg-success-subtle text-success"
-                                                                      style="border-radius:999px; font-weight:900; padding:8px 12px; white-space:nowrap;">
-                                                                    Tercapai Lv {{ (int)$sa['level'] }}
-                                                                </span>
-                                                            </div>
-
-                                                            <div class="summary-item-body">
-                                                                <div class="tx">Indikator ini sudah memenuhi capaian level Anda.</div>
+                                                            <span class="badge bg-success-subtle text-success"
+                                                                  style="border-radius:999px; font-weight:900; padding:8px 12px;">
+                                                                Tercapai Lv {{ (int)($sa['level'] ?? 0) }}
+                                                            </span>
+                                                            <div class="tx">
+                                                                {{ $sa['name'] ?? '-' }}
+                                                                @if(!empty($sa['code']))
+                                                                    <small>Kode: {{ $sa['code'] }}</small>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                     @endforeach
                                                 @else
                                                     <div class="summary-item">
-                                                        <div class="summary-item-head">
-                                                            <div>
-                                                                <div class="summary-item-title">Belum ada indikator yang memenuhi target.</div>
-                                                            </div>
-                                                            <span class="badge bg-secondary-subtle text-secondary"
-                                                                  style="border-radius:999px; font-weight:900; padding:8px 12px; white-space:nowrap;">-</span>
-                                                        </div>
-                                                        <div class="summary-item-body">
-                                                            <div class="tx">Belum ada indikator yang memenuhi target.</div>
-                                                        </div>
+                                                        <span class="badge bg-secondary-subtle text-secondary"
+                                                              style="border-radius:999px; font-weight:900; padding:8px 12px;">-</span>
+                                                        <div class="tx">Belum ada indikator yang memenuhi target.</div>
                                                     </div>
                                                 @endif
                                             </div>
 
+                                            {{-- KANAN: PERLU DITINGKATKAN (SAMA KODE ATAS: NAME + CODE, TANPA TEXT REKOM) --}}
                                             <div class="summary-sec">
                                                 <div class="summary-sec-head">
                                                     <div class="summary-sec-title">
@@ -1084,39 +1064,24 @@
                                                 @if(count($summaryRekList))
                                                     @foreach($summaryRekList as $sr)
                                                         <div class="summary-item">
-                                                            <div class="summary-item-head">
-                                                                <div>
-                                                                    <div class="summary-item-title">{{ $sr['name'] ?? '-' }}</div>
-                                                                    @if(!empty($sr['code']))
-                                                                        <div class="summary-item-code">
-                                                                            <i class="ri-hashtag"></i> <span>Kode: {{ $sr['code'] }}</span>
-                                                                        </div>
-                                                                    @endif
-                                                                </div>
+                                                            <span class="badge bg-danger-subtle text-danger"
+                                                                  style="border-radius:999px; font-weight:900; padding:8px 12px;">
+                                                                Rekom Lv {{ (int)($sr['level'] ?? 0) }}
+                                                            </span>
 
-                                                                <span class="badge bg-danger-subtle text-danger"
-                                                                      style="border-radius:999px; font-weight:900; padding:8px 12px; white-space:nowrap;">
-                                                                    Rekom Lv {{ (int)$sr['level'] }}
-                                                                </span>
-                                                            </div>
-
-                                                            <div class="summary-item-body">
-                                                                <div class="tx">{{ $sr['text'] }}</div>
+                                                            <div class="tx">
+                                                                {{ $sr['name'] ?? '-' }}
+                                                                @if(!empty($sr['code']))
+                                                                    <small>Kode: {{ $sr['code'] }}</small>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                     @endforeach
                                                 @else
                                                     <div class="summary-item">
-                                                        <div class="summary-item-head">
-                                                            <div>
-                                                                <div class="summary-item-title">Belum ada rekomendasi yang cocok.</div>
-                                                            </div>
-                                                            <span class="badge bg-secondary-subtle text-secondary"
-                                                                  style="border-radius:999px; font-weight:900; padding:8px 12px; white-space:nowrap;">-</span>
-                                                        </div>
-                                                        <div class="summary-item-body">
-                                                            <div class="tx">Belum ada rekomendasi gap yang cocok dengan target level Anda.</div>
-                                                        </div>
+                                                        <span class="badge bg-secondary-subtle text-secondary"
+                                                              style="border-radius:999px; font-weight:900; padding:8px 12px;">-</span>
+                                                        <div class="tx">Belum ada rekomendasi gap yang cocok dengan target level Anda.</div>
                                                     </div>
                                                 @endif
                                             </div>
@@ -1136,7 +1101,7 @@
                             </div>
                         </div>
 
-                        {{-- ✅ CARD DETAIL (PUNYA TOGGLE) --}}
+                        {{-- ✅ CARD DETAIL (TOGGLE) --}}
                         <div class="indikator-card">
                             <div class="head">
                                 <p class="ttl mb-0"><i class="ri-list-check-2"></i> Detail Indikator & Rekomendasi</p>
@@ -1309,6 +1274,7 @@
                         </div>
 
                     </div>
+
                 </div>
             </div>
         @endif
