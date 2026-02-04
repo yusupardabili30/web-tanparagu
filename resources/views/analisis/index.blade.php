@@ -28,28 +28,31 @@
     @endphp
 
     <style>
-
-
-        /* Center tombol "Terapkan Filter" (empty state) */
-        #analisisContent .row .col-12.d-flex .text-center .btn{
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        margin-left: auto !important;
-        margin-right: auto !important;
-        }
-
-        /* kalau mau bener-bener center 100% walau ada style lain */
-        #analisisContent .row .col-12.d-flex .text-center{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        }
         /* =====================================================
-            ANALISIS LAYOUT STYLES - FULL CSS
-        ===================================================== */
+       ANALISIS LAYOUT STYLES - CLEAN + RESPONSIVE (MOBILE SAFE)
+       (Tidak ubah desain desktop, fokus rapihin + mobile)
+       ===================================================== */
 
-        /* Base Container & Global Styles */
+        /* =========================
+       EMPTY STATE BUTTON CENTER
+    ========================= */
+        #analisisContent .row .col-12.d-flex .text-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #analisisContent .row .col-12.d-flex .text-center .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
+        /* =========================
+       BASE WRAP + HEADER
+    ========================= */
         .analisis-wrap {
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             border-radius: 20px;
@@ -61,7 +64,7 @@
         }
 
         .analisis-wrap::before {
-            content: '';
+            content: "";
             position: absolute;
             top: 0;
             right: 0;
@@ -72,65 +75,64 @@
             z-index: 0;
         }
 
-/* =========================
-   OVERRIDE: HEADER BADUY + TEKS PUTIH
-   (taruh PALING BAWAH biar menang)
-========================= */
-.analisis-head{
-  position: relative;
-  border-radius: 18px;
-  overflow: hidden;
-  padding: 18px 18px;      /* tipis */
-  min-height: 92px;
-  background: #1a4d8e;     /* base biru */
-  border-bottom: 1px solid rgba(255,255,255,.14);
-  color: #fff !important;
-  box-shadow: 0 8px 25px rgba(26, 91, 184, 0.20);
-}
+        .analisis-wrap>* {
+            position: relative;
+            z-index: 1;
+        }
 
-/* motif baduy repeat */
-.analisis-head::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background-image: url("{{ asset('build/images/baduy.jpg') }}");
-  background-repeat: repeat;
-  background-size: 140px auto;
-  background-position: center;
-  opacity: .55;
-  filter: grayscale(100%) contrast(1.15);
-  z-index: 0;
-}
+        .analisis-head {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            padding: 18px 18px;
+            min-height: 92px;
+            background: #1a4d8e;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+            color: #fff !important;
+            box-shadow: 0 8px 25px rgba(26, 91, 184, 0.2);
+        }
 
-/* overlay solid biru biar teks kebaca */
-.analisis-head::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: rgba(26,91,184,.50);
-  z-index: 1;
-  pointer-events: none;
-}
+        .analisis-head::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("{{ asset('build/images/baduy.jpg') }}");
+            background-repeat: repeat;
+            background-size: 140px auto;
+            background-position: center;
+            opacity: 0.55;
+            filter: grayscale(100%) contrast(1.15);
+            z-index: 0;
+        }
 
-.analisis-head h5{
-  font-weight: 800 !important;
-  text-shadow: 0 2px 12px rgba(0,0,0,.35);
-    color: #fff !important;
-}
+        .analisis-head::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(26, 91, 184, 0.5);
+            z-index: 1;
+            pointer-events: none;
+        }
 
-/* kalau ada class bootstrap text-muted di header */
-.analisis-head .text-muted{
-  color: rgba(255,255,255,.90) !important;
-}
+        .analisis-head h5,
+        .analisis-head .meta {
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+        }
 
-.analisis-head h5,
-.analisis-head .meta{
-  position: relative;
-  z-index: 2;
-  text-shadow: 0 2px 12px rgba(0,0,0,.35);
-}
+        .analisis-head h5 {
+            font-weight: 800 !important;
+            color: #fff !important;
+        }
 
-        /* Filter Section */
+        .analisis-head .text-muted {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        /* =========================
+       FILTER SECTION
+    ========================= */
         .analisis-filter {
             background: white;
             border-radius: 16px;
@@ -146,24 +148,13 @@
             flex-wrap: wrap;
             gap: 20px;
             margin-bottom: 15px;
+            justify-content: center;
+            /* tetap center */
         }
 
         .filter-col {
             flex: 1 1 calc(25% - 20px);
             min-width: 250px;
-        }
-
-        @media (max-width: 1200px) {
-            .filter-col {
-                flex: 1 1 calc(33.333% - 20px);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .filter-col {
-                flex: 1 1 100%;
-                min-width: 100%;
-            }
         }
 
         .filter-col label {
@@ -189,501 +180,14 @@
             box-shadow: 0 0 0 3px rgba(26, 91, 184, 0.1);
         }
 
-        .filter-col .d-flex.gap-2.align-items-end {
+        /* Kolom tombol */
+        .filter-col.d-flex.gap-2.align-items-end {
             align-self: flex-end;
         }
 
-        /* Stat Cards */
-        .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            height: 100%;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background: linear-gradient(to bottom, #1a5bb8, #2d6bc8);
-            border-radius: 16px 0 0 16px;
-        }
-
-        .stat-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .stat-icon i {
-            font-size: 1.5rem;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #1a2937;
-            line-height: 1;
-            margin-bottom: 5px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #64748b;
-            margin-top: 0;
-            font-weight: 500;
-        }
-
-        .stat-label small {
-            font-size: 0.8rem;
-            color: #94a3b8;
-        }
-
-        /* =====================================================
-                                                               CHART FIXES - ADD THESE TO YOUR EXISTING CSS
-                                                            ===================================================== */
-
-        /* Fix untuk chart container */
-        .chart-container {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-            position: relative;
-            overflow: hidden;
-            min-height: 380px;
-            display: flex;
-            flex-direction: column;
-            height: 420px;
-            /* Tambahkan fixed height */
-        }
-
-        .chart-container-large {
-            min-height: 450px;
-            height: 500px;
-            /* Tambahkan fixed height */
-        }
-
-        /* Fix untuk chart wrapper di dalam chart-card */
-        .chart-card {
-            background: white;
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-            height: 380px;
-            /* Fixed height */
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chart-wrapper {
-            flex: 1;
-            position: relative;
-            min-height: 250px;
-            height: 250px;
-            /* Fixed height */
-        }
-
-        /* Fix untuk canvas elements */
-        canvas {
-            max-width: 100% !important;
-            height: 100% !important;
-            display: block;
-        }
-
-        //* =====================================================
-        JENJANG CHARTS SCROLL CONTAINER=====================================================*/ .jenjang-charts-scroll-container {
-            position: relative;
-            width: 100%;
-        }
-
-        /* Alternatif: Grid layout yang lebih baik */
-        #jenjangChartsContainer {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            max-height: 600px;
-            overflow-y: auto;
-            padding: 10px;
-            margin: 0;
-        }
-
-        #jenjangChartsContainer .col-md-6,
-        #jenjangChartsContainer .col-lg-4 {
-            grid-column: auto;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Atau gunakan flexbox sebagai alternatif */
-        #jenjangChartsContainer.flex-version {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            max-height: 600px;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        #jenjangChartsContainer.flex-version>div {
-            flex: 0 0 calc(33.333% - 20px);
-            min-width: 350px;
-        }
-
-        @media (max-width: 1200px) {
-            #jenjangChartsContainer.flex-version>div {
-                flex: 0 0 calc(50% - 20px);
-            }
-        }
-
-        @media (max-width: 768px) {
-            #jenjangChartsContainer.flex-version>div {
-                flex: 0 0 100%;
-            }
-        }
-
-        /* Smooth scrolling */
-        #jenjangChartsContainer {
-            scroll-behavior: smooth;
-        }
-
-        /* Shadow untuk indikasi scroll */
-        .jenjang-charts-scroll-container::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        /* Tambahkan clear untuk row */
-        .row::after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-
-        /* Fix untuk responsive grid */
-        @media (max-width: 768px) {
-            .chart-container {
-                height: 350px;
-            }
-
-            .chart-container-large {
-                height: 400px;
-            }
-
-            .chart-card {
-                height: 320px;
-            }
-
-            #jenjangChartsContainer .col-md-6,
-            #jenjangChartsContainer .col-lg-4 {
-                height: 320px;
-            }
-        }
-
-        /* Prevent chart overlapping with force display block */
-        .chartjs-render-monitor {
-            display: block !important;
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        /* Ensure charts have their own stacking context */
-        .chart-container,
-        .chart-card {
-            isolation: isolate;
-        }
-
-        /* Tambahkan margin bottom untuk spacing yang lebih baik */
-        .row {
-            margin-bottom: 25px;
-        }
-
-        .row:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Table Cards */
-        .table-card {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .table-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(to right, #1a5bb8, #3b82f6);
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .table-responsive::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .table-responsive::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 4px;
-        }
-
-        .table-responsive::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .table-responsive::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .analisis-table {
-            width: 100%;
-            margin-bottom: 0;
-        }
-
-        .analisis-table th {
-            background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
-            color: #1f2937;
-            font-weight: 700;
-            padding: 15px 20px;
-            border-bottom: 2px solid #e2e8f0;
-            white-space: nowrap;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .analisis-table td {
-            padding: 15px 20px;
-            vertical-align: middle;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 0.95rem;
-        }
-
-        .analisis-table tbody tr:hover {
-            background-color: #f8fafc;
-        }
-
-        .analisis-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .modus-table {
-            font-size: 0.9rem;
-        }
-
-        .modus-table th {
-            background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
-            color: #334155;
-            font-weight: 700;
-            padding: 12px 15px;
-            text-align: left;
-        }
-
-        .modus-table td {
-            padding: 12px 15px;
-            vertical-align: middle;
-        }
-
-        .modus-table tbody tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-
-/* FIX BADGE LEVEL BIAR GA TURUN BARIS & GA KOTAK ANEH */
-.badge-level{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;        /* jangan turun baris */
-  max-width: 220px;           /* atur sesuai kebutuhan */
-  overflow: hidden;
-  text-overflow: ellipsis;    /* jadi "..." kalau kepanjangan */
-  padding: 8px 14px;
-  border-radius: 12px;
-  line-height: 1;
-  font-weight: 800;
-}
-/* PAKSA: TD yang punya .badge-level jadi flex center */
-.modus-table td:has(.badge-level){
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* (opsional) biar tinggi badge nggak ngubah row */
-.modus-table td:has(.badge-level) .badge-level{
-  margin: 0;
-}
-
-.chart-title{
-  font-size: 20px !important;
-  font-weight: 800 !important;
-  line-height: 1.2;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;              /* biar small turun rapi */
-  gap: 8px;
-
-  margin-bottom: 18px !important; /* ✅ space ke bawah */
-
-}
-
-/* icon judul */
-.chart-title i{
-  font-size: 22px !important;     
-}
-
-/* teks kecil (keterangan) */
-.chart-title small{
-  font-size: 14px !important;
-  font-weight: 600;
-  color: rgba(22, 63, 116, .65) !important; /* ✅ warna soft */
-  opacity: 1 !important;                    /* biar gak ketimpa */
-}
-
-        /* Progress Bars */
-        .progress {
-            background-color: #e2e8f0;
-            border-radius: 10px;
-            height: 10px;
-            overflow: hidden;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .progress-bar {
-            border-radius: 10px;
-            background: linear-gradient(to right, #10b981, #34d399);
-            transition: width 0.6s ease;
-            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-        }
-
-        .progress-bar.bg-warning {
-            background: linear-gradient(to right, #f59e0b, #fbbf24);
-        }
-
-        .progress-bar.bg-danger {
-            background: linear-gradient(to right, #ef4444, #f87171);
-        }
-
-        .progress-bar.bg-success {
-            background: linear-gradient(to right, #10b981, #34d399);
-        }
-
-        /* Empty State */
-        .empty-state {
-            background: white;
-            border-radius: 16px;
-            padding: 80px 20px;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .empty-state::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(135deg, rgba(26, 91, 184, 0.05) 0%, rgba(26, 91, 184, 0) 70%);
-            border-radius: 50%;
-        }
-
-        .empty-state i {
-            font-size: 5rem;
-            color: #cbd5e1;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .empty-state p {
-            font-size: 1.1rem;
-            color: #64748b;
-            margin-bottom: 25px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .empty-state .btn {
-            position: relative;
-            z-index: 1;
-            padding: 12px 30px;
-            border-radius: 10px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(26, 91, 184, 0.2);
-        }
-
-        /* Loading Spinner */
-        #loadingSpinner {
-            background: white;
-            border-radius: 16px;
-            padding: 60px 20px;
-            margin: 20px 0;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-        }
-
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-            border-width: 0.25em;
-        }
-
-        /* Error Alert */
-        #errorAlert {
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, #fee2e2, #fecaca);
-            color: #7f1d1d;
-            padding: 20px;
-            margin: 20px 0;
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.1);
-            border-left: 5px solid #ef4444;
+        .filter-col .d-flex.gap-2.w-100 {
+            flex-wrap: nowrap;
+            /* desktop tetap rapih */
         }
 
         /* Buttons */
@@ -725,28 +229,408 @@
             background-color: #f8fafc;
         }
 
-        /* Badge Colors */
-        .badge.bg-info {
-            background: linear-gradient(135deg, #0ea5e9, #3b82f6) !important;
-            border: none;
+        /* =========================
+       STAT CARDS
+    ========================= */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
         }
 
-        .badge.bg-primary {
-            background: linear-gradient(135deg, #1a5bb8, #2d6bc8) !important;
-            border: none;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .badge.bg-secondary {
-            background: linear-gradient(135deg, #64748b, #94a3b8) !important;
-            border: none;
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #1a5bb8, #2d6bc8);
+            border-radius: 16px 0 0 16px;
         }
 
-        .badge.bg-warning {
-            background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
-            border: none;
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Responsive Grid Adjustments */
+        .stat-icon i {
+            font-size: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a2937;
+            line-height: 1;
+            margin-bottom: 5px;
+            font-family: "Inter", sans-serif;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 0;
+            font-weight: 500;
+        }
+
+        .stat-label small {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        /* =========================
+       CHART CONTAINER (SAFE)
+    ========================= */
+        .chart-container {
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            height: 460px;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+            /* biar label x-axis ga kepotong */
+        }
+
+        .chart-container-large {
+            height: 560px;
+        }
+
+        .chart-title {
+            flex: 0 0 auto;
+            margin-bottom: 18px;
+        }
+
+        .chart-canvas-wrap {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 6px 30px;
+        }
+
+        .chart-canvas-wrap.is-doughnut {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        /* canvas behavior */
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        /* canvas,
+    .chartjs-render-monitor {
+      width: auto !important;
+      height: auto !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+    } */
+
+        /* =========================
+       JENJANG CHART LIST (SCROLL)
+    ========================= */
+        .jenjang-charts-scroll-container {
+            position: relative;
+            width: 100%;
+        }
+
+        #jenjangChartsContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+            margin: 0;
+            scroll-behavior: smooth;
+        }
+
+        #jenjangChartsContainer .col-md-6,
+        #jenjangChartsContainer .col-lg-4 {
+            grid-column: auto;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .jenjang-charts-scroll-container::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* =========================
+       TABLE CARD + TABLE
+    ========================= */
+        .table-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .table-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, #1a5bb8, #3b82f6);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Table styling */
+        .modus-table {
+            font-size: 0.9rem;
+        }
+
+        .modus-table th {
+            background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+            color: #334155;
+            font-weight: 700;
+            padding: 12px 15px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .modus-table td {
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+
+        /* Badge level fix */
+        .badge-level {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 8px 14px;
+            border-radius: 12px;
+            line-height: 1;
+            font-weight: 800;
+        }
+
+        /* Progress Bars */
+        .progress {
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+            transition: width 0.6s ease;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+
+        .progress-bar.bg-warning {
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.25);
+        }
+
+        .progress-bar.bg-danger {
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        }
+
+        /* =========================
+       EMPTY STATE + LOADING + ERROR
+    ========================= */
+        .empty-state {
+            background: white;
+            border-radius: 16px;
+            padding: 80px 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .empty-state::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(26, 91, 184, 0.05) 0%, rgba(26, 91, 184, 0) 70%);
+            border-radius: 50%;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .empty-state .btn {
+            position: relative;
+            z-index: 1;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(26, 91, 184, 0.2);
+        }
+
+        #loadingSpinner {
+            background: white;
+            border-radius: 16px;
+            padding: 60px 20px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.25em;
+        }
+
+        #errorAlert {
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #7f1d1d;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.1);
+            border-left: 5px solid #ef4444;
+        }
+
+        /* =========================
+       TABS (MOBILE SCROLL)
+    ========================= */
+        .nav-tabs {
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs .nav-link {
+            border: 2px solid transparent;
+            border-radius: 10px 10px 0 0;
+            padding: 12px 24px;
+            font-weight: 600;
+            color: #64748b;
+            background-color: #f8fafc;
+            margin-right: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: #e2e8f0;
+            background-color: white;
+            color: #1a5bb8;
+        }
+
+        .nav-tabs .nav-link.active {
+            border-color: #1a5bb8;
+            border-bottom-color: white;
+            background-color: white;
+            color: #1a5bb8;
+            box-shadow: 0 -2px 10px rgba(26, 91, 184, 0.1);
+        }
+
+        .nav-tabs .nav-link.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: white;
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+        }
+
+        /* =========================
+       RESPONSIVE BREAKPOINTS
+    ========================= */
+
+        /* <= 1200px: kolom filter 3 */
+        @media (max-width: 1200px) {
+            .filter-col {
+                flex: 1 1 calc(33.333% - 20px);
+            }
+        }
+
+        /* <= 992px: tombol mulai aman, chart lebih pendek */
+        @media (max-width: 992px) {
+            .chart-container {
+                height: 430px;
+            }
+
+            .chart-container-large {
+                height: 520px;
+            }
+        }
+
+        /* <= 768px: MOBILE MAIN */
         @media (max-width: 768px) {
             .analisis-wrap {
                 padding: 15px;
@@ -755,30 +639,66 @@
             }
 
             .analisis-head {
-                padding: 20px;
+                padding: 16px;
                 border-radius: 15px;
                 margin-bottom: 20px;
             }
 
             .analisis-head h5 {
-                font-size: 1.3rem;
+                font-size: 1.15rem;
             }
 
             .analisis-filter {
                 padding: 15px;
             }
 
+            .filter-col {
+                flex: 1 1 100%;
+                min-width: 100%;
+            }
+
+            /* tombol jadi wrap (biar export ga kepotong) */
+            .filter-col .d-flex.gap-2.w-100 {
+                flex-wrap: wrap;
+            }
+
+            /* Filter / Reset / Export mobile: rapi */
+            #btnFilter {
+                flex: 1 1 calc(60% - 8px);
+                min-width: 180px;
+            }
+
+            #btnReset {
+                flex: 0 0 46px;
+            }
+
+            /* Export tombol full width di bawah */
+            #btnExportLengkap,
+            #btnExportRekomendasi {
+                flex: 1 1 100%;
+                width: 100%;
+            }
+
+            /* Chart area */
             .chart-container {
+                height: 420px;
                 padding: 20px;
-                min-height: 350px;
             }
 
             .chart-container-large {
-                min-height: 400px;
+                height: 520px;
+            }
+
+            .chart-canvas-wrap.is-doughnut {
+                max-width: 360px;
+            }
+
+            .chart-canvas-wrap {
+                padding-bottom: 34px;
             }
 
             .table-card {
-                padding: 20px;
+                padding: 18px;
             }
 
             .stat-card {
@@ -789,47 +709,31 @@
                 font-size: 1.75rem;
             }
 
-            .chart-title {
-                font-size: 1rem;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
+            /* Tabs bisa geser */
+            .nav-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                gap: 6px;
+                padding-bottom: 6px;
             }
 
-            .chart-title small.text-muted {
-                margin-left: 0;
+            .nav-tabs .nav-link {
+                flex: 0 0 auto;
             }
 
-            .empty-state {
-                padding: 60px 15px;
-            }
-
-            .empty-state i {
-                font-size: 4rem;
+            /* Jenjang grid jadi 1 kolom biar ga mepet */
+            #jenjangChartsContainer {
+                grid-template-columns: 1fr;
+                max-height: 560px;
             }
         }
 
+        /* <= 576px: HP kecil */
         @media (max-width: 576px) {
             .analisis-head {
-                padding: 15px;
-            }
-
-            .chart-container {
-                padding: 15px;
-                min-height: 320px;
-            }
-
-            .stat-icon {
-                width: 48px;
-                height: 48px;
-            }
-
-            .stat-icon i {
-                font-size: 1.25rem;
-            }
-
-            .stat-number {
-                font-size: 1.5rem;
+                padding: 14px;
             }
 
             .filter-col .form-select,
@@ -839,74 +743,108 @@
                 height: 42px;
             }
 
-            .btn-primary,
+            .btn-primary {
+                padding: 10px 16px;
+                font-size: 0.95rem;
+            }
+
             .btn-outline-secondary {
-                padding: 10px 20px;
-                font-size: 0.9rem;
+                height: 42px;
+                width: 42px;
+            }
+
+            .chart-container {
+                height: 400px;
+                padding: 15px;
+            }
+
+            .chart-container-large {
+                height: 500px;
+            }
+
+            .chart-canvas-wrap.is-doughnut {
+                max-width: 320px;
+            }
+
+            .chart-canvas-wrap {
+                padding-bottom: 36px;
+            }
+
+            .empty-state {
+                padding: 60px 15px;
+            }
+
+            .empty-state i {
+                font-size: 4rem;
+            }
+
+            /* Table padding lebih rapat (tetap bisa scroll) */
+            .modus-table th,
+            .modus-table td {
+                padding: 10px 12px;
+                font-size: 0.85rem;
             }
         }
 
-        /* Animation for charts loading */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
+        /* =========================
+       TABLE HORIZONTAL SCROLL (MOBILE FRIENDLY)
+       ========================= */
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* pastikan wrapper bisa geser ke samping */
+        .table-responsive {
+            overflow-x: auto !important;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .chart-container,
-        .table-card,
-        .stat-card {
-            animation: fadeInUp 0.5s ease-out;
+        /* paksa tabelnya punya lebar minimum biar muncul scroll */
+        .table-responsive .table {
+            min-width: 980px;
+            /* bisa kamu naikin kalau kolom banyak */
+            width: max-content;
         }
 
-        /* Custom scrollbar for better UX */
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
+        /* biar teks di sel gak turun ke bawah (nggak bikin tabel "tinggi") */
+        .table-responsive .table th,
+        .table-responsive .table td {
+            white-space: nowrap;
         }
 
-        ::-webkit-scrollbar-track {
+        /* opsi: bikin scrollbar lebih enak dilihat */
+        .table-responsive::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
             background: #f1f5f9;
-            border-radius: 5px;
+            border-radius: 6px;
         }
 
-        ::-webkit-scrollbar-thumb {
+        .table-responsive::-webkit-scrollbar-thumb {
             background: #cbd5e1;
-            border-radius: 5px;
+            border-radius: 6px;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
+        .table-responsive::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
 
-        /* Chart.js specific adjustments */
-        canvas {
-            max-width: 100% !important;
-            height: auto !important;
+        /* kalau di HP, bikin min-width sedikit lebih besar biar kolom kebaca */
+        @media (max-width: 768px) {
+            .table-responsive .table {
+                min-width: 1100px;
+            }
         }
 
-        /* Ensure charts don't overflow */
-        .chartjs-render-monitor {
-            width: 100% !important;
-            height: 100% !important;
+        @media (max-width: 576px) {
+            .table-responsive .table {
+                min-width: 1200px;
+            }
         }
 
-        /* Row spacing */
-        .row {
-            margin-bottom: 15px;
-        }
-
-        .row>div {
-            margin-bottom: 15px;
-        }
-
-        /* Print styles */
+        /* =========================
+       PRINT (tetap)
+    ========================= */
         @media print {
             .analisis-wrap {
                 box-shadow: none;
@@ -929,153 +867,223 @@
             }
         }
 
-        /* Tooltip customization */
-        .tooltip {
-            font-size: 0.85rem;
-        }
-
-        /* Ensure proper z-index stacking */
-        .analisis-wrap>* {
-            position: relative;
-            z-index: 1;
-        }
-
-
-
-        /* Alternatif CSS yang lebih minimalis */
-        .row .col-12.d-flex {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            margin: 30px 0;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-        }
-
-        .row .col-12.d-flex .text-center {
-            padding: 40px;
-        }
-
-
-        /* Tambahkan di bagian CSS */
-        .chart-card .badge.bg-primary {
-            background: linear-gradient(135deg, #1a5bb8, #2d6bc8) !important;
-            border: none;
-            box-shadow: 0 2px 5px rgba(26, 91, 184, 0.2);
-        }
-
-        .chart-card {
-            position: relative;
-        }
-
-        /* Responsive adjustments */
+        /* =========================
+       STAT CARDS: MOBILE 2x2
+    ========================= */
         @media (max-width: 768px) {
-            .chart-card {
-                height: 350px;
+
+            /* bikin 2 kolom */
+            #analisisContent .row>.col-md-3 {
+                flex: 0 0 50%;
+                max-width: 50%;
             }
 
-            .chart-card .badge.bg-primary {
-                font-size: 10px;
-                padding: 3px 6px;
+            /* rapihin jarak biar ga kegedean */
+            #analisisContent .stat-card {
+                padding: 16px;
+                margin-bottom: 12px;
+                border-radius: 14px;
+            }
+
+            #analisisContent .stat-number {
+                font-size: 1.5rem;
+            }
+
+            #analisisContent .stat-label {
+                font-size: 0.85rem;
+                line-height: 1.2;
+            }
+
+            #analisisContent .stat-icon {
+                width: 46px;
+                height: 46px;
+                border-radius: 12px;
+                margin-bottom: 10px;
             }
         }
 
+        /* =========================
+       TOP 4 CHART: LEGEND RAPIH DI DALAM CARD
+    ========================= */
+        @media (max-width: 768px) {
 
+            /* kasih ruang bawah buat legend biar ga mentok */
+            #analisisContent>.row:nth-of-type(2) .chart-container,
+            #analisisContent>.row:nth-of-type(3) .chart-container {
+                height: 310px !important;
+            }
 
-        /* Tab Styles */
-        .nav-tabs {
-            border-bottom: 2px solid #e2e8f0;
-            margin-bottom: 20px;
+            /* area doughnut jangan kegedean, biar legend muat */
+            #analisisContent>.row:nth-of-type(2) .chart-canvas-wrap.is-doughnut,
+            #analisisContent>.row:nth-of-type(3) .chart-canvas-wrap.is-doughnut {
+                max-width: 170px !important;
+            }
         }
 
-        .nav-tabs .nav-link {
-            border: 2px solid transparent;
-            border-radius: 10px 10px 0 0;
-            padding: 12px 24px;
-            font-weight: 600;
-            color: #64748b;
-            background-color: #f8fafc;
-            margin-right: 5px;
-            transition: all 0.3s ease;
+        /* HP kecil banget (opsional): tetap 2 kolom tapi lebih rapat */
+        @media (max-width: 420px) {
+            #analisisContent .stat-card {
+                padding: 14px;
+            }
+
+            #analisisContent .stat-number {
+                font-size: 1.35rem;
+            }
+
+            #analisisContent .stat-icon {
+                width: 42px;
+                height: 42px;
+            }
+        }
+
+        /* =========================
+       FORCE CHART 2-UP ON MOBILE
+    ========================= */
+        @media (max-width: 768px) {
+
+            /* paksa row jadi 2 kolom rapet */
+            #analisisContent .row {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                margin-left: -6px !important;
+                margin-right: -6px !important;
+            }
+
+            /* semua col-md-6 jadi 1/2 lebar */
+            #analisisContent .row>.col-md-6 {
+                flex: 0 0 50% !important;
+                max-width: 50% !important;
+                padding-left: 6px !important;
+                padding-right: 6px !important;
+            }
+
+            /* kecilin card chart biar muat 2 sebelahan */
+            #analisisContent .chart-container {
+                height: 260px !important;
+                padding: 12px !important;
+                margin-bottom: 12px !important;
+                border-radius: 14px !important;
+            }
+
+            /* judul lebih kecil */
+            #analisisContent .chart-title {
+                font-size: 0.85rem !important;
+                margin-bottom: 8px !important;
+                line-height: 1.15 !important;
+            }
+
+            /* doughnut area lebih kecil */
+            #analisisContent .chart-canvas-wrap.is-doughnut {
+                max-width: 180px !important;
+            }
+
+            /* canvas jangan maksa tinggi berlebihan */
+            #analisisContent .chart-container canvas {
+                height: 100% !important;
+            }
+        }
+
+        /* =========================
+       HARD FIX: JENJANG CANVAS HEIGHT
+       (khusus chart per jenjang)
+    ========================= */
+        #jenjangChartsContainer .chart-card {
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #jenjangChartsContainer .chart-card canvas {
+            flex: 1 1 auto;
+            height: 260px !important;
+            /* INI KUNCI: bikin chart kebaca */
+            max-height: 260px !important;
+            width: 100% !important;
+        }
+
+        /* mobile */
+        @media (max-width: 768px) {
+            #jenjangChartsContainer .chart-card canvas {
+                height: 240px !important;
+                max-height: 240px !important;
+            }
+        }
+
+        /* =========================
+       HARD OVERRIDE: JENJANG CHART JANGAN IKUT 2-UP MOBILE
+       (TARUH PALING BAWAH CSS)
+    ========================= */
+        @media (max-width: 768px) {
+
+            /* balikin row jenjang ke normal */
+            #analisisContent #jenjangChartsContainer.row {
+                display: block !important;
+                /* matiin flex 2-up */
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+
+            /* ini yang penting: lawan rule #analisisContent .row > .col-md-6 { 50% !important } */
+            #analisisContent #jenjangChartsContainer>.col-md-6,
+            #analisisContent #jenjangChartsContainer>.col-lg-4 {
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+
+            /* bikin card nya gede + rapi */
+            #analisisContent #jenjangChartsContainer .chart-card {
+                background: #fff;
+                border-radius: 16px;
+                padding: 14px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, .06);
+                height: 360px !important;
+                /* gedein */
+            }
+
+            /* wrapper wajib punya tinggi biar chart ga gepeng */
+            #analisisContent #jenjangChartsContainer .chart-wrapper {
+                position: relative;
+                height: 280px !important;
+                /* gedein chart */
+            }
+
+            /* ini ngelawan rule canvas auto yang bikin shrink */
+            #analisisContent #jenjangChartsContainer canvas {
+                position: absolute;
+                inset: 0;
+                width: 100% !important;
+                height: 100% !important;
+                max-width: none !important;
+                max-height: none !important;
+                display: block !important;
+            }
+        }
+
+        /* Judul aman, legend ga nabrak */
+        #jenjangChartsContainer .chart-card h6 {
+            margin-bottom: 8px !important;
+        }
+
+        #jenjangChartsContainer .chart-card .chart-wrapper {
             position: relative;
+            height: 260px;
+            /* sesuaikan sama kebutuhan */
+            padding-top: 18px;
+            /* INI kunci: ruang buat legend */
         }
 
-        .nav-tabs .nav-link:hover {
-            border-color: #e2e8f0;
-            background-color: white;
-            color: #1a5bb8;
+        #jenjangChartsContainer .chart-card .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
         }
 
-        .nav-tabs .nav-link.active {
-            border-color: #1a5bb8;
-            border-bottom-color: white;
-            background-color: white;
-            color: #1a5bb8;
-            box-shadow: 0 -2px 10px rgba(26, 91, 184, 0.1);
+        #jenjangChartsContainer .chart-wrapper {
+            padding-top: 26px;
+            /* ruang buat legend di atas */
         }
-
-        .nav-tabs .nav-link.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: white;
-        }
-
-        /* Tab Content */
-        .tab-content {
-            background: white;
-            border-radius: 0 0 12px 12px;
-            padding: 20px;
-            border: 1px solid #e2e8f0;
-            border-top: none;
-        }
-
-        .tab-pane {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Badge in tabs */
-        .nav-tabs .badge {
-            font-size: 0.7rem;
-            padding: 2px 6px;
-        }
-        /* === Center tombol Filter/Reset/Export === */
-.filter-row{
-  justify-content: center;           /* center semua kolom di row */
-}
-
-.filter-col.actions{
-  flex: 0 0 100%;                    /* bikin baris tombol full row */
-  display: flex;
-  justify-content: center;           /* center tombol */
-}
-
-.filter-col.actions .actions-inner{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-}
-
-/* optional: samain tinggi tombol */
-.filter-col.actions .btn{
-  height: 46px;
-}
     </style>
 
     <div class="container-fluid">
@@ -1279,7 +1287,10 @@
                                     <i class="ri-pie-chart-line"></i> Distribusi Jenjang Jabatan
                                     <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
                                 </div>
-                                <canvas id="jenjangDistributionChart" height="300"></canvas>
+
+                                <div class="chart-canvas-wrap is-doughnut">
+                                    <canvas id="jenjangDistributionChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1301,7 +1312,7 @@
                         <div class="col-md-6">
                             <div class="chart-container">
                                 <div class="chart-title">
-                                    <i class="ri-user-line"></i> Distribusi Jenis Kelamin
+                                    <i class="ri-user-line"></i> Distribusi Jenis Kelamin <br>
                                     <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
                                 </div>
                                 <canvas id="jenisKelaminChart" height="300"></canvas>
@@ -1511,7 +1522,8 @@
                                                                     <th>Sub Indikator</th>
                                                                     <th width="8%" class="text-center">Level Dicapai
                                                                     </th>
-                                                                    <th width="8%" class="text-center">Level kebutuhan Belajar</th>
+                                                                    <th width="8%" class="text-center">Level kebutuhan
+                                                                        Belajar</th>
                                                                     <th width="6%" class="text-center">Gap</th>
                                                                     <th>Rekomendasi Kebutuhan Belajar</th>
                                                                     <th width="10%" class="text-center">Jumlah PTK</th>
@@ -1648,7 +1660,8 @@
                                                 @else
                                                     <div class="alert alert-success text-center py-4">
                                                         <i class="ri-checkbox-circle-fill fs-4 text-success"></i>
-                                                        <h5 class="mt-2 mb-0">Semua PTK sudah mencapai level kebutuhan belajar!</h5>
+                                                        <h5 class="mt-2 mb-0">Semua PTK sudah mencapai level kebutuhan
+                                                            belajar!</h5>
                                                         <p class="text-muted mb-0">Tidak ada gap untuk jenjang
                                                             {{ $jenjang['jenjang_jabatan'] }}</p>
                                                     </div>
@@ -1740,8 +1753,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         /* =====================================================
-                                                                                                                                                               GLOBAL CHART INSTANCE
-                                                                                                                                                            ===================================================== */
+                                                                                                                                                                   GLOBAL CHART INSTANCE
+                                                                                                                                                                ===================================================== */
         let levelDistributionChart = null;
         let jenjangDistributionChart = null;
         let jenjangPendidikanChart = null;
@@ -1963,13 +1976,13 @@
                             modusRows += `
                     <tr>
                         ${subIndex === 0 ? `
-                                                                                                                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; font-weight: 600;">
-                                                                                                                                                                                            ${kota.nama_kota}
-                                                                                                                                                                                        </td>
-                                                                                                                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; text-align: center;">
-                                                                                                                                                                                            ${kota.total_jawaban}
-                                                                                                                                                                                        </td>
-                                                                                                                                                                                    ` : ''}
+                                                                                                                                                                                            <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; font-weight: 600;">
+                                                                                                                                                                                                ${kota.nama_kota}
+                                                                                                                                                                                            </td>
+                                                                                                                                                                                            <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; text-align: center;">
+                                                                                                                                                                                                ${kota.total_jawaban}
+                                                                                                                                                                                            </td>
+                                                                                                                                                                                        ` : ''}
                         <td>
                             <small class="text-muted">${sub.sub_indikator_code}</small><br>
                             <span class="fw-medium">${sub.sub_indikator_name ? sub.sub_indikator_name.substring(0, 40) + (sub.sub_indikator_name.length > 40 ? '...' : '') : '-'}</span>
@@ -2137,13 +2150,13 @@
                                     <td class="text-center">${counter++}</td>
                                     <td>
                                         ${gapIndex === 0 ? `
-                                                                                                                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                                                                                                                        <span class="fw-medium">${rek.sub_indikator_name ?
-                                                                                                                                                                                            (rek.sub_indikator_name.length > 40 ?
-                                                                                                                                                                                                rek.sub_indikator_name.substring(0, 40) + '...' :
-                                                                                                                                                                                                rek.sub_indikator_name
-                                                                                                                                                                                            ) : '-'}</span>
-                                                                                                                                                                                    ` : ''}
+                                                                                                                                                                                            <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                                                                                                                            <span class="fw-medium">${rek.sub_indikator_name ?
+                                                                                                                                                                                                (rek.sub_indikator_name.length > 40 ?
+                                                                                                                                                                                                    rek.sub_indikator_name.substring(0, 40) + '...' :
+                                                                                                                                                                                                    rek.sub_indikator_name
+                                                                                                                                                                                                ) : '-'}</span>
+                                                                                                                                                                                        ` : ''}
                                     </td>
                                     <td class="text-center">
                                         <span class="badge-level" style="background-color: ${getLevelColor(gap.level_dicapai)}; color: white;">
@@ -2575,11 +2588,26 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        radius: '70%',
+                        cutout: '65%',
+                        layout: {
+                            padding: {
+                                bottom: 26
+                            }
+                        },
                         plugins: {
                             legend: {
                                 position: 'bottom',
+                                align: 'center',
                                 labels: {
-                                    padding: 20
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded',
+                                    boxWidth: 10,
+                                    boxHeight: 10,
+                                    padding: 8,
+                                    font: {
+                                        size: 10
+                                    }
                                 }
                             }
                         }
@@ -2597,7 +2625,7 @@
                     }];
 
                 jenjangPendidikanChart = new Chart(jenjangPendidikanCtx, {
-                    type: 'pie',
+                    type: 'doughnut', // ✅ dari pie -> doughnut
                     data: {
                         labels: src.map(x => x.jenjang_pendidikan),
                         datasets: [{
@@ -2610,11 +2638,26 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        radius: '70%',
+                        cutout: '65%',
+                        layout: {
+                            padding: {
+                                bottom: 26
+                            }
+                        },
                         plugins: {
                             legend: {
                                 position: 'bottom',
+                                align: 'center',
                                 labels: {
-                                    padding: 20
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded',
+                                    boxWidth: 10,
+                                    boxHeight: 10,
+                                    padding: 8,
+                                    font: {
+                                        size: 10
+                                    }
                                 }
                             }
                         }
@@ -2644,11 +2687,26 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        radius: '70%',
+                        cutout: '65%',
+                        layout: {
+                            padding: {
+                                bottom: 26
+                            }
+                        },
                         plugins: {
                             legend: {
                                 position: 'bottom',
+                                align: 'center',
                                 labels: {
-                                    padding: 20
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded',
+                                    boxWidth: 10,
+                                    boxHeight: 10,
+                                    padding: 8,
+                                    font: {
+                                        size: 10
+                                    }
                                 }
                             }
                         }
@@ -2672,12 +2730,28 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+
+                            // ✅ kasih ruang buat legend bawah (biar gak niban chart)
+                            layout: {
+                                padding: {
+                                    top: 8,
+                                    bottom: 24
+                                }
+                            },
+
                             plugins: {
                                 legend: {
-                                    position: 'top',
+                                    position: 'bottom', // ✅ ini yang kamu mau: bawah
+                                    align: 'center',
                                     labels: {
-                                        padding: 20,
-                                        usePointStyle: true
+                                        usePointStyle: true,
+                                        pointStyle: 'circle',
+                                        boxWidth: 8,
+                                        boxHeight: 8,
+                                        padding: 8,
+                                        font: {
+                                            size: 10
+                                        }
                                     }
                                 },
                                 tooltip: {
@@ -2692,12 +2766,10 @@
                                     }
                                 }
                             },
+
                             scales: {
                                 x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Sub Indikator'
-                                    },
+                                    stacked: false,
                                     ticks: {
                                         autoSkip: false,
                                         maxRotation: 45,
@@ -2706,10 +2778,6 @@
                                 },
                                 y: {
                                     beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Jumlah PTK'
-                                    },
                                     ticks: {
                                         stepSize: 1
                                     }
@@ -2880,7 +2948,7 @@
                     type: 'bar',
                     data: {
                         labels: jenjangData.labels || [],
-                        datasets: jenjangData.datasets.map(dataset => ({
+                        datasets: (jenjangData.datasets || []).map(dataset => ({
                             label: dataset.label || 'Unknown',
                             data: dataset.data || [],
                             backgroundColor: dataset.backgroundColor || '#17a2b8',
@@ -2891,25 +2959,36 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: false,
+                        layout: {
+                            padding: {
+                                top: 2,
+                                bottom: 4,
+                                left: 6,
+                                right: 6
+                            }
+                        },
                         plugins: {
                             legend: {
                                 display: true,
-                                position: 'top',
+                                position: 'bottom', // ✅ pindah ke bawah biar ga nabrak judul
+                                align: 'center',
                                 labels: {
-                                    padding: 10,
-                                    usePointStyle: true,
                                     font: {
-                                        size: 10
-                                    }
+                                        size: 8
+                                    },
+                                    boxWidth: 8,
+                                    boxHeight: 8,
+                                    padding: 6,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
                                 }
                             },
                             tooltip: {
                                 mode: 'index',
                                 intersect: false,
                                 callbacks: {
-                                    label: function(context) {
-                                        return `${context.dataset.label}: ${context.raw} PTK`;
-                                    }
+                                    label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} PTK`
                                 }
                             }
                         },
@@ -2942,6 +3021,10 @@
                         }
                     }
                 });
+
+                window[canvasId].resize();
+                setTimeout(() => window[canvasId]?.resize(), 50);
+                console.log(`Chart ${canvasId} berhasil dibuat`);
 
                 console.log(`Chart ${canvasId} berhasil dibuat`);
             });
