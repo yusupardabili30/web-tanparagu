@@ -1173,7 +1173,7 @@ class ExportGapController extends Controller
         $gap = $levelTarget - $levelDicapai;
 
         $levelNames = [
-            1 => 'Gagal',
+            1 => 'Dasar',
             2 => 'Penerapan',
             3 => 'Analisis',
             4 => 'Evaluasi',

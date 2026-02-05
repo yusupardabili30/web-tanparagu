@@ -537,7 +537,7 @@ class AnalisisRekomendasiGapController extends Controller
 
         // Jika masih tidak ditemukan, buat rekomendasi generik
         $levelNames = [
-            1 => 'Gagal',
+            1 => 'Dasar',
             2 => 'Penerapan',
             3 => 'Analisis',
             4 => 'Evaluasi',
