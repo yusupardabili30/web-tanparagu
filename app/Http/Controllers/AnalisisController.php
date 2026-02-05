@@ -207,19 +207,7 @@ class AnalisisController extends Controller
         // ===============================s=================
         $statistik = $this->getStatistik($request, $ptkData, $jawabanData);
 
-        // ========================================================
-        // DISTRIBUSI LEVEL (BERDASARKAN JAWABAN) - INCLUDE LEVEL 1
-        // ========================================================
-        $levelDistribution = $jawabanData
-            ->groupBy('level')
-            ->map(function ($items, $level) {
-                return [
-                    'level' => (int)$level,
-                    'count' => $items->count()
-                ];
-            })
-            ->values()
-            ->sortBy('level');
+
 
         // ========================================================
         // DISTRIBUSI BERDASARKAN PTK (BUKAN JAWABAN)
@@ -436,9 +424,19 @@ class AnalisisController extends Controller
 
 
         $ptkBelumMenjawab = $this->getPtkBelumMenjawab($request);
+
+
+        $levelTerendahPerPtk = $this->getLevelTerendahPerPtk($request);
+
+        $levelkotaPerPtk = $this->getLevelkotaPerPtk($request);
+
+
+        $distribusiLevelPerKota = $this->getDistribusiLevelPerKota($request);
         return [
             'statistik' => $statistik,
-            'level_distribution' => $levelDistribution,
+            'level_kota_per_ptk' => $levelkotaPerPtk,
+            'level_terendah_per_ptk' => $levelTerendahPerPtk,
+            'distribusi_level_per_kota' => $distribusiLevelPerKota,
             'jenjang_distribution' => $jenjangDistribution,
             'bentuk_pendidikan_distribution' => $bentukPendidikanDistribution,
             'jenjang_pendidikan_distribution' => $jenjangPendidikanDistribution,
@@ -3831,6 +3829,337 @@ class AnalisisController extends Controller
             return "Perlu meningkatkan dari $levelDicapaiName ke $levelTargetName (naik $gap level)";
         }
     }
+
+
+
+
+
+    /**
+     * Mendapatkan distribusi level terendah per PTK (SEMUA PTK yang menjawab)
+     * Menghitung level TERENDAH dari semua jawaban PTK
+     */
+    private function getLevelTerendahPerPtk(Request $request)
+    {
+        // Query untuk mendapatkan level terendah setiap PTK
+        $query = DB::table('ptk_jawaban')
+            ->select(
+                'ptk_jawaban.ptk_id',
+                'ptk.nama',
+                'pangkat_jabatan.jenjang_jabatan',
+                DB::raw('MIN(ptk_jawaban.level) as level_terendah'),
+                DB::raw('COUNT(DISTINCT ptk_jawaban.sub_indikator_id) as jumlah_sub_indikator')
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+            ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
+            ->groupBy('ptk_jawaban.ptk_id', 'ptk.nama', 'pangkat_jabatan.jenjang_jabatan');
+
+        // Terapkan filter yang sama
+        if ($request->filled('kegiatan_id')) {
+            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+        }
+        if ($request->filled('pangkat_jabatan_id')) {
+            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+        }
+        if ($request->filled('jenis_ptk_id')) {
+            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+        }
+
+        if ($request->filled('jenjang_pendidikan_id')) {
+            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+        }
+        if ($request->filled('bentuk_pendidikan')) {
+            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+        }
+        if ($request->filled('jenis_kelamin')) {
+            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        $data = $query->get();
+
+        // Debug: Tampilkan sample data
+        \Log::info('Data level terendah per PTK:', [
+            'total_ptk' => $data->count(),
+            'sample_data' => $data->take(3)->toArray()
+        ]);
+
+        // Hitung distribusi per level
+        $distribusi = [];
+        $detailPerLevel = []; // Untuk menyimpan detail PTK per level
+
+        for ($level = 1; $level <= 5; $level++) {
+            $distribusi[$level] = 0;
+            $detailPerLevel[$level] = [];
+        }
+
+        foreach ($data as $item) {
+            if ($item->level_terendah >= 1 && $item->level_terendah <= 5) {
+                $distribusi[$item->level_terendah]++;
+
+                // Simpan detail PTK untuk level ini
+                $detailPerLevel[$item->level_terendah][] = [
+                    'nama' => $item->nama,
+                    'jenjang_jabatan' => $item->jenjang_jabatan,
+                    'jumlah_sub_indikator' => $item->jumlah_sub_indikator
+                ];
+            }
+        }
+
+        return [
+            'labels' => ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
+            'data' => array_values($distribusi),
+            'total_ptk' => $data->count(),
+            'detail_per_level' => $detailPerLevel,
+            'interpretasi' => [
+                1 => 'PTK memiliki minimal 1 jawaban di Level 1 (Dasar)',
+                2 => 'PTK memiliki minimal 1 jawaban di Level 2 (Penerapan)',
+                3 => 'PTK memiliki minimal 1 jawaban di Level 3 (Analisis)',
+                4 => 'PTK memiliki minimal 1 jawaban di Level 4 (Evaluasi)',
+                5 => 'PTK SEMUA jawaban di Level 5 (Pembimbingan) - Kompeten Tinggi'
+            ]
+        ];
+    }
+
+
+    private function getLevelkotaPerPtk(Request $request)
+    {
+        // Query untuk mendapatkan level terendah setiap PTK
+        $query = DB::table('ptk_jawaban')
+            ->select(
+                'ptk_jawaban.ptk_id',
+                'ptk.nama',
+                'pangkat_jabatan.jenjang_jabatan',
+                DB::raw('MIN(ptk_jawaban.level) as level_terendah'),
+                DB::raw('COUNT(DISTINCT ptk_jawaban.sub_indikator_id) as jumlah_sub_indikator')
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+            ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
+            ->groupBy('ptk_jawaban.ptk_id', 'ptk.nama', 'pangkat_jabatan.jenjang_jabatan');
+
+        // Terapkan filter yang sama
+        if ($request->filled('kegiatan_id')) {
+            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+        }
+        if ($request->filled('pangkat_jabatan_id')) {
+            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+        }
+        if ($request->filled('jenis_ptk_id')) {
+            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+        }
+
+        if ($request->filled('kota_id')) {
+            $query->where('ptk.kota_id', $request->kota_id);
+        }
+
+        if ($request->filled('jenjang_pendidikan_id')) {
+            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+        }
+        if ($request->filled('bentuk_pendidikan')) {
+            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+        }
+        if ($request->filled('jenis_kelamin')) {
+            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        $data = $query->get();
+
+        // Debug: Tampilkan sample data
+        \Log::info('Data level terendah per PTK:', [
+            'total_ptk' => $data->count(),
+            'sample_data' => $data->take(3)->toArray()
+        ]);
+
+        // Hitung distribusi per level
+        $distribusi = [];
+        $detailPerLevel = []; // Untuk menyimpan detail PTK per level
+
+        for ($level = 1; $level <= 5; $level++) {
+            $distribusi[$level] = 0;
+            $detailPerLevel[$level] = [];
+        }
+
+        foreach ($data as $item) {
+            if ($item->level_terendah >= 1 && $item->level_terendah <= 5) {
+                $distribusi[$item->level_terendah]++;
+
+                // Simpan detail PTK untuk level ini
+                $detailPerLevel[$item->level_terendah][] = [
+                    'nama' => $item->nama,
+                    'jenjang_jabatan' => $item->jenjang_jabatan,
+                    'jumlah_sub_indikator' => $item->jumlah_sub_indikator
+                ];
+            }
+        }
+
+        return [
+            'labels' => ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
+            'data' => array_values($distribusi),
+            'total_ptk' => $data->count(),
+            'detail_per_level' => $detailPerLevel,
+            'interpretasi' => [
+                1 => 'PTK memiliki minimal 1 jawaban di Level 1 (Dasar)',
+                2 => 'PTK memiliki minimal 1 jawaban di Level 2 (Penerapan)',
+                3 => 'PTK memiliki minimal 1 jawaban di Level 3 (Analisis)',
+                4 => 'PTK memiliki minimal 1 jawaban di Level 4 (Evaluasi)',
+                5 => 'PTK SEMUA jawaban di Level 5 (Pembimbingan) - Kompeten Tinggi'
+            ]
+        ];
+    }
+
+
+
+    /**
+     * Mendapatkan distribusi level per kota (LAYERED BAR)
+     * Menghitung berapa banyak PTK yang memiliki level tersebut sebagai LEVEL TERENDAH di kota tersebut
+     */
+    private function getDistribusiLevelPerKota(Request $request)
+    {
+        // Langkah 1: Dapatkan level terendah per PTK per kota
+        $queryLevelTerendah = DB::table('ptk_jawaban')
+            ->select(
+                'ptk.ptk_id',
+                'kota.nama_kota',
+                DB::raw('MIN(ptk_jawaban.level) as level_terendah')
+            )
+            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+            ->where('ptk_jawaban.level', '>=', 1)
+            ->whereNotNull('kota.nama_kota')
+            ->groupBy('ptk.ptk_id', 'kota.nama_kota');
+
+        // Terapkan filter yang sama
+        if ($request->filled('kegiatan_id')) {
+            $queryLevelTerendah->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+        }
+        if ($request->filled('pangkat_jabatan_id')) {
+            $queryLevelTerendah->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+        }
+        if ($request->filled('jenis_ptk_id')) {
+            $queryLevelTerendah->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+        }
+        if ($request->filled('jenjang_pendidikan_id')) {
+            $queryLevelTerendah->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+        }
+        if ($request->filled('bentuk_pendidikan')) {
+            $queryLevelTerendah->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+        }
+        if ($request->filled('jenis_kelamin')) {
+            $queryLevelTerendah->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        $dataLevelTerendah = $queryLevelTerendah->get();
+
+        // Debug: Hitung total PTK
+        $totalPtk = $dataLevelTerendah->count();
+        \Log::info('Total PTK di distribusi kota: ' . $totalPtk);
+        \Log::info('Sample data: ', $dataLevelTerendah->take(3)->toArray());
+
+        // Langkah 2: Hitung distribusi per kota per level
+        $kotaList = $dataLevelTerendah->pluck('nama_kota')->unique()->values()->toArray();
+
+        // Batasi jumlah kota maksimal 10 agar chart tidak terlalu padat
+        if (count($kotaList) > 10) {
+            $kotaList = array_slice($kotaList, 0, 10);
+        }
+
+        // Inisialisasi array untuk menyimpan data
+        $distribusiPerKota = [];
+
+        foreach ($kotaList as $kota) {
+            $distribusiPerKota[$kota] = [
+                1 => 0, // Level 1
+                2 => 0, // Level 2
+                3 => 0, // Level 3
+                4 => 0, // Level 4
+                5 => 0  // Level 5
+            ];
+        }
+
+        // Hitung jumlah PTK per kota per level
+        foreach ($dataLevelTerendah as $item) {
+            $kota = $item->nama_kota;
+            $level = $item->level_terendah;
+
+            if (in_array($kota, $kotaList) && $level >= 1 && $level <= 5) {
+                $distribusiPerKota[$kota][$level]++;
+            }
+        }
+
+        // Langkah 3: Format data untuk Chart.js (stacked bar)
+        $datasets = [];
+        $levelColors = [
+            1 => 'rgba(220, 53, 69, 0.8)',    // Level 1: merah
+            2 => 'rgba(255, 193, 7, 0.8)',    // Level 2: kuning
+            3 => 'rgba(23, 162, 184, 0.8)',   // Level 3: biru muda
+            4 => 'rgba(0, 123, 255, 0.8)',    // Level 4: biru
+            5 => 'rgba(40, 167, 69, 0.8)'     // Level 5: hijau
+        ];
+
+        $levelNames = [
+            1 => 'Dasar',
+            2 => 'Penerapan',
+            3 => 'Analisis',
+            4 => 'Evaluasi',
+            5 => 'Pembimbingan'
+        ];
+
+        // Buat dataset untuk setiap level (1-5)
+        for ($level = 1; $level <= 5; $level++) {
+            $levelData = [];
+
+            foreach ($kotaList as $kota) {
+                $levelData[] = $distribusiPerKota[$kota][$level] ?? 0;
+            }
+
+            $datasets[] = [
+                'label' => 'Level ' . $level . ' (' . $levelNames[$level] . ')',
+                'data' => $levelData,
+                'backgroundColor' => $levelColors[$level],
+                'borderColor' => str_replace('0.8', '1', $levelColors[$level]),
+                'borderWidth' => 1,
+                'stack' => 'kota' // Ini membuat bar stacked
+            ];
+        }
+
+        // Hitung total PTK per kota untuk informasi
+        $totalPerKota = [];
+        foreach ($kotaList as $kota) {
+            $totalPerKota[$kota] = array_sum($distribusiPerKota[$kota]);
+        }
+
+        return [
+            'labels' => $kotaList,
+            'datasets' => $datasets,
+            'total_kota' => count($kotaList),
+            'total_ptk' => $totalPtk,
+            'distribusi_detail' => $distribusiPerKota,
+            'total_per_kota' => $totalPerKota,
+            'interpretasi' => 'Menunjukkan level terendah yang dicapai PTK per kota'
+        ];
+    }
+
+    // Helper function untuk nama level
+    private function getLevelName($level)
+    {
+        $names = [
+            1 => 'Dasar',
+            2 => 'Penerapan',
+            3 => 'Analisis',
+            4 => 'Evaluasi',
+            5 => 'Pembimbingan'
+        ];
+        return $names[$level] ?? 'Unknown';
+    }
+
+
+
 
 
 

@@ -12,7 +12,7 @@
         ];
 
         $levelColors = [
-            1 => '#17a212',
+            1 => 'rgba(220, 53, 69, 0.8)',
             2 => '#17a2b8',
             3 => '#007bff',
             4 => '#ffc107',
@@ -41,7 +41,7 @@
 
             // Jika tidak ada di database, buat rekomendasi generik
             $levelNames = [
-                1 => 'Dasar',
+                1 => 'Gagal',
                 2 => 'Penerapan',
                 3 => 'Analisis',
                 4 => 'Evaluasi',
@@ -62,9 +62,9 @@
 
     <style>
         /* =====================================================
-       DETAIL PTK — CLEAN STYLE (PUTIH + BIRU)
-       (tanpa ubah DB/BE/HTML)
-    ===================================================== */
+                   DETAIL PTK — CLEAN STYLE (PUTIH + BIRU)
+                   (tanpa ubah DB/BE/HTML)
+                ===================================================== */
         :root {
             --p: #1a5bb8;
             --p2: #2d6bc8;
@@ -308,11 +308,12 @@
             margin-bottom: 6px;
         }
 
+        /* label jangan item pekat + kecilin dikit */
         .stat-label {
-            font-size: .95rem;
-            color: var(--muted);
+            font-size: .92rem;
+            color: #475569;
             margin: 0;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         /* beda warna icon box per kartu */
@@ -463,6 +464,10 @@
             border: 1px solid var(--line);
         }
 
+
+        /* =====================================================
+                   TABLE LINES — FIX (GARIS LEBIH HALUS + RAPI)
+                ===================================================== */
         .ptk-table-container {
             max-height: 400px;
             overflow-y: auto;
@@ -483,6 +488,8 @@
             top: 0;
             z-index: 1;
             white-space: nowrap;
+            border-bottom: 1px solid #e2e8f0 !important;
+            border-right: 1px solid #eef2f7 !important;
             border-bottom: 1px solid var(--line);
         }
 
@@ -545,7 +552,10 @@
             align-items: center;
         }
 
-        /* ====== MATIIN SEMUA HOVER GERAK / TRANSISI (statis) ====== */
+
+        /* ====== MATIIN SEMUA HOVER GERAK / TRANSISI (KECUALI STAT CARD) ====== */
+
+
         .stat-card-gap,
         .sub-indikator-card,
         .level-header-card,
@@ -556,7 +566,6 @@
             transition: none !important;
         }
 
-        .stat-card-gap:hover,
         .sub-indikator-card:hover,
         .level-header-card:hover,
         .level-table-card:hover,
@@ -565,9 +574,9 @@
         }
 
         /* =====================================================
-       FIX TOTAL: 1 CARD (LEVEL + REKOMENDASI + TABLE)
-       + GARIS BIRU TIDAK NUTUP TABLE
-    ===================================================== */
+                   FIX TOTAL: 1 CARD (LEVEL + REKOMENDASI + TABLE)
+                   + GARIS BIRU TIDAK NUTUP TABLE
+                ===================================================== */
         .level-section {
             background: #fff !important;
             border: 1px solid #dbeafe !important;
@@ -708,7 +717,409 @@
         #analisisContent .sub-indikator-card.mt-4 table.table tbody td {
             border-bottom: 1px solid #edf2f7 !important;
         }
+
+
+        /* ================================
+                   PAKSA: GARIS TABLE JANGAN ITEM
+                   (taruh paling bawah)
+                ================================ */
+        .table {
+            --bs-table-border-color: #e2e8f0 !important;
+        }
+
+        .ptk-table thead th {
+            border-left: none !important;
+            border-right: none !important;
+        }
+
+        .ptk-table tbody td {
+            border-left: none !important;
+            border-right: none !important;
+        }
+
+        #analisisContent .sub-indikator-card.mt-4 table.table.table-bordered,
+        #analisisContent .sub-indikator-card.mt-4 table.table.table-bordered * {
+            border-color: #e2e8f0 !important;
+        }
+
+        #analisisContent .sub-indikator-card.mt-4 table.table.table-bordered> :not(caption)>*>* {
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+            border-bottom: 1px solid #eef2f7 !important;
+        }
+
+        #analisisContent .sub-indikator-card.mt-4 table.table tbody tr:last-child td {
+            border-bottom: none !important;
+        }
+
+        /* =====================================================
+                   RESPONSIVE MOBILE FIX (taruh paling bawah)
+                ===================================================== */
+        @media (max-width: 576px) {
+            .container-fluid {
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+
+            .analisis-wrap {
+                padding: 14px !important;
+                border-radius: 16px !important;
+            }
+
+            .analisis-head {
+                padding: 14px !important;
+                border-radius: 16px !important;
+                min-height: auto !important;
+            }
+
+            .analisis-head h5 {
+                font-size: 16px !important;
+                gap: 10px !important;
+            }
+
+            .analisis-head h5 i {
+                width: 38px !important;
+                height: 38px !important;
+                border-radius: 12px !important;
+                margin-right: 8px !important;
+            }
+
+            .analisis-head .meta {
+                font-size: 12px !important;
+                line-height: 1.45 !important;
+            }
+
+            .analisis-head .alert {
+                padding: 10px 12px !important;
+                border-radius: 12px !important;
+            }
+
+            /* Filter card */
+            .filter-info-card {
+                padding: 14px !important;
+                border-radius: 14px !important;
+            }
+
+            .filter-badge {
+                font-size: .78rem !important;
+                padding: 5px 10px !important;
+                border-radius: 10px !important;
+            }
+
+            /* Stat cards jadi 2 kolom */
+            #analisisContent .row.mb-4>.col-md-3 {
+                width: 50% !important;
+                flex: 0 0 50% !important;
+                margin-bottom: 12px !important;
+            }
+
+            .stat-card-gap {
+                padding: 14px !important;
+                border-radius: 14px !important;
+            }
+
+            .stat-number {
+                font-size: 1.5rem !important;
+            }
+
+            .stat-label {
+                font-size: .84rem !important;
+            }
+
+            /* Jenjang card */
+            .jenjang-white-card {
+                padding: 14px !important;
+                border-radius: 16px !important;
+            }
+
+            .sub-indikator-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+
+            .sub-indikator-header h5,
+            .sub-indikator-header h6 {
+                font-size: 15px !important;
+                line-height: 1.3 !important;
+            }
+
+            /* Badge wrap rapi */
+            .sub-indikator-header .d-flex.gap-2,
+            .jenjang-white-card .d-flex.gap-2.mt-2 {
+                gap: 6px !important;
+            }
+
+            .badge-target,
+            .badge-gap,
+            .badge.bg-danger,
+            .badge.bg-secondary,
+            .badge.bg-info,
+            .badge.bg-warning {
+                font-size: .72rem !important;
+                padding: 6px 10px !important;
+                border-radius: 10px !important;
+            }
+
+            /* Level section */
+            .level-section {
+                padding: 14px !important;
+                border-radius: 14px !important;
+            }
+
+            /* Header level jadi stack */
+            .level-header-card .d-flex.justify-content-between {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+
+            /* Badge level jangan maksa lebar 165 di HP */
+            .level-header-card span.badge-level {
+                width: auto !important;
+                max-width: 100% !important;
+                flex: unset !important;
+                padding: 8px 12px !important;
+                border-radius: 12px !important;
+                font-size: .8rem !important;
+            }
+
+            .level-header-card .ms-3.fw-bold,
+            .level-header-card .ms-3 {
+                margin-left: 0 !important;
+                display: block !important;
+                margin-top: 6px !important;
+            }
+
+            /* Gap info */
+            .gap-info {
+                padding: 12px 12px !important;
+                border-radius: 12px !important;
+                font-size: .9rem !important;
+                line-height: 1.45 !important;
+            }
+
+            /* EMPTY LEVEL */
+            .level-header-card+.empty-level {
+                padding: 14px 12px !important;
+            }
+
+            .level-header-card+.empty-level i {
+                font-size: 1.8rem !important;
+            }
+
+            /* TABLE scroll */
+            .ptk-table-container {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .ptk-table {
+                min-width: 740px !important;
+                font-size: .82rem !important;
+            }
+
+            .ptk-table thead th,
+            .ptk-table tbody td {
+                padding: 8px 8px !important;
+            }
+
+            #analisisContent .sub-indikator-card.mt-4 .ptk-table-container {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            #analisisContent .sub-indikator-card.mt-4 table.table {
+                min-width: 980px !important;
+                font-size: .82rem !important;
+            }
+
+            #analisisContent .sub-indikator-card.mt-4 table.table th,
+            #analisisContent .sub-indikator-card.mt-4 table.table td {
+                padding: 8px 8px !important;
+                white-space: nowrap !important;
+            }
+
+            a[href^="tel:"] {
+                white-space: nowrap !important;
+            }
+        }
+
+        /* Tablet: masih rapihin dikit */
+        @media (max-width: 768px) {
+            .analisis-wrap {
+                padding: 18px !important;
+            }
+
+            .ptk-table-container {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .ptk-table {
+                min-width: 720px !important;
+            }
+        }
+
+        /* =====================================================
+                   MOBILE: TABLE HORIZONTAL SCROLL (GESER KANAN-KIRI)
+                ===================================================== */
+        @media (max-width: 576px) {
+            .ptk-table-container {
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                -webkit-overflow-scrolling: touch;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .ptk-table {
+                width: max-content !important;
+                min-width: 760px !important;
+            }
+
+            #analisisContent .sub-indikator-card.mt-4 table.table {
+                width: max-content !important;
+                min-width: 980px !important;
+            }
+
+            .ptk-table th,
+            .ptk-table td,
+            #analisisContent .sub-indikator-card.mt-4 table.table th,
+            #analisisContent .sub-indikator-card.mt-4 table.table td {
+                white-space: nowrap !important;
+            }
+
+            .ptk-table td:nth-child(3),
+            .ptk-table td:nth-child(5),
+            #analisisContent .sub-indikator-card.mt-4 table.table td:nth-child(3),
+            #analisisContent .sub-indikator-card.mt-4 table.table td:nth-child(6) {
+                max-width: 260px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        /* =========================================
+                   SAMAIN UKURAN BADGE (GAP / STATUS / TARGET)
+                ========================================= */
+        #analisisContent .badge,
+        #analisisContent .badge-gap,
+        #analisisContent .badge-target,
+        #analisisContent .badge-level {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+
+            height: 32px !important;
+            padding: 0 12px !important;
+            font-size: .78rem !important;
+            font-weight: 800 !important;
+            line-height: 1 !important;
+            border-radius: 12px !important;
+
+            white-space: nowrap !important;
+        }
+
+        #analisisContent .badge-level {
+            height: 34px !important;
+            padding: 0 14px !important;
+        }
+
+        @media (max-width:576px) {
+
+            #analisisContent .badge,
+            #analisisContent .badge-gap,
+            #analisisContent .badge-target,
+            #analisisContent .badge-level {
+                height: 30px !important;
+                padding: 0 10px !important;
+                font-size: .74rem !important;
+                border-radius: 11px !important;
+            }
+        }
+
+        #analisisContent .d-flex.gap-2.flex-wrap {
+            gap: 8px !important;
+        }
+
+        /* =========================================
+                   STAT CARD GAP: ANGKA DI SAMPING IKON
+                   (tanpa ubah HTML)
+                ========================================= */
+        .stat-card-gap {
+            display: grid !important;
+            grid-template-columns: 56px 1fr !important;
+            grid-template-areas:
+                "icon number"
+                "label label" !important;
+            align-items: center !important;
+            column-gap: 14px !important;
+        }
+
+        .stat-card-gap>.stat-icon-gap {
+            grid-area: icon !important;
+            margin: 0 !important;
+        }
+
+        .stat-card-gap>.stat-number {
+            grid-area: number !important;
+            margin: 0 !important;
+            line-height: 1 !important;
+            align-self: center !important;
+        }
+
+        .stat-card-gap>.stat-label {
+            grid-area: label !important;
+            margin-top: 10px !important;
+        }
+
+        /* mobile tweak */
+        @media (max-width: 576px) {
+            .stat-card-gap {
+                grid-template-columns: 46px 1fr !important;
+                column-gap: 10px !important;
+            }
+
+            .stat-card-gap>.stat-icon-gap {
+                width: 46px !important;
+                height: 46px !important;
+                border-radius: 12px !important;
+            }
+
+            .stat-card-gap>.stat-number {
+                font-size: 1.6rem !important;
+            }
+
+            .stat-card-gap>.stat-label {
+                margin-top: 8px !important;
+                font-size: .84rem !important;
+            }
+        }
+
+        /* =========================================
+                   HOVER CUMA 4 STAT CARD ANGKA
+                   (yang bawah ga ikut)
+                ========================================= */
+        .stat-card-gap {
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
+            will-change: transform, box-shadow;
+        }
+
+        .stat-card-gap:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 14px 34px rgba(2, 6, 23, .12) !important;
+            border-color: rgba(26, 91, 184, .22) !important;
+        }
+
+        @media (max-width: 768px) {
+            .stat-card-gap:hover {
+                transform: translateY(-2px) !important;
+            }
+        }
     </style>
+
 
     <div class="container-fluid">
         <div class="row">
@@ -845,7 +1256,7 @@
                                     <i class="ri-list-check fs-4"></i>
                                 </div>
                                 <div class="stat-number">{{ $analisisData['total_unique_sub_indikator'] ?? 0 }}</div>
-                                <div class="stat-label">Sub Indikator Bermasalah</div>
+                                <div class="stat-label">Sub Indikator Belum Mencapai</div>
                             </div>
                         </div>
 
@@ -884,12 +1295,12 @@
                                                 Jenjang {{ $jenjang['jenjang_jabatan'] }}
                                             </h5>
                                             <div class="d-flex gap-2 mt-2 flex-wrap">
-                                                <span class="badge-target">Target Level:
+                                                <span class="badge-target">Mencapai Level:
                                                     {{ $jenjang['target_level'] }}</span>
                                                 <span class="badge bg-danger">{{ $jenjang['total_ptk'] }} PTK dengan
                                                     Gap</span>
                                                 <span class="badge bg-secondary">{{ $jenjang['total_sub_indikator'] }} Sub
-                                                    Indikator Bermasalah</span>
+                                                    Indikator Belum Mencapai</span>
                                             </div>
                                         </div>
                                     </div>
@@ -915,7 +1326,7 @@
                                                             <span class="badge bg-secondary">{{ $sub['total_ptk'] }} PTK
                                                                 dengan Gap</span>
                                                             <span class="badge bg-info">{{ $sub['total_levels'] }} Level
-                                                                Bermasalah</span>
+                                                                Belum Mencapai</span>
                                                             <span class="badge-target">Target: Level
                                                                 {{ $sub['target_level'] }}</span>
                                                         </div>
@@ -1027,6 +1438,7 @@
                                                                                 <th width="12%">NIP</th>
                                                                                 <th width="18%">Nama</th>
                                                                                 <th width="12%">No. HP</th>
+                                                                                <th width="12%">Jenjang Pendidikan</th>
                                                                                 <th width="20%">Sekolah/Instansi</th>
                                                                                 <th width="10%">Kota</th>
                                                                             </tr>
@@ -1059,6 +1471,8 @@
                                                                                             -
                                                                                         @endif
                                                                                     </td>
+                                                                                    <td>{{ $ptk['jenjang_pendidikan'] ?? '-' }}
+                                                                                    </td>
                                                                                     <td>
                                                                                         @if ($ptk['sekolah'])
                                                                                             {{ $ptk['sekolah'] }}
@@ -1068,6 +1482,7 @@
                                                                                             -
                                                                                         @endif
                                                                                     </td>
+
                                                                                     <td>{{ $ptk['kota'] ?? '-' }}</td>
                                                                                 </tr>
                                                                             @endforeach
@@ -1265,6 +1680,7 @@
                                         <th width="18%">Nama</th>
                                         <th width="12%">No. HP</th>
                                         <th width="15%">Jenjang</th>
+                                        <th width="12%">Jenjang Pendidikan</th>
                                         <th width="15%">Sekolah/Instansi</th>
                                         <th width="10%">Kota</th>
                                         <th width="10%">Jumlah Gap</th>
@@ -1284,6 +1700,7 @@
                                                 @endif
                                             </td>
                                             <td>{{ $ptk['jenjang'] }}</td>
+                                            <td>{{ $ptk['jenjang_pendidikan'] ?? '-' }}</td>
                                             <td>{{ $ptk['sekolah'] }}</td>
                                             <td>{{ $ptk['kota'] }}</td>
                                             <td class="text-center">

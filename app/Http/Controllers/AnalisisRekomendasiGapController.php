@@ -291,6 +291,7 @@ class AnalisisRekomendasiGapController extends Controller
                             'nip' => $ptk->nip,
                             'nama' => $ptk->nama,
                             'sekolah' => $ptk->nama_sekolah,
+                            'jenjang_pendidikan' => $ptk->jenjang_pendidikan ?? '-',
                             'instansi' => $ptk->instansi,
                             'kota' => $ptk->nama_kota,
                             'no_hp' => $ptk->no_hp,
@@ -312,6 +313,7 @@ class AnalisisRekomendasiGapController extends Controller
                                     'nama' => $ptk->nama,
                                     'no_hp' => $ptk->no_hp,
                                     'jenjang_jabatan' => $ptk->jenjang_jabatan,
+                                    'jenjang_pendidikan' => $ptk->jenjang_pendidikan ?? '-',
                                     'nama_sekolah' => $ptk->nama_sekolah,
                                     'instansi' => $ptk->instansi,
                                     'nama_kota' => $ptk->nama_kota
@@ -414,6 +416,7 @@ class AnalisisRekomendasiGapController extends Controller
                 'nama' => $ptkInfo['nama'],
                 'no_hp' => $ptkInfo['no_hp'] ?? '-',
                 'jenjang' => $ptkInfo['jenjang_jabatan'],
+                'jenjang_pendidikan' => $ptkInfo['jenjang_pendidikan'] ?? '-',
                 'sekolah' => $ptkInfo['nama_sekolah'] ?? ($ptkInfo['instansi'] ?? '-'),
                 'kota' => $ptkInfo['nama_kota'] ?? '-',
                 'gap_count' => $gapCount,
@@ -627,7 +630,7 @@ class AnalisisRekomendasiGapController extends Controller
     private function getLevelColor($level)
     {
         $colors = [
-            1 => '#17a212',
+            1 => 'rgba(220, 53, 69, 0.8)',
             2 => '#17a2b8',
             3 => '#007bff',
             4 => '#ffc107',
