@@ -28,7 +28,6 @@
     @endphp
 
     <style>
-<<<<<<< HEAD
         /* =====================================================
        ANALISIS LAYOUT STYLES - CLEAN + RESPONSIVE (MOBILE SAFE)
        (Tidak ubah desain desktop, fokus rapihin + mobile)
@@ -267,21 +266,21 @@
   margin-bottom: 15px;
   justify-content: center; /* tetap center */
 }
->>>>>>> d33c0895071b60fc4b8d0f492d5c5d8102c11a8f
+
 
 .filter-col {
   flex: 1 1 calc(25% - 20px);
   min-width: 250px;
 }
 
-<<<<<<< HEAD
+
         .filter-col label {
             font-weight: 600;
             color: #2d3748;
             margin-bottom: 8px;
             font-size: 0.9rem;
         }
-=======
+
 .filter-col label {
   font-weight: 600;
   color: #2d3748;
@@ -304,7 +303,7 @@
   border-color: #1a5bb8;
   box-shadow: 0 0 0 3px rgba(26, 91, 184, 0.1);
 }
->>>>>>> d33c0895071b60fc4b8d0f492d5c5d8102c11a8f
+
 
 /* Kolom tombol */
 .filter-col.d-flex.gap-2.align-items-end {
@@ -334,7 +333,6 @@
   background: linear-gradient(135deg, #2d6bc8 0%, #3b82f6 100%);
 }
 
-<<<<<<< HEAD
         /* Kolom tombol */
         .filter-col.d-flex.gap-2.align-items-end {
             align-self: flex-end;
@@ -1239,7 +1237,7 @@
             padding-top: 26px;
             /* ruang buat legend di atas */
         }
-=======
+
 .btn-outline-secondary {
   border: 2px solid #cbd5e1;
   border-radius: 10px;
@@ -1960,6 +1958,129 @@
 #jenjangChartsContainer .chart-wrapper{
   padding-top: 26px; /* ruang buat legend di atas */
 }
+
+/* =========================
+   STAT CARD: ANGKA DI SAMPING IKON (TANPA UBAH HTML)
+========================= */
+
+/* jadikan layout 2 kolom: ikon | angka */
+.stat-card{
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  grid-template-areas:
+    "icon number"
+    "label label";
+  align-items: center;
+  column-gap: 14px;
+}
+
+/* tempatkan elemen sesuai area */
+.stat-card > .stat-icon{
+  grid-area: icon;
+  margin-bottom: 0 !important;
+}
+
+.stat-card > .stat-number{
+  grid-area: number;
+  margin: 0 !important;
+  line-height: 1;
+  align-self: center;
+}
+
+.stat-card > .stat-label{
+  grid-area: label;
+  margin-top: 10px !important;
+}
+
+/* kalau ada small di label, tetep rapi */
+.stat-card > .stat-label small{
+  display: block;
+  margin-top: 4px;
+}
+
+/* ukuran icon aman di mobile */
+@media (max-width: 768px){
+  .stat-card{
+    grid-template-columns: 46px 1fr;
+    column-gap: 10px;
+  }
+  .stat-card > .stat-icon{
+    width: 46px;
+    height: 46px;
+  }
+  .stat-card > .stat-number{
+    font-size: 1.6rem;
+  }
+  .stat-card > .stat-label{
+    margin-top: 8px !important;
+    font-size: 0.85rem;
+  }
+}
+
+/* HP kecil banget */
+@media (max-width: 420px){
+  .stat-card > .stat-number{ font-size: 1.45rem; }
+}
+/* =========================
+   SPACE: STAT CARDS -> CHART CARDS
+========================= */
+
+/* Row pertama di #analisisContent (stat cards) kasih jarak ke bawah */
+#analisisContent > .row:first-child{
+  margin-bottom: 22px !important;
+}
+
+/* optional: kalau masih mepet di HP */
+@media (max-width: 768px){
+  #analisisContent > .row:first-child{
+    margin-bottom: 16px !important;
+  }
+}
+/* =========================
+   STAT TEXT STYLE (samain kaya gambar atas)
+   TARUH PALING BAWAH
+========================= */
+
+/* label utama */
+.stat-card .stat-label{
+  margin-top: 10px !important;
+  font-size: 1.05rem;        /* ukuran judul */
+  font-weight: 700;          /* tebal kaya contoh */
+  color: #334155;            /* gelap soft */
+  line-height: 1.25;
+}
+
+
+.stat-card .stat-label small{
+  display: block;            /* turun ke bawah kaya gambar */
+  margin-top: 6px;
+  font-size: .92rem;
+  font-weight: 600;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+/* mobile: sedikit diperkecil biar muat */
+@media (max-width: 768px){
+  .stat-card .stat-label{
+    font-size: .98rem;
+  }
+  .stat-card .stat-label small{
+    font-size: .85rem;
+  }
+}
+/* override: kecilin dikit + jangan item pekat */
+.stat-card .stat-label{
+  font-size: .98rem !important;   /* kecilin dikit */
+  color: #475569 !important;      /* bukan item pekat */
+  font-weight: 700 !important;
+}
+@media (max-width: 768px){
+  .stat-card .stat-label{
+    font-size: .92rem !important;
+  }
+}
+
     </style>
 
     <div class="container-fluid">
@@ -2159,16 +2280,6 @@
                         <!-- Chart 2: Distribusi Jenjang Jabatan -->
                         <div class="col-md-6">
                             <div class="chart-container">
-<<<<<<< HEAD
-                                <div class="chart-title">
-                                    <i class="ri-pie-chart-line"></i> Distribusi Jenjang Jabatan
-                                    <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
-                                </div>
-
-                                <div class="chart-canvas-wrap is-doughnut">
-                                    <canvas id="jenjangDistributionChart"></canvas>
-                                </div>
-=======
                             <div class="chart-title">
                                 <i class="ri-pie-chart-line"></i> Distribusi Jenjang Jabatan
                                 <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
@@ -2177,7 +2288,6 @@
                             <div class="chart-canvas-wrap is-doughnut">
                                 <canvas id="jenjangDistributionChart"></canvas>
                             </div>
->>>>>>> d33c0895071b60fc4b8d0f492d5c5d8102c11a8f
                             </div>
                         </div>
                     </div>
@@ -2409,8 +2519,7 @@
                                                                     <th>Sub Indikator</th>
                                                                     <th width="8%" class="text-center">Level Dicapai
                                                                     </th>
-                                                                    <th width="8%" class="text-center">Level kebutuhan
-                                                                        Belajar</th>
+                                                                    <th width="8%" class="text-center">Level kebutuhan Belajar</th>
                                                                     <th width="6%" class="text-center">Gap</th>
                                                                     <th>Rekomendasi Kebutuhan Belajar</th>
                                                                     <th width="10%" class="text-center">Jumlah PTK</th>
@@ -2547,8 +2656,7 @@
                                                 @else
                                                     <div class="alert alert-success text-center py-4">
                                                         <i class="ri-checkbox-circle-fill fs-4 text-success"></i>
-                                                        <h5 class="mt-2 mb-0">Semua PTK sudah mencapai level kebutuhan
-                                                            belajar!</h5>
+                                                        <h5 class="mt-2 mb-0">Semua PTK sudah mencapai level kebutuhan belajar!</h5>
                                                         <p class="text-muted mb-0">Tidak ada gap untuk jenjang
                                                             {{ $jenjang['jenjang_jabatan'] }}</p>
                                                     </div>
@@ -2640,8 +2748,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         /* =====================================================
-                                                                                                                                                                   GLOBAL CHART INSTANCE
-                                                                                                                                                                ===================================================== */
+                                                                                                                                                               GLOBAL CHART INSTANCE
+                                                                                                                                                            ===================================================== */
         let levelDistributionChart = null;
         let jenjangDistributionChart = null;
         let jenjangPendidikanChart = null;
@@ -2863,13 +2971,13 @@
                             modusRows += `
                     <tr>
                         ${subIndex === 0 ? `
-                                                                                                                                                                                            <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; font-weight: 600;">
-                                                                                                                                                                                                ${kota.nama_kota}
-                                                                                                                                                                                            </td>
-                                                                                                                                                                                            <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; text-align: center;">
-                                                                                                                                                                                                ${kota.total_jawaban}
-                                                                                                                                                                                            </td>
-                                                                                                                                                                                        ` : ''}
+                                                                                                                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; font-weight: 600;">
+                                                                                                                                                                                            ${kota.nama_kota}
+                                                                                                                                                                                        </td>
+                                                                                                                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align: middle; text-align: center;">
+                                                                                                                                                                                            ${kota.total_jawaban}
+                                                                                                                                                                                        </td>
+                                                                                                                                                                                    ` : ''}
                         <td>
                             <small class="text-muted">${sub.sub_indikator_code}</small><br>
                             <span class="fw-medium">${sub.sub_indikator_name ? sub.sub_indikator_name.substring(0, 40) + (sub.sub_indikator_name.length > 40 ? '...' : '') : '-'}</span>
@@ -3037,13 +3145,13 @@
                                     <td class="text-center">${counter++}</td>
                                     <td>
                                         ${gapIndex === 0 ? `
-                                                                                                                                                                                            <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                                                                                                                            <span class="fw-medium">${rek.sub_indikator_name ?
-                                                                                                                                                                                                (rek.sub_indikator_name.length > 40 ?
-                                                                                                                                                                                                    rek.sub_indikator_name.substring(0, 40) + '...' :
-                                                                                                                                                                                                    rek.sub_indikator_name
-                                                                                                                                                                                                ) : '-'}</span>
-                                                                                                                                                                                        ` : ''}
+                                                                                                                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                                                                                                                        <span class="fw-medium">${rek.sub_indikator_name ?
+                                                                                                                                                                                            (rek.sub_indikator_name.length > 40 ?
+                                                                                                                                                                                                rek.sub_indikator_name.substring(0, 40) + '...' :
+                                                                                                                                                                                                rek.sub_indikator_name
+                                                                                                                                                                                            ) : '-'}</span>
+                                                                                                                                                                                    ` : ''}
                                     </td>
                                     <td class="text-center">
                                         <span class="badge-level" style="background-color: ${getLevelColor(gap.level_dicapai)}; color: white;">
@@ -3477,29 +3585,6 @@
                         maintainAspectRatio: false,
                         radius: '70%',
                         cutout: '65%',
-<<<<<<< HEAD
-                        layout: {
-                            padding: {
-                                bottom: 26
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                align: 'center',
-                                labels: {
-                                    usePointStyle: true,
-                                    pointStyle: 'rectRounded',
-                                    boxWidth: 10,
-                                    boxHeight: 10,
-                                    padding: 8,
-                                    font: {
-                                        size: 10
-                                    }
-                                }
-                            }
-                        }
-=======
                         layout: { padding: { bottom: 26 } },
 plugins: {
   legend: {
@@ -3515,7 +3600,6 @@ plugins: {
     }
   }
 }
->>>>>>> d33c0895071b60fc4b8d0f492d5c5d8102c11a8f
                     }
                 });
             }
@@ -3530,18 +3614,6 @@ plugins: {
                     }];
 
                 jenjangPendidikanChart = new Chart(jenjangPendidikanCtx, {
-<<<<<<< HEAD
-                    type: 'doughnut', // ✅ dari pie -> doughnut
-                    data: {
-                        labels: src.map(x => x.jenjang_pendidikan),
-                        datasets: [{
-                            data: src.map(x => x.count),
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                                '#FF9F40'
-                            ]
-                        }]
-                    },
-=======
                 type: 'doughnut', // ✅ dari pie -> doughnut
                 data: {
                     labels: src.map(x => x.jenjang_pendidikan),
@@ -3550,35 +3622,11 @@ plugins: {
                     backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40']
                     }]
                 },
->>>>>>> d33c0895071b60fc4b8d0f492d5c5d8102c11a8f
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         radius: '70%',
                         cutout: '65%',
-<<<<<<< HEAD
-                        layout: {
-                            padding: {
-                                bottom: 26
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                align: 'center',
-                                labels: {
-                                    usePointStyle: true,
-                                    pointStyle: 'rectRounded',
-                                    boxWidth: 10,
-                                    boxHeight: 10,
-                                    padding: 8,
-                                    font: {
-                                        size: 10
-                                    }
-                                }
-                            }
-                        }
-=======
                         layout: { padding: { bottom: 26 } },
 plugins: {
   legend: {
@@ -3594,7 +3642,6 @@ plugins: {
     }
   }
 }
->>>>>>> d33c0895071b60fc4b8d0f492d5c5d8102c11a8f
                     }
                 });
             }
@@ -3623,29 +3670,6 @@ plugins: {
                         maintainAspectRatio: false,
                         radius: '70%',
                         cutout: '65%',
-<<<<<<< HEAD
-                        layout: {
-                            padding: {
-                                bottom: 26
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                align: 'center',
-                                labels: {
-                                    usePointStyle: true,
-                                    pointStyle: 'rectRounded',
-                                    boxWidth: 10,
-                                    boxHeight: 10,
-                                    padding: 8,
-                                    font: {
-                                        size: 10
-                                    }
-                                }
-                            }
-                        }
-=======
                         layout: { padding: { bottom: 26 } },
 plugins: {
   legend: {
@@ -3661,7 +3685,6 @@ plugins: {
     }
   }
 }
->>>>>>> d33c0895071b60fc4b8d0f492d5c5d8102c11a8f
                     }
                 });
             }
@@ -3679,65 +3702,6 @@ plugins: {
                             labels: chartData.labels,
                             datasets: chartData.datasets
                         },
-<<<<<<< HEAD
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-
-                            // ✅ kasih ruang buat legend bawah (biar gak niban chart)
-                            layout: {
-                                padding: {
-                                    top: 8,
-                                    bottom: 24
-                                }
-                            },
-
-                            plugins: {
-                                legend: {
-                                    position: 'bottom', // ✅ ini yang kamu mau: bawah
-                                    align: 'center',
-                                    labels: {
-                                        usePointStyle: true,
-                                        pointStyle: 'circle',
-                                        boxWidth: 8,
-                                        boxHeight: 8,
-                                        padding: 8,
-                                        font: {
-                                            size: 10
-                                        }
-                                    }
-                                },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false,
-                                    callbacks: {
-                                        label: function(context) {
-                                            const label = context.dataset.label || '';
-                                            const value = context.raw;
-                                            return `${label}: ${value} PTK`;
-                                        }
-                                    }
-                                }
-                            },
-
-                            scales: {
-                                x: {
-                                    stacked: false,
-                                    ticks: {
-                                        autoSkip: false,
-                                        maxRotation: 45,
-                                        minRotation: 45
-                                    }
-                                },
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        stepSize: 1
-                                    }
-                                }
-                            }
-                        }
-=======
 options: {
   responsive: true,
   maintainAspectRatio: false,
@@ -3782,7 +3746,6 @@ options: {
     }
   }
 }
->>>>>>> d33c0895071b60fc4b8d0f492d5c5d8102c11a8f
                     });
                 } else {
                     console.log('Chart data kosong, tidak membuat chart');
@@ -3942,86 +3905,6 @@ options: {
                     return;
                 }
 
-<<<<<<< HEAD
-                // Buat chart
-                window[canvasId] = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: jenjangData.labels || [],
-                        datasets: (jenjangData.datasets || []).map(dataset => ({
-                            label: dataset.label || 'Unknown',
-                            data: dataset.data || [],
-                            backgroundColor: dataset.backgroundColor || '#17a2b8',
-                            borderColor: dataset.borderColor || '#17a2b8',
-                            borderWidth: dataset.borderWidth || 1
-                        }))
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        layout: {
-                            padding: {
-                                top: 2,
-                                bottom: 4,
-                                left: 6,
-                                right: 6
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'bottom', // ✅ pindah ke bawah biar ga nabrak judul
-                                align: 'center',
-                                labels: {
-                                    font: {
-                                        size: 8
-                                    },
-                                    boxWidth: 8,
-                                    boxHeight: 8,
-                                    padding: 6,
-                                    usePointStyle: true,
-                                    pointStyle: 'circle'
-                                }
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                                callbacks: {
-                                    label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} PTK`
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    font: {
-                                        size: 9
-                                    },
-                                    maxRotation: 45,
-                                    minRotation: 45
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1,
-                                    font: {
-                                        size: 10
-                                    }
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Jumlah PTK',
-                                    font: {
-                                        size: 10
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-=======
 // Buat chart
 window[canvasId] = new Chart(ctx, {
   type: 'bar',
@@ -4084,11 +3967,6 @@ plugins: {
 window[canvasId].resize();
 setTimeout(() => window[canvasId]?.resize(), 50);
 console.log(`Chart ${canvasId} berhasil dibuat`);
->>>>>>> d33c0895071b60fc4b8d0f492d5c5d8102c11a8f
-
-                window[canvasId].resize();
-                setTimeout(() => window[canvasId]?.resize(), 50);
-                console.log(`Chart ${canvasId} berhasil dibuat`);
 
                 console.log(`Chart ${canvasId} berhasil dibuat`);
             });
