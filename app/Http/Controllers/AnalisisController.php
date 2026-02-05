@@ -2007,7 +2007,7 @@ class AnalisisController extends Controller
 
                 $no = 1;
                 $levelNames = [
-                    1 => 'Gagal',
+                    1 => 'Dasar',
                     2 => 'Penerapan',
                     3 => 'Analisis',
                     4 => 'Evaluasi',
@@ -3815,7 +3815,7 @@ class AnalisisController extends Controller
         $gap = $levelTarget - $levelDicapai;
 
         $levelNames = [
-            1 => 'Gagal',
+            1 => 'Dasar',
             2 => 'Penerapan',
             3 => 'Analisis',
             4 => 'Evaluasi',

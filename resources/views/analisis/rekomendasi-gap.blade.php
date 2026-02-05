@@ -4,7 +4,7 @@
         $title = 'Detail PTK dengan Kebutuhan Belajar';
 
         $levelNames = [
-            1 => 'Gagal',
+            1 => 'Dasar',
             2 => 'Penerapan',
             3 => 'Analisis',
             4 => 'Evaluasi',
@@ -41,7 +41,7 @@
 
             // Jika tidak ada di database, buat rekomendasi generik
             $levelNames = [
-                1 => 'Gagal',
+                1 => 'Dasar',
                 2 => 'Penerapan',
                 3 => 'Analisis',
                 4 => 'Evaluasi',
@@ -61,540 +61,653 @@
     @endphp
 
     <style>
-        
-/* =====================================================
-   DETAIL PTK — CLEAN STYLE (PUTIH + BIRU)
-   (tanpa ubah DB/BE/HTML)
-===================================================== */
-:root{
-  --p:#1a5bb8;
-  --p2:#2d6bc8;
-  --blue:#1a4d8e;
-  --ink:#1a2937;
-  --muted:#64748b;
-  --line:#e2e8f0;
-  --soft:#f8fafc;
-  --soft2:#eef2f7;
-}
+        /* =====================================================
+       DETAIL PTK — CLEAN STYLE (PUTIH + BIRU)
+       (tanpa ubah DB/BE/HTML)
+    ===================================================== */
+        :root {
+            --p: #1a5bb8;
+            --p2: #2d6bc8;
+            --blue: #1a4d8e;
+            --ink: #1a2937;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --soft: #f8fafc;
+            --soft2: #eef2f7;
+        }
 
-/* ====== Base wrap ====== */
-.analisis-wrap{
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-radius:20px;
-  padding:25px;
-  margin-bottom:30px;
-  position:relative;
-  overflow:hidden;
-}
-.analisis-wrap::before{
-  content:'';
-  position:absolute;
-  top:0; right:0;
-  width:300px; height:300px;
-  background: linear-gradient(135deg, rgba(26,91,184,.05) 0%, rgba(26,91,184,0) 70%);
-  border-radius:0 20px 0 0;
-  z-index:0;
-}
-.analisis-wrap > *{ position:relative; z-index:1; }
+        /* ====== Base wrap ====== */
+        .analisis-wrap {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
 
-/* ====== Header baduy ====== */
-.analisis-head{
-  position:relative;
-  border-radius:18px;
-  overflow:hidden;
-  padding:18px 18px !important;
-  min-height:92px;
-  background: var(--blue) !important;
-  border-bottom:1px solid rgba(255,255,255,.14);
-  color:#fff !important;
-}
-.analisis-head::before{
-  content:"";
-  position:absolute; inset:0;
-  background-image:url("{{ asset('build/images/baduy.jpg') }}");
-  background-repeat:repeat;
-  background-size:140px auto;
-  background-position:center;
-  opacity:.55;
-  filter:grayscale(100%) contrast(1.15);
-  z-index:0;
-}
-.analisis-head::after{
-  content:"";
-  position:absolute; inset:0;
-  background: rgba(26,91,184,.50);
-  z-index:1;
-  pointer-events:none;
-}
-.analisis-head > *{ position:relative; z-index:2; }
+        .analisis-wrap::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, rgba(26, 91, 184, .05) 0%, rgba(26, 91, 184, 0) 70%);
+            border-radius: 0 20px 0 0;
+            z-index: 0;
+        }
 
-.analisis-head h5{
-  margin:0 !important;
-  font-weight:900 !important;
-  font-size:20px !important;
-  letter-spacing:.2px;
-  color:#fff !important;
-  line-height:1.15;
-  text-shadow:0 2px 12px rgba(0,0,0,.35);
-}
-.analisis-head h5 i{
-  width:44px;
-  height:44px;
-  border-radius:14px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(255,255,255,.14);
-  border:1px solid rgba(255,255,255,.18);
-  color:#fff;
-  backdrop-filter:blur(6px);
-  margin-right:10px;
-}
-.analisis-head .meta{
-  margin-top:8px !important;
-  font-weight:500;
-  font-size:13px;
-  color:rgba(255,255,255,.92) !important;
-  text-shadow:0 2px 12px rgba(0,0,0,.35);
-}
-.analisis-head .meta small,
-.analisis-head .text-muted{ color:rgba(255,255,255,.90) !important; }
+        .analisis-wrap>* {
+            position: relative;
+            z-index: 1;
+        }
 
-.analisis-head .alert{
-  margin-top:12px !important;
-  margin-bottom:0 !important;
-  background:rgba(255,255,255,.14) !important;
-  border:1px solid rgba(255,255,255,.22) !important;
-  color:#fff !important;
-  border-radius:14px;
-  backdrop-filter:blur(6px);
-}
-.analisis-head .alert strong,
-.analisis-head .alert i{ color:#fff !important; }
+        /* ====== Header baduy ====== */
+        .analisis-head {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            padding: 18px 18px !important;
+            min-height: 92px;
+            background: var(--blue) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, .14);
+            color: #fff !important;
+        }
 
-/* ====== Filter info card ====== */
-.filter-info-card{
-  background:#fff;
-  border-radius:16px;
-  padding:20px;
-  margin-bottom:25px;
-  border:1px solid var(--line);
-}
-.filter-badge{
-  background:#e6f7ff;
-  color:#0056b3;
-  padding:5px 12px;
-  border-radius:8px;
-  font-size:.85rem;
-  font-weight:600;
-  border:1px solid #b3d9ff;
-}
+        .analisis-head::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("{{ asset('build/images/baduy.jpg') }}");
+            background-repeat: repeat;
+            background-size: 140px auto;
+            background-position: center;
+            opacity: .55;
+            filter: grayscale(100%) contrast(1.15);
+            z-index: 0;
+        }
 
-/* ====== Sub indikator card ====== */
-.sub-indikator-card{
-  border-left: none !important;
-  padding-left: 20px !important;   /* biar gak kerasa mepet */
-}
-.sub-indikator-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:16px;
-  padding-bottom:14px;
-  border-bottom:1px solid var(--line);
-}
+        .analisis-head::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(26, 91, 184, .50);
+            z-index: 1;
+            pointer-events: none;
+        }
 
-/* ====== CARD PUTIH BARU UNTUK 1 JENJANG (Jenjang Madya -> sampai PTK) ====== */
-.jenjang-white-card{
-  background:#fff;
-  border:1px solid rgba(15,23,42,.10);
-  border-radius:18px;
-  padding:18px;
-  box-shadow:0 10px 26px rgba(2,6,23,.06);
-}
-.jenjang-white-card .sub-indikator-header{
-  margin-bottom:14px;
-  padding-bottom:12px;
-}
-@media (max-width:768px){
-  .jenjang-white-card{ padding:14px; }
-}
+        .analisis-head>* {
+            position: relative;
+            z-index: 2;
+        }
 
-/* ====== Info keterangan (gap-info) ====== */
-.gap-info{
-  background:#fff;
-  border:1px solid #dbeafe;
-  border-radius:14px;
-  padding:14px 16px;
-  margin:12px 0 16px;
-  color: var(--ink);
-}
-.gap-info i{ color:var(--p) !important; margin-right:8px; }
+        .analisis-head h5 {
+            margin: 0 !important;
+            font-weight: 900 !important;
+            font-size: 20px !important;
+            letter-spacing: .2px;
+            color: #fff !important;
+            line-height: 1.15;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, .35);
+        }
 
-/* ====== Stat cards (angka hitam, icon beda warna) ====== */
-.stat-card-gap{
-  background:#fff;
-  border-radius:16px;
-  padding:22px;
-  border:1px solid var(--line);
-  position:relative;
-  overflow:hidden;
-  height:100%;
-}
-.stat-card-gap::before{
-  content:'';
-  position:absolute;
-  top:0; left:0;
-  width:5px; height:100%;
-  background: linear-gradient(to bottom, var(--p), var(--p2));
-}
-.stat-icon-gap{
-  width:56px;
-  height:56px;
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom:12px;
-}
-.stat-icon-gap i{ font-size:1.5rem; color:inherit !important; }
+        .analisis-head h5 i {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, .14);
+            border: 1px solid rgba(255, 255, 255, .18);
+            color: #fff;
+            backdrop-filter: blur(6px);
+            margin-right: 10px;
+        }
 
-.stat-number{
-  font-size:2rem;
-  font-weight:900;
-  color: var(--ink);
-  line-height:1;
-  margin-bottom:6px;
-}
-.stat-label{
-  font-size:.95rem;
-  color: var(--muted);
-  margin:0;
-  font-weight:600;
-}
+        .analisis-head .meta {
+            margin-top: 8px !important;
+            font-weight: 500;
+            font-size: 13px;
+            color: rgba(255, 255, 255, .92) !important;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, .35);
+        }
 
-/* beda warna icon box per kartu */
-#analisisContent .row.mb-4 > .col-md-3:nth-child(1) .stat-icon-gap{ background:#eaf2ff; color:#2563eb; }
-#analisisContent .row.mb-4 > .col-md-3:nth-child(2) .stat-icon-gap{ background:#e9f9ef; color:#16a34a; }
-#analisisContent .row.mb-4 > .col-md-3:nth-child(3) .stat-icon-gap{ background:#fdecec; color:#ef4444; }
-#analisisContent .row.mb-4 > .col-md-3:nth-child(4) .stat-icon-gap{ background:#eef2ff; color:#4f46e5; }
+        .analisis-head .meta small,
+        .analisis-head .text-muted {
+            color: rgba(255, 255, 255, .90) !important;
+        }
 
-/* ====== Badges ====== */
-.badge-target{
-  background: linear-gradient(135deg, var(--p), var(--p2));
-  color:#fff;
-  padding:6px 10px;
-  border-radius:10px;
-  font-size:.75rem;
-  font-weight:800;
-}
-.badge-gap{
-  background: linear-gradient(135deg, var(--p), var(--p2)) !important;
-  color:#fff !important;
-  padding:6px 10px !important;
-  border-radius:10px !important;
-  font-size:.75rem !important;
-  font-weight:800 !important;
-}
-.analisis-wrap .badge.bg-danger{
-  background: linear-gradient(135deg, var(--p), var(--p2)) !important;
-  border:none !important;
-  color:#fff !important;
-}
-.analisis-wrap .badge.bg-warning{
-  border:none !important;
-  font-weight:800;
-}
+        .analisis-head .alert {
+            margin-top: 12px !important;
+            margin-bottom: 0 !important;
+            background: rgba(255, 255, 255, .14) !important;
+            border: 1px solid rgba(255, 255, 255, .22) !important;
+            color: #fff !important;
+            border-radius: 14px;
+            backdrop-filter: blur(6px);
+        }
 
-/* ====== Level section ====== */
-.level-section{ margin-top:16px; margin-bottom:22px; }
+        .analisis-head .alert strong,
+        .analisis-head .alert i {
+            color: #fff !important;
+        }
 
-/* LEVEL HEADER jadi card utama (gabung rekomendasi) */
-.level-header-card{
-  background:#fff !important;
-  border:1px solid var(--line) !important;
-  border-radius:16px !important;
-  padding:16px 16px 12px !important;
-  margin-bottom:14px !important;
-}
+        /* ====== Filter info card ====== */
+        .filter-info-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid var(--line);
+        }
 
-/* Badge level di kiri */
-.badge-level{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  white-space:nowrap;
-  padding:8px 14px;
-  border-radius:12px;
-  line-height:1;
-  font-weight:900;
-  font-size:.85rem;
-}
+        .filter-badge {
+            background: #e6f7ff;
+            color: #0056b3;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: .85rem;
+            font-weight: 600;
+            border: 1px solid #b3d9ff;
+        }
 
-/* Rekomendasi jadi section di DALAM card (bukan card baru) */
-.level-header-card .rekomendasi-pelatihan{
-  margin-top:14px !important;
-  border:none !important;
-  box-shadow:none !important;
-  background:transparent !important;
-  padding:14px 0 0 !important;
-  border-top:1px dashed #dbeafe !important;
-  border-radius:0 !important;
-}
-.level-header-card .rekomendasi-pelatihan h6{
-  color:var(--p) !important;
-  font-weight:900;
-  margin-bottom:10px !important;
-}
-.level-header-card .rekomendasi-pelatihan ul{
-  margin:0 !important;
-  padding-left:20px !important;
-}
-.level-header-card .rekomendasi-pelatihan li{
-  line-height:1.7 !important;
-  margin-bottom:10px !important;
-}
-.level-header-card .rekomendasi-pelatihan li:last-child{ margin-bottom:0 !important; }
-.level-header-card .rekomendasi-pelatihan strong{ color:var(--p) !important; }
+        /* ====== Sub indikator card ====== */
+        .sub-indikator-card {
+            border-left: none !important;
+            padding-left: 20px !important;
+            /* biar gak kerasa mepet */
+        }
 
-/* ====== Level tanpa PTK: gabung jadi 1 card ====== */
-.level-header-card:has(+ .empty-level){
-  border-bottom-left-radius:0 !important;
-  border-bottom-right-radius:0 !important;
-  margin-bottom:0 !important;
-  border-bottom:none !important;
-}
-.level-header-card + .empty-level{
-  background:#fff !important;
-  border:1px solid var(--line) !important;
-  border-top:none !important;
-  border-radius:0 0 16px 16px !important;
-  margin:0 0 14px !important;
-  padding:18px 16px !important;
-}
-.level-header-card + .empty-level i{
-  font-size:2.2rem !important;
-  opacity:.55 !important;
-}
-.level-header-card + .empty-level small{ color:var(--muted) !important; }
+        .sub-indikator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--line);
+        }
 
-/* ====== Table card (INI AJA yang "card tabel") ====== */
-.level-table-card{
-  background:#fff;
-  border-radius:16px;
-  padding:18px;
-  border:1px solid var(--line);
-}
-.ptk-table-container{
-  max-height:400px;
-  overflow-y:auto;
-  margin-top:10px;
-}
-.ptk-table{
-  font-size:.85rem;
-  width:100%;
-  border-collapse:collapse;
-}
-.ptk-table th{
-  background:#eef2f7;
-  font-weight:900;
-  padding:12px 10px;
-  position:sticky;
-  top:0;
-  z-index:1;
-  white-space:nowrap;
-  border-bottom:1px solid var(--line);
-}
-.ptk-table td{
-  padding:10px;
-  vertical-align:middle;
-  border-bottom:1px solid #edf2f7;
-}
-.ptk-table tbody tr:hover{ background:#f8fafc !important; }
+        /* ====== CARD PUTIH BARU UNTUK 1 JENJANG (Jenjang Madya -> sampai PTK) ====== */
+        .jenjang-white-card {
+            background: #fff;
+            border: 1px solid rgba(15, 23, 42, .10);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 10px 26px rgba(2, 6, 23, .06);
+        }
 
-/* ====== Pagination ====== */
-.pagination-sm .page-link{ font-size:.75rem; padding:.25rem .5rem; }
-.page-item.active .page-link{ background-color:var(--p); border-color:var(--p); }
-.page-link{ color:var(--p); border:1px solid #dee2e6; }
-.page-link:hover{ color:#0d47a1; background:#e9ecef; border-color:#dee2e6; }
+        .jenjang-white-card .sub-indikator-header {
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+        }
 
-/* ====== Responsive ====== */
-@media (max-width:768px){
-  .ptk-table{ font-size:.8rem; }
-  .ptk-table th, .ptk-table td{ padding:8px 6px; }
-}
+        @media (max-width:768px) {
+            .jenjang-white-card {
+                padding: 14px;
+            }
+        }
 
-/* ====== Center tombol empty state (kalau ada) ====== */
-#analisisContent .row .col-12.d-flex .text-center .btn{
-  display:inline-flex;
-  justify-content:center;
-  align-items:center;
-  margin-left:auto !important;
-  margin-right:auto !important;
-}
-#analisisContent .row .col-12.d-flex .text-center{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
+        /* ====== Info keterangan (gap-info) ====== */
+        .gap-info {
+            background: #fff;
+            border: 1px solid #dbeafe;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin: 12px 0 16px;
+            color: var(--ink);
+        }
 
-/* ====== MATIIN SEMUA HOVER GERAK / TRANSISI (statis) ====== */
-.stat-card-gap,
-.sub-indikator-card,
-.level-header-card,
-.level-table-card,
-.gap-info,
-.filter-info-card,
-.jenjang-white-card{
-  transition:none !important;
-}
-.stat-card-gap:hover,
-.sub-indikator-card:hover,
-.level-header-card:hover,
-.level-table-card:hover,
-.jenjang-white-card:hover{
-  transform:none !important;
-}
+        .gap-info i {
+            color: var(--p) !important;
+            margin-right: 8px;
+        }
 
-/* =====================================================
-   FIX TOTAL: 1 CARD (LEVEL + REKOMENDASI + TABLE)
-   + GARIS BIRU TIDAK NUTUP TABLE
-===================================================== */
-.level-section{
-  background:#fff !important;
-  border:1px solid #dbeafe !important;
-  border-left:6px solid #1a5bb8 !important;
-  border-radius:16px !important;
-  padding:16px 16px 14px 16px !important;
-  overflow:hidden !important;
-}
+        /* ====== Stat cards (angka hitam, icon beda warna) ====== */
+        .stat-card-gap {
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            border: 1px solid var(--line);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
 
-/* Header level: jadi bagian dalam (bukan card sendiri) */
-.level-section .level-header-card{
-  background:transparent !important;
-  border:none !important;
-  border-radius:0 !important;
-  padding:0 0 12px 0 !important;
-  margin:0 !important;
-  box-shadow:none !important;
-}
+        .stat-card-gap::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--p), var(--p2));
+        }
 
-/* Rekomendasi: tetap rapi tapi bukan card baru */
-.level-section .rekomendasi-pelatihan{
-  background:transparent !important;
-  border:none !important;
-  border-left:none !important;
-  border-radius:0 !important;
-  box-shadow:none !important;
-  padding:12px 0 0 0 !important;
-  margin:10px 0 0 0 !important;
-  border-top:1px dashed #dbeafe !important;
-}
+        .stat-icon-gap {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
 
-/* Table card: jadi bagian dalam wrapper */
-.level-section .level-table-card{
-  background:transparent !important;
-  border:none !important;
-  border-radius:0 !important;
-  padding:12px 0 0 0 !important;
-  margin:0 !important;
-  box-shadow:none !important;
-}
+        .stat-icon-gap i {
+            font-size: 1.5rem;
+            color: inherit !important;
+        }
 
-/* Biar table gak nempel kiri & gak “kegigit” garis */
-.level-section .ptk-table-container{
-  padding-left:6px !important;
-  padding-right:2px !important;
-  margin-top:10px !important;
-}
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--ink);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
 
-/* Pastikan table full dan gak overflow ke kiri */
-.level-section .ptk-table{
-  width:100% !important;
-  margin:0 !important;
-}
+        .stat-label {
+            font-size: .95rem;
+            color: var(--muted);
+            margin: 0;
+            font-weight: 600;
+        }
 
-/* HAPUS pseudo garis biru lama kalau ada yang masih nyangkut */
-.level-header-card::before,
-.level-table-card::before,
-.rekomendasi-pelatihan::before{
-  content:none !important;
-}
+        /* beda warna icon box per kartu */
+        #analisisContent .row.mb-4>.col-md-3:nth-child(1) .stat-icon-gap {
+            background: #eaf2ff;
+            color: #2563eb;
+        }
 
-/* PAKSA badge Level jadi sama panjang */
-.level-header-card span.badge-level{
-  display: inline-flex !important;
-  flex: 0 0 165px !important;
-  width: 165px !important;
-  max-width: 165px !important;
-  justify-content: center !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-/* ===== SAMAIN LEBAR CARD JENJANG KAYAK CARD ATAS ===== */
+        #analisisContent .row.mb-4>.col-md-3:nth-child(2) .stat-icon-gap {
+            background: #e9f9ef;
+            color: #16a34a;
+        }
 
-/* jangan dorong ke kanan */
-.sub-indikator-card{
-  padding-left: 0 !important;
-}
+        #analisisContent .row.mb-4>.col-md-3:nth-child(3) .stat-icon-gap {
+            background: #fdecec;
+            color: #ef4444;
+        }
 
-/* card jenjang full lebar */
-.jenjang-white-card{
-  width: 100% !important;
-  display: block !important;
-  box-sizing: border-box !important;
-}
+        #analisisContent .row.mb-4>.col-md-3:nth-child(4) .stat-icon-gap {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
 
-/* opsional: biar jaraknya rapi sama statistik */
-.sub-indikator-card.mb-4{
-  margin-top: 6px;
-}
-/* ===== RINGKASAN: JADI CARD PUTIH + HILANGIN GARIS/BORDER ANEH ===== */
+        /* ====== Badges ====== */
+        .badge-target {
+            background: linear-gradient(135deg, var(--p), var(--p2));
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: .75rem;
+            font-weight: 800;
+        }
 
-/* bungkus ringkasan jadi card putih */
-#analisisContent .sub-indikator-card.mt-4{
-  background:#fff !important;
-  border:1px solid rgba(15,23,42,.10) !important;
-  border-radius:18px !important;
-  padding:18px !important;
-  box-shadow:0 10px 26px rgba(2,6,23,.06) !important;
-}
+        .badge-gap {
+            background: linear-gradient(135deg, var(--p), var(--p2)) !important;
+            color: #fff !important;
+            padding: 6px 10px !important;
+            border-radius: 10px !important;
+            font-size: .75rem !important;
+            font-weight: 800 !important;
+        }
 
-/* header ringkasan jangan ada garis bawah */
-#analisisContent .sub-indikator-card.mt-4 .sub-indikator-header{
-  border-bottom:1px solid #e2e8f0 !important;
-  padding-bottom:12px !important;
-  margin-bottom:14px !important;
-}
+        .analisis-wrap .badge.bg-danger {
+            background: linear-gradient(135deg, var(--p), var(--p2)) !important;
+            border: none !important;
+            color: #fff !important;
+        }
 
-/* container tabel ringkasan: hilangin garis putih / border */
-#analisisContent .sub-indikator-card.mt-4 .ptk-table-container{
-  background:transparent !important;
-  border:none !important;
-  box-shadow:none !important;
-  margin-top:0 !important;
-  padding:0 !important;
-}
+        .analisis-wrap .badge.bg-warning {
+            border: none !important;
+            font-weight: 800;
+        }
 
-/* tabel bootstrap yang ringkasan: jangan bordered, jangan ada garis putih */
-#analisisContent .sub-indikator-card.mt-4 table.table{
-  background:transparent !important;
-  border:none !important;
-  margin:0 !important;
-}
-#analisisContent .sub-indikator-card.mt-4 table.table-bordered > :not(caption) > *{
-  border-width:0 !important; /* matiin semua border bawaan */
-}
-#analisisContent .sub-indikator-card.mt-4 table.table thead th{
-  background:#eef2f7 !important;
-  border-bottom:1px solid #e2e8f0 !important;
-}
-#analisisContent .sub-indikator-card.mt-4 table.table tbody td{
-  border-bottom:1px solid #edf2f7 !important;
-}
+        /* ====== Level section ====== */
+        .level-section {
+            margin-top: 16px;
+            margin-bottom: 22px;
+        }
 
+        /* LEVEL HEADER jadi card utama (gabung rekomendasi) */
+        .level-header-card {
+            background: #fff !important;
+            border: 1px solid var(--line) !important;
+            border-radius: 16px !important;
+            padding: 16px 16px 12px !important;
+            margin-bottom: 14px !important;
+        }
+
+        /* Badge level di kiri */
+        .badge-level {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            padding: 8px 14px;
+            border-radius: 12px;
+            line-height: 1;
+            font-weight: 900;
+            font-size: .85rem;
+        }
+
+        /* Rekomendasi jadi section di DALAM card (bukan card baru) */
+        .level-header-card .rekomendasi-pelatihan {
+            margin-top: 14px !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            padding: 14px 0 0 !important;
+            border-top: 1px dashed #dbeafe !important;
+            border-radius: 0 !important;
+        }
+
+        .level-header-card .rekomendasi-pelatihan h6 {
+            color: var(--p) !important;
+            font-weight: 900;
+            margin-bottom: 10px !important;
+        }
+
+        .level-header-card .rekomendasi-pelatihan ul {
+            margin: 0 !important;
+            padding-left: 20px !important;
+        }
+
+        .level-header-card .rekomendasi-pelatihan li {
+            line-height: 1.7 !important;
+            margin-bottom: 10px !important;
+        }
+
+        .level-header-card .rekomendasi-pelatihan li:last-child {
+            margin-bottom: 0 !important;
+        }
+
+        .level-header-card .rekomendasi-pelatihan strong {
+            color: var(--p) !important;
+        }
+
+        /* ====== Level tanpa PTK: gabung jadi 1 card ====== */
+        .level-header-card:has(+ .empty-level) {
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            margin-bottom: 0 !important;
+            border-bottom: none !important;
+        }
+
+        .level-header-card+.empty-level {
+            background: #fff !important;
+            border: 1px solid var(--line) !important;
+            border-top: none !important;
+            border-radius: 0 0 16px 16px !important;
+            margin: 0 0 14px !important;
+            padding: 18px 16px !important;
+        }
+
+        .level-header-card+.empty-level i {
+            font-size: 2.2rem !important;
+            opacity: .55 !important;
+        }
+
+        .level-header-card+.empty-level small {
+            color: var(--muted) !important;
+        }
+
+        /* ====== Table card (INI AJA yang "card tabel") ====== */
+        .level-table-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid var(--line);
+        }
+
+        .ptk-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .ptk-table {
+            font-size: .85rem;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ptk-table th {
+            background: #eef2f7;
+            font-weight: 900;
+            padding: 12px 10px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .ptk-table td {
+            padding: 10px;
+            vertical-align: middle;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .ptk-table tbody tr:hover {
+            background: #f8fafc !important;
+        }
+
+        /* ====== Pagination ====== */
+        .pagination-sm .page-link {
+            font-size: .75rem;
+            padding: .25rem .5rem;
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--p);
+            border-color: var(--p);
+        }
+
+        .page-link {
+            color: var(--p);
+            border: 1px solid #dee2e6;
+        }
+
+        .page-link:hover {
+            color: #0d47a1;
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+
+        /* ====== Responsive ====== */
+        @media (max-width:768px) {
+            .ptk-table {
+                font-size: .8rem;
+            }
+
+            .ptk-table th,
+            .ptk-table td {
+                padding: 8px 6px;
+            }
+        }
+
+        /* ====== Center tombol empty state (kalau ada) ====== */
+        #analisisContent .row .col-12.d-flex .text-center .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
+        #analisisContent .row .col-12.d-flex .text-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ====== MATIIN SEMUA HOVER GERAK / TRANSISI (statis) ====== */
+        .stat-card-gap,
+        .sub-indikator-card,
+        .level-header-card,
+        .level-table-card,
+        .gap-info,
+        .filter-info-card,
+        .jenjang-white-card {
+            transition: none !important;
+        }
+
+        .stat-card-gap:hover,
+        .sub-indikator-card:hover,
+        .level-header-card:hover,
+        .level-table-card:hover,
+        .jenjang-white-card:hover {
+            transform: none !important;
+        }
+
+        /* =====================================================
+       FIX TOTAL: 1 CARD (LEVEL + REKOMENDASI + TABLE)
+       + GARIS BIRU TIDAK NUTUP TABLE
+    ===================================================== */
+        .level-section {
+            background: #fff !important;
+            border: 1px solid #dbeafe !important;
+            border-left: 6px solid #1a5bb8 !important;
+            border-radius: 16px !important;
+            padding: 16px 16px 14px 16px !important;
+            overflow: hidden !important;
+        }
+
+        /* Header level: jadi bagian dalam (bukan card sendiri) */
+        .level-section .level-header-card {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0 0 12px 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
+
+        /* Rekomendasi: tetap rapi tapi bukan card baru */
+        .level-section .rekomendasi-pelatihan {
+            background: transparent !important;
+            border: none !important;
+            border-left: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            padding: 12px 0 0 0 !important;
+            margin: 10px 0 0 0 !important;
+            border-top: 1px dashed #dbeafe !important;
+        }
+
+        /* Table card: jadi bagian dalam wrapper */
+        .level-section .level-table-card {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 12px 0 0 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
+
+        /* Biar table gak nempel kiri & gak “kegigit” garis */
+        .level-section .ptk-table-container {
+            padding-left: 6px !important;
+            padding-right: 2px !important;
+            margin-top: 10px !important;
+        }
+
+        /* Pastikan table full dan gak overflow ke kiri */
+        .level-section .ptk-table {
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
+        /* HAPUS pseudo garis biru lama kalau ada yang masih nyangkut */
+        .level-header-card::before,
+        .level-table-card::before,
+        .rekomendasi-pelatihan::before {
+            content: none !important;
+        }
+
+        /* PAKSA badge Level jadi sama panjang */
+        .level-header-card span.badge-level {
+            display: inline-flex !important;
+            flex: 0 0 165px !important;
+            width: 165px !important;
+            max-width: 165px !important;
+            justify-content: center !important;
+            text-align: center !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        /* ===== SAMAIN LEBAR CARD JENJANG KAYAK CARD ATAS ===== */
+
+        /* jangan dorong ke kanan */
+        .sub-indikator-card {
+            padding-left: 0 !important;
+        }
+
+        /* card jenjang full lebar */
+        .jenjang-white-card {
+            width: 100% !important;
+            display: block !important;
+            box-sizing: border-box !important;
+        }
+
+        /* opsional: biar jaraknya rapi sama statistik */
+        .sub-indikator-card.mb-4 {
+            margin-top: 6px;
+        }
+
+        /* ===== RINGKASAN: JADI CARD PUTIH + HILANGIN GARIS/BORDER ANEH ===== */
+
+        /* bungkus ringkasan jadi card putih */
+        #analisisContent .sub-indikator-card.mt-4 {
+            background: #fff !important;
+            border: 1px solid rgba(15, 23, 42, .10) !important;
+            border-radius: 18px !important;
+            padding: 18px !important;
+            box-shadow: 0 10px 26px rgba(2, 6, 23, .06) !important;
+        }
+
+        /* header ringkasan jangan ada garis bawah */
+        #analisisContent .sub-indikator-card.mt-4 .sub-indikator-header {
+            border-bottom: 1px solid #e2e8f0 !important;
+            padding-bottom: 12px !important;
+            margin-bottom: 14px !important;
+        }
+
+        /* container tabel ringkasan: hilangin garis putih / border */
+        #analisisContent .sub-indikator-card.mt-4 .ptk-table-container {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            margin-top: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* tabel bootstrap yang ringkasan: jangan bordered, jangan ada garis putih */
+        #analisisContent .sub-indikator-card.mt-4 table.table {
+            background: transparent !important;
+            border: none !important;
+            margin: 0 !important;
+        }
+
+        #analisisContent .sub-indikator-card.mt-4 table.table-bordered> :not(caption)>* {
+            border-width: 0 !important;
+            /* matiin semua border bawaan */
+        }
+
+        #analisisContent .sub-indikator-card.mt-4 table.table thead th {
+            background: #eef2f7 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+
+        #analisisContent .sub-indikator-card.mt-4 table.table tbody td {
+            border-bottom: 1px solid #edf2f7 !important;
+        }
     </style>
 
     <div class="container-fluid">
@@ -771,9 +884,12 @@
                                                 Jenjang {{ $jenjang['jenjang_jabatan'] }}
                                             </h5>
                                             <div class="d-flex gap-2 mt-2 flex-wrap">
-                                                <span class="badge-target">Target Level: {{ $jenjang['target_level'] }}</span>
-                                                <span class="badge bg-danger">{{ $jenjang['total_ptk'] }} PTK dengan Gap</span>
-                                                <span class="badge bg-secondary">{{ $jenjang['total_sub_indikator'] }} Sub Indikator Bermasalah</span>
+                                                <span class="badge-target">Target Level:
+                                                    {{ $jenjang['target_level'] }}</span>
+                                                <span class="badge bg-danger">{{ $jenjang['total_ptk'] }} PTK dengan
+                                                    Gap</span>
+                                                <span class="badge bg-secondary">{{ $jenjang['total_sub_indikator'] }} Sub
+                                                    Indikator Bermasalah</span>
                                             </div>
                                         </div>
                                     </div>
@@ -792,12 +908,16 @@
                                                     <div>
                                                         <h6 class="mb-2">
                                                             <i class="ri-list-check text-danger"></i>
-                                                            {{ $sub['sub_indikator_code'] }} - {{ $sub['sub_indikator_name'] }}
+                                                            {{ $sub['sub_indikator_code'] }} -
+                                                            {{ $sub['sub_indikator_name'] }}
                                                         </h6>
                                                         <div class="d-flex gap-2 flex-wrap">
-                                                            <span class="badge bg-secondary">{{ $sub['total_ptk'] }} PTK dengan Gap</span>
-                                                            <span class="badge bg-info">{{ $sub['total_levels'] }} Level Bermasalah</span>
-                                                            <span class="badge-target">Target: Level {{ $sub['target_level'] }}</span>
+                                                            <span class="badge bg-secondary">{{ $sub['total_ptk'] }} PTK
+                                                                dengan Gap</span>
+                                                            <span class="badge bg-info">{{ $sub['total_levels'] }} Level
+                                                                Bermasalah</span>
+                                                            <span class="badge-target">Target: Level
+                                                                {{ $sub['target_level'] }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -823,7 +943,11 @@
                                                         if ($hasGap && isset($levelData['rekomendasi_pelatihan'])) {
                                                             $rekomendasiPelatihan = $levelData['rekomendasi_pelatihan'];
                                                         } elseif ($hasGap && $level < $sub['target_level']) {
-                                                            for ($targetLevel = $level + 1; $targetLevel <= $sub['target_level']; $targetLevel++) {
+                                                            for (
+                                                                $targetLevel = $level + 1;
+                                                                $targetLevel <= $sub['target_level'];
+                                                                $targetLevel++
+                                                            ) {
                                                                 $rekomendasi = getRekomendasiPelatihan(
                                                                     $sub['sub_indikator_id'],
                                                                     'Tahap 1',
@@ -844,23 +968,28 @@
                                                         <div class="level-section">
                                                             <!-- Header Level -->
                                                             <div class="level-header-card">
-                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-center">
                                                                     <div>
                                                                         <span class="badge-level"
                                                                             style="background-color: {{ $levelColors[$level] ?? '#17a2b8' }}; color: white;">
-                                                                            Level {{ $level }} ({{ $levelNames[$level] ?? 'Penerapan' }})
+                                                                            Level {{ $level }}
+                                                                            ({{ $levelNames[$level] ?? 'Penerapan' }})
                                                                         </span>
                                                                         <span class="ms-3 fw-bold">
-                                                                            <i class="ri-user-line"></i> {{ $levelData['ptk_count'] }} PTK
+                                                                            <i class="ri-user-line"></i>
+                                                                            {{ $levelData['ptk_count'] }} PTK
                                                                         </span>
                                                                     </div>
                                                                     <div>
                                                                         @if ($hasGap)
                                                                             <span class="badge-gap me-2">
-                                                                                Gap: +{{ $sub['target_level'] - $level }} level
+                                                                                Gap: +{{ $sub['target_level'] - $level }}
+                                                                                level
                                                                             </span>
                                                                         @endif
-                                                                        <span class="badge bg-warning">{{ $levelData['status'] }}</span>
+                                                                        <span
+                                                                            class="badge bg-warning">{{ $levelData['status'] }}</span>
                                                                     </div>
                                                                 </div>
 
@@ -874,8 +1003,10 @@
                                                                             <ul>
                                                                                 @foreach ($rekomendasiPelatihan as $rek)
                                                                                     <li>
-                                                                                        <strong>Level {{ $rek['level_target'] }}:</strong>
-                                                                                        <span style="white-space: normal !important;">
+                                                                                        <strong>Level
+                                                                                            {{ $rek['level_target'] }}:</strong>
+                                                                                        <span
+                                                                                            style="white-space: normal !important;">
                                                                                             {{ $rek['rekomendasi'] }}
                                                                                         </span>
                                                                                     </li>
@@ -903,19 +1034,27 @@
                                                                         <tbody>
                                                                             @php
                                                                                 $startNumber =
-                                                                                    ($levelData['ptk_list']->currentPage() - 1) *
-                                                                                        $levelData['ptk_list']->perPage() +
+                                                                                    ($levelData[
+                                                                                        'ptk_list'
+                                                                                    ]->currentPage() -
+                                                                                        1) *
+                                                                                        $levelData[
+                                                                                            'ptk_list'
+                                                                                        ]->perPage() +
                                                                                     1;
                                                                             @endphp
 
                                                                             @foreach ($levelData['ptk_list'] as $ptkIndex => $ptk)
                                                                                 <tr>
-                                                                                    <td class="text-center">{{ $startNumber + $ptkIndex }}</td>
+                                                                                    <td class="text-center">
+                                                                                        {{ $startNumber + $ptkIndex }}</td>
                                                                                     <td>{{ $ptk['nip'] ?? '-' }}</td>
-                                                                                    <td><strong>{{ $ptk['nama'] ?? '-' }}</strong></td>
+                                                                                    <td><strong>{{ $ptk['nama'] ?? '-' }}</strong>
+                                                                                    </td>
                                                                                     <td>
                                                                                         @if (!empty($ptk['no_hp']))
-                                                                                            <a href="tel:{{ $ptk['no_hp'] }}">{{ $ptk['no_hp'] }}</a>
+                                                                                            <a
+                                                                                                href="tel:{{ $ptk['no_hp'] }}">{{ $ptk['no_hp'] }}</a>
                                                                                         @else
                                                                                             -
                                                                                         @endif
@@ -939,33 +1078,46 @@
                                                                 @if ($levelData['ptk_list']->hasPages())
                                                                     <div class="mt-3">
                                                                         <nav aria-label="Pagination">
-                                                                            <ul class="pagination pagination-sm justify-content-center mb-0">
+                                                                            <ul
+                                                                                class="pagination pagination-sm justify-content-center mb-0">
                                                                                 {{-- Previous --}}
                                                                                 @if ($levelData['ptk_list']->onFirstPage())
                                                                                     <li class="page-item disabled">
-                                                                                        <span class="page-link">&laquo;</span>
+                                                                                        <span
+                                                                                            class="page-link">&laquo;</span>
                                                                                     </li>
                                                                                 @else
                                                                                     <li class="page-item">
-                                                                                        <a class="page-link" href="{{ $levelData['ptk_list']->previousPageUrl() }}" rel="prev">&laquo;</a>
+                                                                                        <a class="page-link"
+                                                                                            href="{{ $levelData['ptk_list']->previousPageUrl() }}"
+                                                                                            rel="prev">&laquo;</a>
                                                                                     </li>
                                                                                 @endif
 
                                                                                 @php
-                                                                                    $currentPage = $levelData['ptk_list']->currentPage();
-                                                                                    $lastPage = $levelData['ptk_list']->lastPage();
+                                                                                    $currentPage = $levelData[
+                                                                                        'ptk_list'
+                                                                                    ]->currentPage();
+                                                                                    $lastPage = $levelData[
+                                                                                        'ptk_list'
+                                                                                    ]->lastPage();
                                                                                     $start = max(1, $currentPage - 2);
-                                                                                    $end = min($lastPage, $currentPage + 2);
+                                                                                    $end = min(
+                                                                                        $lastPage,
+                                                                                        $currentPage + 2,
+                                                                                    );
                                                                                 @endphp
 
                                                                                 @for ($i = $start; $i <= $end; $i++)
                                                                                     @if ($i == $currentPage)
                                                                                         <li class="page-item active">
-                                                                                            <span class="page-link">{{ $i }}</span>
+                                                                                            <span
+                                                                                                class="page-link">{{ $i }}</span>
                                                                                         </li>
                                                                                     @else
                                                                                         <li class="page-item">
-                                                                                            <a class="page-link" href="{{ $levelData['ptk_list']->url($i) }}">{{ $i }}</a>
+                                                                                            <a class="page-link"
+                                                                                                href="{{ $levelData['ptk_list']->url($i) }}">{{ $i }}</a>
                                                                                         </li>
                                                                                     @endif
                                                                                 @endfor
@@ -973,20 +1125,27 @@
                                                                                 {{-- Next --}}
                                                                                 @if ($levelData['ptk_list']->hasMorePages())
                                                                                     <li class="page-item">
-                                                                                        <a class="page-link" href="{{ $levelData['ptk_list']->nextPageUrl() }}" rel="next">&raquo;</a>
+                                                                                        <a class="page-link"
+                                                                                            href="{{ $levelData['ptk_list']->nextPageUrl() }}"
+                                                                                            rel="next">&raquo;</a>
                                                                                     </li>
                                                                                 @else
                                                                                     <li class="page-item disabled">
-                                                                                        <span class="page-link">&raquo;</span>
+                                                                                        <span
+                                                                                            class="page-link">&raquo;</span>
                                                                                     </li>
                                                                                 @endif
                                                                             </ul>
 
                                                                             <div class="text-center">
                                                                                 <small class="text-muted">
-                                                                                    Menampilkan {{ $levelData['ptk_list']->firstItem() ?? 0 }} -
+                                                                                    Menampilkan
+                                                                                    {{ $levelData['ptk_list']->firstItem() ?? 0 }}
+                                                                                    -
                                                                                     {{ $levelData['ptk_list']->lastItem() ?? 0 }}
-                                                                                    dari {{ $levelData['ptk_list']->total() }} PTK
+                                                                                    dari
+                                                                                    {{ $levelData['ptk_list']->total() }}
+                                                                                    PTK
                                                                                 </small>
                                                                             </div>
                                                                         </nav>
@@ -998,26 +1157,34 @@
                                                         <!-- Level tanpa PTK tapi ada gap -->
                                                         <div class="level-section">
                                                             <div class="level-header-card">
-                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-center">
                                                                     <div>
                                                                         <span class="badge-level"
                                                                             style="background-color: {{ $levelColors[$level] ?? '#17a2b8' }}; color: white;">
-                                                                            Level {{ $level }} ({{ $levelNames[$level] ?? 'Penerapan' }})
+                                                                            Level {{ $level }}
+                                                                            ({{ $levelNames[$level] ?? 'Penerapan' }})
                                                                         </span>
                                                                         <span class="ms-3">
                                                                             <span class="badge-gap">
-                                                                                Gap: +{{ $sub['target_level'] - $level }} level
+                                                                                Gap: +{{ $sub['target_level'] - $level }}
+                                                                                level
                                                                             </span>
                                                                         </span>
                                                                     </div>
                                                                     <div>
-                                                                        <span class="badge bg-secondary">TIDAK ADA PTK</span>
+                                                                        <span class="badge bg-secondary">TIDAK ADA
+                                                                            PTK</span>
                                                                     </div>
                                                                 </div>
 
                                                                 @php
                                                                     $rekomendasiPelatihan = [];
-                                                                    for ($targetLevel = $level + 1; $targetLevel <= $sub['target_level']; $targetLevel++) {
+                                                                    for (
+                                                                        $targetLevel = $level + 1;
+                                                                        $targetLevel <= $sub['target_level'];
+                                                                        $targetLevel++
+                                                                    ) {
                                                                         $rekomendasi = getRekomendasiPelatihan(
                                                                             $sub['sub_indikator_id'],
                                                                             'Tahap 1',
@@ -1043,8 +1210,10 @@
                                                                             <ul>
                                                                                 @foreach ($rekomendasiPelatihan as $rek)
                                                                                     <li>
-                                                                                        <strong>Level {{ $rek['level_target'] }}:</strong>
-                                                                                        <span style="white-space: normal !important;">
+                                                                                        <strong>Level
+                                                                                            {{ $rek['level_target'] }}:</strong>
+                                                                                        <span
+                                                                                            style="white-space: normal !important;">
                                                                                             {{ $rek['rekomendasi'] }}
                                                                                         </span>
                                                                                     </li>
@@ -1059,7 +1228,8 @@
                                                                 <i class="ri-user-unfollow-line"></i>
                                                                 <p class="mt-2 mb-0">Tidak ada PTK di level ini</p>
                                                                 <small class="text-muted">
-                                                                    Level {{ $level }} membutuhkan peningkatan ke level {{ $sub['target_level'] }}
+                                                                    Level {{ $level }} membutuhkan peningkatan ke
+                                                                    level {{ $sub['target_level'] }}
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -1135,7 +1305,9 @@
                                             </li>
                                         @else
                                             <li class="page-item">
-                                                <a class="page-link" href="{{ $analisisData['all_ptks_paginated']->previousPageUrl() }}" rel="prev">&laquo;</a>
+                                                <a class="page-link"
+                                                    href="{{ $analisisData['all_ptks_paginated']->previousPageUrl() }}"
+                                                    rel="prev">&laquo;</a>
                                             </li>
                                         @endif
 
@@ -1153,14 +1325,17 @@
                                                 </li>
                                             @else
                                                 <li class="page-item">
-                                                    <a class="page-link" href="{{ $analisisData['all_ptks_paginated']->url($i) }}">{{ $i }}</a>
+                                                    <a class="page-link"
+                                                        href="{{ $analisisData['all_ptks_paginated']->url($i) }}">{{ $i }}</a>
                                                 </li>
                                             @endif
                                         @endfor
 
                                         @if ($analisisData['all_ptks_paginated']->hasMorePages())
                                             <li class="page-item">
-                                                <a class="page-link" href="{{ $analisisData['all_ptks_paginated']->nextPageUrl() }}" rel="next">&raquo;</a>
+                                                <a class="page-link"
+                                                    href="{{ $analisisData['all_ptks_paginated']->nextPageUrl() }}"
+                                                    rel="next">&raquo;</a>
                                             </li>
                                         @else
                                             <li class="page-item disabled">
