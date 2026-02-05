@@ -919,6 +919,128 @@
 #jenjangChartsContainer .chart-wrapper{
   padding-top: 26px; /* ruang buat legend di atas */
 }
+/* =========================
+   STAT CARD: ANGKA DI SAMPING IKON (TANPA UBAH HTML)
+========================= */
+
+/* jadikan layout 2 kolom: ikon | angka */
+.stat-card{
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  grid-template-areas:
+    "icon number"
+    "label label";
+  align-items: center;
+  column-gap: 14px;
+}
+
+/* tempatkan elemen sesuai area */
+.stat-card > .stat-icon{
+  grid-area: icon;
+  margin-bottom: 0 !important;
+}
+
+.stat-card > .stat-number{
+  grid-area: number;
+  margin: 0 !important;
+  line-height: 1;
+  align-self: center;
+}
+
+.stat-card > .stat-label{
+  grid-area: label;
+  margin-top: 10px !important;
+}
+
+/* kalau ada small di label, tetep rapi */
+.stat-card > .stat-label small{
+  display: block;
+  margin-top: 4px;
+}
+
+/* ukuran icon aman di mobile */
+@media (max-width: 768px){
+  .stat-card{
+    grid-template-columns: 46px 1fr;
+    column-gap: 10px;
+  }
+  .stat-card > .stat-icon{
+    width: 46px;
+    height: 46px;
+  }
+  .stat-card > .stat-number{
+    font-size: 1.6rem;
+  }
+  .stat-card > .stat-label{
+    margin-top: 8px !important;
+    font-size: 0.85rem;
+  }
+}
+
+/* HP kecil banget */
+@media (max-width: 420px){
+  .stat-card > .stat-number{ font-size: 1.45rem; }
+}
+/* =========================
+   SPACE: STAT CARDS -> CHART CARDS
+========================= */
+
+/* Row pertama di #analisisContent (stat cards) kasih jarak ke bawah */
+#analisisContent > .row:first-child{
+  margin-bottom: 22px !important;
+}
+
+/* optional: kalau masih mepet di HP */
+@media (max-width: 768px){
+  #analisisContent > .row:first-child{
+    margin-bottom: 16px !important;
+  }
+}
+/* =========================
+   STAT TEXT STYLE (samain kaya gambar atas)
+   TARUH PALING BAWAH
+========================= */
+
+/* label utama */
+.stat-card .stat-label{
+  margin-top: 10px !important;
+  font-size: 1.05rem;        /* ukuran judul */
+  font-weight: 700;          /* tebal kaya contoh */
+  color: #334155;            /* gelap soft */
+  line-height: 1.25;
+}
+
+
+.stat-card .stat-label small{
+  display: block;            /* turun ke bawah kaya gambar */
+  margin-top: 6px;
+  font-size: .92rem;
+  font-weight: 600;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+/* mobile: sedikit diperkecil biar muat */
+@media (max-width: 768px){
+  .stat-card .stat-label{
+    font-size: .98rem;
+  }
+  .stat-card .stat-label small{
+    font-size: .85rem;
+  }
+}
+/* override: kecilin dikit + jangan item pekat */
+.stat-card .stat-label{
+  font-size: .98rem !important;   /* kecilin dikit */
+  color: #475569 !important;      /* bukan item pekat */
+  font-weight: 700 !important;
+}
+@media (max-width: 768px){
+  .stat-card .stat-label{
+    font-size: .92rem !important;
+  }
+}
+
     </style>
 
     <div class="container-fluid">
