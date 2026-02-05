@@ -64,6 +64,7 @@
         
 /* =====================================================
    DETAIL PTK — CLEAN STYLE (PUTIH + BIRU)
+   (tanpa ubah DB/BE/HTML)
 ===================================================== */
 :root{
   --p:#1a5bb8;
@@ -191,8 +192,8 @@
 
 /* ====== Sub indikator card ====== */
 .sub-indikator-card{
-  border-left:none !important;
-  padding-left:20px !important;
+  border-left: none !important;
+  padding-left: 20px !important;   /* biar gak kerasa mepet */
 }
 .sub-indikator-header{
   display:flex;
@@ -203,7 +204,7 @@
   border-bottom:1px solid var(--line);
 }
 
-/* ====== CARD PUTIH UNTUK 1 JENJANG ====== */
+/* ====== CARD PUTIH BARU UNTUK 1 JENJANG (Jenjang Madya -> sampai PTK) ====== */
 .jenjang-white-card{
   background:#fff;
   border:1px solid rgba(15,23,42,.10);
@@ -230,7 +231,7 @@
 }
 .gap-info i{ color:var(--p) !important; margin-right:8px; }
 
-/* ====== Stat cards ====== */
+/* ====== Stat cards (angka hitam, icon beda warna) ====== */
 .stat-card-gap{
   background:#fff;
   border-radius:16px;
@@ -310,7 +311,7 @@
 /* ====== Level section ====== */
 .level-section{ margin-top:16px; margin-bottom:22px; }
 
-/* Level header card */
+/* LEVEL HEADER jadi card utama (gabung rekomendasi) */
 .level-header-card{
   background:#fff !important;
   border:1px solid var(--line) !important;
@@ -319,7 +320,7 @@
   margin-bottom:14px !important;
 }
 
-/* Badge level */
+/* Badge level di kiri */
 .badge-level{
   display:inline-flex;
   align-items:center;
@@ -332,7 +333,7 @@
   font-size:.85rem;
 }
 
-/* Rekomendasi di dalam header card */
+/* Rekomendasi jadi section di DALAM card (bukan card baru) */
 .level-header-card .rekomendasi-pelatihan{
   margin-top:14px !important;
   border:none !important;
@@ -358,7 +359,7 @@
 .level-header-card .rekomendasi-pelatihan li:last-child{ margin-bottom:0 !important; }
 .level-header-card .rekomendasi-pelatihan strong{ color:var(--p) !important; }
 
-/* Level tanpa PTK gabung */
+/* ====== Level tanpa PTK: gabung jadi 1 card ====== */
 .level-header-card:has(+ .empty-level){
   border-bottom-left-radius:0 !important;
   border-bottom-right-radius:0 !important;
@@ -379,7 +380,7 @@
 }
 .level-header-card + .empty-level small{ color:var(--muted) !important; }
 
-/* ====== Table card ====== */
+/* ====== Table card (INI AJA yang "card tabel") ====== */
 .level-table-card{
   background:#fff;
   border-radius:16px;
@@ -390,28 +391,27 @@
 /* =====================================================
    TABLE LINES — FIX (GARIS LEBIH HALUS + RAPI)
 ===================================================== */
-.ptk-table-container{
-  border:1px solid #e2e8f0 !important;
-  border-radius:14px !important;
-  overflow:hidden !important;
-  background:#fff !important;
-}
 
-/* --- 1) tabel custom .ptk-table --- */
-.ptk-table{
-  width:100% !important;
-  border-collapse:separate !important;
-  border-spacing:0 !important;
+/* container tabel jadi card halus + rounded */
+.ptk-table-container{
+  max-height:400px;
+  overflow-y:auto;
+  margin-top:10px;
 }
-.ptk-table thead th{
-  background:#f1f5f9 !important;
-  color:#0f172a !important;
-  font-weight:900 !important;
-  padding:12px 10px !important;
+.ptk-table{
+  font-size:.85rem;
+  width:100%;
+  border-collapse:collapse;
+}
+.ptk-table th{
+  background:#eef2f7;
+  font-weight:900;
+  padding:12px 10px;
   position:sticky;
   top:0;
   z-index:1;
   white-space:nowrap;
+
   border-bottom:1px solid #e2e8f0 !important;
   border-right:1px solid #eef2f7 !important;
 }
@@ -423,44 +423,7 @@
   border-bottom:1px solid #eef2f7 !important;
   border-right:1px solid #f1f5f9 !important;
 }
-.ptk-table tbody td:last-child{ border-right:none !important; }
-.ptk-table tbody tr:last-child td{ border-bottom:none !important; }
-
 .ptk-table tbody tr:hover{ background:#f8fafc !important; }
-
-/* --- 2) tabel bootstrap ringkasan: .table.table-bordered --- */
-#analisisContent .sub-indikator-card.mt-4 table.table{
-  width:100% !important;
-  border-collapse:separate !important;
-  border-spacing:0 !important;
-  background:#fff !important;
-  margin:0 !important;
-}
-#analisisContent .sub-indikator-card.mt-4 table.table-bordered > :not(caption) > *{
-  border-width:0 !important;
-}
-#analisisContent .sub-indikator-card.mt-4 table.table thead th{
-  background:#f1f5f9 !important;
-  color:#0f172a !important;
-  border-bottom:1px solid #e2e8f0 !important;
-  border-right:1px solid #eef2f7 !important;
-}
-#analisisContent .sub-indikator-card.mt-4 table.table thead th:last-child{
-  border-right:none !important;
-}
-#analisisContent .sub-indikator-card.mt-4 table.table tbody td{
-  border-bottom:1px solid #eef2f7 !important;
-  border-right:1px solid #f1f5f9 !important;
-}
-#analisisContent .sub-indikator-card.mt-4 table.table tbody td:last-child{
-  border-right:none !important;
-}
-#analisisContent .sub-indikator-card.mt-4 table.table tbody tr:last-child td{
-  border-bottom:none !important;
-}
-#analisisContent .sub-indikator-card.mt-4 table.table tbody tr:hover{
-  background:#f8fafc !important;
-}
 
 /* ====== Pagination ====== */
 .pagination-sm .page-link{ font-size:.75rem; padding:.25rem .5rem; }
@@ -471,10 +434,10 @@
 /* ====== Responsive ====== */
 @media (max-width:768px){
   .ptk-table{ font-size:.8rem; }
-  .ptk-table th, .ptk-table td{ padding:8px 6px !important; }
+  .ptk-table th, .ptk-table td{ padding:8px 6px; }
 }
 
-/* ====== Center tombol empty state ====== */
+/* ====== Center tombol empty state (kalau ada) ====== */
 #analisisContent .row .col-12.d-flex .text-center .btn{
   display:inline-flex;
   justify-content:center;
@@ -488,7 +451,8 @@
   align-items:center;
 }
 
-/* ====== MATIIN SEMUA HOVER GERAK / TRANSISI (KECUALI STAT CARD) ====== */
+/* ====== MATIIN SEMUA HOVER GERAK / TRANSISI ====== */
+.stat-card-gap,
 .sub-indikator-card,
 .level-header-card,
 .level-table-card,
@@ -506,6 +470,7 @@
 
 /* =====================================================
    FIX TOTAL: 1 CARD (LEVEL + REKOMENDASI + TABLE)
+   + GARIS BIRU TIDAK NUTUP TABLE
 ===================================================== */
 .level-section{
   background:#fff !important;
@@ -515,6 +480,8 @@
   padding:16px 16px 14px 16px !important;
   overflow:hidden !important;
 }
+
+/* Header level: jadi bagian dalam (bukan card sendiri) */
 .level-section .level-header-card{
   background:transparent !important;
   border:none !important;
@@ -523,6 +490,8 @@
   margin:0 !important;
   box-shadow:none !important;
 }
+
+/* Rekomendasi: tetap rapi tapi bukan card baru */
 .level-section .rekomendasi-pelatihan{
   background:transparent !important;
   border:none !important;
@@ -533,6 +502,8 @@
   margin:10px 0 0 0 !important;
   border-top:1px dashed #dbeafe !important;
 }
+
+/* Table card: jadi bagian dalam wrapper */
 .level-section .level-table-card{
   background:transparent !important;
   border:none !important;
@@ -541,42 +512,60 @@
   margin:0 !important;
   box-shadow:none !important;
 }
+
+/* Biar table gak nempel kiri & gak “kegigit” garis */
 .level-section .ptk-table-container{
   padding-left:6px !important;
   padding-right:2px !important;
   margin-top:10px !important;
 }
+
+/* Pastikan table full dan gak overflow ke kiri */
 .level-section .ptk-table{
   width:100% !important;
   margin:0 !important;
 }
+
+/* HAPUS pseudo garis biru lama kalau ada yang masih nyangkut */
 .level-header-card::before,
 .level-table-card::before,
 .rekomendasi-pelatihan::before{
   content:none !important;
 }
+
+/* PAKSA badge Level jadi sama panjang */
 .level-header-card span.badge-level{
-  display:inline-flex !important;
-  flex:0 0 165px !important;
-  width:165px !important;
-  max-width:165px !important;
-  justify-content:center !important;
-  text-align:center !important;
-  white-space:nowrap !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis !important;
+  display: inline-flex !important;
+  flex: 0 0 165px !important;
+  width: 165px !important;
+  max-width: 165px !important;
+  justify-content: center !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+/* ===== SAMAIN LEBAR CARD JENJANG KAYAK CARD ATAS ===== */
+
+/* jangan dorong ke kanan */
+.sub-indikator-card{
+  padding-left: 0 !important;
 }
 
-/* ===== SAMAIN LEBAR CARD JENJANG ===== */
-.sub-indikator-card{ padding-left:0 !important; }
+/* card jenjang full lebar */
 .jenjang-white-card{
-  width:100% !important;
-  display:block !important;
-  box-sizing:border-box !important;
+  width: 100% !important;
+  display: block !important;
+  box-sizing: border-box !important;
 }
-.sub-indikator-card.mb-4{ margin-top:6px; }
 
-/* ===== RINGKASAN: CARD PUTIH ===== */
+/* opsional: biar jaraknya rapi sama statistik */
+.sub-indikator-card.mb-4{
+  margin-top: 6px;
+}
+/* ===== RINGKASAN: JADI CARD PUTIH + HILANGIN GARIS/BORDER ANEH ===== */
+
+/* bungkus ringkasan jadi card putih */
 #analisisContent .sub-indikator-card.mt-4{
   background:#fff !important;
   border:1px solid rgba(15,23,42,.10) !important;
@@ -584,11 +573,15 @@
   padding:18px !important;
   box-shadow:0 10px 26px rgba(2,6,23,.06) !important;
 }
+
+/* header ringkasan jangan ada garis bawah */
 #analisisContent .sub-indikator-card.mt-4 .sub-indikator-header{
   border-bottom:1px solid #e2e8f0 !important;
   padding-bottom:12px !important;
   margin-bottom:14px !important;
 }
+
+/* container tabel ringkasan: hilangin garis putih / border */
 #analisisContent .sub-indikator-card.mt-4 .ptk-table-container{
   background:transparent !important;
   border:none !important;
@@ -596,13 +589,15 @@
   margin-top:0 !important;
   padding:0 !important;
 }
+
+/* tabel bootstrap yang ringkasan: jangan bordered, jangan ada garis putih */
 #analisisContent .sub-indikator-card.mt-4 table.table{
   background:transparent !important;
   border:none !important;
   margin:0 !important;
 }
 #analisisContent .sub-indikator-card.mt-4 table.table-bordered > :not(caption) > *{
-  border-width:0 !important;
+  border-width:0 !important; /* matiin semua border bawaan */
 }
 #analisisContent .sub-indikator-card.mt-4 table.table thead th{
   background:#eef2f7 !important;
@@ -611,32 +606,83 @@
 #analisisContent .sub-indikator-card.mt-4 table.table tbody td{
   border-bottom:1px solid #edf2f7 !important;
 }
-
 /* ================================
    PAKSA: GARIS TABLE JANGAN ITEM
    (taruh paling bawah)
 ================================ */
-.table{ --bs-table-border-color: #e2e8f0 !important; }
 
+/* Bootstrap 5 table vars (kalau kepake) */
+.table{
+  --bs-table-border-color: #e2e8f0 !important;
+}
+
+/* Card container */
+.ptk-table-container{
+  border:1px solid #e2e8f0 !important;
+  border-radius:14px !important;
+  overflow:hidden !important;
+  background:#fff !important;
+}
+
+/* ===== 1) TABEL CUSTOM (.ptk-table) ===== */
+.ptk-table{
+  width:100% !important;
+  border-collapse:separate !important;
+  border-spacing:0 !important;
+}
+
+/* HEADER */
 .ptk-table thead th{
-  border-left:none !important;
-  border-right:none !important;
-}
-.ptk-table tbody td{
+  background:#f1f5f9 !important;
+  color:#0f172a !important;
+  border-bottom:1px solid #e2e8f0 !important;
+
+  /* MATIIN garis vertikal item */
   border-left:none !important;
   border-right:none !important;
 }
 
+/* BODY */
+.ptk-table tbody td{
+  border-bottom:1px solid #eef2f7 !important;
+
+  /* MATIIN garis vertikal item */
+  border-left:none !important;
+  border-right:none !important;
+}
+
+/* terakhir: jangan ada garis bawah */
+.ptk-table tbody tr:last-child td{ border-bottom:none !important; }
+
+/* ===== 2) TABEL RINGKASAN (bootstrap table-bordered) ===== */
+#analisisContent .sub-indikator-card.mt-4 table.table{
+  width:100% !important;
+  border-collapse:separate !important;
+  border-spacing:0 !important;
+  background:#fff !important;
+}
+
+/* PAKSA override semua border bawaan bootstrap */
 #analisisContent .sub-indikator-card.mt-4 table.table.table-bordered,
 #analisisContent .sub-indikator-card.mt-4 table.table.table-bordered *{
   border-color:#e2e8f0 !important;
 }
+
+/* MATIIN border kotak/vertikal bawaan */
 #analisisContent .sub-indikator-card.mt-4 table.table.table-bordered > :not(caption) > * > *{
   border-left:none !important;
   border-right:none !important;
   border-top:none !important;
-  border-bottom:1px solid #eef2f7 !important;
+  border-bottom:1px solid #eef2f7 !important; /* cuma garis bawah halus */
 }
+
+/* header garis bawah lebih tegas dikit */
+#analisisContent .sub-indikator-card.mt-4 table.table thead th{
+  background:#f1f5f9 !important;
+  border-bottom:1px solid #e2e8f0 !important;
+}
+
+/* baris terakhir tanpa garis bawah */
 #analisisContent .sub-indikator-card.mt-4 table.table tbody tr:last-child td{
   border-bottom:none !important;
 }
@@ -644,6 +690,8 @@
 /* =====================================================
    RESPONSIVE MOBILE FIX (taruh paling bawah)
 ===================================================== */
+
+/* Global spacing mobile */
 @media (max-width: 576px) {
   .container-fluid { padding-left: 12px !important; padding-right: 12px !important; }
 
@@ -695,7 +743,7 @@
   }
   .stat-card-gap{ padding:14px !important; border-radius:14px !important; }
   .stat-number{ font-size:1.5rem !important; }
-  .stat-label{ font-size:.84rem !important; }
+  .stat-label{ font-size:.85rem !important; }
 
   /* Jenjang card */
   .jenjang-white-card{
@@ -776,11 +824,15 @@
     font-size:1.8rem !important;
   }
 
-  /* TABLE scroll */
+  /* ===========================
+     TABLE: bikin aman di HP
+     =========================== */
   .ptk-table-container{
     overflow-x:auto !important;
     -webkit-overflow-scrolling:touch;
   }
+
+  /* kasih min-width biar bisa scroll, ga mepet */
   .ptk-table{
     min-width:740px !important;
     font-size:.82rem !important;
@@ -790,6 +842,7 @@
     padding:8px 8px !important;
   }
 
+  /* ringkasan table bootstrap juga scroll */
   #analisisContent .sub-indikator-card.mt-4 .ptk-table-container{
     overflow-x:auto !important;
     -webkit-overflow-scrolling:touch;
@@ -804,6 +857,7 @@
     white-space:nowrap !important;
   }
 
+  /* link tel jangan nge-break */
   a[href^="tel:"]{ white-space:nowrap !important; }
 }
 
@@ -813,11 +867,13 @@
   .ptk-table-container{ overflow-x:auto !important; -webkit-overflow-scrolling:touch; }
   .ptk-table{ min-width:720px !important; }
 }
-
 /* =====================================================
    MOBILE: TABLE HORIZONTAL SCROLL (GESER KANAN-KIRI)
+   taruh paling bawah
 ===================================================== */
 @media (max-width: 576px){
+
+  /* semua container tabel boleh geser */
   .ptk-table-container{
     overflow-x: auto !important;
     overflow-y: hidden !important;
@@ -826,22 +882,26 @@
     max-width: 100% !important;
   }
 
+  /* paksa tabel custom melebar biar bisa di-scroll */
   .ptk-table{
-    width: max-content !important;
-    min-width: 760px !important;
+    width: max-content !important;   /* penting */
+    min-width: 760px !important;     /* atur sesuai kolom */
   }
 
+  /* paksa tabel ringkasan (bootstrap) juga melebar */
   #analisisContent .sub-indikator-card.mt-4 table.table{
-    width: max-content !important;
-    min-width: 980px !important;
+    width: max-content !important;   /* penting */
+    min-width: 980px !important;     /* ringkasan kolom lebih banyak */
   }
 
+  /* biar isi kolom gak patah random, jadi enak digeser */
   .ptk-table th, .ptk-table td,
   #analisisContent .sub-indikator-card.mt-4 table.table th,
   #analisisContent .sub-indikator-card.mt-4 table.table td{
     white-space: nowrap !important;
   }
 
+  /* khusus kolom Nama & Sekolah boleh panjang tapi tetep satu baris */
   .ptk-table td:nth-child(3),
   .ptk-table td:nth-child(5),
   #analisisContent .sub-indikator-card.mt-4 table.table td:nth-child(3),
@@ -854,6 +914,7 @@
 
 /* =========================================
    SAMAIN UKURAN BADGE (GAP / STATUS / TARGET)
+   taruh paling bawah
 ========================================= */
 #analisisContent .badge,
 #analisisContent .badge-gap,
@@ -863,9 +924,9 @@
   align-items:center !important;
   justify-content:center !important;
 
-  height:32px !important;
-  padding:0 12px !important;
-  font-size:.78rem !important;
+  height:32px !important;          /* <= ukuran seragam */
+  padding:0 12px !important;       /* <= padding seragam */
+  font-size:.78rem !important;     /* <= font seragam */
   font-weight:800 !important;
   line-height:1 !important;
   border-radius:12px !important;
@@ -873,11 +934,13 @@
   white-space:nowrap !important;
 }
 
+/* khusus badge-level biar gak terlalu panjang */
 #analisisContent .badge-level{
   height:34px !important;
   padding:0 14px !important;
 }
 
+/* mobile: sedikit kecil biar muat */
 @media (max-width:576px){
   #analisisContent .badge,
   #analisisContent .badge-gap,
@@ -890,85 +953,17 @@
   }
 }
 
+/* OPTIONAL: samain jarak antar badge biar rapi */
 #analisisContent .d-flex.gap-2.flex-wrap{
   gap:8px !important;
 }
-
-/* =========================================
-   STAT CARD GAP: ANGKA DI SAMPING IKON
-   (tanpa ubah HTML)
-========================================= */
-.stat-card-gap{
-  display: grid !important;
-  grid-template-columns: 56px 1fr !important;
-  grid-template-areas:
-    "icon number"
-    "label label" !important;
-  align-items: center !important;
-  column-gap: 14px !important;
-}
-
-.stat-card-gap > .stat-icon-gap{
-  grid-area: icon !important;
-  margin: 0 !important;
-}
-
-.stat-card-gap > .stat-number{
-  grid-area: number !important;
-  margin: 0 !important;
-  line-height: 1 !important;
-  align-self: center !important;
-}
-
-.stat-card-gap > .stat-label{
-  grid-area: label !important;
-  margin-top: 10px !important;
-}
-
-/* mobile tweak */
-@media (max-width: 576px){
-  .stat-card-gap{
-    grid-template-columns: 46px 1fr !important;
-    column-gap: 10px !important;
-  }
-  .stat-card-gap > .stat-icon-gap{
-    width: 46px !important;
-    height: 46px !important;
-    border-radius: 12px !important;
-  }
-  .stat-card-gap > .stat-number{
-    font-size: 1.6rem !important;
-  }
-  .stat-card-gap > .stat-label{
-    margin-top: 8px !important;
-    font-size: .84rem !important;
-  }
-}
-
-/* =========================================
-   HOVER CUMA 4 STAT CARD ANGKA
-   (yang bawah ga ikut)
-========================================= */
-.stat-card-gap{
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
-  will-change: transform, box-shadow;
-}
-.stat-card-gap:hover{
-  transform: translateY(-4px) !important;
-  box-shadow: 0 14px 34px rgba(2,6,23,.12) !important;
-  border-color: rgba(26,91,184,.22) !important;
-}
-@media (max-width: 768px){
-  .stat-card-gap:hover{ transform: translateY(-2px) !important; }
-}
-
     </style>
 
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0"></h4>
+                    <h4 class="mb-sm-0">{{ $title }}</h4>
                     <div class="page-title-right">
                         <ol class="breadcrumb m-0">
                             <li class="breadcrumb-item"><a href="{{ route('analisis.index') }}">Analisis</a></li>
@@ -1138,7 +1133,7 @@
                                                 Jenjang {{ $jenjang['jenjang_jabatan'] }}
                                             </h5>
                                             <div class="d-flex gap-2 mt-2 flex-wrap">
-                                                <span class="badge-target">Level Gap: {{ $jenjang['target_level'] }}</span>
+                                                <span class="badge-target">Target Level: {{ $jenjang['target_level'] }}</span>
                                                 <span class="badge bg-danger">{{ $jenjang['total_ptk'] }} PTK dengan Gap</span>
                                                 <span class="badge bg-secondary">{{ $jenjang['total_sub_indikator'] }} Sub Indikator Bermasalah</span>
                                             </div>
@@ -1149,7 +1144,7 @@
                                         <i class="ri-information-line"></i>
                                         <strong>Keterangan:</strong> PTK di jenjang {{ $jenjang['jenjang_jabatan'] }} harus
                                         mencapai level {{ $jenjang['target_level'] }}.
-                                        Hanya menampilkan sub indikator yang memiliki PTK dengan level di bawah capaian level.
+                                        Hanya menampilkan sub indikator yang memiliki PTK dengan level di bawah target.
                                     </div>
 
                                     @foreach ($jenjang['detail_per_sub_indikator'] as $subIndex => $sub)

@@ -857,7 +857,7 @@
 
                             $meetSet = [];
                             $summaryAch = []; // indikator tercapai (unique)
-                            $summaryRek = []; // rekomendasi gap (unique, match targetLevel) ✅ include name+code+text
+                            $summaryRek = []; // rekomendasi gap (unique, match targetLevel) ✅ include name+code
 
                             foreach ($data as $r) {
                                 // decode rekomendasi_info biar aman (string/object/array)
@@ -918,7 +918,7 @@
 
                                         $summaryRek[$key] = [
                                             'level' => $gl,
-                                            'text'  => $gt,   // ✅ INI YANG DITAMPILIN DI "PERLU DITINGKATKAN"
+                                            'text'  => $gt,   // disimpan aja (kalau suatu saat perlu), tapi UI ga nampilin
                                             'name'  => $nm,
                                             'code'  => $cd,
                                         ];
@@ -934,7 +934,7 @@
                             $summaryRekList = array_values($summaryRek);
                         @endphp
 
-                        {{-- ✅ SUMMARY --}}
+                        {{-- ✅ SUMMARY (MODEL SAMA KODE ATAS) --}}
                         <div class="summary-box">
                             <div class="summary-top">
                                 <p class="summary-title mb-0">
@@ -945,7 +945,7 @@
                                     @if($targetLevel > 0)
                                         <span class="badge bg-{{ $levelColors[$targetLevel] ?? 'secondary' }}-subtle text-{{ $levelColors[$targetLevel] ?? 'secondary' }}"
                                               style="border-radius:999px; padding:8px 12px; font-weight:900;">
-                                            Capaian Lv {{ $targetLevel }}
+                                            Target Lv {{ $targetLevel }}
                                         </span>
                                         <span class="badge bg-secondary-subtle text-secondary"
                                               style="border-radius:999px; padding:8px 12px; font-weight:900;">
@@ -967,7 +967,7 @@
                                         <i class="ri-check-line me-1"></i> Good job!
                                     </span>
                                     <span class="ms-2">
-                                        Anda telah memenuhi sesuai dengan level capaian Anda (Capaian Level {{ $targetLevel }}).
+                                        Anda telah memenuhi sesuai dengan level capaian Anda (Target Level {{ $targetLevel }}).
                                     </span>
 
                                     <div class="summary-rek">
@@ -1012,7 +1012,7 @@
                                         <i class="ri-error-warning-line me-1"></i> Perlu peningkatan
                                     </span>
                                     <span class="ms-2">
-                                        Anda belum mencapai sesuai dengan level jabatan Anda (Capaian Level {{ $targetLevel }}).
+                                        Anda belum mencapai sesuai dengan level jabatan Anda (Target Level {{ $targetLevel }}).
                                         Maka direkomendasikan:
                                     </span>
 
@@ -1052,7 +1052,7 @@
                                                 @endif
                                             </div>
 
-                                            {{-- KANAN: PERLU DITINGKATKAN + ISI (PERSIS KAYA GAMBAR) --}}
+                                            {{-- KANAN: PERLU DITINGKATKAN (SAMA KODE ATAS: NAME + CODE, TANPA TEXT REKOM) --}}
                                             <div class="summary-sec">
                                                 <div class="summary-sec-head">
                                                     <div class="summary-sec-title">
@@ -1062,14 +1062,7 @@
                                                 </div>
 
                                                 @if(count($summaryRekList))
-                                                    @foreach($summaryRekList as $i => $sr)
-                                                        @php
-                                                            $full = trim((string)($sr['text'] ?? '')); // ✅ isi rekomendasi
-                                                            // rapihin biar "1. 2. 3." turun baris
-                                                            $pretty = $full !== '' ? preg_replace('/\s*(\d+\.)\s*/', "\n$1 ", $full) : '';
-                                                            $pretty = ltrim((string)$pretty);
-                                                        @endphp
-
+                                                    @foreach($summaryRekList as $sr)
                                                         <div class="summary-item">
                                                             <span class="badge bg-danger-subtle text-danger"
                                                                   style="border-radius:999px; font-weight:900; padding:8px 12px;">
@@ -1080,13 +1073,6 @@
                                                                 {{ $sr['name'] ?? '-' }}
                                                                 @if(!empty($sr['code']))
                                                                     <small>Kode: {{ $sr['code'] }}</small>
-                                                                @endif
-
-                                                                {{-- ✅ SUB-ISI rekomendasi tampil (kayak gambar) --}}
-                                                                @if($pretty !== '')
-                                                                    <small style="margin-top:6px; white-space:pre-line;">
-                                                                        {{ $pretty }}
-                                                                    </small>
                                                                 @endif
                                                             </div>
                                                         </div>
