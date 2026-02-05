@@ -28,14 +28,7 @@
     @endphp
 
     <style>
-        /* =====================================================
-                                                                               ANALISIS LAYOUT STYLES - CLEAN + RESPONSIVE (MOBILE SAFE)
-                                                                               (Tidak ubah desain desktop, fokus rapihin + mobile)
-                                                                               ===================================================== */
 
-        /* =========================
-                                                                               EMPTY STATE BUTTON CENTER
-                                                                            ========================= */
         #analisisContent .row .col-12.d-flex .text-center {
             display: flex;
             flex-direction: column;
@@ -50,9 +43,6 @@
             margin-right: auto !important;
         }
 
-        /* =========================
-                                                                               BASE WRAP + HEADER
-                                                                            ========================= */
         .analisis-wrap {
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             border-radius: 20px;
@@ -130,9 +120,6 @@
             color: rgba(255, 255, 255, 0.9) !important;
         }
 
-        /* =========================
-                                                                               FILTER SECTION
-                                                                            ========================= */
         .analisis-filter {
             background: white;
             border-radius: 16px;
@@ -152,15 +139,6 @@
             /* tetap center */
         }
 
-        =======
-        /* =====================================================
-                                                                           ANALISIS LAYOUT STYLES - CLEAN + RESPONSIVE (MOBILE SAFE)
-                                                                           (Tidak ubah desain desktop, fokus rapihin + mobile)
-                                                                           ===================================================== */
-
-        /* =========================
-                                                                           EMPTY STATE BUTTON CENTER
-                                                                        ========================= */
         #analisisContent .row .col-12.d-flex .text-center {
             display: flex;
             flex-direction: column;
@@ -175,9 +153,6 @@
             margin-right: auto !important;
         }
 
-        /* =========================
-                                                                           BASE WRAP + HEADER
-                                                                        ========================= */
         .analisis-wrap {
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             border-radius: 20px;
@@ -255,9 +230,7 @@
             color: rgba(255, 255, 255, 0.9) !important;
         }
 
-        /* =========================
-                                                                           FILTER SECTION
-                                                                        ========================= */
+
         .analisis-filter {
             background: white;
             border-radius: 16px;
@@ -395,9 +368,6 @@
             background-color: #f8fafc;
         }
 
-        /* =========================
-                                                                               STAT CARDS
-                                                                            ========================= */
         .stat-card {
             background: white;
             border-radius: 16px;
@@ -463,9 +433,6 @@
             color: #94a3b8;
         }
 
-        /* =========================
-                                                                               CHART CONTAINER (SAFE)
-                                                                            ========================= */
         .chart-container {
             background: #fff;
             border-radius: 16px;
@@ -520,9 +487,6 @@
                                                                               max-height: 100% !important;
                                                                             } */
 
-        /* =========================
-                                                                               JENJANG CHART LIST (SCROLL)
-                                                                            ========================= */
         .jenjang-charts-scroll-container {
             position: relative;
             width: 100%;
@@ -559,9 +523,7 @@
             z-index: 2;
         }
 
-        /* =========================
-                                                                               TABLE CARD + TABLE
-                                                                            ========================= */
+
         .table-card {
             background: white;
             border-radius: 16px;
@@ -646,9 +608,6 @@
             box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
         }
 
-        /* =========================
-                                                                               EMPTY STATE + LOADING + ERROR
-                                                                            ========================= */
         .empty-state {
             background: white;
             border-radius: 16px;
@@ -721,9 +680,6 @@
             border-left: 5px solid #ef4444;
         }
 
-        /* =========================
-                                                                               TABS (MOBILE SCROLL)
-                                                                            ========================= */
         .nav-tabs {
             border-bottom: 2px solid #e2e8f0;
             margin-bottom: 20px;
@@ -774,9 +730,6 @@
             border-top: none;
         }
 
-        /* =========================
-                                                                               RESPONSIVE BREAKPOINTS
-                                                                            ========================= */
 
         /* <= 1200px: kolom filter 3 */
         @media (max-width: 1200px) {
@@ -952,9 +905,6 @@
             }
         }
 
-        /* =========================
-                                                                               TABLE HORIZONTAL SCROLL (MOBILE FRIENDLY)
-                                                                               ========================= */
 
         /* pastikan wrapper bisa geser ke samping */
         .table-responsive {
@@ -1008,9 +958,7 @@
             }
         }
 
-        /* =========================
-                                                                               PRINT (tetap)
-                                                                            ========================= */
+
         @media print {
             .analisis-wrap {
                 box-shadow: none;
@@ -1033,9 +981,6 @@
             }
         }
 
-        /* =========================
-                                                                               STAT CARDS: MOBILE 2x2
-                                                                            ========================= */
         @media (max-width: 768px) {
 
             /* bikin 2 kolom */
@@ -1068,9 +1013,6 @@
             }
         }
 
-        /* =========================
-                                                                               TOP 4 CHART: LEGEND RAPIH DI DALAM CARD
-                                                                            ========================= */
         @media (max-width: 768px) {
 
             /* kasih ruang bawah buat legend biar ga mentok */
@@ -1102,9 +1044,6 @@
             }
         }
 
-        /* =========================
-                                                                               FORCE CHART 2-UP ON MOBILE
-                                                                            ========================= */
         @media (max-width: 768px) {
 
             /* paksa row jadi 2 kolom rapet */
@@ -1149,10 +1088,6 @@
             }
         }
 
-        /* =========================
-                                                                               HARD FIX: JENJANG CANVAS HEIGHT
-                                                                               (khusus chart per jenjang)
-                                                                            ========================= */
         #jenjangChartsContainer .chart-card {
             height: 380px;
             display: flex;
@@ -1175,10 +1110,6 @@
             }
         }
 
-        /* =========================
-                                                                               HARD OVERRIDE: JENJANG CHART JANGAN IKUT 2-UP MOBILE
-                                                                               (TARUH PALING BAWAH CSS)
-                                                                            ========================= */
         @media (max-width: 768px) {
 
             /* balikin row jenjang ke normal */
@@ -1269,9 +1200,6 @@
             background-color: #f8fafc;
         }
 
-        /* =========================
-                                                                           STAT CARDS
-                                                                        ========================= */
         .stat-card {
             background: white;
             border-radius: 16px;
@@ -1337,9 +1265,6 @@
             color: #94a3b8;
         }
 
-        /* =========================
-                                                                           CHART CONTAINER (SAFE)
-                                                                        ========================= */
         .chart-container {
             background: #fff;
             border-radius: 16px;
@@ -1394,9 +1319,6 @@
                                                                           max-height: 100% !important;
                                                                         } */
 
-        /* =========================
-                                                                           JENJANG CHART LIST (SCROLL)
-                                                                        ========================= */
         .jenjang-charts-scroll-container {
             position: relative;
             width: 100%;
@@ -1433,15 +1355,12 @@
             z-index: 2;
         }
 
-        /* =========================
-                                                                           TABLE CARD + TABLE
-                                                                        ========================= */
         .table-card {
             background: white;
             border-radius: 16px;
             padding: 25px;
             margin-bottom: 25px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 8px 2====5px rgba(0, 0, 0, 0.06);
             position: relative;
             overflow: hidden;
         }
@@ -1520,9 +1439,6 @@
             box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
         }
 
-        /* =========================
-                                                                           EMPTY STATE + LOADING + ERROR
-                                                                        ========================= */
         .empty-state {
             background: white;
             border-radius: 16px;
@@ -1595,9 +1511,6 @@
             border-left: 5px solid #ef4444;
         }
 
-        /* =========================
-                                                                           TABS (MOBILE SCROLL)
-                                                                        ========================= */
         .nav-tabs {
             border-bottom: 2px solid #e2e8f0;
             margin-bottom: 20px;
@@ -1648,9 +1561,6 @@
             border-top: none;
         }
 
-        /* =========================
-                                                                           RESPONSIVE BREAKPOINTS
-                                                                        ========================= */
 
         /* <= 1200px: kolom filter 3 */
         @media (max-width: 1200px) {
@@ -1826,9 +1736,6 @@
             }
         }
 
-        /* =========================
-                                                                           TABLE HORIZONTAL SCROLL (MOBILE FRIENDLY)
-                                                                           ========================= */
 
         /* pastikan wrapper bisa geser ke samping */
         .table-responsive {
@@ -1882,9 +1789,6 @@
             }
         }
 
-        /* =========================
-                                                                           PRINT (tetap)
-                                                                        ========================= */
         @media print {
             .analisis-wrap {
                 box-shadow: none;
@@ -1907,9 +1811,6 @@
             }
         }
 
-        /* =========================
-                                                                           STAT CARDS: MOBILE 2x2
-                                                                        ========================= */
         @media (max-width: 768px) {
 
             /* bikin 2 kolom */
@@ -1942,9 +1843,6 @@
             }
         }
 
-        /* =========================
-                                                                           TOP 4 CHART: LEGEND RAPIH DI DALAM CARD
-                                                                        ========================= */
         @media (max-width: 768px) {
 
             /* kasih ruang bawah buat legend biar ga mentok */
@@ -1976,10 +1874,7 @@
             }
         }
 
-        /* =========================
-                                                                           FORCE CHART 2-UP ON MOBILE
-                                                                        ========================= */
-        @media (max-width: 768px) {
+       @media (max-width: 768px) {
 
             /* paksa row jadi 2 kolom rapet */
             #analisisContent .row {
@@ -2023,10 +1918,6 @@
             }
         }
 
-        /* =========================
-                                                                           HARD FIX: JENJANG CANVAS HEIGHT
-                                                                           (khusus chart per jenjang)
-                                                                        ========================= */
         #jenjangChartsContainer .chart-card {
             height: 380px;
             display: flex;
@@ -2049,10 +1940,6 @@
             }
         }
 
-        /* =========================
-                                                                           HARD OVERRIDE: JENJANG CHART JANGAN IKUT 2-UP MOBILE
-                                                                           (TARUH PALING BAWAH CSS)
-                                                                        ========================= */
         @media (max-width: 768px) {
 
             /* balikin row jenjang ke normal */
@@ -2125,10 +2012,6 @@
             /* ruang buat legend di atas */
         }
 
-        /* =========================
-                                                                           STAT CARD: ANGKA DI SAMPING IKON (TANPA UBAH HTML)
-                                                                        ========================= */
-
         /* jadikan layout 2 kolom: ikon | angka */
         .stat-card {
             display: grid;
@@ -2193,10 +2076,6 @@
             }
         }
 
-        /* =========================
-                                                                           SPACE: STAT CARDS -> CHART CARDS
-                                                                        ========================= */
-
         /* Row pertama di #analisisContent (stat cards) kasih jarak ke bawah */
         #analisisContent>.row:first-child {
             margin-bottom: 22px !important;
@@ -2208,11 +2087,6 @@
                 margin-bottom: 16px !important;
             }
         }
-
-        /* =========================
-                                                                           STAT TEXT STYLE (samain kaya gambar atas)
-                                                                           TARUH PALING BAWAH
-                                                                        ========================= */
 
         /* label utama */
         .stat-card .stat-label {
@@ -2262,6 +2136,225 @@
                 font-size: .92rem !important;
             }
         }
+
+
+#analisisContent > .row:nth-of-type(2),
+#analisisContent > .row:nth-of-type(3) {
+  float: left !important;
+  width: 50% !important;
+  display: block !important;        /* matiin flex row bootstrap utk yg ini */
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* rapihin biar card chart-nya tetep full di kolom */
+#analisisContent > .row:nth-of-type(2) .col-md-6,
+#analisisContent > .row:nth-of-type(3) .col-md-6 {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+/* jangan biarin konten setelahnya nyangkut di samping float */
+#analisisContent > *:nth-child(n+4) {
+  clear: both;
+}
+
+/* MOBILE: balikin jadi stack */
+@media (max-width: 768px) {
+  #analisisContent > .row:nth-of-type(2),
+  #analisisContent > .row:nth-of-type(3) {
+    float: none !important;
+    width: 100% !important;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+/* =========================================================
+   FIX DOUGHNUT ONLY (JENJANG JABATAN / PENDIDIKAN / KELAMIN)
+   - Naikin posisi doughnut (hilangin space kosong)
+   - Legend tetap bawah
+   - Ukuran konsisten
+   - Tidak ganggu chart lain
+   ========================================================= */
+
+/* target 3 card doughnut aja */
+#analisisContent .chart-container:has(#jenjangDistributionChart),
+#analisisContent .chart-container:has(#jenjangPendidikanChart),
+#analisisContent .chart-container:has(#jenisKelaminChart) {
+  /* tinggi card jangan kegedean */
+  height: 420px !important;
+
+  /* layout vertikal */
+  display: flex !important;
+  flex-direction: column !important;
+
+  /* biar chart area naik */
+  justify-content: flex-start !important;
+
+  /* amanin overflow legend */
+  overflow: visible !important;
+
+  /* padding rapi */
+  padding: 20px !important;
+}
+
+/* judul jangan makan tempat kebanyakan */
+#analisisContent .chart-container:has(#jenjangDistributionChart) .chart-title,
+#analisisContent .chart-container:has(#jenjangPendidikanChart) .chart-title,
+#analisisContent .chart-container:has(#jenisKelaminChart) .chart-title {
+  margin-bottom: 6px !important;
+  line-height: 1.2 !important;
+}
+
+/* bikin area chart (canvas) naik, bukan di tengah */
+#analisisContent .chart-container:has(#jenjangDistributionChart) canvas,
+#analisisContent .chart-container:has(#jenjangPendidikanChart) canvas,
+#analisisContent .chart-container:has(#jenisKelaminChart) canvas {
+  /* jangan full tinggi container (ini penyebab space kosong kebawah) */
+  height: auto !important;
+  width: 100% !important;
+  display: block !important;
+
+  /* center */
+  margin-left: auto !important;
+  margin-right: auto !important;
+
+  /* naikin posisi */
+  margin-top: 6px !important;
+  margin-bottom: 0 !important;
+
+  /* batasi ukuran doughnut biar konsisten */
+  max-width: 320px !important;
+  max-height: 320px !important;
+}
+
+/* khusus kalau kamu pakai wrapper doughnut (jenjang jabatan udah ada wrapper) */
+#analisisContent .chart-container:has(#jenjangDistributionChart) .chart-canvas-wrap.is-doughnut {
+  /* bikin wrapper ga kebesaran */
+  width: 100% !important;
+  max-width: 360px !important;
+
+  /* naikin ke atas */
+  margin: 0 auto !important;
+  padding: 0 !important;
+
+  /* jangan bikin ruang bawah */
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+}
+
+/* canvas di wrapper: jangan dipaksa 100% tinggi */
+#analisisContent .chart-container:has(#jenjangDistributionChart) .chart-canvas-wrap.is-doughnut canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 320px !important;
+  max-height: 320px !important;
+}
+
+/* =========================================================
+   MOBILE: kecilin biar muat + tetap naik
+   ========================================================= */
+@media (max-width: 768px) {
+  #analisisContent .chart-container:has(#jenjangDistributionChart),
+  #analisisContent .chart-container:has(#jenjangPendidikanChart),
+  #analisisContent .chart-container:has(#jenisKelaminChart) {
+    height: 360px !important;
+    padding: 14px !important;
+  }
+
+  #analisisContent .chart-container:has(#jenjangDistributionChart) canvas,
+  #analisisContent .chart-container:has(#jenjangPendidikanChart) canvas,
+  #analisisContent .chart-container:has(#jenisKelaminChart) canvas {
+    max-width: 260px !important;
+    max-height: 260px !important;
+    margin-top: 4px !important;
+  }
+
+  #analisisContent .chart-container:has(#jenjangDistributionChart) .chart-canvas-wrap.is-doughnut canvas {
+    max-width: 260px !important;
+    max-height: 260px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  #analisisContent .chart-container:has(#jenjangDistributionChart),
+  #analisisContent .chart-container:has(#jenjangPendidikanChart),
+  #analisisContent .chart-container:has(#jenisKelaminChart) {
+    height: 340px !important;
+  }
+
+  #analisisContent .chart-container:has(#jenjangDistributionChart) canvas,
+  #analisisContent .chart-container:has(#jenjangPendidikanChart) canvas,
+  #analisisContent .chart-container:has(#jenisKelaminChart) canvas {
+    max-width: 240px !important;
+    max-height: 240px !important;
+  }
+}
+
+/* doughnut wrapper: naikkan chart, space kosong hilang */
+.chart-canvas-wrap.is-doughnut{
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 0 !important;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* ini bikin dia naik */
+}
+
+/* jangan paksa canvas jadi 100% tinggi card */
+.chart-canvas-wrap.is-doughnut canvas{
+  width: 100% !important;
+  height: auto !important;
+  max-width: 320px;
+  max-height: 320px;
+  display: block;
+}
+/* =========================================================
+   FIX: TABEL TAB Rekomendasi Gap (Sub Indikator & Rekomendasi)
+   - Biar teks panjang turun ke bawah (wrap)
+   - Biar gak kepaksa scroll horizontal gara-gara nowrap global
+   ========================================================= */
+#jenjangTabContent .table-responsive{
+  overflow-x: visible !important;   /* matiin scroll khusus tabel ini */
+}
+
+#jenjangTabContent .table-responsive .table{
+  min-width: 0 !important;          /* ngalahin min-width 980/1100/1200 */
+  width: 100% !important;
+  table-layout: fixed;              /* biar kolom wrap rapi */
+}
+
+/* default: kolom lain tetap nowrap biar angka/level gak berantakan */
+#jenjangTabContent .table-responsive .table th,
+#jenjangTabContent .table-responsive .table td{
+  white-space: nowrap !important;
+  vertical-align: top;
+}
+
+/* Kolom 2 = Sub Indikator, Kolom 6 = Rekomendasi -> boleh turun kebawah */
+#jenjangTabContent .table-responsive .table th:nth-child(2),
+#jenjangTabContent .table-responsive .table td:nth-child(2),
+#jenjangTabContent .table-responsive .table th:nth-child(6),
+#jenjangTabContent .table-responsive .table td:nth-child(6){
+  white-space: normal !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+/* optional: kasih ruang biar enak dibaca */
+#jenjangTabContent .table-responsive .table td:nth-child(2){
+  width: 32%;
+}
+#jenjangTabContent .table-responsive .table td:nth-child(6){
+  width: 34%;
+}
+
     </style>
 
     <div class="container-fluid">
@@ -2497,45 +2590,51 @@
                         </div>
                     @endif
 
-                    <!-- Chart 2: Distribusi Jenjang Jabatan -->
-                    <div class="col-md-6">
-                        <div class="chart-container">
-                            <div class="chart-title">
-                                <i class="ri-pie-chart-line"></i> Distribusi Jenjang Jabatan
-                                <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
-                            </div>
-
-                            <div class="chart-canvas-wrap is-doughnut">
-                                <canvas id="jenjangDistributionChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
+<!-- Doughnut Row: Jabatan + Pendidikan -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <div class="chart-title">
+                <i class="ri-pie-chart-line"></i> Distribusi Jenjang Jabatan
+                <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
             </div>
 
-            <!-- Charts Row 2: Distribusi Berdasarkan PTK -->
-            <div class="row">
-                <!-- Chart 3: Distribusi Jenjang Pendidikan -->
-                <div class="col-md-6">
-                    <div class="chart-container">
-                        <div class="chart-title">
-                            <i class="ri-school-line"></i> Distribusi Jenjang Pendidikan
-                            <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
-                        </div>
-                        <canvas id="jenjangPendidikanChart" height="300"></canvas>
-                    </div>
-                </div>
-
-                <!-- Chart 4: Distribusi Jenis Kelamin -->
-                <div class="col-md-6">
-                    <div class="chart-container">
-                        <div class="chart-title">
-                            <i class="ri-user-line"></i> Distribusi Jenis Kelamin <br>
-                            <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
-                        </div>
-                        <canvas id="jenisKelaminChart" height="300"></canvas>
-                    </div>
-                </div>
+            <div class="chart-canvas-wrap is-doughnut">
+                <canvas id="jenjangDistributionChart"></canvas>
             </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="chart-container">
+            <div class="chart-title">
+                <i class="ri-school-line"></i> Distribusi Jenjang Pendidikan
+                <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
+            </div>
+
+            <div class="chart-canvas-wrap is-doughnut">
+                <canvas id="jenjangPendidikanChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Doughnut Row: Kelamin -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <div class="chart-title">
+                <i class="ri-user-line"></i> Distribusi Jenis Kelamin
+                <small class="text-muted ms-2">(Berdasarkan PTK yang menjawab)</small>
+            </div>
+
+            <div class="chart-canvas-wrap is-doughnut">
+                <canvas id="jenisKelaminChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 
             <!-- Chart 5: Semua Sub Indikator -->
             @if (!empty($analisisData['all_sub_indikators_chart']['labels']))
@@ -2999,9 +3098,7 @@
 @section('sipproja-js')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        /* =====================================================
-                                                                                                                                                                                                                                       GLOBAL CHART INSTANCE
-                                                                                                                                                                                                                                    ===================================================== */
+
         let levelDistributionChart = null;
         let jenjangDistributionChart = null;
         let jenjangPendidikanChart = null;
@@ -3012,9 +3109,6 @@
         let levelTerendahkabkotaChart = null
         let levelPerKotaChart = null;
 
-        /* =====================================================
-           RESET FORM
-        ===================================================== */
         document.getElementById('btnReset')?.addEventListener('click', function() {
             document.getElementById('kegiatanSelect').value = '';
             document.getElementById('pangkatSelect').value = '';
@@ -3025,9 +3119,6 @@
             document.getElementById('analisisForm').submit();
         });
 
-        /* =====================================================
-           FORM SUBMIT AJAX
-        ===================================================== */
         document.getElementById('analisisForm')?.addEventListener('submit', function(e) {
             e.preventDefault();
             loadAnalisis();
@@ -3077,60 +3168,83 @@
             const selectElement = document.querySelector(`[name="${paramName}"]`);
             return selectElement ? selectElement.value : '';
         }
-        /* =====================================================
-           UPDATE HTML CONTENT
-        ===================================================== */
-        function updateAnalisisContent(data) {
-            let html = `
+
+function updateAnalisisContent(data) {
+  let html = `
     <div class="row">
-        ${statCard('ri-user-3-line','Total PTK<br><small>Semua Filter</small>',data.statistik?.total_ptk ?? 0,'#1a5bb8')}
-        ${statCard('ri-checkbox-circle-line','PTK Menjawab<br><small>Kegiatan</small>',data.statistik?.ptk_menjawab ?? 0,'#28a745')}
- ${statCard('ri-user-forbid-line','PTK Belum<br>Menjawab',data.statistik?.ptk_belum_menjawab ?? 0,'#dc3545')}
-        ${statCard('ri-progress-4-line','Progress<br>Pengisian',(data.statistik?.persentase_isi ?? 0)+'%','#dc3545')}
-    </div>
-
-
-
-
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="chart-container">
-                <div class="chart-title"><i class="ri-arrow-down-line"></i> Distribusi Level PTK Per Provinsi <small class="text-muted">(Level terendah yang dicapai PTK di semua sub indikator)</small></div>
-                <canvas id="levelTerendahChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-      <div class="row">
-        <div class="col-md-6">
-            <div class="chart-container">
-                <div class="chart-title"><i class="ri-arrow-down-line"></i> Distribusi Level PTK Per Kab/kota <small class="text-muted">(Level terendah yang dicapai PTK di semua sub indikator)</small></div>
-                <canvas id="levelTerendahkabkotaChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-        <div class="col-md-6">
-            <div class="chart-container">
-                <div class="chart-title"><i class="ri-pie-chart-line"></i> Distribusi Jenjang Jabatan <small class="text-muted">(PTK yang menjawab)</small></div>
-                <canvas id="jenjangDistributionChart" height="300"></canvas>
-            </div>
-        </div>
+      ${statCard('ri-user-3-line','Total PTK<br><small>Semua Filter</small>',data.statistik?.total_ptk ?? 0,'#1a5bb8')}
+      ${statCard('ri-checkbox-circle-line','PTK Menjawab<br><small>Kegiatan</small>',data.statistik?.ptk_menjawab ?? 0,'#28a745')}
+      ${statCard('ri-user-forbid-line','PTK Belum<br>Menjawab',data.statistik?.ptk_belum_menjawab ?? 0,'#dc3545')}
+      ${statCard('ri-progress-4-line','Progress<br>Pengisian',(data.statistik?.persentase_isi ?? 0)+'%','#dc3545')}
     </div>
 
     <div class="row">
-        <div class="col-md-6">
-            <div class="chart-container">
-                <div class="chart-title"><i class="ri-school-line"></i> Distribusi Jenjang Pendidikan <small class="text-muted">(PTK yang menjawab)</small></div>
-                <canvas id="jenjangPendidikanChart" height="300"></canvas>
-            </div>
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">
+            <i class="ri-arrow-down-line"></i> Distribusi Level PTK Per Provinsi
+            <small class="text-muted">(Level terendah yang dicapai PTK di semua sub indikator)</small>
+          </div>
+          <canvas id="levelTerendahChart" height="300"></canvas>
         </div>
-        <div class="col-md-6">
-            <div class="chart-container">
-                <div class="chart-title"><i class="ri-user-line"></i> Distribusi Jenis Kelamin <small class="text-muted">(PTK yang menjawab)</small></div>
-                <canvas id="jenisKelaminChart" height="300"></canvas>
-            </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">
+            <i class="ri-arrow-down-line"></i> Distribusi Level PTK Per Kab/kota
+            <small class="text-muted">(Level terendah yang dicapai PTK di semua sub indikator)</small>
+          </div>
+          <canvas id="levelTerendahkabkotaChart" height="300"></canvas>
         </div>
-    </div>`;
+      </div>
+    </div>
+
+    <!-- ✅ ROW DOUGHNUT: Jabatan + Pendidikan -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">
+            <i class="ri-pie-chart-line"></i> Distribusi Jenjang Jabatan
+            <small class="text-muted">(PTK yang menjawab)</small>
+          </div>
+          <div class="chart-canvas-wrap is-doughnut">
+            <canvas id="jenjangDistributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">
+            <i class="ri-school-line"></i> Distribusi Jenjang Pendidikan
+            <small class="text-muted">(PTK yang menjawab)</small>
+          </div>
+          <div class="chart-canvas-wrap is-doughnut">
+            <canvas id="jenjangPendidikanChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ ROW DOUGHNUT: Kelamin -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">
+            <i class="ri-user-line"></i> Distribusi Jenis Kelamin
+            <small class="text-muted">(PTK yang menjawab)</small>
+          </div>
+          <div class="chart-canvas-wrap is-doughnut">
+            <canvas id="jenisKelaminChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
 
             // Tambahkan chart level per kota jika ada data
             if (data.distribusi_level_per_kota?.labels?.length > 0) {
@@ -3150,9 +3264,7 @@
         </div>
     </div>`;
             }
-            /* =====================================================
-               TABEL PTK BELUM MENJAWAB - YANG SUDAH DIPERBAIKI
-            ===================================================== */
+
             if (data.ptk_belum_menjawab && Array.isArray(data.ptk_belum_menjawab) && data.ptk_belum_menjawab.length > 0) {
                 let ptkRows = '';
 
@@ -3435,13 +3547,13 @@
                                     <td class="text-center">${counter++}</td>
                                     <td>
                                         ${gapIndex === 0 ? `
-                                                                                                                                                                                                                                                                <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                                                                                                                                                                                                <span class="fw-medium">${rek.sub_indikator_name ?
-                                                                                                                                                                                                                                                                    (rek.sub_indikator_name.length > 40 ?
-                                                                                                                                                                                                                                                                        rek.sub_indikator_name.substring(0, 40) + '...' :
-                                                                                                                                                                                                                                                                        rek.sub_indikator_name
-                                                                                                                                                                                                                                                                    ) : '-'}</span>
-                                                                                                                                                                                                                                                            ` : ''}
+                                                                                                                                                                                                                <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                                                                                                                                                <span class="fw-medium">${rek.sub_indikator_name ?
+                                                                                                                                                                                                                    (rek.sub_indikator_name.length > 40 ?
+                                                                                                                                                                                                                        rek.sub_indikator_name.substring(0, 40) + '...' :
+                                                                                                                                                                                                                        rek.sub_indikator_name
+                                                                                                                                                                                                                    ) : '-'}</span>
+                                                                                                                                                                                                            ` : ''}
                                     </td>
                                           <td class="text-center">
                                         ${gap.level_gap > 0 ?
@@ -3722,9 +3834,6 @@
             setTimeout(() => renderCharts(data), 100);
         }
 
-        /* =====================================================
-           STAT CARD HELPER
-        ===================================================== */
         function statCard(icon, label, value, color) {
             return `
     <div class="col-md-3">
@@ -3738,9 +3847,7 @@
     </div>`;
         }
 
-        /* =====================================================
-           HELPER FUNCTIONS - TAMBAHKAN FUNGSI INI
-        ===================================================== */
+
         function hitungRataRataLevel(jenjangData) {
             try {
                 // Debug: Lihat struktur data
@@ -3804,9 +3911,6 @@
             return names[level] || 'Penerapan';
         }
 
-        /* =====================================================
-           RENDER ALL CHARTS
-        ===================================================== */
         function renderCharts(data) {
             console.log('Rendering charts with data:', data);
 
@@ -3971,7 +4075,6 @@
             }
 
 
-            /* ================= LEVEL PER KOTA LAYERED BAR CHART ================= */
             const levelPerKotaCtx = document.getElementById('levelPerKotaChart')?.getContext('2d');
             if (levelPerKotaCtx && data.distribusi_level_per_kota) {
                 levelPerKotaChart = new Chart(levelPerKotaCtx, {
@@ -4036,7 +4139,6 @@
                 });
             }
 
-            /* ================= JENJANG DISTRIBUTION (BERDASARKAN PTK) ================= */
             const jenjangCtx = document.getElementById('jenjangDistributionChart')?.getContext('2d');
             if (jenjangCtx) {
                 const src = data.jenjang_distribution?.length ?
@@ -4086,7 +4188,6 @@
                 });
             }
 
-            /* ================= JENJANG PENDIDIKAN DISTRIBUTION ================= */
             const jenjangPendidikanCtx = document.getElementById('jenjangPendidikanChart')?.getContext('2d');
             if (jenjangPendidikanCtx) {
                 const src = data.jenjang_pendidikan_distribution?.length ?
@@ -4135,7 +4236,7 @@
                     }
                 });
             }
-            /* ================= JENIS KELAMIN DISTRIBUTION (BERDASARKAN PTK) ================= */
+
             const jenisKelaminCtx = document.getElementById('jenisKelaminChart')?.getContext('2d');
             if (jenisKelaminCtx) {
                 const src = data.jenis_kelamin_distribution?.length ?
@@ -4185,7 +4286,6 @@
                 });
             }
 
-            /* ================= ALL SUB INDIKATOR (BERDASARKAN PTK) ================= */
             const allSubCtx = document.getElementById('allSubIndikatorsChart')?.getContext('2d');
             if (allSubCtx && data.all_sub_indikators_chart) {
                 const chartData = data.all_sub_indikators_chart;
@@ -4267,7 +4367,6 @@
             }
 
 
-            /* ================= PELATIHAN CHART ================= */
             const pelatihanCtx = document.getElementById('pelatihanChart')?.getContext('2d');
             if (pelatihanCtx && data.pelatihan_data?.length > 0) {
                 const pelatihanData = data.pelatihan_data;
@@ -4358,12 +4457,9 @@
                 });
             }
 
-
-            /* ================= RENDER JENJANG CHARTS ================= */
             renderJenjangCharts(data);
         }
 
-        /* ================= RENDER JENJANG CHARTS ================= */
         function renderJenjangCharts(data) {
             console.log('Rendering jenjang charts:', data?.sub_indikator_per_jenjang);
 
@@ -4495,9 +4591,7 @@
             });
         }
 
-        /* =====================================================
-           INITIAL LOAD (SSR DATA)
-        ===================================================== */
+
         @if (isset($analisisData) && !isset($analisisData['error']))
             document.addEventListener('DOMContentLoaded', () => {
                 console.log('Initial load dengan data:', @json($analisisData));
