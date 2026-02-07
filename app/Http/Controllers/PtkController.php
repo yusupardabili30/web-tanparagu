@@ -104,19 +104,24 @@ class PtkController extends Controller
             // Untuk Quiz 2: Hitung total soal case berdasarkan entity
             $totalCases = SoalCase::where('entity', $kegiatan->entity)->count();
 
-            // Hitung jawaban yang sudah selesai
-            $completedCases = DB::table('ptk_jawaban as pj')
-                ->join('soal as s', 's.sub_indikator_id', '=', 'pj.sub_indikator_id')
-                ->join('soal_case as sc', 'sc.soal_case_id', '=', 's.soal_case_id')
-                ->where('pj.kegiatan_id', $kegiatan_id)
-                ->where('pj.ptk_id', $ptk->ptk_id)
-                ->where('pj.tahap', 2)
-                ->where('sc.entity', $kegiatan->entity)
-                ->whereNotNull('pj.level')
-                ->distinct('sc.soal_case_id')
-                ->count('sc.soal_case_id');
+            // PERBAIKAN: Jika tidak ada case sama sekali, langsung false
+            if ($totalCases === 0) {
+                $isFinished = false;
+            } else {
+                // Hitung jawaban yang sudah selesai
+                $completedCases = DB::table('ptk_jawaban as pj')
+                    ->join('soal as s', 's.sub_indikator_id', '=', 'pj.sub_indikator_id')
+                    ->join('soal_case as sc', 'sc.soal_case_id', '=', 's.soal_case_id')
+                    ->where('pj.kegiatan_id', $kegiatan_id)
+                    ->where('pj.ptk_id', $ptk->ptk_id)
+                    ->where('pj.tahap', 2)
+                    ->where('sc.entity', $kegiatan->entity)
+                    ->whereNotNull('pj.level')
+                    ->distinct('sc.soal_case_id')
+                    ->count('sc.soal_case_id');
 
-            $isFinished = ($completedCases >= $totalCases);
+                $isFinished = ($completedCases >= $totalCases);
+            }
         } else {
             // Untuk Quiz 1
             $totalIndicators = DB::table('soal')
@@ -125,15 +130,20 @@ class PtkController extends Controller
                 ->distinct('indikator_id')
                 ->count('indikator_id');
 
-            $completedIndicators = DB::table('ptk_jawaban')
-                ->where('kegiatan_id', $kegiatan_id)
-                ->where('ptk_id', $ptk->ptk_id)
-                ->where('tahap', 1)
-                ->whereNotNull('bobot')
-                ->distinct('indikator_id')
-                ->count('indikator_id');
+            // PERBAIKAN: Jika tidak ada indikator sama sekali, langsung false
+            if ($totalIndicators === 0) {
+                $isFinished = false;
+            } else {
+                $completedIndicators = DB::table('ptk_jawaban')
+                    ->where('kegiatan_id', $kegiatan_id)
+                    ->where('ptk_id', $ptk->ptk_id)
+                    ->where('tahap', 1)
+                    ->whereNotNull('bobot')
+                    ->distinct('indikator_id')
+                    ->count('indikator_id');
 
-            $isFinished = ($completedIndicators >= $totalIndicators);
+                $isFinished = ($completedIndicators >= $totalIndicators);
+            }
         }
 
 

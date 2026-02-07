@@ -13,6 +13,7 @@ use App\Models\PtkJawaban;
 use App\Models\SoalJawaban;
 use App\Models\SubIndikator;
 use App\Models\PtkJawabanDetail;
+use App\Models\PtkJawabanAdjusment;
 use App\Models\PangkatJabatan;
 use App\Models\PtkJawabanRekomendasi;
 use Illuminate\Http\Request;
@@ -705,6 +706,34 @@ class SoalController extends Controller
                         'level' => $level_final
                     ]);
 
+                    //start insert tabel ptk_jawaban_adjusment
+                    $adjustment = PtkJawabanAdjusment::where('kegiatan_id', $kegiatan_id)
+                        ->where('ptk_id', $ptk->ptk_id)
+                        ->where('tahap', $tahap)
+                        ->first();
+
+                    // Jika belum ada data sama sekali → INSERT (jawaban pertama)
+                    if (!$adjustment) {
+                        PtkJawabanAdjusment::updateOrCreate([
+                            'kegiatan_id' => $kegiatan_id,
+                            'tahap' => $tahap,
+                            'ptk_id' => $ptk->ptk_id,
+                            'level_adjusment' => $level_final,
+                        ]);
+                    }
+                    // Jika sudah ada data → UPDATE hanya jika level baru lebih kecil
+                    else {
+                        $ljBaru = $level_final;
+                        $ljLama = $adjustment->level_adjusment;
+
+                        if ($ljBaru < $ljLama) {
+                            $adjustment->update([
+                                'level_adjusment' => $ljBaru
+                            ]);
+                        }
+                    }
+                    //end insert tabel ptk_jawaban_adjusment
+
 
                     //start insert tabel ptk_jawaban_rekomendasi
                     $i = 0;
@@ -745,6 +774,39 @@ class SoalController extends Controller
                         ]);
                     }
 
+
+                    //start insert tabel ptk_jawaban_adjusment
+                    $level_final = $soal->level;
+                    $adjustment = PtkJawabanAdjusment::where('kegiatan_id', $kegiatan_id)
+                        ->where('ptk_id', $ptk->ptk_id)
+                        ->where('tahap', $tahap)
+                        ->first();
+
+                    // Jika belum ada data sama sekali → INSERT (jawaban pertama)
+                    if (!$adjustment) {
+                        PtkJawabanAdjusment::updateOrCreate([
+                            'kegiatan_id' => $kegiatan_id,
+                            'tahap' => $tahap,
+                            'ptk_id' => $ptk->ptk_id,
+                            'level_adjusment' => 5, // Level 4 atau 5
+                        ]);
+                    }
+                    // Jika sudah ada data → UPDATE hanya jika level baru lebih kecil
+                    else {
+                        $ljBaru = $level_final;
+                        $ljLama = $adjustment->level_adjusment;
+
+                        if ($ljBaru < $ljLama) {
+                            $adjustment->update([
+                                'level_adjusment' => $ljBaru
+                            ]);
+                        }
+                    }
+                    //end insert tabel ptk_jawaban_adjusment
+
+
+
+
                     $next = Soal::where('sub_indikator_id', $sub_indikator->sub_indikator_id)
                         ->where('no_urut', $current_no_urut + 1)
                         ->first();
@@ -773,6 +835,36 @@ class SoalController extends Controller
                         'selisih' => $durasi_sub,
                         'level' => $level_final
                     ]);
+
+
+                    // TAMBAHKAN INI: INSERT KE ADJUSMENT JIKA LEVEL 4 ATAU 5 BERHASIL
+                    //start insert tabel ptk_jawaban_adjusment
+                    $adjustment = PtkJawabanAdjusment::where('kegiatan_id', $kegiatan_id)
+                        ->where('ptk_id', $ptk->ptk_id)
+                        ->where('tahap', $tahap)
+                        ->first();
+
+                    // Jika belum ada data sama sekali → INSERT (jawaban pertama)
+                    if (!$adjustment) {
+                        PtkJawabanAdjusment::updateOrCreate([
+                            'kegiatan_id' => $kegiatan_id,
+                            'tahap' => $tahap,
+                            'ptk_id' => $ptk->ptk_id,
+                            'level_adjusment' => $level_final, // Level 4 atau 5
+                        ]);
+                    }
+                    // Jika sudah ada data → UPDATE hanya jika level baru lebih kecil
+                    else {
+                        $ljBaru = $level_final;
+                        $ljLama = $adjustment->level_adjusment;
+
+                        if ($ljBaru < $ljLama) {
+                            $adjustment->update([
+                                'level_adjusment' => $ljBaru
+                            ]);
+                        }
+                    }
+                    //end insert tabel ptk_jawaban_adjusment
 
 
                     //start insert tabel ptk_jawaban_rekomendasi

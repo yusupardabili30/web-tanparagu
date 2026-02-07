@@ -1566,7 +1566,7 @@
                 if (event.persisted) {
                     const soalId = {{ $soal->soal_id ?? 0 }};
                     const visitedKey = 'quiz2_visited_' + soalId;
-                    alert(visitedKey);
+
                     if (sessionStorage.getItem(visitedKey) === 'true') {
                         showBackButtonWarning();
                     }

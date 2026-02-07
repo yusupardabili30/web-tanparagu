@@ -1,887 +1,807 @@
 @extends('layouts.main-user')
 @section('mycontent')
 
-<div class="container-fluid">
-    <!-- Jika belum ada Font Awesome -->
+    <div class="container-fluid">
+        <!-- Jika belum ada Font Awesome -->
 
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <!-- SweetAlert2 CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
-    <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
-<style>
-:root{
-  --mm-primary: #1a4d8e;                 /* #1a4 = #11aa44 */
-  --mm-primary-hover: #163f74;
-  --mm-primary-focus:  rgba(26,75,184,.25);
-}
+        <!-- SweetAlert2 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="{{ asset('build/css/login.min.css?v=' . time()) }}">
+        <link rel="stylesheet" href="{{ asset('build/css/profil.min.css?v=' . time()) }}">
+        <style>
+            :root {
+                --mm-primary: #1a4d8e;
+                /* #1a4 = #11aa44 */
+                --mm-primary-hover: #163f74;
+                --mm-primary-focus: rgba(26, 75, 184, .25);
+            }
 
-/* tombol Lihat Riwayat Kegiatan */
-a.btn.btn-primary.btn-sm.w-100{
-  background-color: var(--mm-primary) !important;
-  border-color: var(--mm-primary) !important;
-  color:#fff !important;
-}
-a.btn.btn-primary.btn-sm.w-100:hover{
-  background-color: var(--mm-primary-hover) !important;
-  border-color: var(--mm-primary-hover) !important;
-  box-shadow: 0 4px 12px var(--mm-primary-focus); 
-  transform: translateY(-2px);
-}
+            /* tombol Lihat Riwayat Kegiatan */
+            a.btn.btn-primary.btn-sm.w-100 {
+                background-color: var(--mm-primary) !important;
+                border-color: var(--mm-primary) !important;
+                color: #fff !important;
+            }
 
-/* tombol Mulai / Mulai Baru (id=btnMulai) */
-#btnMulai{
-  background-color: var(--mm-primary) !important;
-  border-color: var(--mm-primary) !important;
-  color:#fff !important;
-}
-#btnMulai:hover{
-  background-color: var(--mm-primary-hover) !important;
-  border-color: var(--mm-primary-hover) !important;
-  box-shadow: 0 4px 12px var(--mm-primary-focus);
-  transform: translateY(-2px);
-}
+            a.btn.btn-primary.btn-sm.w-100:hover {
+                background-color: var(--mm-primary-hover) !important;
+                border-color: var(--mm-primary-hover) !important;
+                box-shadow: 0 4px 12px var(--mm-primary-focus);
+                transform: translateY(-2px);
+            }
 
-/* fokus */
-#btnMulai:focus,
-a.btn.btn-primary.btn-sm.w-100:focus{
-  box-shadow: 0 0 0 .25rem var(--mm-primary-focus) !important;
-}
-</style>
+            /* tombol Mulai / Mulai Baru (id=btnMulai) */
+            #btnMulai {
+                background-color: var(--mm-primary) !important;
+                border-color: var(--mm-primary) !important;
+                color: #fff !important;
+            }
 
-    <!-- PAGE TITLE -->
-    <div class="row mb-1 pt-0" style="margin-top:-50px;">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
-                <h4 class="mb-sm-0"></h4>
+            #btnMulai:hover {
+                background-color: var(--mm-primary-hover) !important;
+                border-color: var(--mm-primary-hover) !important;
+                box-shadow: 0 4px 12px var(--mm-primary-focus);
+                transform: translateY(-2px);
+            }
 
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0" style="font-size:15px; font-weight:400;">
-                        <li class="breadcrumb-item">
-                            <a href="javascript:history.back();" class="text-primary fw-bold">
-                                <i class="ri-arrow-left-line me-1"></i> Riwayat
+            /* fokus */
+            #btnMulai:focus,
+            a.btn.btn-primary.btn-sm.w-100:focus {
+                box-shadow: 0 0 0 .25rem var(--mm-primary-focus) !important;
+            }
+        </style>
+
+        <!-- PAGE TITLE -->
+        <div class="row mb-1 pt-0" style="margin-top:-50px;">
+            <div class="col-12">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-galaxy-transparent">
+                    <h4 class="mb-sm-0"></h4>
+
+                    <div class="page-title-right">
+                        <ol class="breadcrumb m-0" style="font-size:15px; font-weight:400;">
+                            <li class="breadcrumb-item">
+                                <a href="javascript:history.back();" class="text-primary fw-bold">
+                                    <i class="ri-arrow-left-line me-1"></i> Riwayat
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Kegiatan</li>
+                        </ol>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- ========================================== -->
+        <!--  PROFIL + DETAIL -->
+        <!-- ========================================== -->
+        <div class="row mb-1 pt-0">
+
+            <!-- ========================= -->
+            <!--  PROFIL (LEBIH KECIL) -->
+            <!-- ========================= -->
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm" style="border-radius:14px;">
+                    <div class="card-header baduy-bg py-2">
+                        <h5 class="mb-0 text-white" style="font-size:18px; font-weight:700;">
+                            <i class="fa-solid fa-address-card"></i> Profil PTK
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-3 profile-card-body">
+
+                        <!-- Nama -->
+                        <h4 class="fw-bold mb-0 mt-2 text-center profile-title" style="font-size:20px;">
+                            {{ $ptk->nama }}
+                        </h4>
+
+                        <!-- Jabatan -->
+                        <h5 class="text-muted d-block mb-3 text-center profile-role" style="font-size:14px;">
+                            @if ($ptk->pangkatJabatan)
+                                {{ $ptk->pangkatJabatan->jenjang_jabatan }}
+                                @if ($ptk->pangkatJabatan->pangkat)
+                                    - {{ $ptk->pangkatJabatan->pangkat }}
+                                @endif
+                                @if ($ptk->pangkatJabatan->golongan_ruang)
+                                    ({{ $ptk->pangkatJabatan->golongan_ruang }})
+                                @endif
+                            @endif
+                        </h5>
+
+                        <!-- Badge -->
+                        <div class="d-flex justify-content-center gap-2 mb-3 profile-badges">
+                            <div class="px-2 py-1"
+                                style="background:#eef2ff; border-radius:8px; display:flex; align-items:center;">
+                                <i class="ri-user-line me-1" style="font-size:14px;"></i>
+                                <span
+                                    style="font-size:13px;">{{ $ptk->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
+                            </div>
+                            <div class="px-2 py-1"
+                                style="background:#d6f5ef; border-radius:8px; display:flex; align-items:center;">
+                                <i class="ri-calendar-event-line me-1" style="font-size:14px;"></i>
+                                <span style="font-size:13px;">{{ $ptk->tgl_lahir_formatted }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Tabel Profil -->
+                        <table class="table table-borderless mb-0 text-start profile-table" style="font-size:13px;">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-semibold" width="110">NIP</td>
+                                    <td>: {{ $ptk->nip }}</td>
+                                </tr>
+                                @if ($ptk->nik)
+                                    <tr>
+                                        <td class="fw-semibold">NIK</td>
+                                        <td>: {{ $ptk->nik }}</td>
+                                    </tr>
+                                @endif
+                                @if ($ptk->nuptk)
+                                    <tr>
+                                        <td class="fw-semibold">NUPTK</td>
+                                        <td>: {{ $ptk->nuptk }}</td>
+                                    </tr>
+                                @endif
+                                <tr>
+                                    <td class="fw-semibold">Email</td>
+                                    <td>: {{ $ptk->email }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">No. HP</td>
+                                    <td>: {{ $ptk->no_hp }}</td>
+                                </tr>
+                                @if ($ptk->npwp)
+                                    <tr>
+                                        <td class="fw-semibold">NPWP</td>
+                                        <td>: {{ $ptk->npwp }}</td>
+                                    </tr>
+                                @endif
+                                <tr>
+                                    <td class="fw-semibold">Tempat Lahir</td>
+                                    <td>: {{ $ptk->tempat_lahir }}</td>
+                                </tr>
+                                @if ($ptk->agama)
+                                    <tr>
+                                        <td class="fw-semibold">Agama</td>
+                                        <td>: {{ $ptk->agama }}</td>
+                                    </tr>
+                                @endif
+                                @if ($ptk->pendidikan)
+                                    <tr>
+                                        <td class="fw-semibold">Pendidikan</td>
+                                        <td>: {{ $ptk->pendidikan }}</td>
+                                    </tr>
+                                @endif
+                                <!-- Dalam tabel profil, tambahkan setelah data agama/pendidikan -->
+                                @if ($ptk->jenisPtk)
+                                    <tr>
+                                        <td class="fw-semibold">Jenis PTK</td>
+                                        <td>: {{ $ptk->jenisPtk->jenis_ptk }}</td>
+                                    </tr>
+                                @endif
+
+                                <!-- Pangkat Jabatan -->
+                                @if ($ptk->pangkatJabatan)
+                                    <tr>
+                                        <td class="fw-semibold">Jenjang Jabatan</td>
+                                        <td>: {{ $ptk->pangkatJabatan->jenjang_jabatan }}
+                                            @if ($ptk->pangkatJabatan->pangkat)
+                                                - {{ $ptk->pangkatJabatan->pangkat }}
+                                            @endif
+                                            @if ($ptk->pangkatJabatan->golongan_ruang)
+                                                ({{ $ptk->pangkatJabatan->golongan_ruang }})
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endif
+                                <!-- Jika ada pangkat golongan -->
+                                @if ($ptk->pangkatGolongan)
+                                    <tr>
+                                        <td class="fw-semibold">Golongan</td>
+                                        <td>: {{ $ptk->pangkatGolongan->pangkat }} ({{ $ptk->pangkatGolongan->golongan }})
+                                        </td>
+                                    </tr>
+                                @endif
+                                @if ($ptk->sekolah)
+                                    <tr>
+                                        <td class="fw-semibold">Sekolah</td>
+                                        <td>: {{ $ptk->sekolah->nama_sekolah }}
+                                            @if ($ptk->sekolah->npsn)
+                                                ({{ $ptk->sekolah->npsn }})
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endif
+                                @if ($ptk->instansi && !$ptk->sekolah)
+                                    <tr>
+                                        <td class="fw-semibold">Instansi</td>
+                                        <td>: {{ $ptk->instansi }}</td>
+                                    </tr>
+                                @elseif($ptk->instansi && $ptk->sekolah)
+                                    <tr>
+                                        <td class="fw-semibold">Instansi Lain</td>
+                                        <td>: {{ $ptk->instansi }}</td>
+                                    </tr>
+                                @endif
+                                @if ($ptk->alamat_rumah)
+                                    <tr>
+                                        <td class="fw-semibold">Alamat</td>
+                                        <td>: {{ $ptk->alamat_rumah }}</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+
+                        <!-- BUTTON LIHAT RIWAYAT -->
+                        <div class="mt-3">
+                            <a href="{{ route('ptk.riwayat', [
+                                'encode_kegiatan_id' => $current_encode_kegiatan_id,
+                                'nip' => $current_nip,
+                            ]) }}"
+                                class="btn btn-primary btn-sm w-100 d-block text-center"
+                                style="border-radius:8px; font-size:14px; padding:8px;">
+                                <i class="ri-book-open-line me-1"></i> Lihat Riwayat Kegiatan
                             </a>
-                        </li>
-                        <li class="breadcrumb-item active">Kegiatan</li>
-                    </ol>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-
-
-    <!-- ========================================== -->
-    <!--  PROFIL + DETAIL -->
-    <!-- ========================================== -->
-    <div class="row mb-1 pt-0">
-
-        <!-- ========================= -->
-        <!--  PROFIL (LEBIH KECIL) -->
-        <!-- ========================= -->
-        <div class="col-md-5">
-            <div class="card border-0 shadow-sm" style="border-radius:14px;">
-                <div class="card-header baduy-bg py-2">
-                    <h5 class="mb-0 text-white" style="font-size:18px; font-weight:700;">
-                        <i class="fa-solid fa-address-card"></i> Profil PTK
-                    </h5>
-                </div>
-
-                <div class="card-body p-3 profile-card-body">
-
-                    <!-- Nama -->
-                    <h4 class="fw-bold mb-0 mt-2 text-center profile-title" style="font-size:20px;">
-                        {{ $ptk->nama }}
-                    </h4>
-
-                    <!-- Jabatan -->
-                    <h5 class="text-muted d-block mb-3 text-center profile-role" style="font-size:14px;">
-                        @if($ptk->pangkatJabatan)
-                        {{ $ptk->pangkatJabatan->jenjang_jabatan }}
-                        @if($ptk->pangkatJabatan->pangkat)
-                        - {{ $ptk->pangkatJabatan->pangkat }}
-                        @endif
-                        @if($ptk->pangkatJabatan->golongan_ruang)
-                        ({{ $ptk->pangkatJabatan->golongan_ruang }})
-                        @endif
-                        @endif
-                    </h5>
-
-                    <!-- Badge -->
-                    <div class="d-flex justify-content-center gap-2 mb-3 profile-badges">
-                        <div class="px-2 py-1" style="background:#eef2ff; border-radius:8px; display:flex; align-items:center;">
-                            <i class="ri-user-line me-1" style="font-size:14px;"></i>
-                            <span style="font-size:13px;">{{ $ptk->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
                         </div>
-                        <div class="px-2 py-1" style="background:#d6f5ef; border-radius:8px; display:flex; align-items:center;">
-                            <i class="ri-calendar-event-line me-1" style="font-size:14px;"></i>
-                            <span style="font-size:13px;">{{ $ptk->tgl_lahir_formatted }}</span>
-                        </div>
+
                     </div>
-
-                    <!-- Tabel Profil -->
-                    <table class="table table-borderless mb-0 text-start profile-table" style="font-size:13px;">
-                        <tbody>
-                            <tr>
-                                <td class="fw-semibold" width="110">NIP</td>
-                                <td>: {{ $ptk->nip }}</td>
-                            </tr>
-                            @if($ptk->nik)
-                            <tr>
-                                <td class="fw-semibold">NIK</td>
-                                <td>: {{ $ptk->nik }}</td>
-                            </tr>
-                            @endif
-                            @if($ptk->nuptk)
-                            <tr>
-                                <td class="fw-semibold">NUPTK</td>
-                                <td>: {{ $ptk->nuptk }}</td>
-                            </tr>
-                            @endif
-                            <tr>
-                                <td class="fw-semibold">Email</td>
-                                <td>: {{ $ptk->email }}</td>
-                            </tr>
-                            <tr>
-                                <td class="fw-semibold">No. HP</td>
-                                <td>: {{ $ptk->no_hp }}</td>
-                            </tr>
-                            @if($ptk->npwp)
-                            <tr>
-                                <td class="fw-semibold">NPWP</td>
-                                <td>: {{ $ptk->npwp }}</td>
-                            </tr>
-                            @endif
-                            <tr>
-                                <td class="fw-semibold">Tempat Lahir</td>
-                                <td>: {{ $ptk->tempat_lahir }}</td>
-                            </tr>
-                            @if($ptk->agama)
-                            <tr>
-                                <td class="fw-semibold">Agama</td>
-                                <td>: {{ $ptk->agama }}</td>
-                            </tr>
-                            @endif
-                            @if($ptk->pendidikan)
-                            <tr>
-                                <td class="fw-semibold">Pendidikan</td>
-                                <td>: {{ $ptk->pendidikan }}</td>
-                            </tr>
-                            @endif
-                            <!-- Dalam tabel profil, tambahkan setelah data agama/pendidikan -->
-@if($ptk->jenisPtk)
-<tr>
-    <td class="fw-semibold">Jenis PTK</td>
-    <td>: {{ $ptk->jenisPtk->jenis_ptk }}</td>
-</tr>
-@endif
-
-<!-- Pangkat Jabatan -->
-@if($ptk->pangkatJabatan)
-<tr>
-    <td class="fw-semibold">Jenjang Jabatan</td>
-    <td>: {{ $ptk->pangkatJabatan->jenjang_jabatan }}
-        @if($ptk->pangkatJabatan->pangkat)
-            - {{ $ptk->pangkatJabatan->pangkat }}
-        @endif
-        @if($ptk->pangkatJabatan->golongan_ruang)
-            ({{ $ptk->pangkatJabatan->golongan_ruang }})
-        @endif
-    </td>
-</tr>
-@endif
-<!-- Jika ada pangkat golongan -->
-@if($ptk->pangkatGolongan)
-<tr>
-    <td class="fw-semibold">Golongan</td>
-    <td>: {{ $ptk->pangkatGolongan->pangkat }} ({{ $ptk->pangkatGolongan->golongan }})</td>
-</tr>
-@endif
-                            @if($ptk->sekolah)
-                            <tr>
-                                <td class="fw-semibold">Sekolah</td>
-                                <td>: {{ $ptk->sekolah->nama_sekolah }}
-                                    @if($ptk->sekolah->npsn)
-                                    ({{ $ptk->sekolah->npsn }})
-                                    @endif
-                                </td>
-                            </tr>
-                            @endif
-                            @if($ptk->instansi && !$ptk->sekolah)
-                            <tr>
-                                <td class="fw-semibold">Instansi</td>
-                                <td>: {{ $ptk->instansi }}</td>
-                            </tr>
-                            @elseif($ptk->instansi && $ptk->sekolah)
-                            <tr>
-                                <td class="fw-semibold">Instansi Lain</td>
-                                <td>: {{ $ptk->instansi }}</td>
-                            </tr>
-                            @endif
-                            @if($ptk->alamat_rumah)
-                            <tr>
-                                <td class="fw-semibold">Alamat</td>
-                                <td>: {{ $ptk->alamat_rumah }}</td>
-                            </tr>
-                            @endif
-                        </tbody>
-                    </table>
-
-                    <!-- BUTTON LIHAT RIWAYAT -->
-                    <div class="mt-3">
-                        <a href="{{ route('ptk.riwayat', [
-                        'encode_kegiatan_id' => $current_encode_kegiatan_id,
-                        'nip' => $current_nip
-                    ]) }}"
-                            class="btn btn-primary btn-sm w-100 d-block text-center"
-                            style="border-radius:8px; font-size:14px; padding:8px;">
-                            <i class="ri-book-open-line me-1"></i> Lihat Riwayat Kegiatan
-                        </a>
-                    </div>
-
                 </div>
             </div>
-        </div>
 
 
-        <!-- ========================= -->
-        <!--  DETAIL KEGIATAN (LEBIH BESAR) -->
-        <!-- ========================= -->
-        <div class="col-md-7">
-            <div class="card border-0 shadow-sm" style="border-radius:14px; height:100%;">
+            <!-- ========================= -->
+            <!--  DETAIL KEGIATAN (LEBIH BESAR) -->
+            <!-- ========================= -->
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm" style="border-radius:14px; height:100%;">
 
-                <div class="card-header baduy-bg py-2">
-                    <h5 class="mb-0 text-white" style="font-size:18px; font-weight:700;">
-                        {{-- Nama Kegiatan (lebih besar) --}}
-                        <div class="d-flex align-items-center mb-1">
-                            <i class="fas fa-calendar-alt me-2"></i>
-                            {{ $kegiatan->kegiatan_name }}
+                    <div class="card-header baduy-bg py-2">
+                        <h5 class="mb-0 text-white" style="font-size:18px; font-weight:700;">
+                            {{-- Nama Kegiatan (lebih besar) --}}
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                {{ $kegiatan->kegiatan_name }}
+                            </div>
+
+                            {{-- Entity (lebih kecil, di bawahnya) --}}
+                            <div class="d-flex align-items-center text-white" style="font-size: 14px; font-weight: 500;">
+                                <i class="fa-solid fa-user me-2"></i>
+                                {{ $kegiatan->entity }}
+                            </div>
+                    </div>
+
+
+                    <div class="card-body p-4 detail-card-body">
+
+                        <div class="guideline-body">
+                            <div class="mb-3">
+                                <h6 class="fw-semibold text-dark mb-2">
+                                    <i class="fas fa-clipboard-list me-2 text-primary"></i>
+                                    Tentang Soal
+                                </h6>
+                                <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
+                                    Bapak dan Ibu akan mengerjakan sejumlah soal berbasis studi kasus yang menggambarkan
+                                    situasi nyata dalam pelaksanaan tugas sehari-hari. Setiap kasus dapat terdiri dari satu
+                                    atau lebih pertanyaan, sehingga mohon dibaca dengan saksama sebelum menjawab.
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="fw-semibold text-dark mb-2">
+                                    <i class="fas fa-user-check me-2 text-primary"></i>
+                                    Cara Menjawab
+                                </h6>
+                                <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
+                                    Dalam menjawab pertanyaan, jawablah berdasarkan apa yang benar-benar akan Bapak dan Ibu
+                                    lakukan ketika menghadapi situasi tersebut, bukan berdasarkan jawaban yang dianggap
+                                    paling ideal atau paling baik secara teori. Tidak ada jawaban benar atau salah dalam
+                                    arti normatif—yang terpenting adalah kejujuran dan kesesuaian dengan pengalaman serta
+                                    praktik yang selama ini Bapak dan Ibu jalani.
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="fw-semibold text-dark mb-2">
+                                    <i class="fas fa-bullseye me-2 text-primary"></i>
+                                    Tujuan Kuesioner
+                                </h6>
+                                <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
+                                    Instrumen ini dirancang untuk memahami cara berpikir, pengambilan keputusan, dan
+                                    tindakan nyata dalam konteks pekerjaan. Oleh karena itu, tidak perlu merasa khawatir
+                                    atau ragu dalam menjawab. Isilah setiap pertanyaan sesuai dengan pengalaman,
+                                    pertimbangan pribadi, dan tindakan yang kemungkinan besar akan Bapak dan Ibu ambil dalam
+                                    situasi tersebut.
+                                </p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="fw-semibold text-dark mb-2">
+                                    <i class="fas fa-clock me-2 text-primary"></i>
+                                    Waktu Pengerjaan
+                                </h6>
+                                <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
+                                    Waktu yang dibutuhkan untuk mengerjakan setiap 1 (satu) soal, biasanya memakan waktu
+                                    sebanyak 1 (satu) menit per soal. Mohon membaca dengan seksama dan pastikan seluruh
+                                    jawaban terisi serta mohon menjawab seluruh pertanyaan dengan tenang dan reflektif agar
+                                    hasil yang diperoleh dapat memberikan gambaran yang akurat dan bermakna.
+                                </p>
+                            </div>
+
+                            <div class="alert alert-light border-start border-primary border-3 ps-4 py-3 mt-4">
+                                <div class="d-flex align-items-start">
+                                    <i class="fas fa-hand-point-right me-3 mt-1 text-primary"></i>
+                                    <div>
+                                        <strong class="d-block mb-1 text-dark">Inti Pedoman:</strong>
+                                        <span class="d-block text-dark" style="text-align: justify;">
+                                            Jawablah sesuai dengan pengalaman nyata Anda, bukan teori ideal. Kejujuran
+                                            adalah kunci untuk mendapatkan gambaran yang akurat tentang pola pikir dan
+                                            pengambilan keputusan dalam pekerjaan.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {{-- Entity (lebih kecil, di bawahnya) --}}
-                        <div class="d-flex align-items-center text-white" style="font-size: 14px; font-weight: 500;">
-                            <i class="fa-solid fa-user me-2"></i>
-                            {{ $kegiatan->entity }}
-                        </div>
-                </div>
 
 
-                <div class="card-body p-4 detail-card-body">
-
-                    <div class="guideline-body">
-                        <div class="mb-3">
-                            <h6 class="fw-semibold text-dark mb-2">
-                                <i class="fas fa-clipboard-list me-2 text-primary"></i>
-                                Tentang Soal
-                            </h6>
-                            <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
-                                Bapak dan Ibu akan mengerjakan sejumlah soal berbasis studi kasus yang menggambarkan situasi nyata dalam pelaksanaan tugas sehari-hari. Setiap kasus dapat terdiri dari satu atau lebih pertanyaan, sehingga mohon dibaca dengan saksama sebelum menjawab.
-                            </p>
-                        </div>
-
-                        <div class="mb-3">
-                            <h6 class="fw-semibold text-dark mb-2">
-                                <i class="fas fa-user-check me-2 text-primary"></i>
-                                Cara Menjawab
-                            </h6>
-                            <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
-                                Dalam menjawab pertanyaan, jawablah berdasarkan apa yang benar-benar akan Bapak dan Ibu lakukan ketika menghadapi situasi tersebut, bukan berdasarkan jawaban yang dianggap paling ideal atau paling baik secara teori. Tidak ada jawaban benar atau salah dalam arti normatif—yang terpenting adalah kejujuran dan kesesuaian dengan pengalaman serta praktik yang selama ini Bapak dan Ibu jalani.
-                            </p>
-                        </div>
-
-                        <div class="mb-3">
-                            <h6 class="fw-semibold text-dark mb-2">
-                                <i class="fas fa-bullseye me-2 text-primary"></i>
-                                Tujuan Kuesioner
-                            </h6>
-                            <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
-                                Instrumen ini dirancang untuk memahami cara berpikir, pengambilan keputusan, dan tindakan nyata dalam konteks pekerjaan. Oleh karena itu, tidak perlu merasa khawatir atau ragu dalam menjawab. Isilah setiap pertanyaan sesuai dengan pengalaman, pertimbangan pribadi, dan tindakan yang kemungkinan besar akan Bapak dan Ibu ambil dalam situasi tersebut.
-                            </p>
-                        </div>
-
-                        <div class="mb-3">
-                            <h6 class="fw-semibold text-dark mb-2">
-                                <i class="fas fa-clock me-2 text-primary"></i>
-                                Waktu Pengerjaan
-                            </h6>
-                            <p class="ps-4 mb-3" style="text-align: justify; line-height: 1.8;">
-                                Waktu yang dibutuhkan untuk mengerjakan setiap 1 (satu) soal, biasanya memakan waktu sebanyak 1 (satu) menit per soal. Mohon membaca dengan seksama dan pastikan seluruh jawaban terisi serta mohon menjawab seluruh pertanyaan dengan tenang dan reflektif agar hasil yang diperoleh dapat memberikan gambaran yang akurat dan bermakna.
-                            </p>
-                        </div>
-
-                        <div class="alert alert-light border-start border-primary border-3 ps-4 py-3 mt-4">
-                            <div class="d-flex align-items-start">
-                                <i class="fas fa-hand-point-right me-3 mt-1 text-primary"></i>
+                        <!-- DURASI PENGERJAAN -->
+                        <div class="mb-3 px-3 py-2"
+                            style="background:#f4f6ff; border-radius:10px; border:1px solid #e0e6ff;">
+                            <div class="d-flex align-items-center">
+                                <i class="ri-timer-line me-3" style="font-size:30px; color:#1a4cbc;"></i>
                                 <div>
-                                    <strong class="d-block mb-1 text-dark">Inti Pedoman:</strong>
-                                    <span class="d-block text-dark" style="text-align: justify;">
-                                        Jawablah sesuai dengan pengalaman nyata Anda, bukan teori ideal. Kejujuran adalah kunci untuk mendapatkan gambaran yang akurat tentang pola pikir dan pengambilan keputusan dalam pekerjaan.
-                                    </span>
+                                    <div class="fw-semibold" style="font-size:16px;">Durasi Pengerjaan</div>
+                                    <div class="text-primary fw-bold" style="font-size:16px; margin-top:-2px;">
+                                        2 Jam (120 Menit)
+                                    </div>
+                                    <small class="text-muted" style="font-size:13px;">Waktu dimulai saat Anda klik tombol
+                                        "Mulai"</small>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-
-
-                    <!-- DURASI PENGERJAAN -->
-                    <div class="mb-3 px-3 py-2" style="background:#f4f6ff; border-radius:10px; border:1px solid #e0e6ff;">
-                        <div class="d-flex align-items-center">
-                            <i class="ri-timer-line me-3" style="font-size:30px; color:#1a4cbc;"></i>
-                            <div>
-                                <div class="fw-semibold" style="font-size:16px;">Durasi Pengerjaan</div>
-                                <div class="text-primary fw-bold" style="font-size:16px; margin-top:-2px;">
-                                    2 Jam (120 Menit)
-                                </div>
-                                <small class="text-muted" style="font-size:13px;">Waktu dimulai saat Anda klik tombol "Mulai"</small>
+                        <!-- CHECKBOX KONFIRMASI -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="konfirmasiCheckbox"
+                                    style="width: 18px; height: 18px; cursor: pointer;">
+                                <label class="form-check-label ms-2" for="konfirmasiCheckbox"
+                                    style="cursor: pointer; font-size: 14px; line-height: 1.4;">
+                                    <strong>Saya telah membaca dan memahami pedoman di atas.</strong><br>
+                                    <small class="text-muted">Dengan mencentang ini, saya menyatakan siap mengikuti
+                                        kegiatan ini dengan penuh tanggung jawab.</small>
+                                </label>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- CHECKBOX KONFIRMASI -->
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="konfirmasiCheckbox"
-                                style="width: 18px; height: 18px; cursor: pointer;">
-                            <label class="form-check-label ms-2" for="konfirmasiCheckbox"
-                                style="cursor: pointer; font-size: 14px; line-height: 1.4;">
-                                <strong>Saya telah membaca dan memahami pedoman di atas.</strong><br>
-                                <small class="text-muted">Dengan mencentang ini, saya menyatakan siap mengikuti
-                                    kegiatan ini dengan penuh tanggung jawab.</small>
-                            </label>
+                        <!-- TOMBOL MULAI -->
+                        <div class="text-center mt-4">
+                            @php
+                                $encoded_no_urut = Hashids::encode(1);
+                            @endphp
+
+                            @if ($isFinished)
+                                <!-- Jika sudah selesai -->
+                                <div class="alert alert-success mb-3" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="ri-checkbox-circle-fill fs-4 me-2"></i>
+                                        <div class="text-start">
+                                            <h6 class="mb-1">Instumen Selesai</h6>
+                                            <small>Anda telah menyelesaikan instrumen ini.</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn btn-success btn-lg px-5 w-100 d-block text-center"
+                                    style="border-radius:10px; font-size:16px; padding:10px;"
+                                    onclick="showFinishedAlert()">
+                                    <i class="ri-check-double-line me-2"></i> Lihat Hasil
+                                </button>
+                            @elseif($hasUnfinishedQuiz && !$isFinished)
+                                <!-- Jika ada quiz yang belum selesai -->
+                                <div class="alert alert-warning mb-3" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="ri-refresh-line fs-4 me-2"></i>
+                                        <div class="text-start">
+                                            <h6 class="mb-1">Instrumen Belum Selesai</h6>
+                                            <small>Anda memiliki instrumen yang belum diselesaikan.</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <a href="{{ route('ptk.continue-quiz', [
+                                            'encode_kegiatan_id' => $current_encode_kegiatan_id,
+                                            'nip' => $current_nip,
+                                        ]) }}"
+                                            class="btn btn-warning btn-lg px-5 w-100 d-block text-center"
+                                            style="border-radius:10px; font-size:16px; padding:10px;">
+                                            <i class="ri-play-circle-line me-2"></i> Lanjutkan Instrumen
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        @switch($kegiatan->tahap)
+                                            @case(1)
+                                                @php
+                                                    $encoded_indikator_id = Hashids::encode($data->indikator_id);
+                                                    $encoded_no_urut = Hashids::encode(1);
+                                                @endphp
+                                                <a href="{{ route('quiz1.show', [
+                                                    'tahap' => $kegiatan->tahap,
+                                                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                                                    'nip' => $current_nip,
+                                                    'encoded_indikator_id' => $encoded_indikator_id,
+                                                    'encoded_no_urut' => $encoded_no_urut,
+                                                ]) }}"
+                                                    id="btnMulai"
+                                                    class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
+                                                    style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+                                                    <i class="ri-play-line me-2"></i> Mulai Baru
+                                                </a>
+                                            @break
+
+                                            @case(2)
+                                                @php
+                                                    $encoded_no_urut = Hashids::encode(1);
+                                                @endphp
+                                                <a href="{{ route('quiz2.show', [
+                                                    'tahap' => $kegiatan->tahap,
+                                                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                                                    'nip' => $current_nip,
+                                                    'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                                                    'encoded_no_urut' => $encoded_no_urut,
+                                                ]) }}"
+                                                    id="btnMulai"
+                                                    class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
+                                                    style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+                                                    <i class="ri-play-line me-2"></i> Mulai Baru
+                                                </a>
+                                            @break
+
+                                            @default
+                                        @endswitch
+                                    </div>
+                                </div>
+                            @else
+                                <!-- Jika belum mulai sama sekali -->
+                                @switch($kegiatan->tahap)
+                                    @case(1)
+                                        @php
+                                            $encoded_indikator_id = Hashids::encode($data->indikator_id);
+                                            $encoded_no_urut = Hashids::encode(1);
+                                        @endphp
+                                        <a href="{{ route('quiz1.show', [
+                                            'tahap' => $kegiatan->tahap,
+                                            'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                                            'nip' => $current_nip,
+                                            'encoded_indikator_id' => $encoded_indikator_id,
+                                            'encoded_no_urut' => $encoded_no_urut,
+                                        ]) }}"
+                                            id="btnMulai" class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
+                                            style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+                                            <i class="ri-play-line me-2"></i> Mulai
+                                        </a>
+                                    @break
+
+                                    @case(2)
+                                        @php
+                                            $encoded_no_urut = Hashids::encode(1);
+                                        @endphp
+                                        <a href="{{ route('quiz2.show', [
+                                            'tahap' => $kegiatan->tahap,
+                                            'encoded_kegiatan_id' => $current_encode_kegiatan_id,
+                                            'nip' => $current_nip,
+                                            'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
+                                            'encoded_no_urut' => $encoded_no_urut,
+                                        ]) }}"
+                                            id="btnMulai" class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
+                                            style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+                                            <i class="ri-play-line me-2"></i> Mulai
+                                        </a>
+                                    @break
+
+                                    @default
+                                @endswitch
+                            @endif
                         </div>
                     </div>
+                </div>
+            </div>
 
-                  <!-- TOMBOL MULAI -->
-<div class="text-center mt-4">
-    @php
-    $encoded_no_urut = Hashids::encode(1);
-    @endphp
+        </div>
 
-    @if($isFinished)
-    <!-- Jika sudah selesai -->
-    <div class="alert alert-success mb-3" role="alert">
-        <div class="d-flex align-items-center">
-            <i class="ri-checkbox-circle-fill fs-4 me-2"></i>
-            <div class="text-start">
-                <h6 class="mb-1">Instumen Selesai</h6>
-                <small>Anda telah menyelesaikan instrumen ini.</small>
+
+        <!-- SESSION INFO -->
+        <div class="alert alert-info mt-3 shadow-sm">
+            <div class="d-flex align-items-center">
+                <i class="ri-user-line fs-4 me-2"></i>
+                <div>
+                    <h6 class="mb-1">Informasi Sesi</h6>
+                    <small>
+                        Anda sedang mengakses kegiatan sebagai: <b>{{ $ptk->nama }}</b> (NIP: {{ $ptk->nip }})<br>
+                        Kegiatan: <b>{{ $kegiatan->kegiatan_name }}</b> |
+                        Token: <code>{{ $kegiatan->instrumen_token }}</code><br>
+                        Instansi: <b>{{ $ptk->sekolah ? $ptk->sekolah->nama_sekolah : $ptk->instansi }}</b>
+                    </small>
+                </div>
+
+                </a>
             </div>
         </div>
     </div>
 
-    <button type="button"
-        class="btn btn-success btn-lg px-5 w-100 d-block text-center"
-        style="border-radius:10px; font-size:16px; padding:10px;"
-        onclick="showFinishedAlert()">
-        <i class="ri-check-double-line me-2"></i> Lihat Hasil
-    </button>
-
-    @elseif($hasUnfinishedQuiz && !$isFinished)
-    <!-- Jika ada quiz yang belum selesai -->
-    <div class="alert alert-warning mb-3" role="alert">
-        <div class="d-flex align-items-center">
-            <i class="ri-refresh-line fs-4 me-2"></i>
-            <div class="text-start">
-                <h6 class="mb-1">Quiz Belum Selesai</h6>
-                <small>Anda memiliki quiz yang belum diselesaikan.</small>
-            </div>
-        </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6 mb-2">
-            <a href="{{ route('ptk.continue-quiz', [
-                'encode_kegiatan_id' => $current_encode_kegiatan_id,
-                'nip' => $current_nip
-            ]) }}"
-                class="btn btn-warning btn-lg px-5 w-100 d-block text-center"
-                style="border-radius:10px; font-size:16px; padding:10px;">
-                <i class="ri-play-circle-line me-2"></i> Lanjutkan Quiz
-            </a>
-        </div>
-        <div class="col-md-6 mb-2">
-            @switch($kegiatan->tahap)
-            @case(1)
-            @php
-            $encoded_indikator_id = Hashids::encode($data->indikator_id);
-            $encoded_no_urut = Hashids::encode(1);
-            @endphp
-            <a href="{{ route('quiz1.show', [
-                    'tahap' => $kegiatan->tahap,
-                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-                    'nip' => $current_nip,
-                    'encoded_indikator_id' => $encoded_indikator_id,
-                    'encoded_no_urut' => $encoded_no_urut
-                ]) }}"
-                id="btnMulai"
-                class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-                style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
-                <i class="ri-play-line me-2"></i> Mulai Baru
-            </a>
-            @break
-            
-            @case(2)
-            @php
-            $encoded_no_urut = Hashids::encode(1);
-            @endphp
-            <a href="{{ route('quiz2.show', [
-                    'tahap' => $kegiatan->tahap,
-                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-                    'nip' => $current_nip,
-                    'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
-                    'encoded_no_urut' => $encoded_no_urut
-                ]) }}"
-                id="btnMulai"
-                class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-                style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
-                <i class="ri-play-line me-2"></i> Mulai Baru
-            </a>
-            @break
-            
-            @default
-            @endswitch
-        </div>
-    </div>
-
-    @else
-    <!-- Jika belum mulai sama sekali -->
-    @switch($kegiatan->tahap)
-    @case(1)
-    @php
-    $encoded_indikator_id = Hashids::encode($data->indikator_id);
-    $encoded_no_urut = Hashids::encode(1);
-    @endphp
-    <a href="{{ route('quiz1.show', [
-            'tahap' => $kegiatan->tahap,
-            'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-            'nip' => $current_nip,
-            'encoded_indikator_id' => $encoded_indikator_id,
-            'encoded_no_urut' => $encoded_no_urut
-        ]) }}"
-        id="btnMulai"
-        class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-        style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
-        <i class="ri-play-line me-2"></i> Mulai
-    </a>
-    @break
-
-    @case(2)
-    @php
-    $encoded_no_urut = Hashids::encode(1);
-    @endphp
-    <a href="{{ route('quiz2.show', [
-            'tahap' => $kegiatan->tahap,
-            'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-            'nip' => $current_nip,
-            'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
-            'encoded_no_urut' => $encoded_no_urut
-        ]) }}"
-        id="btnMulai"
-        class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-        style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
-        <i class="ri-play-line me-2"></i> Mulai
-    </a>
-    @break
-
-    @default
-    @endswitch
-    @endif
-</div>
+    <!-- Edit Modal (Opsional) -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Data PTK</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nama Lengkap</label>
+                                <input type="text" name="nama" class="form-control" value="{{ $ptk->nama }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" value="{{ $ptk->email }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">No. HP</label>
+                                <input type="text" name="no_hp" class="form-control" value="{{ $ptk->no_hp }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Alamat Rumah</label>
+                                <textarea name="alamat_rumah" class="form-control" rows="2">{{ $ptk->alamat_rumah }}</textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Kota</label>
+                                <select name="kota_id" class="form-control">
+                                    <option value="">Pilih Kota</option>
+                                    @foreach ($kotas as $kota)
+                                        <option value="{{ $kota->kota_id }}"
+                                            {{ $ptk->kota_id == $kota->kota_id ? 'selected' : '' }}>
+                                            {{ $kota->nama_kota }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Sekolah/Instansi</label>
+                                <select name="sekolah_id" class="form-control">
+                                    <option value="">Pilih Sekolah</option>
+                                    @foreach ($sekolahs as $sekolah)
+                                        <option value="{{ $sekolah->sekolah_id }}"
+                                            {{ $ptk->sekolah_id == $sekolah->sekolah_id ? 'selected' : '' }}>
+                                            {{ $sekolah->nama_sekolah }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Jika tidak ada, isi manual di bawah</small>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Instansi Manual</label>
+                                <input type="text" name="instansi" class="form-control" value="{{ $ptk->instansi }}"
+                                    placeholder="Nama instansi/lembaga (jika sekolah tidak ada dalam daftar)">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pangkat/Jabatan</label>
+                                <select name="pangkat_jabatan_id" class="form-control">
+                                    <option value="">Pilih Pangkat/Jabatan</option>
+                                    @foreach ($pangkatJabatans as $pangkatJabatan)
+                                        <option value="{{ $pangkatJabatan->pangkat_jabatan_id }}"
+                                            {{ $ptk->pangkat_jabatan_id == $pangkatJabatan->pangkat_jabatan_id ? 'selected' : '' }}>
+                                            {{ $pangkatJabatan->jenjang_jabatan }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="saveEdit">Simpan</button>
                 </div>
             </div>
         </div>
-
     </div>
 
+    <script>
+        // Edit modal functionality
+        document.getElementById('saveEdit')?.addEventListener('click', function() {
+            const form = document.getElementById('editForm');
+            const formData = new FormData(form);
 
-    <!-- SESSION INFO -->
-    <div class="alert alert-info mt-3 shadow-sm">
-        <div class="d-flex align-items-center">
-            <i class="ri-user-line fs-4 me-2"></i>
-            <div>
-                <h6 class="mb-1">Informasi Sesi</h6>
-                <small>
-                    Anda sedang mengakses kegiatan sebagai: <b>{{ $ptk->nama }}</b> (NIP: {{ $ptk->nip }})<br>
-                    Kegiatan: <b>{{ $kegiatan->kegiatan_name }}</b> |
-                    Token: <code>{{ $kegiatan->instrumen_token }}</code><br>
-                    Instansi: <b>{{ $ptk->sekolah ? $ptk->sekolah->nama_sekolah : $ptk->instansi }}</b>
-                </small>
-            </div>
-
-            </a>
-        </div>
-    </div>
-</div>
-
-</div>
-
-<!-- Edit Modal (Opsional) -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Edit Data PTK</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editForm">
-                    @csrf
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nama Lengkap</label>
-                            <input type="text" name="nama" class="form-control" value="{{ $ptk->nama }}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" value="{{ $ptk->email }}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">No. HP</label>
-                            <input type="text" name="no_hp" class="form-control" value="{{ $ptk->no_hp }}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Alamat Rumah</label>
-                            <textarea name="alamat_rumah" class="form-control" rows="2">{{ $ptk->alamat_rumah }}</textarea>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Kota</label>
-                            <select name="kota_id" class="form-control">
-                                <option value="">Pilih Kota</option>
-                                @foreach($kotas as $kota)
-                                <option value="{{ $kota->kota_id }}" {{ $ptk->kota_id == $kota->kota_id ? 'selected' : '' }}>
-                                    {{ $kota->nama_kota }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Sekolah/Instansi</label>
-                            <select name="sekolah_id" class="form-control">
-                                <option value="">Pilih Sekolah</option>
-                                @foreach($sekolahs as $sekolah)
-                                <option value="{{ $sekolah->sekolah_id }}" {{ $ptk->sekolah_id == $sekolah->sekolah_id ? 'selected' : '' }}>
-                                    {{ $sekolah->nama_sekolah }}
-                                </option>
-                                @endforeach
-                            </select>
-                            <small class="text-muted">Jika tidak ada, isi manual di bawah</small>
-                        </div>
-                        <div class="col-12 mb-3">
-                            <label class="form-label">Instansi Manual</label>
-                            <input type="text" name="instansi" class="form-control" value="{{ $ptk->instansi }}"
-                                placeholder="Nama instansi/lembaga (jika sekolah tidak ada dalam daftar)">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Pangkat/Jabatan</label>
-                            <select name="pangkat_jabatan_id" class="form-control">
-                                <option value="">Pilih Pangkat/Jabatan</option>
-                                @foreach($pangkatJabatans as $pangkatJabatan)
-                                <option value="{{ $pangkatJabatan->pangkat_jabatan_id }}" {{ $ptk->pangkat_jabatan_id == $pangkatJabatan->pangkat_jabatan_id ? 'selected' : '' }}>
-                                    {{ $pangkatJabatan->jenjang_jabatan }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" id="saveEdit">Simpan</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Edit modal functionality
-    document.getElementById('saveEdit')?.addEventListener('click', function() {
-        const form = document.getElementById('editForm');
-        const formData = new FormData(form);
-
-        fetch(`/ptk/update/{{ $current_encode_kegiatan_id }}/{{ $current_nip }}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: 'Data berhasil diperbarui',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#2c7be5',
-                        willClose: () => {
-                            location.reload();
-                        }
-                    });
-                } else {
+            fetch(`/ptk/update/{{ $current_encode_kegiatan_id }}/{{ $current_nip }}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Data berhasil diperbarui',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#2c7be5',
+                            willClose: () => {
+                                location.reload();
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: data.message,
+                            confirmButtonText: 'Mengerti',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                     Swal.fire({
                         icon: 'error',
-                        title: 'Gagal!',
-                        text: data.message,
+                        title: 'Kesalahan',
+                        text: 'Terjadi kesalahan saat memperbarui data',
                         confirmButtonText: 'Mengerti',
                         confirmButtonColor: '#dc3545'
                     });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Kesalahan',
-                    text: 'Terjadi kesalahan saat memperbarui data',
-                    confirmButtonText: 'Mengerti',
-                    confirmButtonColor: '#dc3545'
                 });
-            });
-    });
-</script>
-
-<style>
-    @media (max-width: 768px) {
-
-        .profile-card-body {
-            text-align: left !important;
-        }
-
-        .profile-title,
-        .profile-role {
-            text-align: left !important;
-            margin-left: 0 !important;
-        }
-
-        .profile-badges {
-            justify-content: flex-start !important;
-        }
-
-        .profile-table {
-            width: 100% !important;
-            margin: 0 !important;
-        }
-
-        .profile-table td {
-            text-align: left !important;
-            padding-left: 0 !important;
-        }
-
-        .profile-table td:first-child {
-            width: 150px !important;
-        }
-    }
-
-    @media (max-width: 768px) {
-
-        .detail-card-body {
-            text-align: left !important;
-        }
-
-        .detail-table {
-            width: 100% !important;
-            margin: 0 !important;
-        }
-
-        .detail-table td {
-            text-align: left !important;
-            padding-left: 0 !important;
-        }
-
-        .detail-table td:first-child {
-            width: 150px !important;
-        }
-
-        .detail-stat-box {
-            text-align: center !important;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-        }
-    }
-
-    /* Styling untuk checkbox area */
-    .form-check-input:checked {
-        background-color: #2c7be5;
-        border-color: #2c7be5;
-    }
-
-    .form-check-input:focus {
-        box-shadow: 0 0 0 0.25rem rgba(44, 123, 229, 0.25);
-        border-color: #2c7be5;
-    }
-
-    /* Smooth transition untuk tombol */
-    #btnMulai {
-        transition: all 0.3s ease;
-    }
-
-    #btnMulai:not(.disabled):hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(44, 123, 229, 0.3);
-    }
-
-
-
-
+        });
+    </script>
 
     <style>
+        @media (max-width: 768px) {
 
-    /* Style untuk tombol */
-    .btn-success {
-        cursor: pointer !important;
-        transition: all 0.3s ease;
-    }
-
-    .btn-success:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-    }
-
-    /* Pastikan tombol disabled tidak bisa diklik */
-    .btn.disabled {
-        cursor: not-allowed !important;
-        pointer-events: none !important;
-    }
-
-    /* Style untuk popup SweetAlert2 */
-    .swal2-popup {
-        border-radius: 12px !important;
-        font-family: inherit !important;
-    }
-
-    .swal2-title {
-        font-size: 22px !important;
-        font-weight: 600 !important;
-    }
-
-    .swal2-confirm {
-        border-radius: 8px !important;
-        padding: 10px 24px !important;
-    }
-
-    .swal2-cancel {
-        border-radius: 8px !important;
-        padding: 10px 24px !important;
-    }
-</style>
-</style>
-
-<!-- <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkbox = document.getElementById('konfirmasiCheckbox');
-        const btnMulai = document.getElementById('btnMulai');
-
-        if (checkbox && btnMulai) {
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    btnMulai.classList.remove('disabled');
-                    btnMulai.style.opacity = '1';
-                    btnMulai.style.pointerEvents = 'auto';
-                } else {
-                    btnMulai.classList.add('disabled');
-                    btnMulai.style.opacity = '0.6';
-                    btnMulai.style.pointerEvents = 'none';
-                }
-            });
-        }
-    });
-</script> -->
-
-<script>
-    // Reset checkbox setiap halaman dimuat
-    window.onload = function() {
-        const checkbox = document.getElementById('konfirmasiCheckbox');
-        const btnMulai = document.getElementById('btnMulai');
-
-        // Reset checkbox
-        if (checkbox) {
-            checkbox.checked = false;
-        }
-
-        // Reset tombol ke disabled
-        if (btnMulai) {
-            btnMulai.classList.add('disabled');
-            btnMulai.style.opacity = '0.6';
-            btnMulai.style.pointerEvents = 'none';
-        }
-
-        // Event untuk toggle tombol
-        if (checkbox) {
-            checkbox.addEventListener('change', function() {
-                if (btnMulai) {
-                    if (this.checked) {
-                        btnMulai.classList.remove('disabled');
-                        btnMulai.style.opacity = '1';
-                        btnMulai.style.pointerEvents = 'auto';
-                    } else {
-                        btnMulai.classList.add('disabled');
-                        btnMulai.style.opacity = '0.6';
-                        btnMulai.style.pointerEvents = 'none';
-                    }
-                }
-            });
-        }
-    };
-</script>
-
-<script>
-    // Fungsi untuk alert selesai dengan SweetAlert2
-    function showFinishedAlert() {
-        // URL untuk redirect
-        const riwayatUrl = "{{ route('ptk.riwayat', ['encode_kegiatan_id' => $current_encode_kegiatan_id, 'nip' => $current_nip]) }}";
-
-        Swal.fire({
-            icon: 'success',
-            title: 'Instumen Selesai',
-            html: `
-            <div class="text-center">
-                <i style="font-size: 48px; margin-bottom: 15px;"></i>
-                <p>Anda telah menyelesaikan {{ $kegiatan->kegiatan_name }}.</p>
-            
-            </div>
-        `,
-            showCancelButton: true,
-            confirmButtonText: '<i class="ri-book-open-line me-1"></i> Lihat Riwayat',
-            cancelButtonText: '<i class="ri-close-line me-1"></i> Tutup',
-            confirmButtonColor: '#1a4d8e',
-            cancelButtonColor: '#6c757d',
-            reverseButtons: true,
-            allowOutsideClick: false,
-            allowEscapeKey: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = riwayatUrl;
+            .profile-card-body {
+                text-align: left !important;
             }
-        });
-    }
 
-    // Inisialisasi tombol mulai jika belum selesai
-    document.addEventListener('DOMContentLoaded', function() {
-        // Cek apakah sudah selesai
-        const isFinished = @json($isFinished ?? false);
+            .profile-title,
+            .profile-role {
+                text-align: left !important;
+                margin-left: 0 !important;
+            }
 
-        if (!isFinished) {
+            .profile-badges {
+                justify-content: flex-start !important;
+            }
+
+            .profile-table {
+                width: 100% !important;
+                margin: 0 !important;
+            }
+
+            .profile-table td {
+                text-align: left !important;
+                padding-left: 0 !important;
+            }
+
+            .profile-table td:first-child {
+                width: 150px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .detail-card-body {
+                text-align: left !important;
+            }
+
+            .detail-table {
+                width: 100% !important;
+                margin: 0 !important;
+            }
+
+            .detail-table td {
+                text-align: left !important;
+                padding-left: 0 !important;
+            }
+
+            .detail-table td:first-child {
+                width: 150px !important;
+            }
+
+            .detail-stat-box {
+                text-align: center !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+        }
+
+        /* Styling untuk checkbox area */
+        .form-check-input:checked {
+            background-color: #2c7be5;
+            border-color: #2c7be5;
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(44, 123, 229, 0.25);
+            border-color: #2c7be5;
+        }
+
+        /* Smooth transition untuk tombol */
+        #btnMulai {
+            transition: all 0.3s ease;
+        }
+
+        #btnMulai:not(.disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(44, 123, 229, 0.3);
+        }
+
+
+
+
+
+        <style>
+
+        /* Style untuk tombol */
+        .btn-success {
+            cursor: pointer !important;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        /* Pastikan tombol disabled tidak bisa diklik */
+        .btn.disabled {
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+        }
+
+        /* Style untuk popup SweetAlert2 */
+        .swal2-popup {
+            border-radius: 12px !important;
+            font-family: inherit !important;
+        }
+
+        .swal2-title {
+            font-size: 22px !important;
+            font-weight: 600 !important;
+        }
+
+        .swal2-confirm {
+            border-radius: 8px !important;
+            padding: 10px 24px !important;
+        }
+
+        .swal2-cancel {
+            border-radius: 8px !important;
+            padding: 10px 24px !important;
+        }
+    </style>
+    </style>
+
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
             const checkbox = document.getElementById('konfirmasiCheckbox');
             const btnMulai = document.getElementById('btnMulai');
 
             if (checkbox && btnMulai) {
-                // Reset checkbox
-                checkbox.checked = false;
-
-                // Reset tombol ke disabled
-                btnMulai.classList.add('disabled');
-                btnMulai.style.opacity = '0.6';
-                btnMulai.style.pointerEvents = 'none';
-
-                // Event untuk toggle tombol
                 checkbox.addEventListener('change', function() {
                     if (this.checked) {
                         btnMulai.classList.remove('disabled');
@@ -894,12 +814,115 @@ a.btn.btn-primary.btn-sm.w-100:focus{
                     }
                 });
             }
+        });
+    </script> -->
+
+    <script>
+        // Reset checkbox setiap halaman dimuat
+        window.onload = function() {
+            const checkbox = document.getElementById('konfirmasiCheckbox');
+            const btnMulai = document.getElementById('btnMulai');
+
+            // Reset checkbox
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+
+            // Reset tombol ke disabled
+            if (btnMulai) {
+                btnMulai.classList.add('disabled');
+                btnMulai.style.opacity = '0.6';
+                btnMulai.style.pointerEvents = 'none';
+            }
+
+            // Event untuk toggle tombol
+            if (checkbox) {
+                checkbox.addEventListener('change', function() {
+                    if (btnMulai) {
+                        if (this.checked) {
+                            btnMulai.classList.remove('disabled');
+                            btnMulai.style.opacity = '1';
+                            btnMulai.style.pointerEvents = 'auto';
+                        } else {
+                            btnMulai.classList.add('disabled');
+                            btnMulai.style.opacity = '0.6';
+                            btnMulai.style.pointerEvents = 'none';
+                        }
+                    }
+                });
+            }
+        };
+    </script>
+
+    <script>
+        // Fungsi untuk alert selesai dengan SweetAlert2
+        function showFinishedAlert() {
+            // URL untuk redirect
+            const riwayatUrl =
+                "{{ route('ptk.riwayat', ['encode_kegiatan_id' => $current_encode_kegiatan_id, 'nip' => $current_nip]) }}";
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Instumen Selesai',
+                html: `
+            <div class="text-center">
+                <i style="font-size: 48px; margin-bottom: 15px;"></i>
+                <p>Anda telah menyelesaikan {{ $kegiatan->kegiatan_name }}.</p>
+
+            </div>
+        `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="ri-book-open-line me-1"></i> Lihat Riwayat',
+                cancelButtonText: '<i class="ri-close-line me-1"></i> Tutup',
+                confirmButtonColor: '#1a4d8e',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true,
+                allowOutsideClick: false,
+                allowEscapeKey: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = riwayatUrl;
+                }
+            });
         }
 
-        // Debug info
-        console.log('Status selesai:', isFinished);
-        console.log('Checkbox ditemukan:', !!document.getElementById('konfirmasiCheckbox'));
-        console.log('Tombol Mulai ditemukan:', !!document.getElementById('btnMulai'));
-    });
-</script>
+        // Inisialisasi tombol mulai jika belum selesai
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek apakah sudah selesai
+            const isFinished = @json($isFinished ?? false);
+
+            if (!isFinished) {
+                const checkbox = document.getElementById('konfirmasiCheckbox');
+                const btnMulai = document.getElementById('btnMulai');
+
+                if (checkbox && btnMulai) {
+                    // Reset checkbox
+                    checkbox.checked = false;
+
+                    // Reset tombol ke disabled
+                    btnMulai.classList.add('disabled');
+                    btnMulai.style.opacity = '0.6';
+                    btnMulai.style.pointerEvents = 'none';
+
+                    // Event untuk toggle tombol
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            btnMulai.classList.remove('disabled');
+                            btnMulai.style.opacity = '1';
+                            btnMulai.style.pointerEvents = 'auto';
+                        } else {
+                            btnMulai.classList.add('disabled');
+                            btnMulai.style.opacity = '0.6';
+                            btnMulai.style.pointerEvents = 'none';
+                        }
+                    });
+                }
+            }
+
+            // Debug info
+            console.log('Status selesai:', isFinished);
+            console.log('Checkbox ditemukan:', !!document.getElementById('konfirmasiCheckbox'));
+            console.log('Tombol Mulai ditemukan:', !!document.getElementById('btnMulai'));
+        });
+    </script>
 @endsection
