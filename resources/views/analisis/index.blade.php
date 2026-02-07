@@ -1174,13 +1174,13 @@
                                 ${
                                     subIndex === 0
                                         ? `
-                                                <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
-                                                    ${kota.nama_kota || 'Banten'}
-                                                </td>
-                                                <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
-                                                    ${kota.total_jawaban || 0}
-                                                </td>
-                                            `
+                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
+                                                        ${kota.nama_kota || 'Banten'}
+                                                    </td>
+                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
+                                                        ${kota.total_jawaban || 0}
+                                                    </td>
+                                                `
                                         : ''
                                 }
 
@@ -1358,9 +1358,9 @@
                                     ${
                                         gapIndex === 0
                                             ? `
-                                                    <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                    <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
-                                                `
+                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                        <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
+                                                    `
                                             : ''
                                     }
                                 </td>
@@ -1545,19 +1545,19 @@
                                                           : '-';
 
                                                 return `
-                                                        <tr>
-                                                            <td class="text-center">${i + 1}</td>
-                                                            <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
-                                                            <td class="text-center">${tipeBadge}</td>
-                                                            <td class="text-center">${p.jumlah_ptk || 0}</td>
-                                                            <td class="text-center fw-bold">${persen}%</td>
-                                                            <td>
-                                                                <div class="progress" style="height:8px;">
-                                                                    <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    `;
+                                                            <tr>
+                                                                <td class="text-center">${i + 1}</td>
+                                                                <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
+                                                                <td class="text-center">${tipeBadge}</td>
+                                                                <td class="text-center">${p.jumlah_ptk || 0}</td>
+                                                                <td class="text-center fw-bold">${persen}%</td>
+                                                                <td>
+                                                                    <div class="progress" style="height:8px;">
+                                                                        <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        `;
                                             })
                                             .join('')}
                                     </tbody>
@@ -1854,8 +1854,7 @@
             const jenjangPendidikanCtx = document.getElementById('jenjangPendidikanChart')?.getContext('2d');
             if (jenjangPendidikanCtx) {
                 const src = data.jenjang_pendidikan_distribution?.length ?
-                    data.jenjang_pendidikan_distribution :
-                    [{
+                    data.jenjang_pendidikan_distribution : [{
                         jenjang_pendidikan: 'Tidak Ada Data',
                         count: 0
                     }];
