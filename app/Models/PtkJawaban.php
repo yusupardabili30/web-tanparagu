@@ -23,6 +23,7 @@ class PtkJawaban extends Model
         'sub_indikator_id',
         'sub_indikator_code',
         'level',
+        'level_kalkulasi',
         'bobot',
         'selisih',
         'time_start',

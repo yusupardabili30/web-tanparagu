@@ -692,7 +692,16 @@ class SoalController extends Controller
                     }
                 } else {
                     $level_final = $soal->level == 2 ? 1 : $soal->level - 1;
-
+                    //do kalkulasi persentasi
+                    $kalkulasi_persentasi_level;
+                    $level_kompetensi = $pangkat_jabatan->level_kompetensi;              
+                    if($level_final<= $level_kompetensi){
+                        $kalkulasi_persentasi_level = (($level_final - 1) / ($level_kompetensi - 1)) * 100;
+                    }else{
+                        $kalkulasi_persentasi_level=100;
+                    }
+                    //end kalkulasi persentasi
+                    
                     PtkJawaban::updateOrCreate([
                         'kegiatan_id' => $kegiatan_id,
                         'sub_indikator_id' => $sub_indikator->sub_indikator_id,
@@ -703,7 +712,8 @@ class SoalController extends Controller
                         'time_start' => session('timestart'),
                         'time_end' => now()->format('H:i:s'),
                         'selisih' => $durasi_sub,
-                        'level' => $level_final
+                        'level' => $level_final,
+                        'level_kalkulasi' => $kalkulasi_persentasi_level,
                     ]);
 
                     //start insert tabel ptk_jawaban_adjusment
@@ -750,7 +760,7 @@ class SoalController extends Controller
                         $i = $i + 1;
                         $level_final = $level_final + 1;
                     }
-                    //end insert tabel ptk_jawaban_rekomendasi
+                    //end insert tabel ptk_jawaban_rekomendasi                   
 
                 }
                 break;
@@ -758,7 +768,6 @@ class SoalController extends Controller
             case 4:
             case 5:
                 if ($bobot == 4) {
-
                     if ($soal->level == 5) {
                         PtkJawaban::updateOrCreate([
                             'kegiatan_id' => $kegiatan_id,
@@ -770,10 +779,10 @@ class SoalController extends Controller
                             'time_start' => session('timestart'),
                             'time_end' => now()->format('H:i:s'),
                             'selisih' => $durasi_sub,
-                            'level' => 5
+                            'level' => 5,
+                            'level_kalkulasi' => $kalkulasi_persentasi_level
                         ]);
                     }
-
 
                     //start insert tabel ptk_jawaban_adjusment
                     $level_final = $soal->level;
@@ -802,10 +811,7 @@ class SoalController extends Controller
                             ]);
                         }
                     }
-                    //end insert tabel ptk_jawaban_adjusment
-
-
-
+                    //end insert tabel ptk_jawaban_adjusment                   
 
                     $next = Soal::where('sub_indikator_id', $sub_indikator->sub_indikator_id)
                         ->where('no_urut', $current_no_urut + 1)
@@ -822,7 +828,15 @@ class SoalController extends Controller
                     }
                 } else {
                     $level_final = $soal->level - 1;
-
+                    //do kalkulasi persentasi
+                    $kalkulasi_persentasi_level;
+                    $level_kompetensi = $pangkat_jabatan->level_kompetensi;
+                    if($level_final<= $level_kompetensi){
+                        $kalkulasi_persentasi_level = (($level_final - 1) / ($level_kompetensi - 1)) * 100;
+                    }else{
+                        $kalkulasi_persentasi_level=100;
+                    }
+                    //end kalkulasi persentasi
                     PtkJawaban::updateOrCreate([
                         'kegiatan_id' => $kegiatan_id,
                         'sub_indikator_id' => $sub_indikator->sub_indikator_id,
@@ -833,7 +847,8 @@ class SoalController extends Controller
                         'time_start' => session('timestart'),
                         'time_end' => now()->format('H:i:s'),
                         'selisih' => $durasi_sub,
-                        'level' => $level_final
+                        'level' => $level_final,
+                        'level_kalkulasi' => $kalkulasi_persentasi_level
                     ]);
 
 
