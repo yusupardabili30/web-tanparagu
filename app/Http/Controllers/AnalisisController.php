@@ -4,12 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-
-
-
-
-
-// Tambahkan di atas class AnalisisController (setelah namespace)
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -432,12 +426,16 @@ class AnalisisController extends Controller
 
 
         $distribusiLevelPerKota = $this->getDistribusiLevelPerKota($request);
+
+        $persentaseLevelPerJenjang = $this->getPersentaseLevelPerJenjang($request);
+
         return [
             'statistik' => $statistik,
             'level_kota_per_ptk' => $levelkotaPerPtk,
             'level_terendah_per_ptk' => $levelTerendahPerPtk,
             'distribusi_level_per_kota' => $distribusiLevelPerKota,
             'jenjang_distribution' => $jenjangDistribution,
+            'persentase_level_per_jenjang' => $persentaseLevelPerJenjang,
             'bentuk_pendidikan_distribution' => $bentukPendidikanDistribution,
             'jenjang_pendidikan_distribution' => $jenjangPendidikanDistribution,
             'jenis_kelamin_distribution' => $jenisKelaminDistribution,
@@ -4157,6 +4155,283 @@ class AnalisisController extends Controller
         ];
         return $names[$level] ?? 'Unknown';
     }
+
+
+
+
+
+
+
+
+
+
+
+    private function getPersentaseLevelPerJenjang(Request $request)
+    {
+        try {
+            // Target maksimal per entity
+            $targetPerEntity = [
+                'guru' => 13,
+                'kepala sekolah' => 9,
+                'pengawas' => 9
+            ];
+
+            // Bobot level (sesuai permintaan: level2=1, level3=2, level4=3, level5=4)
+            $bobotLevel = [
+                1 => 0,   // Level 1 dianggap 0
+                2 => 1,   // Level 2 bobot 1
+                3 => 2,   // Level 3 bobot 2
+                4 => 3,   // Level 4 bobot 3
+                5 => 4    // Level 5 bobot 4
+            ];
+
+            // Target minimum per jenjang (level yang harus dicapai)
+            $targetJenjang = [
+                'Pertama' => 2,  // Harus minimal level 2
+                'Muda' => 3,     // Harus minimal level 3
+                'Madya' => 4,    // Harus minimal level 4
+                'Utama' => 5     // Harus minimal level 5
+            ];
+
+            // Rentang persentase 10%: 0-10, 11-20, ..., 91-100
+            $rentangPersentase = [];
+            $rentangLabels = [];
+            $rentangColors = [];
+
+            // Warna gradasi dari merah ke hijau
+            $colorPalette = [
+                'rgba(220, 53, 69, 0.8)',   // Merah untuk 0-10%
+                'rgba(244, 67, 54, 0.8)',   // Merah muda
+                'rgba(248, 113, 113, 0.8)', // Merah terang
+                'rgba(251, 146, 60, 0.8)',  // Oranye
+                'rgba(252, 211, 77, 0.8)',  // Kuning
+                'rgba(163, 230, 53, 0.8)',  // Kuning hijau
+                'rgba(74, 222, 128, 0.8)',  // Hijau muda
+                'rgba(34, 197, 94, 0.8)',   // Hijau
+                'rgba(22, 163, 74, 0.8)',   // Hijau sedang
+                'rgba(21, 128, 61, 0.8)'    // Hijau tua untuk 91-100%
+            ];
+
+            for ($i = 0; $i < 10; $i++) {
+                $start = $i * 10;
+                $end = ($i + 1) * 10;
+                $label = $start . '-' . $end . '%';
+
+                if ($i == 0) {
+                    $label = '0-10%';
+                } elseif ($i == 9) {
+                    $label = '91-100%';
+                }
+
+                $rentangLabels[] = $label;
+                $rentangPersentase[$label] = 0;
+                $rentangColors[] = $colorPalette[$i];
+            }
+
+            // Ambil semua jenjang yang ada di data berdasarkan filter
+            $jenjangQuery = DB::table('ptk_jawaban')
+                ->select('pangkat_jabatan.jenjang_jabatan')
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+                ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                ->where('ptk_jawaban.level', '>=', 1)
+                ->whereNotNull('pangkat_jabatan.jenjang_jabatan');
+
+            // Terapkan filter yang sama
+            if ($request->filled('kegiatan_id')) {
+                $jenjangQuery->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            }
+            if ($request->filled('pangkat_jabatan_id')) {
+                $jenjangQuery->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            }
+            if ($request->filled('jenis_ptk_id')) {
+                $jenjangQuery->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            }
+            if ($request->filled('kota_id')) {
+                $jenjangQuery->where('ptk.kota_id', $request->kota_id);
+            }
+            if ($request->filled('jenjang_pendidikan_id')) {
+                $jenjangQuery->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+            }
+            if ($request->filled('bentuk_pendidikan')) {
+                $jenjangQuery->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            }
+            if ($request->filled('jenis_kelamin')) {
+                $jenjangQuery->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            }
+
+            $jenjangList = $jenjangQuery
+                ->groupBy('pangkat_jabatan.jenjang_jabatan')
+                ->pluck('jenjang_jabatan')
+                ->toArray();
+
+            if (empty($jenjangList)) {
+                return [];
+            }
+
+            $result = [];
+
+            foreach ($jenjangList as $jenjang) {
+                // Pastikan jenjang ini ada dalam $targetJenjang
+                if (!isset($targetJenjang[$jenjang])) {
+                    continue;
+                }
+
+                $targetLevel = $targetJenjang[$jenjang];
+
+                // Query untuk mendapatkan data detail per PTK
+                $query = DB::table('ptk_jawaban')
+                    ->select(
+                        'ptk.ptk_id',
+                        'ptk.nama',
+                        'kegiatan.entity',
+                        'ptk_jawaban.sub_indikator_id',
+                        'ptk_jawaban.level'
+                    )
+                    ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                    ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+                    ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+                    ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                    ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                    ->where('pangkat_jabatan.jenjang_jabatan', $jenjang)
+                    ->where('ptk_jawaban.level', '>=', 1);
+
+                // Terapkan filter
+                if ($request->filled('kegiatan_id')) {
+                    $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+                }
+                if ($request->filled('kota_id')) {
+                    $query->where('ptk.kota_id', $request->kota_id);
+                }
+                if ($request->filled('jenis_ptk_id')) {
+                    $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+                }
+                if ($request->filled('jenjang_pendidikan_id')) {
+                    $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+                }
+                if ($request->filled('bentuk_pendidikan')) {
+                    $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+                }
+                if ($request->filled('jenis_kelamin')) {
+                    $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+                }
+
+                $data = $query->get();
+
+                if ($data->isEmpty()) {
+                    continue;
+                }
+
+                // Kelompokkan data per PTK
+                $groupedByPtk = $data->groupBy('ptk_id');
+
+                $persentaseData = [];
+                $totalSkor = 0;
+                $jumlahPtks = 0;
+
+                // Reset distribusi persentase untuk jenjang ini
+                $distribusiPersentase = [];
+                foreach ($rentangLabels as $label) {
+                    $distribusiPersentase[$label] = 0;
+                }
+
+                foreach ($groupedByPtk as $ptkId => $records) {
+                    $firstRecord = $records->first();
+                    $entity = strtolower($firstRecord->entity ?? '');
+
+                    // Tentukan target berdasarkan entity
+                    $targetSubIndikator = 13; // default untuk guru
+                    foreach ($targetPerEntity as $key => $value) {
+                        if (strpos($entity, $key) !== false) {
+                            $targetSubIndikator = $value;
+                            break;
+                        }
+                    }
+
+                    // Hitung skor maksimal (target sub indikator * bobot target level)
+                    $bobotTarget = $bobotLevel[$targetLevel] ?? 1;
+                    $skorMaksimal = $targetSubIndikator * $bobotTarget;
+
+                    // Hitung skor aktual berdasarkan level yang dicapai
+                    $skorAktual = 0;
+                    $levelCounts = $records->groupBy('level')->map->count();
+
+                    foreach ($levelCounts as $level => $count) {
+                        if ($level >= 2 && $level <= 5) {
+                            $bobot = $bobotLevel[$level] ?? 0;
+                            $skorAktual += ($count * $bobot);
+                        }
+                    }
+
+                    // Hitung persentase
+                    $persentase = $skorMaksimal > 0 ? round(($skorAktual / $skorMaksimal) * 100, 1) : 0;
+
+                    // Batasi maksimal 100%
+                    $persentase = min($persentase, 100);
+
+                    // Tentukan rentang persentase
+                    $rentangIndex = floor($persentase / 10);
+                    if ($persentase == 100) {
+                        $rentangIndex = 9; // 91-100%
+                    } elseif ($persentase == 0) {
+                        $rentangIndex = 0; // 0-10%
+                    }
+
+                    // Update distribusi persentase
+                    $distribusiPersentase[$rentangLabels[$rentangIndex]]++;
+
+                    $persentaseData[] = [
+                        'ptk_id' => $ptkId,
+                        'nama' => $firstRecord->nama,
+                        'entity' => $firstRecord->entity,
+                        'target_sub_indikator' => $targetSubIndikator,
+                        'target_level' => $targetLevel,
+                        'skor_aktual' => $skorAktual,
+                        'skor_maksimal' => $skorMaksimal,
+                        'persentase' => $persentase,
+                        'jumlah_sub_indikator' => $records->unique('sub_indikator_id')->count(),
+                        'rentang' => $rentangLabels[$rentangIndex]
+                    ];
+
+                    $totalSkor += $persentase;
+                    $jumlahPtks++;
+                }
+
+                // Hitung rata-rata persentase untuk jenjang ini
+                $rataPersentase = $jumlahPtks > 0 ? round($totalSkor / $jumlahPtks, 1) : 0;
+
+                // Siapkan data untuk chart
+                $chartDataValues = [];
+                foreach ($rentangLabels as $label) {
+                    $chartDataValues[] = $distribusiPersentase[$label] ?? 0;
+                }
+
+                $result[] = [
+                    'jenjang_jabatan' => $jenjang,
+                    'jumlah_ptk' => $jumlahPtks,
+                    'rata_persentase' => $rataPersentase,
+                    'target_level' => $targetLevel,
+                    'distribusi_persentase' => $distribusiPersentase,
+                    'chart_data' => [
+                        'labels' => $rentangLabels,
+                        'data' => $chartDataValues,
+                        'backgroundColor' => $rentangColors
+                    ]
+                ];
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            \Log::error('Error getPersentaseLevelPerJenjang: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+
+
+
+
 
 
 
