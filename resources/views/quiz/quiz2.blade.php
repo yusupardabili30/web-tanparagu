@@ -239,9 +239,11 @@
                                                 <i class="ri-checkbox-circle-line me-2"></i> Kirim Jawaban
                                             </button>
                                         </form>
+
                                         <div class="d-flex justify-content-end mt-2">
+                                            <!-- ✅ CUMA UBAH DI SINI: tambah class pause-float -->
                                             <button type="button" id="pauseBtn"
-                                                class="btn btn-primary btn-lg pause-btn">
+                                                class="btn btn-primary btn-lg pause-btn pause-float">
                                                 <i class="ri-pause-circle-line me-2"></i> Jeda
                                             </button>
                                         </div>
@@ -889,6 +891,54 @@
                 transform: none !important;
                 filter: none !important;
             }
+
+            /* ===============================
+               ✅ PAUSE BUTTON FLOATING (LEFT)
+/* ===============================
+   ✅ PAUSE BUTTON FLOATING (MATCH TIMER)
+   =============================== */
+#pauseBtn.pause-float{
+  position: fixed;
+  top: 246px;              /* sesuaikan jaraknya dari timer */
+  left: -6px;
+  z-index: 2200;
+  top: 252px;
+
+  background: #1a4d8e !important;     /* SAMA KAYAK TIMER */
+  border: none !important;
+  color: #fff !important;
+
+  border-radius: 0 20px 20px 0 !important; /* SAMA KAYAK TIMER */
+  padding: 8px 14px !important;            /* SAMAIN FEEL-NYA */
+  font-size: 15px;                          /* biar seimbang */
+  font-weight: 700;
+
+  box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+/* icon pause biar sejajar */
+#pauseBtn.pause-float i{
+  font-size: 18px;
+  margin-right: 8px; /* me-2 udah ada, ini optional kalau masih kurang */
+}
+
+/* hover: ikutin style timer/nav */
+#pauseBtn.pause-float:hover{
+  background: #163f74 !important;
+}
+
+/* MOBILE: ikut kanan kayak timer mobile */
+@media(max-width: 768px){
+  #pauseBtn.pause-float{
+    top: 165px;
+    right: 18px;
+    left: auto;
+    border-radius: 16px !important;
+    padding: 7px 12px !important;
+    font-size: 14px;
+  }
+}
+
         </style>
     @endsection
 
