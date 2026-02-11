@@ -870,6 +870,30 @@
 
                         $summaryRekList = array_values($summaryRek);
                         $summaryAchList = array_values($summaryAch);
+                        
+                        // ✅ URUTKAN LIST SUMMARY BERDASARKAN KODE (1.1.1 -> ... -> 1.3.5)
+                        $cmpCodeArr = function($a, $b) {
+                            $ka = trim((string)($a['code'] ?? ''));
+                            $kb = trim((string)($b['code'] ?? ''));
+
+                            if ($ka === $kb) return 0;
+
+                            $pa = array_map('intval', preg_split('/\./', $ka));
+                            $pb = array_map('intval', preg_split('/\./', $kb));
+
+                            $len = max(count($pa), count($pb));
+                            for ($i = 0; $i < $len; $i++) {
+                                $va = $pa[$i] ?? -1;
+                                $vb = $pb[$i] ?? -1;
+                                if ($va === $vb) continue;
+                                return $va <=> $vb;
+                            }
+                            return count($pa) <=> count($pb);
+                        };
+
+                        usort($summaryAchList, $cmpCodeArr);
+                        usort($summaryRekList, $cmpCodeArr);
+
                     @endphp
 
                     <div class="ptk-card">
