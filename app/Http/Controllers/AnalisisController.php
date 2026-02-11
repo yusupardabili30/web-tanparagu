@@ -4277,7 +4277,7 @@ class AnalisisController extends Controller
                     $entity = strtolower($ptk->entity ?? '');
 
                     // Pembagi: 9 untuk KS/Pengawas, 13 untuk Guru
-                    if (strpos($entity, 'kepala') !== false || strpos($entity, 'pengawas') !== false) {
+                    if (strpos($entity, 'Kepala Sekolah') !== false || strpos($entity, 'Pengawas') !== false) {
                         $pembagi = 9;
                     } else {
                         $pembagi = 13;
