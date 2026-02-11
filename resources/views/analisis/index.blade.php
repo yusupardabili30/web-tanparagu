@@ -1352,13 +1352,13 @@
                                 ${
                                     subIndex === 0
                                         ? `
-                                                                                <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
-                                                                                    ${kota.nama_kota || 'Banten'}
-                                                                                </td>
-                                                                                <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
-                                                                                    ${kota.total_jawaban || 0}
-                                                                                </td>
-                                                                            `
+                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
+                                                                                        ${kota.nama_kota || 'Banten'}
+                                                                                    </td>
+                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
+                                                                                        ${kota.total_jawaban || 0}
+                                                                                    </td>
+                                                                                `
                                         : ''
                                 }
 
@@ -1536,9 +1536,9 @@
                                     ${
                                         gapIndex === 0
                                             ? `
-                                                                                    <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                    <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
-                                                                                `
+                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                        <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
+                                                                                    `
                                             : ''
                                     }
                                 </td>
@@ -1723,19 +1723,19 @@
                                                           : '-';
 
                                                 return `
-                                                                                        <tr>
-                                                                                            <td class="text-center">${i + 1}</td>
-                                                                                            <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
-                                                                                            <td class="text-center">${tipeBadge}</td>
-                                                                                            <td class="text-center">${p.jumlah_ptk || 0}</td>
-                                                                                            <td class="text-center fw-bold">${persen}%</td>
-                                                                                            <td>
-                                                                                                <div class="progress" style="height:8px;">
-                                                                                                    <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
-                                                                                                </div>
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    `;
+                                                                                            <tr>
+                                                                                                <td class="text-center">${i + 1}</td>
+                                                                                                <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
+                                                                                                <td class="text-center">${tipeBadge}</td>
+                                                                                                <td class="text-center">${p.jumlah_ptk || 0}</td>
+                                                                                                <td class="text-center fw-bold">${persen}%</td>
+                                                                                                <td>
+                                                                                                    <div class="progress" style="height:8px;">
+                                                                                                        <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        `;
                                             })
                                             .join('')}
                                     </tbody>
@@ -1994,50 +1994,25 @@
 
                     const ctx = canvas.getContext('2d');
 
-                    // Destroy existing chart if any
                     if (window[canvasId]) {
                         try {
                             window[canvasId].destroy();
                         } catch (e) {}
                     }
 
-                    // Buat chart dengan 10 kategori
+                    const chartLabels = jenjangData.chart_data?.labels || [];
+                    const chartData = jenjangData.chart_data?.data || [];
+                    const chartColors = jenjangData.chart_data?.backgroundColor || [];
+
                     window[canvasId] = new Chart(ctx, {
                         type: 'bar',
                         data: {
-                            labels: jenjangData.chart_data?.labels || [
-                                '0-10%', '11-20%', '21-30%', '31-40%', '41-50%',
-                                '51-60%', '61-70%', '71-80%', '81-90%', '91-100%'
-                            ],
+                            labels: chartLabels,
                             datasets: [{
                                 label: 'Jumlah PTK',
-                                data: jenjangData.chart_data?.data || Array(10).fill(0),
-                                backgroundColor: jenjangData.chart_data?.backgroundColor || [
-                                    'rgba(220, 53, 69, 0.8)', // 0-10% merah
-                                    'rgba(244, 67, 54, 0.8)', // 11-20%
-                                    'rgba(248, 113, 113, 0.8)', // 21-30%
-                                    'rgba(251, 146, 60, 0.8)', // 31-40%
-                                    'rgba(252, 211, 77, 0.8)', // 41-50%
-                                    'rgba(163, 230, 53, 0.8)', // 51-60%
-                                    'rgba(74, 222, 128, 0.8)', // 61-70%
-                                    'rgba(34, 197, 94, 0.8)', // 71-80%
-                                    'rgba(22, 163, 74, 0.8)', // 81-90%
-                                    'rgba(21, 128, 61, 0.8)' // 91-100% hijau tua
-                                ],
-                                borderColor: jenjangData.chart_data?.backgroundColor?.map(color =>
-                                    color.replace('0.8', '1')
-                                ) || [
-                                    'rgba(220, 53, 69, 1)',
-                                    'rgba(244, 67, 54, 1)',
-                                    'rgba(248, 113, 113, 1)',
-                                    'rgba(251, 146, 60, 1)',
-                                    'rgba(252, 211, 77, 1)',
-                                    'rgba(163, 230, 53, 1)',
-                                    'rgba(74, 222, 128, 1)',
-                                    'rgba(34, 197, 94, 1)',
-                                    'rgba(22, 163, 74, 1)',
-                                    'rgba(21, 128, 61, 1)'
-                                ],
+                                data: chartData,
+                                backgroundColor: chartColors,
+                                borderColor: chartColors.map(c => c.replace('0.85', '1')),
                                 borderWidth: 1
                             }]
                         },
@@ -2050,17 +2025,11 @@
                                 },
                                 tooltip: {
                                     callbacks: {
-                                        label: function(context) {
-                                            const label = context.dataset.label || '';
-                                            const value = context.raw;
-                                            const total = context.dataset.data.reduce((a, b) => a + b,
-                                                0);
-                                            const percentage = total > 0 ? ((value / total) * 100)
-                                                .toFixed(1) : 0;
-                                            return `${label}: ${value} PTK (${percentage}%)`;
-                                        },
                                         title: function(tooltipItems) {
-                                            return tooltipItems[0].label;
+                                            return 'Persentase: ' + tooltipItems[0].label + '%';
+                                        },
+                                        label: function(context) {
+                                            return 'Jumlah PTK: ' + context.raw;
                                         }
                                     }
                                 }
@@ -2071,9 +2040,7 @@
                                     ticks: {
                                         stepSize: 1,
                                         callback: function(value) {
-                                            if (Number.isInteger(value)) {
-                                                return value;
-                                            }
+                                            return Number.isInteger(value) ? value + ' PTK' : null;
                                         }
                                     },
                                     title: {
@@ -2081,7 +2048,7 @@
                                         text: 'Jumlah PTK'
                                     },
                                     grid: {
-                                        color: 'rgba(0, 0, 0, 0.05)'
+                                        color: 'rgba(0,0,0,0.05)'
                                     }
                                 },
                                 x: {
@@ -2089,12 +2056,15 @@
                                         font: {
                                             size: 10
                                         },
-                                        maxRotation: 45,
-                                        minRotation: 45
+                                        maxRotation: 60,
+                                        minRotation: 45,
+                                        callback: function(val, index) {
+                                            return this.getLabelForValue(val) + '%';
+                                        }
                                     },
                                     title: {
                                         display: true,
-                                        text: 'Rentang Persentase'
+                                        text: 'Persentase Capaian'
                                     },
                                     grid: {
                                         display: false
@@ -2102,7 +2072,7 @@
                                 }
                             },
                             animation: {
-                                duration: 1000,
+                                duration: 800,
                                 easing: 'easeOutQuart'
                             }
                         }
