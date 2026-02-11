@@ -1200,38 +1200,30 @@
                     <canvas id="persentaseChart_${index}"></canvas>
                 </div>
 
-                <div class="mt-3">
-                    <div class="row text-center small">
-        `;
+              <div class="mt-3">
+    <div class="row text-center small">
+        @php
+            $labels = $jenjangData['chart_data']['labels'] ?? [];
+            $data = $jenjangData['chart_data']['data'] ?? [];
+        @endphp
 
-                    // Baris pertama (5 rentang pertama)
-                    for (let i = 0; i < 5; i++) {
-                        html += `
-                        <div class="col">
-                            <div>${labels[i] || '0-10%'}</div>
-                            <div class="fw-bold">${dataValues[i] || 0}</div>
-                        </div>
-            `;
-                    }
+        @for ($i = 0; $i < min(5, count($labels)); $i++)
+            <div class="col">
+                <div>{{ $labels[$i] }}</div>
+                <div class="fw-bold">{{ $data[$i] ?? 0 }}</div>
+            </div>
+        @endfor
+    </div>
 
-                    html += `
-                    </div>
-
-                    <div class="row text-center small mt-2">
-        `;
-
-                    // Baris kedua (5 rentang terakhir)
-                    for (let i = 5; i < 10; i++) {
-                        html += `
-                        <div class="col">
-                            <div>${labels[i] || '51-60%'}</div>
-                            <div class="fw-bold">${dataValues[i] || 0}</div>
-                        </div>
-            `;
-                    }
-
-                    html += `
-                    </div>
+    <div class="row text-center small mt-2">
+        @for ($i = 5; $i < min(10, count($labels)); $i++)
+            <div class="col">
+                <div>{{ $labels[$i] }}</div>
+                <div class="fw-bold">{{ $data[$i] ?? 0 }}</div>
+            </div>
+        @endfor
+    </div>
+</div>
                 </div>
             </div>
         </div>
@@ -1352,13 +1344,13 @@
                                 ${
                                     subIndex === 0
                                         ? `
-                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
-                                                                                        ${kota.nama_kota || 'Banten'}
-                                                                                    </td>
-                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
-                                                                                        ${kota.total_jawaban || 0}
-                                                                                    </td>
-                                                                                `
+                                                                                            <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
+                                                                                                ${kota.nama_kota || 'Banten'}
+                                                                                            </td>
+                                                                                            <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
+                                                                                                ${kota.total_jawaban || 0}
+                                                                                            </td>
+                                                                                        `
                                         : ''
                                 }
 
@@ -1536,9 +1528,9 @@
                                     ${
                                         gapIndex === 0
                                             ? `
-                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                        <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
-                                                                                    `
+                                                                                                <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                                <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
+                                                                                            `
                                             : ''
                                     }
                                 </td>
@@ -1723,19 +1715,19 @@
                                                           : '-';
 
                                                 return `
-                                                                                            <tr>
-                                                                                                <td class="text-center">${i + 1}</td>
-                                                                                                <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
-                                                                                                <td class="text-center">${tipeBadge}</td>
-                                                                                                <td class="text-center">${p.jumlah_ptk || 0}</td>
-                                                                                                <td class="text-center fw-bold">${persen}%</td>
-                                                                                                <td>
-                                                                                                    <div class="progress" style="height:8px;">
-                                                                                                        <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
-                                                                                                    </div>
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                        `;
+                                                                                                    <tr>
+                                                                                                        <td class="text-center">${i + 1}</td>
+                                                                                                        <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
+                                                                                                        <td class="text-center">${tipeBadge}</td>
+                                                                                                        <td class="text-center">${p.jumlah_ptk || 0}</td>
+                                                                                                        <td class="text-center fw-bold">${persen}%</td>
+                                                                                                        <td>
+                                                                                                            <div class="progress" style="height:8px;">
+                                                                                                                <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
+                                                                                                            </div>
+                                                                                                        </td>
+                                                                                                    </tr>
+                                                                                                `;
                                             })
                                             .join('')}
                                     </tbody>
