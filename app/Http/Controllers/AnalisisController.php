@@ -954,9 +954,20 @@ class AnalisisController extends Controller
             return [];
         }
 
+        // URUTKAN JENJANG SESUAI URUTAN YANG DIINGINKAN
+        $sortedJenjangList = [];
+        $order = ['Pertama', 'Muda', 'Madya', 'Utama'];
+
+        foreach ($order as $jenjang) {
+            if (in_array($jenjang, $jenjangList)) {
+                $sortedJenjangList[] = $jenjang;
+            }
+        }
+
+
         $result = [];
 
-        foreach ($jenjangList as $jenjang) {
+        foreach ($sortedJenjangList  as $jenjang) {
             // Query untuk mendapatkan data per jenjang jabatan - INCLUDE SEMUA SUB INDIKATOR
             $perJenjangQuery = DB::table('ptk_jawaban')
                 ->select(
@@ -3604,9 +3615,21 @@ class AnalisisController extends Controller
             return [];
         }
 
+
+        // URUTKAN JENJANG SESUAI URUTAN YANG DIINGINKAN
+        $sortedJenjangList = [];
+        $order = ['Pertama', 'Muda', 'Madya', 'Utama'];
+
+        foreach ($order as $jenjang) {
+            if (in_array($jenjang, $jenjangList)) {
+                $sortedJenjangList[] = $jenjang;
+            }
+        }
+
+
         $result = [];
 
-        foreach ($jenjangList as $jenjang) {
+        foreach ($sortedJenjangList  as $jenjang) {
             // Pastikan jenjang ini ada dalam $targetLevels
             if (!isset($targetLevels[$jenjang])) {
                 continue;
@@ -4201,9 +4224,19 @@ class AnalisisController extends Controller
 
             if (empty($jenjangList)) return [];
 
+            // URUTKAN JENJANG SESUAI URUTAN YANG DIINGINKAN
+            $sortedJenjangList = [];
+            $order = ['Pertama', 'Muda', 'Madya', 'Utama'];
+
+            foreach ($order as $jenjang) {
+                if (in_array($jenjang, $jenjangList)) {
+                    $sortedJenjangList[] = $jenjang;
+                }
+            }
+
             $result = [];
 
-            foreach ($jenjangList as $jenjang) {
+            foreach ($sortedJenjangList as $jenjang) {
                 if (!isset($targetJenjang[$jenjang])) continue;
 
                 $targetLevel = $targetJenjang[$jenjang];
