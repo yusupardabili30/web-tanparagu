@@ -2768,7 +2768,7 @@ class AnalisisController extends Controller
                 $entity = strtolower($ptk->entity ?? '');
                 $target = 13; // default untuk guru
 
-                if (strpos($entity, 'kepala') !== false || strpos($entity, 'pengawas') !== false) {
+                if (strpos($entity, 'kepala sekolah') !== false || strpos($entity, 'pengawas') !== false) {
                     $target = 9;
                 }
 
@@ -2818,7 +2818,7 @@ class AnalisisController extends Controller
                 foreach ($groupedProgress['selesai'] as $ptk) {
                     $entity = strtolower($ptk->entity ?? '');
                     $target = 13;
-                    if (strpos($entity, 'kepala') !== false || strpos($entity, 'pengawas') !== false) {
+                    if (strpos($entity, 'kepala sekolah') !== false || strpos($entity, 'pengawas') !== false) {
                         $target = 9;
                     }
 
@@ -2891,7 +2891,7 @@ class AnalisisController extends Controller
                 foreach ($groupedProgress['dalam_proses'] as $ptk) {
                     $entity = strtolower($ptk->entity ?? '');
                     $target = 13;
-                    if (strpos($entity, 'kepala') !== false || strpos($entity, 'pengawas') !== false) {
+                    if (strpos($entity, 'kepala sekolah') !== false || strpos($entity, 'pengawas') !== false) {
                         $target = 9;
                     }
 
@@ -2976,7 +2976,7 @@ class AnalisisController extends Controller
                     $jenis_ptk = strtolower($ptk->jenis_ptk ?? '');
                     $target = 13; // default untuk guru
 
-                    if (strpos($jenis_ptk, 'kepala') !== false) {
+                    if (strpos($jenis_ptk, 'kepala sekolah') !== false) {
                         $target = 9;
                     } elseif (strpos($jenis_ptk, 'pengawas') !== false) {
                         $target = 9;
@@ -3547,7 +3547,7 @@ class AnalisisController extends Controller
 
         if (strpos($entity, 'guru') !== false) {
             return 13;
-        } elseif (strpos($entity, 'kepala') !== false || strpos($entity, 'pengawas') !== false) {
+        } elseif (strpos($entity, 'kepala sekolah') !== false || strpos($entity, 'pengawas') !== false) {
             return 9;
         }
 
@@ -4269,15 +4269,23 @@ class AnalisisController extends Controller
 
                 if ($data->isEmpty()) continue;
 
-                // Hitung persentase asli per PTK, lalu buat distribusi frekuensi
-                // Key = persentase dibulatkan 2 desimal, Value = jumlah PTK
-                $distribusi = [];
+                // INISIALISASI DISTRIBUSI KELOMPOK (4 KELOMPOK)
+                $kelompokLabels = ['0-50%', '51-80%', '81-99%', '100%'];
+                $kelompokData = [0, 0, 0, 0];
+
+                // WARNA UNTUK SETIAP KELOMPOK
+                $kelompokColors = [
+                    'rgba(220, 53, 69, 0.85)',   // Merah untuk 0-50%
+                    'rgba(255, 193, 7, 0.85)',   // Kuning untuk 51-80%
+                    'rgba(23, 162, 184, 0.85)',  // Biru untuk 81-99%
+                    'rgba(40, 167, 69, 0.85)'    // Hijau untuk 100%
+                ];
 
                 foreach ($data as $ptk) {
                     $entity = strtolower($ptk->entity ?? '');
 
                     // Pembagi: 9 untuk KS/Pengawas, 13 untuk Guru
-                    if (strpos($entity, 'Kepala Sekolah') !== false || strpos($entity, 'Pengawas') !== false) {
+                    if (strpos($entity, 'kepala sekolah') !== false || strpos($entity, 'pengawas') !== false) {
                         $pembagi = 9;
                     } else {
                         $pembagi = 13;
@@ -4286,56 +4294,49 @@ class AnalisisController extends Controller
                     $sumKalkulasi = (float) $ptk->sum_level_kalkulasi;
 
                     // RUMUS: SUM(level_kalkulasi) / pembagi
-                    // level_kalkulasi sudah dalam bentuk persen (misal 97.436154)
-                    // jadi hasilnya langsung persentase
                     $persentase = $pembagi > 0 ? $sumKalkulasi / $pembagi : 0;
 
                     // Cap max 100%
                     $persentase = min($persentase, 100.0);
 
-                    // Bulatkan ke 2 desimal sebagai key distribusi
-                    $key = number_format($persentase, 2, '.', '');
-
-                    if (!isset($distribusi[$key])) {
-                        $distribusi[$key] = 0;
+                    // KELOMPOKKAN BERDASARKAN NILAI PERSENTASE
+                    if ($persentase >= 100) {
+                        $kelompokData[3]++; // Kelompok 100%
+                    } elseif ($persentase >= 81) {
+                        $kelompokData[2]++; // Kelompok 81-99%
+                    } elseif ($persentase >= 51) {
+                        $kelompokData[1]++; // Kelompok 51-80%
+                    } else {
+                        $kelompokData[0]++; // Kelompok 0-50%
                     }
-                    $distribusi[$key]++;
                 }
 
-                // Urutkan berdasarkan nilai persentase (ascending)
-                uksort($distribusi, function ($a, $b) {
-                    return (float)$a <=> (float)$b;
-                });
-
-                $labels     = array_keys($distribusi);     // ["67.44", "83.21", "97.44", ...]
-                $dataValues = array_values($distribusi);   // [2, 1, 3, ...]
-
-                // Warna per bar berdasarkan nilai persentase
-                $backgroundColors = array_map(function ($pct) {
-                    $p = (float)$pct;
-                    if ($p >= 90)      return 'rgba(21, 128, 61, 0.85)';
-                    elseif ($p >= 70)  return 'rgba(34, 197, 94, 0.85)';
-                    elseif ($p >= 50)  return 'rgba(163, 230, 53, 0.85)';
-                    elseif ($p >= 30)  return 'rgba(251, 191, 36, 0.85)';
-                    else               return 'rgba(220, 53, 69, 0.85)';
-                }, $labels);
-
-                $allPersentase = array_map('floatval', $labels);
-                $rataPersentase = count($allPersentase) > 0
-                    ? array_sum(array_map(fn($k, $v) => (float)$k * $v, $labels, $dataValues))
-                    / array_sum($dataValues)
+                // HITUNG RATA-RATA PERSENTASE
+                $rataPersentase = $data->count() > 0
+                    ? array_sum(array_map(function ($ptk) use ($targetLevel) {
+                        $entity = strtolower($ptk->entity ?? '');
+                        $pembagi = (strpos($entity, 'kepala sekolah') !== false || strpos($entity, 'pengawas') !== false) ? 9 : 13;
+                        return $pembagi > 0 ? min((float)$ptk->sum_level_kalkulasi / $pembagi, 100) : 0;
+                    }, iterator_to_array($data))) / $data->count()
                     : 0;
 
                 $result[] = [
                     'jenjang_jabatan'  => $jenjang,
-                    'jumlah_ptk'       => count($data),
+                    'jumlah_ptk'       => $data->count(),
                     'rata_persentase'  => round($rataPersentase, 2),
                     'target_level'     => $targetLevel,
                     'chart_data'       => [
-                        'labels'          => $labels,          // nilai % asli
-                        'data'            => $dataValues,      // jumlah PTK
-                        'backgroundColor' => $backgroundColors,
+                        'labels'          => $kelompokLabels,      // 4 kelompok persentase
+                        'data'            => $kelompokData,        // jumlah PTK per kelompok
+                        'backgroundColor' => $kelompokColors,      // warna per kelompok
+                        'borderColor'     => array_map(fn($c) => str_replace('0.85', '1', $c), $kelompokColors),
                     ],
+                    'statistik' => [
+                        '0_50' => $kelompokData[0],
+                        '51_80' => $kelompokData[1],
+                        '81_99' => $kelompokData[2],
+                        '100' => $kelompokData[3]
+                    ]
                 ];
             }
 

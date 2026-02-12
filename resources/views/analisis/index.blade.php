@@ -36,6 +36,28 @@
     @endphp
 
     <link rel="stylesheet" href="{{ asset('build/css/analisis.min.css') }}">
+    <style>
+        /* Tambahkan di file CSS Anda untuk mempercantik tampilan statistik */
+        .jenjang-persentase-scroll-container .chart-card .statistik-kelompok {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .jenjang-persentase-scroll-container .chart-card .stat-item {
+            transition: all 0.2s ease;
+        }
+
+        .jenjang-persentase-scroll-container .chart-card .stat-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .jenjang-persentase-scroll-container .chart-card .badge {
+            font-size: 11px;
+            padding: 4px 8px;
+        }
+    </style>
 
     <!-- FLOATING NAVBAR + SLIDE PANEL (KIRI, SETENGAH OVAL) -->
     <div id="floatingNavAnalisis">
@@ -278,7 +300,7 @@
                                     <div class="chart-title">
                                         <i class="ri-percent-line"></i> Distribusi Persentase Level Kompetensi per Jenjang
                                         Jabatan
-
+                                        <span class="badge bg-info ms-2">4 Kelompok Capaian</span>
                                     </div>
 
                                     <div class="jenjang-persentase-scroll-container">
@@ -293,38 +315,55 @@
                                                             <span class="badge bg-primary ms-2">
                                                                 Capaian: Level {{ $jenjangData['target_level'] }}
                                                             </span>
+                                                            <span class="badge bg-secondary ms-1">
+                                                                Rata-rata: {{ $jenjangData['rata_persentase'] }}%
+                                                            </span>
                                                         </h6>
 
-
-
-                                                        <div class="chart-wrapper" style="height: 250px;">
+                                                        <div class="chart-wrapper" style="height: 280px;">
                                                             <canvas id="persentaseChart_{{ $loop->index }}"></canvas>
                                                         </div>
 
                                                         <div class="mt-3">
-                                                            <div class="row text-center small">
-                                                                @php
-                                                                    $labels =
-                                                                        $jenjangData['chart_data']['labels'] ?? [];
-                                                                    $data = $jenjangData['chart_data']['data'] ?? [];
-                                                                @endphp
-
-                                                                @for ($i = 0; $i < min(5, count($labels)); $i++)
-                                                                    <div class="col">
-                                                                        <div>{{ $labels[$i] }}</div>
-                                                                        <div class="fw-bold">{{ $data[$i] ?? 0 }}</div>
+                                                            <div class="row g-2">
+                                                                <div class="col-3 text-center">
+                                                                    <div class="small text-muted">0-50%</div>
+                                                                    <div class="fw-bold text-danger">
+                                                                        {{ $jenjangData['statistik']['0_50'] ?? 0 }}</div>
+                                                                    <div class="small" style="font-size:10px;">
+                                                                        {{ $jenjangData['jumlah_ptk'] > 0 ? round((($jenjangData['statistik']['0_50'] ?? 0) / $jenjangData['jumlah_ptk']) * 100, 1) : 0 }}%
                                                                     </div>
-                                                                @endfor
-                                                            </div>
-
-                                                            <div class="row text-center small mt-2">
-                                                                @for ($i = 5; $i < min(10, count($labels)); $i++)
-                                                                    <div class="col">
-                                                                        <div>{{ $labels[$i] }}</div>
-                                                                        <div class="fw-bold">{{ $data[$i] ?? 0 }}</div>
+                                                                </div>
+                                                                <div class="col-3 text-center">
+                                                                    <div class="small text-muted">51-80%</div>
+                                                                    <div class="fw-bold text-warning">
+                                                                        {{ $jenjangData['statistik']['51_80'] ?? 0 }}</div>
+                                                                    <div class="small" style="font-size:10px;">
+                                                                        {{ $jenjangData['jumlah_ptk'] > 0 ? round((($jenjangData['statistik']['51_80'] ?? 0) / $jenjangData['jumlah_ptk']) * 100, 1) : 0 }}%
                                                                     </div>
-                                                                @endfor
+                                                                </div>
+                                                                <div class="col-3 text-center">
+                                                                    <div class="small text-muted">81-99%</div>
+                                                                    <div class="fw-bold text-info">
+                                                                        {{ $jenjangData['statistik']['81_99'] ?? 0 }}</div>
+                                                                    <div class="small" style="font-size:10px;">
+                                                                        {{ $jenjangData['jumlah_ptk'] > 0 ? round((($jenjangData['statistik']['81_99'] ?? 0) / $jenjangData['jumlah_ptk']) * 100, 1) : 0 }}%
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-3 text-center">
+                                                                    <div class="small text-muted">100%</div>
+                                                                    <div class="fw-bold text-success">
+                                                                        {{ $jenjangData['statistik']['100'] ?? 0 }}</div>
+                                                                    <div class="small" style="font-size:10px;">
+                                                                        {{ $jenjangData['jumlah_ptk'] > 0 ? round((($jenjangData['statistik']['100'] ?? 0) / $jenjangData['jumlah_ptk']) * 100, 1) : 0 }}%
+                                                                    </div>
+                                                                </div>
                                                             </div>
+                                                        </div>
+
+                                                        <div class="mt-2 small text-center text-muted">
+                                                            <i class="ri-information-line"></i> Total PTK:
+                                                            {{ $jenjangData['jumlah_ptk'] }}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -337,9 +376,7 @@
                                             <i class="ri-information-line"></i>
                                             Menampilkan {{ count($analisisData['persentase_level_per_jenjang']) }} jenjang
                                             jabatan
-                                            @if (count($analisisData['persentase_level_per_jenjang']) > 6)
-                                                (Gunakan scroll untuk melihat lebih banyak)
-                                            @endif
+                                            dengan pengelompokan 4 kategori capaian
                                         </small>
                                     </div>
                                 </div>
@@ -1203,20 +1240,20 @@
             <div class="mt-3">
                 <div class="row text-center small">
                     ${labels.slice(0,5).map((label, i) => `
-                                <div class="col">
-                                    <div>${label}</div>
-                                    <div class="fw-bold">${dataValues[i] ?? 0}</div>
-                                </div>
-                            `).join('')}
+                                            <div class="col">
+                                                <div>${label}</div>
+                                                <div class="fw-bold">${dataValues[i] ?? 0}</div>
+                                            </div>
+                                        `).join('')}
                 </div>
 
                 <div class="row text-center small mt-2">
                     ${labels.slice(5,10).map((label, i) => `
-                                <div class="col">
-                                    <div>${label}</div>
-                                    <div class="fw-bold">${dataValues[i+5] ?? 0}</div>
-                                </div>
-                            `).join('')}
+                                            <div class="col">
+                                                <div>${label}</div>
+                                                <div class="fw-bold">${dataValues[i+5] ?? 0}</div>
+                                            </div>
+                                        `).join('')}
                 </div>
             </div>
 
@@ -1340,13 +1377,13 @@
                                 ${
                                     subIndex === 0
                                         ? `
-                                                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
-                                                                                                                            ${kota.nama_kota || 'Banten'}
-                                                                                                                        </td>
-                                                                                                                        <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
-                                                                                                                            ${kota.total_jawaban || 0}
-                                                                                                                        </td>
-                                                                                                                    `
+                                                                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
+                                                                                                                                        ${kota.nama_kota || 'Banten'}
+                                                                                                                                    </td>
+                                                                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
+                                                                                                                                        ${kota.total_jawaban || 0}
+                                                                                                                                    </td>
+                                                                                                                                `
                                         : ''
                                 }
 
@@ -1524,9 +1561,9 @@
                                     ${
                                         gapIndex === 0
                                             ? `
-                                                                                                                            <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                                                            <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
-                                                                                                                        `
+                                                                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                                                                        <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
+                                                                                                                                    `
                                             : ''
                                     }
                                 </td>
@@ -1711,19 +1748,19 @@
                                                           : '-';
 
                                                 return `
-                                                                                                                                <tr>
-                                                                                                                                    <td class="text-center">${i + 1}</td>
-                                                                                                                                    <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
-                                                                                                                                    <td class="text-center">${tipeBadge}</td>
-                                                                                                                                    <td class="text-center">${p.jumlah_ptk || 0}</td>
-                                                                                                                                    <td class="text-center fw-bold">${persen}%</td>
-                                                                                                                                    <td>
-                                                                                                                                        <div class="progress" style="height:8px;">
-                                                                                                                                            <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
-                                                                                                                                        </div>
-                                                                                                                                    </td>
-                                                                                                                                </tr>
-                                                                                                                            `;
+                                                                                                                                            <tr>
+                                                                                                                                                <td class="text-center">${i + 1}</td>
+                                                                                                                                                <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
+                                                                                                                                                <td class="text-center">${tipeBadge}</td>
+                                                                                                                                                <td class="text-center">${p.jumlah_ptk || 0}</td>
+                                                                                                                                                <td class="text-center fw-bold">${persen}%</td>
+                                                                                                                                                <td>
+                                                                                                                                                    <div class="progress" style="height:8px;">
+                                                                                                                                                        <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
+                                                                                                                                                    </div>
+                                                                                                                                                </td>
+                                                                                                                                            </tr>
+                                                                                                                                        `;
                                             })
                                             .join('')}
                                     </tbody>
@@ -1974,6 +2011,7 @@
 
             function renderPersentaseCharts(data) {
                 if (!data?.persentase_level_per_jenjang) return;
+
                 // SORT DATA BERDASARKAN URUTAN JENJANG
                 const sortedData = [...data.persentase_level_per_jenjang].sort((a, b) => {
                     const order = {
@@ -1984,7 +2022,6 @@
                     };
                     return (order[a.jenjang_jabatan] || 99) - (order[b.jenjang_jabatan] || 99);
                 });
-
 
                 sortedData.forEach((jenjangData, index) => {
                     const canvasId = `persentaseChart_${index}`;
@@ -1999,9 +2036,14 @@
                         } catch (e) {}
                     }
 
-                    const chartLabels = jenjangData.chart_data?.labels || [];
-                    const chartData = jenjangData.chart_data?.data || [];
-                    const chartColors = jenjangData.chart_data?.backgroundColor || [];
+                    const chartLabels = jenjangData.chart_data?.labels || ['0-50%', '51-80%', '81-99%', '100%'];
+                    const chartData = jenjangData.chart_data?.data || [0, 0, 0, 0];
+                    const chartColors = jenjangData.chart_data?.backgroundColor || [
+                        'rgba(220, 53, 69, 0.85)', // Merah
+                        'rgba(255, 193, 7, 0.85)', // Kuning
+                        'rgba(23, 162, 184, 0.85)', // Biru
+                        'rgba(40, 167, 69, 0.85)' // Hijau
+                    ];
 
                     window[canvasId] = new Chart(ctx, {
                         type: 'bar',
@@ -2025,10 +2067,24 @@
                                 tooltip: {
                                     callbacks: {
                                         title: function(tooltipItems) {
-                                            return 'Persentase: ' + tooltipItems[0].label + '%';
+                                            return 'Rentang: ' + tooltipItems[0].label;
                                         },
                                         label: function(context) {
-                                            return 'Jumlah PTK: ' + context.raw;
+                                            const total = jenjangData.jumlah_ptk || 0;
+                                            const value = context.raw;
+                                            const percentage = total > 0 ? ((value / total) * 100)
+                                                .toFixed(1) : 0;
+                                            return 'Jumlah PTK: ' + value + ' (' + percentage + '%)';
+                                        },
+                                        afterLabel: function(context) {
+                                            const label = context.label;
+                                            let keterangan = '';
+                                            if (label === '0-50%') keterangan =
+                                                'Perlu Peningkatan Signifikan';
+                                            else if (label === '51-80%') keterangan = 'Cukup Baik';
+                                            else if (label === '81-99%') keterangan = 'Baik';
+                                            else if (label === '100%') keterangan = 'Sempurna';
+                                            return keterangan;
                                         }
                                     }
                                 }
@@ -2053,17 +2109,15 @@
                                 x: {
                                     ticks: {
                                         font: {
-                                            size: 10
+                                            size: 11,
+                                            weight: 'bold'
                                         },
-                                        maxRotation: 60,
-                                        minRotation: 45,
-                                        callback: function(val, index) {
-                                            return this.getLabelForValue(val) + '%';
-                                        }
+                                        maxRotation: 0,
+                                        minRotation: 0
                                     },
                                     title: {
                                         display: true,
-                                        text: 'Persentase Capaian'
+                                        text: 'Rentang Persentase Capaian'
                                     },
                                     grid: {
                                         display: false
