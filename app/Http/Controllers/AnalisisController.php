@@ -32,7 +32,35 @@ class AnalisisController extends Controller
         // =========================
         $kegiatans = DB::table('kegiatan')->get();
         $pangkatJabatans = DB::table('pangkat_jabatan')->get();
-        $jenisPtkList = DB::table('jenis_ptk')->get();
+
+        // PERBAIKAN: Ambil jenis_ptk dengan validasi entity dari kegiatan
+        $jenisPtkQuery = DB::table('jenis_ptk');
+
+        if ($request->filled('kegiatan_id')) {
+            $kegiatan = DB::table('kegiatan')
+                ->where('kegiatan_id', $request->kegiatan_id)
+                ->first();
+
+            if ($kegiatan && !empty($kegiatan->entity)) {
+                // Mapping entity ke jenis_ptk_id
+                $entity = strtolower($kegiatan->entity);
+
+                $jenisPtkQuery->where(function ($q) use ($entity) {
+                    if (strpos($entity, 'guru') !== false) {
+                        $q->where('jenis_ptk', 'LIKE', '%Guru%');
+                    }
+                    if (strpos($entity, 'kepala sekolah') !== false) {
+                        $q->orWhere('jenis_ptk', 'LIKE', '%Kepala Sekolah%');
+                    }
+                    if (strpos($entity, 'pengawas') !== false) {
+                        $q->orWhere('jenis_ptk', 'LIKE', '%Pengawas%');
+                    }
+                });
+            }
+        }
+
+        $jenisPtkList = $jenisPtkQuery->get();
+
         $kotas = DB::table('kota')->orderBy('nama_kota')->get();
 
         // Ambil jenjang pendidikan dari tabel jenjang_pendidikan
@@ -75,6 +103,26 @@ class AnalisisController extends Controller
             'jenis_kelamin'
         ])) {
             try {
+                // PERBAIKAN: Validasi kompatibilitas kegiatan dan jenis_ptk
+                if ($request->filled('kegiatan_id') && $request->filled('jenis_ptk_id')) {
+                    $isCompatible = $this->validateJenisPtkWithKegiatan(
+                        $request->kegiatan_id,
+                        $request->jenis_ptk_id
+                    );
+
+                    if (!$isCompatible) {
+                        if ($request->ajax()) {
+                            return response()->json([
+                                'error' => 'Filter tidak valid: Kegiatan dan Jenis PTK tidak kompatibel'
+                            ], 422);
+                        }
+
+                        return redirect()
+                            ->route('analisis.index')
+                            ->with('error', 'Kegiatan dan Jenis PTK yang dipilih tidak kompatibel. Silakan pilih filter yang sesuai.');
+                    }
+                }
+
                 $analisisData = $this->getAnalisisData($request);
 
                 // Jika AJAX → JSON
@@ -111,345 +159,347 @@ class AnalisisController extends Controller
 
     private function getAnalisisData(Request $request)
     {
-        // ========================================================
-        // QUERY UNTUK DISTRIBUSI PTK (BUKAN BERDASARKAN JAWABAN)
-        // ========================================================
 
-        // Query untuk mendapatkan PTK yang sudah menjawab dalam kegiatan tertentu
-        $ptkYangSudahMenjawabQuery = DB::table('ptk_jawaban')
-            ->select('ptk_id')
-            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
-                $q->where('kegiatan_id', $request->kegiatan_id);
-            })
-            ->groupBy('ptk_id');
+        if ($request->filled('kegiatan_id') && $request->filled('jenis_ptk_id')) {
+            $isCompatible = $this->validateJenisPtkWithKegiatan(
+                $request->kegiatan_id,
+                $request->jenis_ptk_id
+            );
 
-        // Ambil PTK yang memenuhi filter dan sudah menjawab
-        $ptkQuery = DB::table('ptk')
-            ->select(
-                'ptk.ptk_id',
-                'ptk.nip',
-                'ptk.nama',
-                'ptk.jenis_kelamin',
-                'ptk.kota_id',
-                'pangkat_jabatan.jenjang_jabatan',
-                'kota.nama_kota',
-                'sekolah.bentuk_pendidikan',
-                'jenjang_pendidikan.jenjang_pendidikan'
-            )
-            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
-            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
-            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
-            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
-            ->whereIn('ptk.ptk_id', $ptkYangSudahMenjawabQuery)
-            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
-                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-            })
-            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
-                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-            })
-            ->when($request->filled('kota_id'), function ($q) use ($request) {
-                $q->where('ptk.kota_id', $request->kota_id);
-            })
-            ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
-                $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
-            })
-            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
-                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
-            })
-            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
-                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
-            });
+            // ========================================================
+            // QUERY UNTUK DISTRIBUSI PTK (BUKAN BERDASARKAN JAWABAN)
+            // ========================================================
 
-        $ptkData = $ptkQuery->get();
+            // Query untuk mendapatkan PTK yang sudah menjawab dalam kegiatan tertentu
+            $ptkYangSudahMenjawabQuery = DB::table('ptk_jawaban')
+                ->select('ptk_id')
+                ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                    $q->where('kegiatan_id', $request->kegiatan_id);
+                })
+                ->groupBy('ptk_id');
 
-        // ========================================================
-        // QUERY UNTUK LEVEL DISTRIBUTION (BERDASARKAN JAWABAN)
-        // ========================================================
+            // Ambil PTK yang memenuhi filter dan sudah menjawab
+            $ptkQuery = DB::table('ptk')
+                ->select(
+                    'ptk.ptk_id',
+                    'ptk.nip',
+                    'ptk.nama',
+                    'ptk.jenis_kelamin',
+                    'ptk.kota_id',
+                    'pangkat_jabatan.jenjang_jabatan',
+                    'kota.nama_kota',
+                    'sekolah.bentuk_pendidikan',
+                    'jenjang_pendidikan.jenjang_pendidikan'
+                )
+                ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+                ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+                ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                ->whereIn('ptk.ptk_id', $ptkYangSudahMenjawabQuery)
+                ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                    $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+                })
+                ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+                })
+                ->when($request->filled('kota_id'), function ($q) use ($request) {
+                    $q->where('ptk.kota_id', $request->kota_id);
+                })
+                ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+                })
+                ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                    $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+                })
+                ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+                });
 
-        $jawabanQuery = DB::table('ptk_jawaban')
-            ->select('ptk_jawaban.level')
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
-            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
-            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
-            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
-                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-            })
-            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
-                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-            })
-            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
-                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-            })
-            ->when($request->filled('kota_id'), function ($q) use ($request) {
-                $q->where('ptk.kota_id', $request->kota_id);
-            })
-            ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
-                $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
-            })
-            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
-                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
-            })
-            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
-                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
-            })
-            ->where('ptk_jawaban.level', '>=', 1); // INCLUDE LEVEL 1
+            $ptkData = $ptkQuery->get();
 
-        $jawabanData = $jawabanQuery->get();
+            // ========================================================
+            // QUERY UNTUK LEVEL DISTRIBUTION (BERDASARKAN JAWABAN)
+            // ========================================================
 
-        // ========================================================
-        // HITUNG STATISTIK
-        // ===============================s=================
-        $statistik = $this->getStatistik($request, $ptkData, $jawabanData);
+            $jawabanQuery = DB::table('ptk_jawaban')
+                ->select('ptk_jawaban.level')
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                    $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+                })
+                ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                    $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+                })
+                ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+                })
+                ->when($request->filled('kota_id'), function ($q) use ($request) {
+                    $q->where('ptk.kota_id', $request->kota_id);
+                })
+                ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+                })
+                ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                    $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+                })
+                ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+                })
+                ->where('ptk_jawaban.level', '>=', 1); // INCLUDE LEVEL 1
 
+            $jawabanData = $jawabanQuery->get();
 
-
-        // ========================================================
-        // DISTRIBUSI BERDASARKAN PTK (BUKAN JAWABAN)
-        // ========================================================
-
-        // Distribusi jenjang jabatan (berdasarkan PTK, bukan jawaban)
-        $jenjangDistribution = $ptkData->groupBy('jenjang_jabatan')
-            ->map(function ($items, $jenjang) {
-                return [
-                    'jenjang_jabatan' => $jenjang ?: 'Tidak Diketahui',
-                    'count' => $items->count()
-                ];
-            })
-            ->values();
-
-        // Distribusi bentuk pendidikan (berdasarkan PTK, bukan jawaban)
-        $bentukPendidikanDistribution = $ptkData->groupBy('bentuk_pendidikan')
-            ->map(function ($items, $bentuk) {
-                return [
-                    'bentuk_pendidikan' => $bentuk ?: 'Tidak Diketahui',
-                    'count' => $items->count()
-                ];
-            })
-            ->values();
-
-        // Distribusi jenjang pendidikan (berdasarkan PTK, bukan jawaban)
-        $jenjangPendidikanDistribution = $ptkData->groupBy('jenjang_pendidikan')
-            ->map(function ($items, $jenjang) {
-                return [
-                    'jenjang_pendidikan' => $jenjang ?: 'Tidak Diketahui',
-                    'count' => $items->count()
-                ];
-            })
-            ->values();
-
-        // Distribusi jenis kelamin (berdasarkan PTK, bukan jawaban)
-        $jenisKelaminDistribution = $ptkData->groupBy('jenis_kelamin')
-            ->map(function ($items, $jenis) {
-                $label = $jenis == 'L' ? 'Laki-laki' : ($jenis == 'P' ? 'Perempuan' : ($jenis ?: 'Tidak Diketahui'));
-                return [
-                    'jenis_kelamin' => $label,
-                    'count' => $items->count()
-                ];
-            })
-            ->values();
-
-        // ========================================================
-        // DATA UNTUK CHART SUB INDIKATOR (DARI ptk_jawaban)
-        // ========================================================
-
-        // 1. Ambil semua sub indikator yang ada dalam kegiatan (VALIDASI DATA)
-        $semuaSubIndikatorQuery = DB::table('ptk_jawaban')
-            ->select(
-                'ptk_jawaban.sub_indikator_id',
-                'ptk_jawaban.sub_indikator_code',
-                'sub_indikator.sub_indikator_name'
-            )
-            ->join('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
-            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
-                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-            })
-            ->whereNotNull('ptk_jawaban.sub_indikator_id')
-            ->whereNotNull('ptk_jawaban.sub_indikator_code')
-            ->groupBy('ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'sub_indikator.sub_indikator_name')
-            ->orderBy('ptk_jawaban.sub_indikator_code');
-
-        $semuaSubIndikator = $semuaSubIndikatorQuery->get();
-
-        // 2. Query untuk data chart sub indikator (VALIDASI dengan DISTINCT pada ptk_id)
-        $subIndikatorQuery = DB::table('ptk_jawaban')
-            ->select(
-                'ptk_jawaban.sub_indikator_id',
-                'ptk_jawaban.sub_indikator_code',
-                'ptk_jawaban.level',
-                DB::raw('COUNT(DISTINCT ptk_jawaban.ptk_id) as ptk_count')
-            )
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
-            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
-            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
-            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
-                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-            })
-            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
-                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-            })
-            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
-                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-            })
-            ->when($request->filled('kota_id'), function ($q) use ($request) {
-                $q->where('ptk.kota_id', $request->kota_id);
-            })
-            ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
-                $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
-            })
-            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
-                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
-            })
-            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
-                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
-            })
-            ->whereNotNull('ptk_jawaban.sub_indikator_id')
-            ->whereNotNull('ptk_jawaban.sub_indikator_code')
-            ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
-            ->groupBy('ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'ptk_jawaban.level')
-            ->orderBy('ptk_jawaban.sub_indikator_code')
-            ->orderBy('ptk_jawaban.level');
-
-        $subIndikatorData = $subIndikatorQuery->get();
-
-        // Data untuk chart semua sub indikator
-        $allSubIndikatorsChart = $this->getAllSubIndikatorsChartData($semuaSubIndikator, $subIndikatorData);
-
-        // ========================================================
-        // MODUS PER KOTA
-        // ========================================================
-
-        // Query untuk mendapatkan TOTAL semua jawaban per kota
-        $totalJawabanPerKotaQuery = DB::table('ptk_jawaban')
-            ->select(
-                'kota.nama_kota',
-                DB::raw('COUNT(*) as total_jawaban')
-            )
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
-            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
-            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
-            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
-            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
-                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-            })
-            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
-                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-            })
-            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
-                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-            })
-            ->when($request->filled('kota_id'), function ($q) use ($request) {
-                $q->where('ptk.kota_id', $request->kota_id);
-            })
-            ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
-                $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
-            })
-            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
-                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
-            })
-            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
-                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
-            })
-            ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
-            ->groupBy('kota.nama_kota');
-
-        $totalJawabanPerKota = $totalJawabanPerKotaQuery->get()
-            ->pluck('total_jawaban', 'nama_kota')
-            ->toArray();
-
-        // Query untuk modus per kota dengan COUNT (bukan DISTINCT)
-        $modusKotaQuery = DB::table('ptk_jawaban')
-            ->select(
-                'kota.nama_kota',
-                'ptk_jawaban.sub_indikator_id',
-                'ptk_jawaban.sub_indikator_code',
-                'ptk_jawaban.level',
-                DB::raw('COUNT(*) as jumlah_jawaban')
-            )
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
-            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
-            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
-            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
-            ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
-                $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-            })
-            ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
-                $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-            })
-            ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
-                $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-            })
-            ->when($request->filled('kota_id'), function ($q) use ($request) {
-                $q->where('ptk.kota_id', $request->kota_id);
-            })
-            ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
-                $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
-            })
-            ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
-                $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
-            })
-            ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
-                $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
-            })
-            ->whereNotNull('ptk_jawaban.sub_indikator_id')
-            ->whereNotNull('ptk_jawaban.sub_indikator_code')
-            ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
-            ->groupBy('kota.nama_kota', 'ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'ptk_jawaban.level')
-            ->orderBy('kota.nama_kota')
-            ->orderBy('ptk_jawaban.sub_indikator_code');
-
-        $modusKotaData = $modusKotaQuery->get();
-
-        $modusPerKota = $this->getModusPerKota($modusKotaData, $semuaSubIndikator, $totalJawabanPerKota, $request);
-        $subIndikatorPerJenjang = $this->getSubIndikatorPerJenjang($request, $semuaSubIndikator);
-        $subIndikatorPerJenjangPendidikan = $this->getSubIndikatorPerJenjangPendidikan($request, $semuaSubIndikator);
-
-        // ========================================================
-        // DATA LAINNYA
-        // ========================================================
-
-        // Progress pengisian per kota
-        $progressKota = $this->getProgressKota($request);
-
-        // Data pelatihan PTK
-        $pelatihanData = $this->getPelatihanData($request);
+            // ========================================================
+            // HITUNG STATISTIK
+            // ===============================s=================
+            $statistik = $this->getStatistik($request, $ptkData, $jawabanData);
 
 
-        $rekomendasiGapPerJenjang = $this->getRekomendasiGapPerJenjang($request);
+
+            // ========================================================
+            // DISTRIBUSI BERDASARKAN PTK (BUKAN JAWABAN)
+            // ========================================================
+
+            // Distribusi jenjang jabatan (berdasarkan PTK, bukan jawaban)
+            $jenjangDistribution = $ptkData->groupBy('jenjang_jabatan')
+                ->map(function ($items, $jenjang) {
+                    return [
+                        'jenjang_jabatan' => $jenjang ?: 'Tidak Diketahui',
+                        'count' => $items->count()
+                    ];
+                })
+                ->values();
+
+            // Distribusi bentuk pendidikan (berdasarkan PTK, bukan jawaban)
+            $bentukPendidikanDistribution = $ptkData->groupBy('bentuk_pendidikan')
+                ->map(function ($items, $bentuk) {
+                    return [
+                        'bentuk_pendidikan' => $bentuk ?: 'Tidak Diketahui',
+                        'count' => $items->count()
+                    ];
+                })
+                ->values();
+
+            // Distribusi jenjang pendidikan (berdasarkan PTK, bukan jawaban)
+            $jenjangPendidikanDistribution = $ptkData->groupBy('jenjang_pendidikan')
+                ->map(function ($items, $jenjang) {
+                    return [
+                        'jenjang_pendidikan' => $jenjang ?: 'Tidak Diketahui',
+                        'count' => $items->count()
+                    ];
+                })
+                ->values();
+
+            // Distribusi jenis kelamin (berdasarkan PTK, bukan jawaban)
+            $jenisKelaminDistribution = $ptkData->groupBy('jenis_kelamin')
+                ->map(function ($items, $jenis) {
+                    $label = $jenis == 'L' ? 'Laki-laki' : ($jenis == 'P' ? 'Perempuan' : ($jenis ?: 'Tidak Diketahui'));
+                    return [
+                        'jenis_kelamin' => $label,
+                        'count' => $items->count()
+                    ];
+                })
+                ->values();
+
+            // ========================================================
+            // DATA UNTUK CHART SUB INDIKATOR (DARI ptk_jawaban)
+            // ========================================================
+
+            // 1. Ambil semua sub indikator yang ada dalam kegiatan (VALIDASI DATA)
+            $semuaSubIndikatorQuery = DB::table('ptk_jawaban')
+                ->select(
+                    'ptk_jawaban.sub_indikator_id',
+                    'ptk_jawaban.sub_indikator_code',
+                    'sub_indikator.sub_indikator_name'
+                )
+                ->join('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+                ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                    $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+                })
+                ->whereNotNull('ptk_jawaban.sub_indikator_id')
+                ->whereNotNull('ptk_jawaban.sub_indikator_code')
+                ->groupBy('ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'sub_indikator.sub_indikator_name')
+                ->orderBy('ptk_jawaban.sub_indikator_code');
+
+            $semuaSubIndikator = $semuaSubIndikatorQuery->get();
+
+            // 2. Query untuk data chart sub indikator (VALIDASI dengan DISTINCT pada ptk_id)
+            $subIndikatorQuery = DB::table('ptk_jawaban')
+                ->select(
+                    'ptk_jawaban.sub_indikator_id',
+                    'ptk_jawaban.sub_indikator_code',
+                    'ptk_jawaban.level',
+                    DB::raw('COUNT(DISTINCT ptk_jawaban.ptk_id) as ptk_count')
+                )
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                    $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+                })
+                ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                    $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+                })
+                ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+                })
+                ->when($request->filled('kota_id'), function ($q) use ($request) {
+                    $q->where('ptk.kota_id', $request->kota_id);
+                })
+                ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+                })
+                ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                    $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+                })
+                ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+                })
+                ->whereNotNull('ptk_jawaban.sub_indikator_id')
+                ->whereNotNull('ptk_jawaban.sub_indikator_code')
+                ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
+                ->groupBy('ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'ptk_jawaban.level')
+                ->orderBy('ptk_jawaban.sub_indikator_code')
+                ->orderBy('ptk_jawaban.level');
+
+            $subIndikatorData = $subIndikatorQuery->get();
+
+            // Data untuk chart semua sub indikator
+            $allSubIndikatorsChart = $this->getAllSubIndikatorsChartData($semuaSubIndikator, $subIndikatorData);
+
+            // ========================================================
+            // MODUS PER KOTA
+            // ========================================================
+
+            // Query untuk mendapatkan TOTAL semua jawaban per kota
+            $totalJawabanPerKotaQuery = DB::table('ptk_jawaban')
+                ->select(
+                    'kota.nama_kota',
+                    DB::raw('COUNT(*) as total_jawaban')
+                )
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+                ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                    $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+                })
+                ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                    $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+                })
+                ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+                })
+                ->when($request->filled('kota_id'), function ($q) use ($request) {
+                    $q->where('ptk.kota_id', $request->kota_id);
+                })
+                ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+                })
+                ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                    $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+                })
+                ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+                })
+                ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
+                ->groupBy('kota.nama_kota');
+
+            $totalJawabanPerKota = $totalJawabanPerKotaQuery->get()
+                ->pluck('total_jawaban', 'nama_kota')
+                ->toArray();
+
+            // Query untuk modus per kota dengan COUNT (bukan DISTINCT)
+            $modusKotaQuery = DB::table('ptk_jawaban')
+                ->select(
+                    'kota.nama_kota',
+                    'ptk_jawaban.sub_indikator_id',
+                    'ptk_jawaban.sub_indikator_code',
+                    'ptk_jawaban.level',
+                    DB::raw('COUNT(*) as jumlah_jawaban')
+                )
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+                ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                ->when($request->filled('kegiatan_id'), function ($q) use ($request) {
+                    $q->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+                })
+                ->when($request->filled('pangkat_jabatan_id'), function ($q) use ($request) {
+                    $q->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+                })
+                ->when($request->filled('jenis_ptk_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+                })
+                ->when($request->filled('kota_id'), function ($q) use ($request) {
+                    $q->where('ptk.kota_id', $request->kota_id);
+                })
+                ->when($request->filled('jenjang_pendidikan_id'), function ($q) use ($request) {
+                    $q->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+                })
+                ->when($request->filled('bentuk_pendidikan'), function ($q) use ($request) {
+                    $q->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+                })
+                ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
+                    $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+                })
+                ->whereNotNull('ptk_jawaban.sub_indikator_id')
+                ->whereNotNull('ptk_jawaban.sub_indikator_code')
+                ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
+                ->groupBy('kota.nama_kota', 'ptk_jawaban.sub_indikator_id', 'ptk_jawaban.sub_indikator_code', 'ptk_jawaban.level')
+                ->orderBy('kota.nama_kota')
+                ->orderBy('ptk_jawaban.sub_indikator_code');
+
+            $modusKotaData = $modusKotaQuery->get();
+
+            $modusPerKota = $this->getModusPerKota($modusKotaData, $semuaSubIndikator, $totalJawabanPerKota, $request);
+            $subIndikatorPerJenjang = $this->getSubIndikatorPerJenjang($request, $semuaSubIndikator);
+            $subIndikatorPerJenjangPendidikan = $this->getSubIndikatorPerJenjangPendidikan($request, $semuaSubIndikator);
+
+            // ========================================================
+            // DATA LAINNYA
+            // ========================================================
+
+            // Progress pengisian per kota
+            $progressKota = $this->getProgressKota($request);
+
+            // Data pelatihan PTK
+            $pelatihanData = $this->getPelatihanData($request);
 
 
-        $ptkBelumMenjawab = $this->getPtkBelumMenjawab($request);
+            $rekomendasiGapPerJenjang = $this->getRekomendasiGapPerJenjang($request);
 
 
-        $levelTerendahPerPtk = $this->getLevelTerendahPerPtk($request);
-
-        $levelkotaPerPtk = $this->getLevelkotaPerPtk($request);
+            $ptkBelumMenjawab = $this->getPtkBelumMenjawab($request);
 
 
-        $distribusiLevelPerKota = $this->getDistribusiLevelPerKota($request);
+            $rataRataLevelPerJenjangProvinsi = $this->getRataRataLevelPerJenjangProvinsi($request);
+            $rataRataLevelPerJenjangKota = $this->getRataRataLevelPerJenjangKota($request);
 
-        $persentaseLevelPerJenjang = $this->getPersentaseLevelPerJenjang($request);
+            $persentaseLevelPerJenjang = $this->getPersentaseLevelPerJenjang($request);
 
-        return [
-            'statistik' => $statistik,
-            'level_kota_per_ptk' => $levelkotaPerPtk,
-            'level_terendah_per_ptk' => $levelTerendahPerPtk,
-            'distribusi_level_per_kota' => $distribusiLevelPerKota,
-            'jenjang_distribution' => $jenjangDistribution,
-            'persentase_level_per_jenjang' => $persentaseLevelPerJenjang,
-            'bentuk_pendidikan_distribution' => $bentukPendidikanDistribution,
-            'jenjang_pendidikan_distribution' => $jenjangPendidikanDistribution,
-            'jenis_kelamin_distribution' => $jenisKelaminDistribution,
-            'all_sub_indikators_chart' => $allSubIndikatorsChart,
-            'sub_indikator_per_jenjang' => $subIndikatorPerJenjang,
-            'sub_indikator_per_jenjang_pendidikan' => $subIndikatorPerJenjangPendidikan,
-            'progress_kota' => $progressKota,
-            'modus_per_kota' => $modusPerKota,
-            'pelatihan_data' => $pelatihanData,
-            'rekomendasi_gap_per_jenjang' => $rekomendasiGapPerJenjang,
-            'ptk_belum_menjawab' => $ptkBelumMenjawab,
-        ];
+            return [
+                'statistik' => $statistik,
+                'rata_rata_level_provinsi' => $rataRataLevelPerJenjangProvinsi,
+                'rata_rata_level_kota' => $rataRataLevelPerJenjangKota,
+                'jenjang_distribution' => $jenjangDistribution,
+                'persentase_level_per_jenjang' => $persentaseLevelPerJenjang,
+                'bentuk_pendidikan_distribution' => $bentukPendidikanDistribution,
+                'jenjang_pendidikan_distribution' => $jenjangPendidikanDistribution,
+                'jenis_kelamin_distribution' => $jenisKelaminDistribution,
+                'all_sub_indikators_chart' => $allSubIndikatorsChart,
+                'sub_indikator_per_jenjang' => $subIndikatorPerJenjang,
+                'sub_indikator_per_jenjang_pendidikan' => $subIndikatorPerJenjangPendidikan,
+                'progress_kota' => $progressKota,
+                'modus_per_kota' => $modusPerKota,
+                'pelatihan_data' => $pelatihanData,
+                'rekomendasi_gap_per_jenjang' => $rekomendasiGapPerJenjang,
+                'ptk_belum_menjawab' => $ptkBelumMenjawab,
+            ];
+        }
     }
-
 
 
 
@@ -541,6 +591,29 @@ class AnalisisController extends Controller
             ->when($request->filled('jenis_kelamin'), function ($q) use ($request) {
                 $q->where('ptk.jenis_kelamin', $request->jenis_kelamin);
             });
+
+
+        if ($request->filled('kegiatan_id')) {
+            $kegiatan = DB::table('kegiatan')
+                ->where('kegiatan_id', $request->kegiatan_id)
+                ->first();
+
+            if ($kegiatan && !empty($kegiatan->entity)) {
+                $entity = strtolower($kegiatan->entity);
+
+                $ptkQuery->where(function ($q) use ($entity) {
+                    if (strpos($entity, 'guru') !== false) {
+                        $q->where('jenis_ptk.jenis_ptk', 'LIKE', '%Guru%');
+                    }
+                    if (strpos($entity, 'kepala sekolah') !== false) {
+                        $q->orWhere('jenis_ptk.jenis_ptk', 'LIKE', '%Kepala Sekolah%');
+                    }
+                    if (strpos($entity, 'pengawas') !== false) {
+                        $q->orWhere('jenis_ptk.jenis_ptk', 'LIKE', '%Pengawas%');
+                    }
+                });
+            }
+        }
 
         $ptkBelumMenjawab = $ptkBelumMenjawabQuery->first()->jumlah ?? 0;
 
@@ -3855,329 +3928,7 @@ class AnalisisController extends Controller
 
 
 
-    /**
-     * Mendapatkan distribusi level terendah per PTK (SEMUA PTK yang menjawab)
-     * Menghitung level TERENDAH dari semua jawaban PTK
-     */
-    private function getLevelTerendahPerPtk(Request $request)
-    {
-        // Query untuk mendapatkan level terendah setiap PTK
-        $query = DB::table('ptk_jawaban')
-            ->select(
-                'ptk_jawaban.ptk_id',
-                'ptk.nama',
-                'pangkat_jabatan.jenjang_jabatan',
-                DB::raw('MIN(ptk_jawaban.level) as level_terendah'),
-                DB::raw('COUNT(DISTINCT ptk_jawaban.sub_indikator_id) as jumlah_sub_indikator')
-            )
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
-            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
-            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
-            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
-            ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
-            ->groupBy('ptk_jawaban.ptk_id', 'ptk.nama', 'pangkat_jabatan.jenjang_jabatan');
 
-        // Terapkan filter yang sama
-        if ($request->filled('kegiatan_id')) {
-            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-        }
-        if ($request->filled('pangkat_jabatan_id')) {
-            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-        }
-        if ($request->filled('jenis_ptk_id')) {
-            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-        }
-
-        if ($request->filled('jenjang_pendidikan_id')) {
-            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
-        }
-        if ($request->filled('bentuk_pendidikan')) {
-            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
-        }
-        if ($request->filled('jenis_kelamin')) {
-            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
-        }
-
-        $data = $query->get();
-
-        // Debug: Tampilkan sample data
-        \Log::info('Data level terendah per PTK:', [
-            'total_ptk' => $data->count(),
-            'sample_data' => $data->take(3)->toArray()
-        ]);
-
-        // Hitung distribusi per level
-        $distribusi = [];
-        $detailPerLevel = []; // Untuk menyimpan detail PTK per level
-
-        for ($level = 1; $level <= 5; $level++) {
-            $distribusi[$level] = 0;
-            $detailPerLevel[$level] = [];
-        }
-
-        foreach ($data as $item) {
-            if ($item->level_terendah >= 1 && $item->level_terendah <= 5) {
-                $distribusi[$item->level_terendah]++;
-
-                // Simpan detail PTK untuk level ini
-                $detailPerLevel[$item->level_terendah][] = [
-                    'nama' => $item->nama,
-                    'jenjang_jabatan' => $item->jenjang_jabatan,
-                    'jumlah_sub_indikator' => $item->jumlah_sub_indikator
-                ];
-            }
-        }
-
-        return [
-            'labels' => ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
-            'data' => array_values($distribusi),
-            'total_ptk' => $data->count(),
-            'detail_per_level' => $detailPerLevel,
-            'interpretasi' => [
-                1 => 'PTK memiliki minimal 1 jawaban di Level 1 (Dasar)',
-                2 => 'PTK memiliki minimal 1 jawaban di Level 2 (Penerapan)',
-                3 => 'PTK memiliki minimal 1 jawaban di Level 3 (Analisis)',
-                4 => 'PTK memiliki minimal 1 jawaban di Level 4 (Evaluasi)',
-                5 => 'PTK SEMUA jawaban di Level 5 (Pembimbingan) - Kompeten Tinggi'
-            ]
-        ];
-    }
-
-
-    private function getLevelkotaPerPtk(Request $request)
-    {
-        // Query untuk mendapatkan level terendah setiap PTK
-        $query = DB::table('ptk_jawaban')
-            ->select(
-                'ptk_jawaban.ptk_id',
-                'ptk.nama',
-                'pangkat_jabatan.jenjang_jabatan',
-                DB::raw('MIN(ptk_jawaban.level) as level_terendah'),
-                DB::raw('COUNT(DISTINCT ptk_jawaban.sub_indikator_id) as jumlah_sub_indikator')
-            )
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
-            ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
-            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
-            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
-            ->where('ptk_jawaban.level', '>=', 1) // INCLUDE LEVEL 1
-            ->groupBy('ptk_jawaban.ptk_id', 'ptk.nama', 'pangkat_jabatan.jenjang_jabatan');
-
-        // Terapkan filter yang sama
-        if ($request->filled('kegiatan_id')) {
-            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-        }
-        if ($request->filled('pangkat_jabatan_id')) {
-            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-        }
-        if ($request->filled('jenis_ptk_id')) {
-            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-        }
-
-        if ($request->filled('kota_id')) {
-            $query->where('ptk.kota_id', $request->kota_id);
-        }
-
-        if ($request->filled('jenjang_pendidikan_id')) {
-            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
-        }
-        if ($request->filled('bentuk_pendidikan')) {
-            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
-        }
-        if ($request->filled('jenis_kelamin')) {
-            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
-        }
-
-        $data = $query->get();
-
-        // Debug: Tampilkan sample data
-        \Log::info('Data level terendah per PTK:', [
-            'total_ptk' => $data->count(),
-            'sample_data' => $data->take(3)->toArray()
-        ]);
-
-        // Hitung distribusi per level
-        $distribusi = [];
-        $detailPerLevel = []; // Untuk menyimpan detail PTK per level
-
-        for ($level = 1; $level <= 5; $level++) {
-            $distribusi[$level] = 0;
-            $detailPerLevel[$level] = [];
-        }
-
-        foreach ($data as $item) {
-            if ($item->level_terendah >= 1 && $item->level_terendah <= 5) {
-                $distribusi[$item->level_terendah]++;
-
-                // Simpan detail PTK untuk level ini
-                $detailPerLevel[$item->level_terendah][] = [
-                    'nama' => $item->nama,
-                    'jenjang_jabatan' => $item->jenjang_jabatan,
-                    'jumlah_sub_indikator' => $item->jumlah_sub_indikator
-                ];
-            }
-        }
-
-        return [
-            'labels' => ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
-            'data' => array_values($distribusi),
-            'total_ptk' => $data->count(),
-            'detail_per_level' => $detailPerLevel,
-            'interpretasi' => [
-                1 => 'PTK memiliki minimal 1 jawaban di Level 1 (Dasar)',
-                2 => 'PTK memiliki minimal 1 jawaban di Level 2 (Penerapan)',
-                3 => 'PTK memiliki minimal 1 jawaban di Level 3 (Analisis)',
-                4 => 'PTK memiliki minimal 1 jawaban di Level 4 (Evaluasi)',
-                5 => 'PTK SEMUA jawaban di Level 5 (Pembimbingan) - Kompeten Tinggi'
-            ]
-        ];
-    }
-
-
-
-    /**
-     * Mendapatkan distribusi level per kota (LAYERED BAR)
-     * Menghitung berapa banyak PTK yang memiliki level tersebut sebagai LEVEL TERENDAH di kota tersebut
-     */
-    private function getDistribusiLevelPerKota(Request $request)
-    {
-        // Langkah 1: Dapatkan level terendah per PTK per kota
-        $queryLevelTerendah = DB::table('ptk_jawaban')
-            ->select(
-                'ptk.ptk_id',
-                'kota.nama_kota',
-                DB::raw('MIN(ptk_jawaban.level) as level_terendah')
-            )
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
-            ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
-            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
-            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
-            ->where('ptk_jawaban.level', '>=', 1)
-            ->whereNotNull('kota.nama_kota')
-            ->groupBy('ptk.ptk_id', 'kota.nama_kota');
-
-        // Terapkan filter yang sama
-        if ($request->filled('kegiatan_id')) {
-            $queryLevelTerendah->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-        }
-        if ($request->filled('pangkat_jabatan_id')) {
-            $queryLevelTerendah->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-        }
-        if ($request->filled('jenis_ptk_id')) {
-            $queryLevelTerendah->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-        }
-        if ($request->filled('jenjang_pendidikan_id')) {
-            $queryLevelTerendah->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
-        }
-        if ($request->filled('bentuk_pendidikan')) {
-            $queryLevelTerendah->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
-        }
-        if ($request->filled('jenis_kelamin')) {
-            $queryLevelTerendah->where('ptk.jenis_kelamin', $request->jenis_kelamin);
-        }
-
-        $dataLevelTerendah = $queryLevelTerendah->get();
-
-        // Debug: Hitung total PTK
-        $totalPtk = $dataLevelTerendah->count();
-        \Log::info('Total PTK di distribusi kota: ' . $totalPtk);
-        \Log::info('Sample data: ', $dataLevelTerendah->take(3)->toArray());
-
-        // Langkah 2: Hitung distribusi per kota per level
-        $kotaList = $dataLevelTerendah->pluck('nama_kota')->unique()->values()->toArray();
-
-        // Batasi jumlah kota maksimal 10 agar chart tidak terlalu padat
-        if (count($kotaList) > 10) {
-            $kotaList = array_slice($kotaList, 0, 10);
-        }
-
-        // Inisialisasi array untuk menyimpan data
-        $distribusiPerKota = [];
-
-        foreach ($kotaList as $kota) {
-            $distribusiPerKota[$kota] = [
-                1 => 0, // Level 1
-                2 => 0, // Level 2
-                3 => 0, // Level 3
-                4 => 0, // Level 4
-                5 => 0  // Level 5
-            ];
-        }
-
-        // Hitung jumlah PTK per kota per level
-        foreach ($dataLevelTerendah as $item) {
-            $kota = $item->nama_kota;
-            $level = $item->level_terendah;
-
-            if (in_array($kota, $kotaList) && $level >= 1 && $level <= 5) {
-                $distribusiPerKota[$kota][$level]++;
-            }
-        }
-
-        // Langkah 3: Format data untuk Chart.js (stacked bar)
-        $datasets = [];
-        $levelColors = [
-            1 => 'rgba(220, 53, 69, 0.8)',    // Level 1: merah
-            2 => 'rgba(255, 193, 7, 0.8)',    // Level 2: kuning
-            3 => 'rgba(23, 162, 184, 0.8)',   // Level 3: biru muda
-            4 => 'rgba(0, 123, 255, 0.8)',    // Level 4: biru
-            5 => 'rgba(40, 167, 69, 0.8)'     // Level 5: hijau
-        ];
-
-        $levelNames = [
-            1 => 'Dasar',
-            2 => 'Penerapan',
-            3 => 'Analisis',
-            4 => 'Evaluasi',
-            5 => 'Pembimbingan'
-        ];
-
-        // Buat dataset untuk setiap level (1-5)
-        for ($level = 1; $level <= 5; $level++) {
-            $levelData = [];
-
-            foreach ($kotaList as $kota) {
-                $levelData[] = $distribusiPerKota[$kota][$level] ?? 0;
-            }
-
-            $datasets[] = [
-                'label' => 'Level ' . $level . ' (' . $levelNames[$level] . ')',
-                'data' => $levelData,
-                'backgroundColor' => $levelColors[$level],
-                'borderColor' => str_replace('0.8', '1', $levelColors[$level]),
-                'borderWidth' => 1,
-                'stack' => 'kota' // Ini membuat bar stacked
-            ];
-        }
-
-        // Hitung total PTK per kota untuk informasi
-        $totalPerKota = [];
-        foreach ($kotaList as $kota) {
-            $totalPerKota[$kota] = array_sum($distribusiPerKota[$kota]);
-        }
-
-        return [
-            'labels' => $kotaList,
-            'datasets' => $datasets,
-            'total_kota' => count($kotaList),
-            'total_ptk' => $totalPtk,
-            'distribusi_detail' => $distribusiPerKota,
-            'total_per_kota' => $totalPerKota,
-            'interpretasi' => 'Menunjukkan level terendah yang dicapai PTK per kota'
-        ];
-    }
-
-    // Helper function untuk nama level
-    private function getLevelName($level)
-    {
-        $names = [
-            1 => 'Dasar',
-            2 => 'Penerapan',
-            3 => 'Analisis',
-            4 => 'Evaluasi',
-            5 => 'Pembimbingan'
-        ];
-        return $names[$level] ?? 'Unknown';
-    }
 
 
 
@@ -4352,6 +4103,272 @@ class AnalisisController extends Controller
 
 
 
+    /**
+     * Menghitung rata-rata level_kalkulasi per jenjang jabatan (Provinsi)
+     * Rumus: SELECT ptk_jawaban.ptk_id, ptk_jawaban.sub_indikator_code, AVG(level_kalkulasi) AS rata_rata
+     * FROM ptk_jawaban
+     * LEFT JOIN ptk ON ptk_jawaban.ptk_id = ptk.ptk_id
+     * WHERE [filter]
+     * GROUP BY pangkat_jabatan.jenjang_jabatan
+     */
+    private function getRataRataLevelPerJenjangProvinsi(Request $request)
+    {
+        try {
+            // Query untuk menghitung rata-rata level_kalkulasi per jenjang jabatan
+            $query = DB::table('ptk_jawaban')
+                ->select(
+                    'pangkat_jabatan.jenjang_jabatan',
+                    DB::raw('ROUND(AVG(ptk_jawaban.level_kalkulasi), 2) AS rata_rata_level'),
+                    DB::raw('COUNT(DISTINCT ptk_jawaban.ptk_id) AS jumlah_ptk'),
+                    DB::raw('COUNT(ptk_jawaban.ptk_jawaban_id) AS total_jawaban')
+                )
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+                ->whereNotNull('ptk_jawaban.level_kalkulasi')
+                ->whereNotNull('pangkat_jabatan.jenjang_jabatan');
+
+            // Filter kegiatan
+            if ($request->filled('kegiatan_id')) {
+                $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            }
+
+            // Filter pangkat_jabatan_id (jenjang spesifik)
+            if ($request->filled('pangkat_jabatan_id')) {
+                $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            }
+
+            // Filter jenis_ptk_id
+            if ($request->filled('jenis_ptk_id')) {
+                $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            }
+
+
+
+            // Filter jenis_kelamin
+            if ($request->filled('jenis_kelamin')) {
+                $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            }
+
+            // Filter bentuk_pendidikan (perlu join ke sekolah)
+            if ($request->filled('bentuk_pendidikan')) {
+                $query->join('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                    ->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            }
+
+            // Filter jenjang_pendidikan_id (perlu join ke jenjang_pendidikan)
+            if ($request->filled('jenjang_pendidikan_id')) {
+                $query->join('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                    ->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+            }
+
+            // Group by jenjang jabatan
+            $data = $query->groupBy('pangkat_jabatan.jenjang_jabatan')
+                ->orderByRaw("FIELD(pangkat_jabatan.jenjang_jabatan, 'Pertama', 'Muda', 'Madya', 'Utama')")
+                ->get();
+
+            // Data untuk chart
+            $jenjangList = ['Pertama', 'Muda', 'Madya', 'Utama'];
+            $backgroundColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
+            $labels = [];
+            $dataValues = [];
+            $detailPerJenjang = [];
+
+            foreach ($jenjangList as $jenjang) {
+                $labels[] = $jenjang;
+
+                $row = $data->where('jenjang_jabatan', $jenjang)->first();
+
+                if ($row) {
+                    $dataValues[] = (float) $row->rata_rata_level;
+                    $detailPerJenjang[$jenjang] = [
+                        'jumlah_ptk' => (int) $row->jumlah_ptk,
+                        'total_jawaban' => (int) $row->total_jawaban,
+                        'rata_rata' => (float) $row->rata_rata_level
+                    ];
+                } else {
+                    $dataValues[] = 0;
+                    $detailPerJenjang[$jenjang] = [
+                        'jumlah_ptk' => 0,
+                        'total_jawaban' => 0,
+                        'rata_rata' => 0
+                    ];
+                }
+            }
+
+            return [
+                'labels' => $labels,
+                'data' => $dataValues,
+                'backgroundColors' => $backgroundColors,
+                'detail_per_jenjang' => $detailPerJenjang,
+                'query_info' => 'Rata-rata dihitung dari level_kalkulasi per baris jawaban'
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Error getRataRataLevelPerJenjangProvinsi: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return [
+                'labels' => ['Pertama', 'Muda', 'Madya', 'Utama'],
+                'data' => [0, 0, 0, 0],
+                'backgroundColors' => ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'],
+                'detail_per_jenjang' => [],
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Menghitung rata-rata level_kalkulasi per jenjang jabatan per kota
+     * Rumus: SELECT ptk_jawaban.ptk_id, kota.nama_kota, pangkat_jabatan.jenjang_jabatan, AVG(level_kalkulasi) AS rata_rata
+     * FROM ptk_jawaban
+     * LEFT JOIN ptk ON ptk_jawaban.ptk_id = ptk.ptk_id
+     * LEFT JOIN kota ON ptk.kota_id = kota.kota_id
+     * LEFT JOIN pangkat_jabatan ON ptk.pangkat_jabatan_id = pangkat_jabatan.pangkat_jabatan_id
+     * WHERE [filter]
+     * GROUP BY kota.nama_kota, pangkat_jabatan.jenjang_jabatan
+     */
+    private function getRataRataLevelPerJenjangKota(Request $request)
+    {
+        try {
+            // Query untuk menghitung rata-rata level_kalkulasi per jenjang jabatan per kota
+            $query = DB::table('ptk_jawaban')
+                ->select(
+                    'pangkat_jabatan.jenjang_jabatan',
+                    'kota.nama_kota',
+                    DB::raw('ROUND(AVG(ptk_jawaban.level_kalkulasi), 2) AS rata_rata_level'),
+                    DB::raw('COUNT(DISTINCT ptk_jawaban.ptk_id) AS jumlah_ptk'),
+                    DB::raw('COUNT(ptk_jawaban.ptk_jawaban_id) AS total_jawaban')
+                )
+                ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+                ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+                ->join('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+                ->whereNotNull('ptk_jawaban.level_kalkulasi')
+                ->whereNotNull('pangkat_jabatan.jenjang_jabatan')
+                ->whereNotNull('kota.nama_kota');
+
+            // Filter kegiatan
+            if ($request->filled('kegiatan_id')) {
+                $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
+            }
+
+            // Filter pangkat_jabatan_id (jenjang spesifik)
+            if ($request->filled('pangkat_jabatan_id')) {
+                $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
+            }
+
+            // Filter jenis_ptk_id
+            if ($request->filled('jenis_ptk_id')) {
+                $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+            }
+
+            // Filter kota_id - jika ada filter kota, tampilkan hanya kota itu
+            if ($request->filled('kota_id')) {
+                $query->where('ptk.kota_id', $request->kota_id);
+            }
+
+            // Filter jenis_kelamin
+            if ($request->filled('jenis_kelamin')) {
+                $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+            }
+
+            // Filter bentuk_pendidikan (perlu join ke sekolah)
+            if ($request->filled('bentuk_pendidikan')) {
+                $query->join('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+                    ->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+            }
+
+            // Filter jenjang_pendidikan_id (perlu join ke jenjang_pendidikan)
+            if ($request->filled('jenjang_pendidikan_id')) {
+                $query->join('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+                    ->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+            }
+
+            // Group by kota dan jenjang jabatan
+            $data = $query->groupBy('kota.nama_kota', 'pangkat_jabatan.jenjang_jabatan')
+                ->orderBy('kota.nama_kota')
+                ->orderByRaw("FIELD(pangkat_jabatan.jenjang_jabatan, 'Pertama', 'Muda', 'Madya', 'Utama')")
+                ->get();
+
+            if ($data->isEmpty()) {
+                return [
+                    'labels' => [],
+                    'datasets' => []
+                ];
+            }
+
+            // Ambil daftar kota (max 10 kota untuk readability)
+            $kotaList = $data->pluck('nama_kota')
+                ->unique()
+                ->values()
+                ->take(10)
+                ->toArray();
+
+            // Warna untuk setiap jenjang
+            $jenjangColors = [
+                'Pertama' => '#ff6b6b',
+                'Muda'    => '#4ecdc4',
+                'Madya'   => '#45b7d1',
+                'Utama'   => '#96ceb4'
+            ];
+
+            // Urutan jenjang yang diinginkan
+            $jenjangOrder = ['Pertama', 'Muda', 'Madya', 'Utama'];
+
+            $datasets = [];
+
+            foreach ($jenjangOrder as $jenjang) {
+                $jenjangData = [];
+
+                foreach ($kotaList as $kota) {
+                    $row = $data->where('jenjang_jabatan', $jenjang)
+                        ->where('nama_kota', $kota)
+                        ->first();
+
+                    $jenjangData[] = $row ? (float) $row->rata_rata_level : 0;
+                }
+
+                // Hanya tambahkan dataset jika ada data > 0
+                if (array_sum($jenjangData) > 0) {
+                    $datasets[] = [
+                        'label' => $jenjang,
+                        'data' => $jenjangData,
+                        'backgroundColor' => $jenjangColors[$jenjang] ?? '#cccccc',
+                        'borderColor' => $jenjangColors[$jenjang] ?? '#cccccc',
+                        'borderWidth' => 1,
+                    ];
+                }
+            }
+
+            // Jika semua dataset kosong, beri dataset default
+            if (empty($datasets)) {
+                foreach ($jenjangOrder as $jenjang) {
+                    $datasets[] = [
+                        'label' => $jenjang,
+                        'data' => array_fill(0, count($kotaList), 0),
+                        'backgroundColor' => $jenjangColors[$jenjang] ?? '#cccccc',
+                        'borderColor' => $jenjangColors[$jenjang] ?? '#cccccc',
+                        'borderWidth' => 1,
+                    ];
+                }
+            }
+
+            return [
+                'labels' => $kotaList,
+                'datasets' => $datasets,
+                'query_info' => 'Rata-rata dihitung dari level_kalkulasi per baris jawaban, dikelompokkan per kota dan jenjang'
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Error getRataRataLevelPerJenjangKota: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return [
+                'labels' => [],
+                'datasets' => [],
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+
 
 
 
@@ -4428,5 +4445,72 @@ class AnalisisController extends Controller
         return $query->orderBy('kegiatan.entity')
             ->orderBy('ptk.nama')
             ->get();
+    }
+
+
+
+    /**
+     * Validasi apakah jenis_ptk kompatibel dengan entity kegiatan
+     */
+    private function validateJenisPtkWithKegiatan($kegiatanId, $jenisPtkId)
+    {
+        // Ambil data kegiatan
+        $kegiatan = DB::table('kegiatan')
+            ->where('kegiatan_id', $kegiatanId)
+            ->first();
+
+        if (!$kegiatan || empty($kegiatan->entity)) {
+            return true; // Jika tidak ada entity, anggap valid
+        }
+
+        // Ambil data jenis_ptk
+        $jenisPtk = DB::table('jenis_ptk')
+            ->where('jenis_ptk_id', $jenisPtkId)
+            ->first();
+
+        if (!$jenisPtk || empty($jenisPtk->jenis_ptk)) {
+            return true; // Jika tidak ada jenis_ptk, anggap valid
+        }
+
+        // Mapping kompatibilitas
+        $entity = strtolower(trim($kegiatan->entity));
+        $jenis = strtolower(trim($jenisPtk->jenis_ptk));
+
+        // Cek kompatibilitas
+        $isCompatible = false;
+
+        if (strpos($entity, 'guru') !== false && strpos($jenis, 'guru') !== false) {
+            $isCompatible = true;
+        }
+
+        if (strpos($entity, 'kepala sekolah') !== false && strpos($jenis, 'kepala sekolah') !== false) {
+            $isCompatible = true;
+        }
+
+        if (strpos($entity, 'pengawas') !== false && strpos($jenis, 'pengawas') !== false) {
+            $isCompatible = true;
+        }
+
+        // Jika entity umum, anggap kompatibel dengan semua
+        if (strpos($entity, 'semua') !== false || strpos($entity, 'all') !== false) {
+            $isCompatible = true;
+        }
+
+        return $isCompatible;
+    }
+
+
+
+    /**
+     * API endpoint untuk mendapatkan entity kegiatan
+     */
+    public function getKegiatanEntity($id)
+    {
+        $kegiatan = DB::table('kegiatan')
+            ->select('kegiatan_id', 'kegiatan_name', 'entity')
+            ->where('kegiatan_id', $id)
+            ->first();
+
+        return response()->json($kegiatan);
     }
 }

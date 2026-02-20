@@ -250,7 +250,7 @@ Route::get('/ptk/export-hasil/{encode_kegiatan_id}/{nip}', [PtkController::class
 
 Route::get('/analisis/rekomendasi-gap', [AnalisisRekomendasiGapController::class, 'index'])
     ->name('analisis.rekomendasi-gap.index');
-
+Route::get('/api/kegiatan/{id}/entity', [AnalisisController::class, 'getKegiatanEntity']);
 
 
 

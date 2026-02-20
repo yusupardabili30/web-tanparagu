@@ -355,7 +355,7 @@ class AnalisisRekomendasiGapController extends Controller
                         'level' => $levelDicapai,
                         'ptk_count' => count($ptkList),
                         'ptk_list' => $ptkListPaginated,
-                        'status' => 'BELUM TARGET',
+                        'status' => 'BELUM MENCAPAI',
                         'gap' => $targetLevel - $levelDicapai,
                         'rekomendasi_pelatihan' => $rekomendasiText
                     ];

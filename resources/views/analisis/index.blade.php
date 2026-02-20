@@ -263,28 +263,27 @@
                         </div>
                     </div>
 
-                    <!-- {{-- ROW 2: PROVINSI (WAJIB row ke-2 biar CSS float 2 kolom jalan) --}} -->
+                    <!-- ROW 2: PROVINSI (RATA-RATA PER JENJANG) -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="chart-container" id="sec-level-ptk">
                                 <div class="chart-title">
-                                    <i class="ri-arrow-down-line"></i> Distribusi Level PTK Per Provinsi
-                                    <small class="text-muted ms-2">(Level terendah yang dicapai PTK di semua sub
-                                        indikator)</small>
+                                    <i class="ri-arrow-down-line"></i> Rata-rata Capaian PTK Per Provinsi
+                                    <small class="text-muted ms-2">(Rata-rata level_kalkulasi per jenjang jabatan)</small>
                                 </div>
                                 <canvas id="levelTerendahChart" height="300"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <!-- {{-- ROW 3: KAB/KOTA (WAJIB row ke-3 biar CSS float 2 kolom jalan) --}} -->
+                    <!-- ROW 3: KAB/KOTA (RATA-RATA PER JENJANG PER KOTA) -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="chart-container">
                                 <div class="chart-title">
-                                    <i class="ri-arrow-down-line"></i> Distribusi Level PTK Per Kab/Kota
-                                    <small class="text-muted ms-2">(Level terendah yang dicapai PTK di semua sub
-                                        indikator)</small>
+                                    <i class="ri-arrow-down-line"></i> Rata-rata Capaian PTK Per Kab/Kota
+                                    <small class="text-muted ms-2">(Rata-rata level_kalkulasi per jenjang jabatan per
+                                        kota)</small>
                                 </div>
                                 <canvas id="levelTerendahkabkotaChart" height="300"></canvas>
                             </div>
@@ -486,10 +485,8 @@
                                                 <tr>
                                                     @if (request('kota_id'))
                                                         <th>Kota</th>
-                                                        <th>Total Jawab Sub Indikator</th>
                                                     @else
                                                         <th>Provinsi</th>
-                                                        <th>Total Jawab Sub Indikator</th>
                                                     @endif
                                                     <th>Sub Indikator</th>
                                                     <th>Modus Level</th>
@@ -520,11 +517,6 @@
                                                                             Banten
                                                                         </td>
                                                                     @endif
-
-                                                                    <td rowspan="{{ count($kota['sub_indikator_modus']) }}"
-                                                                        style="vertical-align: middle; text-align:center;">
-                                                                        {{ $kota['total_jawaban'] }}
-                                                                    </td>
                                                                 @endif
 
                                                                 <td>
@@ -1117,30 +1109,31 @@
                 ${statCard('ri-progress-4-line','Progress<br>Pengisian',(data.statistik?.persentase_isi ?? 0)+'%','#dc3545')}
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="chart-container" id="sec-level-ptk">
-                        <div class="chart-title">
-                            <i class="ri-arrow-down-line"></i> Distribusi Level PTK Per Provinsi
-                            <small class="text-muted">(Level terendah yang dicapai PTK di semua sub indikator)</small>
-                        </div>
-                        <canvas id="levelTerendahChart" height="300"></canvas>
-                    </div>
-                </div>
+          <!-- ROW 2: PROVINSI (RATA-RATA PER JENJANG) -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="chart-container" id="sec-level-ptk">
+            <div class="chart-title">
+                <i class="ri-arrow-down-line"></i> Rata-rata Capaian PTK Per Provinsi
+                <small class="text-muted ms-2">(Rata-rata level_kalkulasi per jenjang jabatan)</small>
             </div>
+            <canvas id="levelTerendahChart" height="300"></canvas>
+        </div>
+    </div>
+</div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="chart-container">
-                        <div class="chart-title">
-                            <i class="ri-arrow-down-line"></i> Distribusi Level PTK Per Kab/Kota
-                            <small class="text-muted">(Level terendah yang dicapai PTK di semua sub indikator)</small>
-                        </div>
-                        <canvas id="levelTerendahkabkotaChart" height="300"></canvas>
-                    </div>
-                </div>
+<!-- ROW 3: KAB/KOTA (RATA-RATA PER JENJANG PER KOTA) -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <div class="chart-title">
+                <i class="ri-arrow-down-line"></i> Rata-rata Capaian PTK Per Kab/Kota
+                <small class="text-muted ms-2">(Rata-rata level_kalkulasi per jenjang jabatan per kota)</small>
             </div>
-
+            <canvas id="levelTerendahkabkotaChart" height="300"></canvas>
+        </div>
+    </div>
+</div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="chart-container" id="sec-jenjang">
@@ -1182,25 +1175,7 @@
             </div>
         `;
 
-            // LEVEL PER KOTA
-            if (data.distribusi_level_per_kota?.labels?.length > 0) {
-                html += `
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="chart-container chart-container-large" id="sec-level-kota">
-                            <div class="chart-title">
-                                <i class="ri-map-pin-2-line"></i> Distribusi Level per Kota (Layered Bar)
-                                <span class="badge bg-info ms-2">Jumlah PTK per Level</span>
-                                <small class="text-muted ms-2">
-                                    ${data.distribusi_level_per_kota.total_kota ?? data.distribusi_level_per_kota.labels.length} kota ditampilkan
-                                </small>
-                            </div>
-                            <canvas id="levelPerKotaChart" height="400"></canvas>
-                        </div>
-                    </div>
-                </div>
-            `;
-            }
+
 
             // PERSENTASE LEVEL PER JENJANG (AJAX VERSION)
             if (data.persentase_level_per_jenjang?.length > 0) {
@@ -1240,20 +1215,20 @@
             <div class="mt-3">
                 <div class="row text-center small">
                     ${labels.slice(0,5).map((label, i) => `
-                                            <div class="col">
-                                                <div>${label}</div>
-                                                <div class="fw-bold">${dataValues[i] ?? 0}</div>
-                                            </div>
-                                        `).join('')}
+                                                                                                                    <div class="col">
+                                                                                                                        <div>${label}</div>
+                                                                                                                        <div class="fw-bold">${dataValues[i] ?? 0}</div>
+                                                                                                                    </div>
+                                                                                                                `).join('')}
                 </div>
 
                 <div class="row text-center small mt-2">
                     ${labels.slice(5,10).map((label, i) => `
-                                            <div class="col">
-                                                <div>${label}</div>
-                                                <div class="fw-bold">${dataValues[i+5] ?? 0}</div>
-                                            </div>
-                                        `).join('')}
+                                                                                                                    <div class="col">
+                                                                                                                        <div>${label}</div>
+                                                                                                                        <div class="fw-bold">${dataValues[i+5] ?? 0}</div>
+                                                                                                                    </div>
+                                                                                                                `).join('')}
                 </div>
             </div>
 
@@ -1280,158 +1255,7 @@
             }
 
 
-            // PTK BELUM MENJAWAB (LIST)
-            if (Array.isArray(data.ptk_belum_menjawab) && data.ptk_belum_menjawab.length > 0) {
-                let ptkRows = '';
 
-                data.ptk_belum_menjawab.forEach((ptk, index) => {
-                    let sekolahInstansi = '-';
-                    if (ptk.nama_sekolah) sekolahInstansi = `<small>${ptk.nama_sekolah}</small>`;
-                    else if (ptk.instansi) sekolahInstansi = `<small>${ptk.instansi}</small>`;
-
-                    ptkRows += `
-                    <tr>
-                        <td class="text-center">${index + 1}</td>
-                        <td>${ptk.nip || '-'}</td>
-                        <td><strong>${ptk.nama || '-'}</strong></td>
-                        <td>${ptk.jenjang_jabatan || '-'}</td>
-                        <td>${ptk.jenis_ptk || '-'}</td>
-                        <td>${ptk.nama_kota || '-'}</td>
-                        <td>${ptk.jenjang_pendidikan || '-'}</td>
-                        <td>${ptk.no_hp || '-'}</td>
-                        <td>${sekolahInstansi}</td>
-                        <td class="text-center"><span class="badge bg-danger">Belum Isi</span></td>
-                    </tr>
-                `;
-                });
-
-                html += `
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-card" id="sec-ptk-belum">
-                            <div class="chart-title">
-                                <i class="ri-user-forbid-line"></i> PTK yang Belum Menjawab Instrumen
-                                <span class="badge bg-danger ms-2">${data.ptk_belum_menjawab.length} PTK</span>
-                            </div>
-
-                            <div class="table-responsive">
-                                <table class="table table-bordered modus-table">
-                                    <thead>
-                                        <tr>
-                                            <th width="5%">No</th>
-                                            <th width="15%">NIP</th>
-                                            <th>Nama</th>
-                                            <th width="12%">Jenjang Jabatan</th>
-                                            <th width="10%">Jenis PTK</th>
-                                            <th width="12%">Kota</th>
-                                            <th width="10%">Jenjang Pendidikan</th>
-                                            <th width="8%">No. HP</th>
-                                            <th width="15%">Sekolah/Instansi</th>
-                                            <th width="8%">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>${ptkRows}</tbody>
-                                </table>
-                            </div>
-
-                            <div class="text-center mt-3">
-                                <small class="text-muted">
-                                    <i class="ri-information-line"></i>
-                                    Menampilkan ${data.ptk_belum_menjawab.length} PTK yang belum menjawab instrumen
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            } else if (Array.isArray(data.ptk_belum_menjawab) && data.ptk_belum_menjawab.length === 0) {
-                html += `
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-card" id="sec-ptk-belum">
-                            <div class="chart-title">
-                                <i class="ri-user-forbid-line"></i> PTK yang Belum Menjawab Instrumen
-                                <span class="badge bg-success ms-2">0 PTK</span>
-                            </div>
-
-                            <div class="alert alert-success text-center py-4">
-                                <i class="ri-checkbox-circle-fill fs-4 text-success"></i>
-                                <h5 class="mt-2 mb-0">Semua PTK sudah menjawab instrumen!</h5>
-                                <p class="text-muted mb-0">Tidak ada PTK yang belum mengisi instrumen</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            }
-
-            // MODUS TABLE
-            if (data.modus_per_kota?.length > 0) {
-                let modusRows = '';
-
-                data.modus_per_kota.forEach((kota) => {
-                    if (kota.sub_indikator_modus?.length) {
-                        kota.sub_indikator_modus.forEach((sub, subIndex) => {
-                            modusRows += `
-                            <tr>
-                                ${
-                                    subIndex === 0
-                                        ? `
-                                                                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
-                                                                                                                                        ${kota.nama_kota || 'Banten'}
-                                                                                                                                    </td>
-                                                                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
-                                                                                                                                        ${kota.total_jawaban || 0}
-                                                                                                                                    </td>
-                                                                                                                                `
-                                        : ''
-                                }
-
-                                <td>
-                                    <small class="text-muted">${sub.sub_indikator_code || '-'}</small><br>
-                                    <span class="fw-medium">${sub.sub_indikator_name || '-'}</span>
-                                </td>
-
-                                <td>
-                                    <span class="badge-level" style="background-color:${getLevelColor(sub.modus_level)}; color:#fff;">
-                                        Level ${sub.modus_level} (${getLevelName(sub.modus_level)})
-                                    </span>
-                                </td>
-
-                                <td class="text-center">${sub.jumlah_jawaban || 0}</td>
-                            </tr>
-                        `;
-                        });
-                    }
-                });
-
-                html += `
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-card" id="sec-modus">
-                            <div class="chart-title">
-                                <i class="ri-map-pin-line"></i> Modus Level per Kota <small class="text-muted">(Jumlah PTK)</small>
-                            </div>
-
-                            <div class="table-responsive">
-                                <table class="table table-bordered modus-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Kota</th>
-                                            <th>Total Jawaban Sub Indikator</th>
-                                            <th>Sub Indikator</th>
-                                            <th>Modus Level</th>
-                                            <th>Jumlah PTK</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>${modusRows}</tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            }
 
             // ALL SUB CHART
             if (data.all_sub_indikators_chart?.labels?.length > 0) {
@@ -1487,6 +1311,8 @@
                 </div>
             `;
             }
+
+
 
             // TAB GAP (AJAX VERSION)
             if (data.rekomendasi_gap_per_jenjang?.length > 0) {
@@ -1561,9 +1387,9 @@
                                     ${
                                         gapIndex === 0
                                             ? `
-                                                                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                                                                        <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
-                                                                                                                                    `
+                                                                                                                                                                                                                <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                                                                                                                                                <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
+                                                                                                                                                                                                            `
                                             : ''
                                     }
                                 </td>
@@ -1647,6 +1473,74 @@
                 </div>
             `;
             }
+
+
+
+            // MODUS TABLE
+            if (data.modus_per_kota?.length > 0) {
+                let modusRows = '';
+
+                data.modus_per_kota.forEach((kota) => {
+                    if (kota.sub_indikator_modus?.length) {
+                        kota.sub_indikator_modus.forEach((sub, subIndex) => {
+                            modusRows += `
+                            <tr>
+                                ${
+                                    subIndex === 0
+                                        ? `
+                                                                                                                                                                                                            <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
+                                                                                                                                                                                                                ${kota.nama_kota || 'Banten'}
+                                                                                                                                                                                                            </td>
+
+                                                                                                                                                                                                        `
+                                        : ''
+                                }
+
+                                <td>
+                                    <small class="text-muted">${sub.sub_indikator_code || '-'}</small><br>
+                                    <span class="fw-medium">${sub.sub_indikator_name || '-'}</span>
+                                </td>
+
+                                <td>
+                                    <span class="badge-level" style="background-color:${getLevelColor(sub.modus_level)}; color:#fff;">
+                                        Level ${sub.modus_level} (${getLevelName(sub.modus_level)})
+                                    </span>
+                                </td>
+
+                                <td class="text-center">${sub.jumlah_jawaban || 0}</td>
+                            </tr>
+                        `;
+                        });
+                    }
+                });
+
+                html += `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-card" id="sec-modus">
+                            <div class="chart-title">
+                                <i class="ri-map-pin-line"></i> Modus Level per Kota <small class="text-muted">(Jumlah PTK)</small>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered modus-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Kota</th>
+                                            <th>Sub Indikator</th>
+                                            <th>Modus Level</th>
+                                            <th>Jumlah PTK</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${modusRows}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }
+
 
             // PROGRESS KOTA
             if (data.progress_kota?.length > 0) {
@@ -1748,19 +1642,19 @@
                                                           : '-';
 
                                                 return `
-                                                                                                                                            <tr>
-                                                                                                                                                <td class="text-center">${i + 1}</td>
-                                                                                                                                                <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
-                                                                                                                                                <td class="text-center">${tipeBadge}</td>
-                                                                                                                                                <td class="text-center">${p.jumlah_ptk || 0}</td>
-                                                                                                                                                <td class="text-center fw-bold">${persen}%</td>
-                                                                                                                                                <td>
-                                                                                                                                                    <div class="progress" style="height:8px;">
-                                                                                                                                                        <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
-                                                                                                                                                    </div>
-                                                                                                                                                </td>
-                                                                                                                                            </tr>
-                                                                                                                                        `;
+                                                                                                                                                                                                                    <tr>
+                                                                                                                                                                                                                        <td class="text-center">${i + 1}</td>
+                                                                                                                                                                                                                        <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
+                                                                                                                                                                                                                        <td class="text-center">${tipeBadge}</td>
+                                                                                                                                                                                                                        <td class="text-center">${p.jumlah_ptk || 0}</td>
+                                                                                                                                                                                                                        <td class="text-center fw-bold">${persen}%</td>
+                                                                                                                                                                                                                        <td>
+                                                                                                                                                                                                                            <div class="progress" style="height:8px;">
+                                                                                                                                                                                                                                <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
+                                                                                                                                                                                                                            </div>
+                                                                                                                                                                                                                        </td>
+                                                                                                                                                                                                                    </tr>
+                                                                                                                                                                                                                `;
                                             })
                                             .join('')}
                                     </tbody>
@@ -1771,6 +1665,94 @@
                 </div>
             `;
             }
+
+
+
+            // PTK BELUM MENJAWAB (LIST)
+            if (Array.isArray(data.ptk_belum_menjawab) && data.ptk_belum_menjawab.length > 0) {
+                let ptkRows = '';
+
+                data.ptk_belum_menjawab.forEach((ptk, index) => {
+                    let sekolahInstansi = '-';
+                    if (ptk.nama_sekolah) sekolahInstansi = `<small>${ptk.nama_sekolah}</small>`;
+                    else if (ptk.instansi) sekolahInstansi = `<small>${ptk.instansi}</small>`;
+
+                    ptkRows += `
+                    <tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td>${ptk.nip || '-'}</td>
+                        <td><strong>${ptk.nama || '-'}</strong></td>
+                        <td>${ptk.jenjang_jabatan || '-'}</td>
+                        <td>${ptk.jenis_ptk || '-'}</td>
+                        <td>${ptk.nama_kota || '-'}</td>
+                        <td>${ptk.jenjang_pendidikan || '-'}</td>
+                        <td>${ptk.no_hp || '-'}</td>
+                        <td>${sekolahInstansi}</td>
+                        <td class="text-center"><span class="badge bg-danger">Belum Isi</span></td>
+                    </tr>
+                `;
+                });
+
+                html += `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-card" id="sec-ptk-belum">
+                            <div class="chart-title">
+                                <i class="ri-user-forbid-line"></i> PTK yang Belum Menjawab Instrumen
+                                <span class="badge bg-danger ms-2">${data.ptk_belum_menjawab.length} PTK</span>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered modus-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">No</th>
+                                            <th width="15%">NIP</th>
+                                            <th>Nama</th>
+                                            <th width="12%">Jenjang Jabatan</th>
+                                            <th width="10%">Jenis PTK</th>
+                                            <th width="12%">Kota</th>
+                                            <th width="10%">Jenjang Pendidikan</th>
+                                            <th width="8%">No. HP</th>
+                                            <th width="15%">Sekolah/Instansi</th>
+                                            <th width="8%">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${ptkRows}</tbody>
+                                </table>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="ri-information-line"></i>
+                                    Menampilkan ${data.ptk_belum_menjawab.length} PTK yang belum menjawab instrumen
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            } else if (Array.isArray(data.ptk_belum_menjawab) && data.ptk_belum_menjawab.length === 0) {
+                html += `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-card" id="sec-ptk-belum">
+                            <div class="chart-title">
+                                <i class="ri-user-forbid-line"></i> PTK yang Belum Menjawab Instrumen
+                                <span class="badge bg-success ms-2">0 PTK</span>
+                            </div>
+
+                            <div class="alert alert-success text-center py-4">
+                                <i class="ri-checkbox-circle-fill fs-4 text-success"></i>
+                                <h5 class="mt-2 mb-0">Semua PTK sudah menjawab instrumen!</h5>
+                                <p class="text-muted mb-0">Tidak ada PTK yang belum mengisi instrumen</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }
+
 
             document.getElementById('analisisContent').innerHTML = html;
             document.getElementById('analisisContent').style.display = 'block';
@@ -1804,26 +1786,21 @@
                 levelPerKotaChart,
             ].forEach(destroyChartInstance);
 
-            // PROVINSI BAR
-            const levelTerendahCtx = document.getElementById('levelTerendahChart')?.getContext('2d');
-            if (levelTerendahCtx && data.level_terendah_per_ptk) {
-                levelTerendahChart = new Chart(levelTerendahCtx, {
+            // PROVINSI BAR CHART (RATA-RATA PER JENJANG)
+            const provinsiCtx = document.getElementById('levelTerendahChart')?.getContext('2d');
+            if (provinsiCtx && data.rata_rata_level_provinsi) {
+                levelTerendahChart = new Chart(provinsiCtx, {
                     type: 'bar',
                     data: {
-                        labels: data.level_terendah_per_ptk.labels || ['Level 1', 'Level 2', 'Level 3', 'Level 4',
-                            'Level 5'
-                        ],
+                        labels: data.rata_rata_level_provinsi.labels || ['Pertama', 'Muda', 'Madya', 'Utama'],
                         datasets: [{
-                            label: 'Jumlah PTK',
-                            data: data.level_terendah_per_ptk.data || [0, 0, 0, 0, 0],
-                            backgroundColor: ['rgba(220, 53, 69, 0.8)', '#17a2b8', '#007bff', '#ffc107',
-                                '#28a745'
-                            ],
-                            borderColor: ['rgba(220, 53, 69, 0.8)', '#148899', '#0069d9', '#e0a800',
-                                '#218838'
+                            label: 'Rata-rata Capaian Kalkulasi',
+                            data: data.rata_rata_level_provinsi.data || [0, 0, 0, 0],
+                            backgroundColor: data.rata_rata_level_provinsi.backgroundColors || ['#ff6b6b',
+                                '#4ecdc4', '#45b7d1', '#96ceb4'
                             ],
                             borderWidth: 1,
-                        }, ],
+                        }],
                     },
                     options: {
                         responsive: true,
@@ -1835,17 +1812,18 @@
                             tooltip: {
                                 callbacks: {
                                     label: (ctx) => {
-                                        const total = data.level_terendah_per_ptk.total_ptk || 0;
-                                        const val = ctx.raw;
-                                        const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                                        return `${val} PTK (${pct}%)`;
+                                        const value = ctx.raw;
+                                        return `Rata-rata Capaian: ${value}`;
                                     },
                                     afterLabel: (ctx) => {
-                                        const level = ctx.dataIndex + 1;
-                                        const names = ['Dasar', 'Penerapan', 'Analisis', 'Evaluasi',
-                                            'Pembimbingan'
+                                        const jenjang = ctx.label;
+                                        const detail = data.rata_rata_level_provinsi.detail_per_jenjang?.[
+                                            jenjang
                                         ];
-                                        return `Level ${level}: ${names[level - 1]}`;
+                                        if (detail && detail.jumlah_ptk > 0) {
+                                            return `Jumlah PTK: ${detail.jumlah_ptk}`;
+                                        }
+                                        return '';
                                     },
                                 },
                             },
@@ -1853,18 +1831,22 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
+                                max: 100,
                                 ticks: {
-                                    stepSize: 1
+                                    stepSize: 10,
+                                    callback: function(value) {
+                                        return value.toFixed(1);
+                                    }
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Jumlah PTK'
+                                    text: 'Rata-rata Capaian (1-100)'
                                 }
                             },
                             x: {
                                 title: {
                                     display: true,
-                                    text: 'Level Kompetensi Terendah'
+                                    text: 'Jenjang Jabatan'
                                 }
                             },
                         },
@@ -1872,114 +1854,27 @@
                 });
             }
 
-            // KAB/KOTA BAR
-            const levelTerendahkabkotaCtx = document.getElementById('levelTerendahkabkotaChart')?.getContext('2d');
-            if (levelTerendahkabkotaCtx && data.level_kota_per_ptk) {
-                levelTerendahkabkotaChart = new Chart(levelTerendahkabkotaCtx, {
+            // KOTA BAR CHART (RATA-RATA PER JENJANG PER KOTA)
+            const kotaCtx = document.getElementById('levelTerendahkabkotaChart')?.getContext('2d');
+            if (kotaCtx && data.rata_rata_level_kota) {
+                levelTerendahkabkotaChart = new Chart(kotaCtx, {
                     type: 'bar',
                     data: {
-                        labels: data.level_kota_per_ptk.labels || ['Level 1', 'Level 2', 'Level 3', 'Level 4',
-                            'Level 5'
-                        ],
-                        datasets: [{
-                            label: 'Jumlah PTK',
-                            data: data.level_kota_per_ptk.data || [0, 0, 0, 0, 0],
-                            backgroundColor: ['rgba(220, 53, 69, 0.8)', '#17a2b8', '#007bff', '#ffc107',
-                                '#28a745'
-                            ],
-                            borderColor: ['rgba(220, 53, 69, 0.8)', '#148899', '#0069d9', '#e0a800',
-                                '#218838'
-                            ],
-                            borderWidth: 1,
-                        }, ],
+                        labels: data.rata_rata_level_kota.labels || [],
+                        datasets: data.rata_rata_level_kota.datasets || [],
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: (ctx) => {
-                                        const total = data.level_kota_per_ptk.total_ptk || 0;
-                                        const val = ctx.raw;
-                                        const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                                        return `${val} PTK (${pct}%)`;
-                                    },
-                                    afterLabel: (ctx) => {
-                                        const level = ctx.dataIndex + 1;
-                                        const names = ['Dasar', 'Penerapan', 'Analisis', 'Evaluasi',
-                                            'Pembimbingan'
-                                        ];
-                                        return `Level ${level}: ${names[level - 1]}`;
-                                    },
-                                },
-                            },
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Jumlah PTK'
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Level Kompetensi Terendah'
-                                }
-                            },
-                        },
-                    },
-                });
-            }
-
-            // LEVEL PER KOTA STACKED
-            const levelPerKotaCtx = document.getElementById('levelPerKotaChart')?.getContext('2d');
-            if (levelPerKotaCtx && data.distribusi_level_per_kota) {
-                levelPerKotaChart = new Chart(levelPerKotaCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.distribusi_level_per_kota.labels || [],
-                        datasets: data.distribusi_level_per_kota.datasets || [],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                stacked: true,
-                                title: {
-                                    display: true,
-                                    text: 'Kota'
-                                }
-                            },
-                            y: {
-                                stacked: true,
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Jumlah PTK'
-                                },
-                            },
-                        },
                         plugins: {
                             legend: {
                                 position: 'bottom',
                                 labels: {
-                                    boxWidth: 12,
-                                    boxHeight: 12,
-                                    padding: 10
-                                },
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded',
+                                    boxWidth: 10,
+                                    boxHeight: 10,
+                                }
                             },
                             tooltip: {
                                 mode: 'index',
@@ -1988,20 +1883,38 @@
                                     label: (ctx) => {
                                         const label = ctx.dataset.label || '';
                                         const value = ctx.raw;
-                                        const total = ctx.chart.data.datasets
-                                            .map((ds) => ds.data[ctx.dataIndex])
-                                            .reduce((a, b) => a + b, 0);
-                                        const pct = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        return `${label}: ${value} PTK (${pct}%)`;
-                                    },
-                                    footer: (items) => {
-                                        const total = items.reduce((sum, it) => sum + it.raw, 0);
-                                        return `Total: ${total} PTK`;
-                                    },
-                                },
-                            },
+                                        return `${label}: Rata-rata ${value}`;
+                                    }
+                                }
+                            }
                         },
-                    },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 10,
+                                    callback: function(value) {
+                                        return value.toFixed(1);
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Rata-rata Capaian (1-100)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Kota/Kabupaten'
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
                 });
             }
 
@@ -2595,10 +2508,7 @@
                     label: "grafik Distribusi Jenjang"
                 },
                 {
-                    id: "sec-level-kota",
-                    label: "grafik Distribusi Level per Kota (Layered Bar)"
-                },
-                {
+
                     id: "sec-ptk-belum",
                     label: "tabel PTK yang Belum Menjawab Instrumen"
                 },
@@ -2944,5 +2854,91 @@
             })();
 
         })();
+    </script>
+
+    <script>
+        // ============================================
+        // VALIDASI FILTER KEGIATAN DAN JENIS PTK
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const kegiatanSelect = document.getElementById('kegiatanSelect');
+            const jenisPtkSelect = document.getElementById('jenisPtkSelect');
+            const btnFilter = document.getElementById('btnFilter');
+
+            // Mapping entity kegiatan ke jenis_ptk yang kompatibel
+            const entityMapping = {
+                'guru': ['Guru'],
+                'kepala sekolah': ['Kepala Sekolah'],
+                'pengawas': ['Pengawas'],
+                'semua': ['Guru', 'Kepala Sekolah', 'Pengawas'] // Jika entity = 'semua'
+            };
+
+            function validateFilters() {
+                const kegiatanId = kegiatanSelect.value;
+                const jenisPtkId = jenisPtkSelect.value;
+
+                if (!kegiatanId || !jenisPtkId) {
+                    btnFilter.disabled = false;
+                    return true;
+                }
+
+                // Ambil data kegiatan via AJAX
+                fetch(`/api/kegiatan/${kegiatanId}/entity`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const entity = data.entity ? data.entity.toLowerCase() : '';
+                        let isValid = false;
+
+                        // Cek kompatibilitas
+                        for (const [key, values] of Object.entries(entityMapping)) {
+                            if (entity.includes(key)) {
+                                const selectedOption = jenisPtkSelect.options[jenisPtkSelect.selectedIndex];
+                                const jenisPtkText = selectedOption.text.toLowerCase();
+
+                                isValid = values.some(v =>
+                                    jenisPtkText.includes(v.toLowerCase())
+                                );
+
+                                if (isValid) break;
+                            }
+                        }
+
+                        if (!isValid) {
+                            btnFilter.disabled = true;
+                            showValidationMessage('Kegiatan dan Jenis PTK tidak kompatibel!');
+                        } else {
+                            btnFilter.disabled = false;
+                            hideValidationMessage();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error validasi:', error);
+                        btnFilter.disabled = false;
+                    });
+            }
+
+            function showValidationMessage(message) {
+                let alert = document.getElementById('filterValidationAlert');
+                if (!alert) {
+                    alert = document.createElement('div');
+                    alert.id = 'filterValidationAlert';
+                    alert.className = 'alert alert-danger mt-2';
+                    document.querySelector('.filter-row').appendChild(alert);
+                }
+                alert.innerHTML = `<i class="ri-alert-line me-1"></i> ${message}`;
+            }
+
+            function hideValidationMessage() {
+                const alert = document.getElementById('filterValidationAlert');
+                if (alert) alert.remove();
+            }
+
+            kegiatanSelect.addEventListener('change', validateFilters);
+            jenisPtkSelect.addEventListener('change', validateFilters);
+        });
+
+        // Tambahkan endpoint untuk ambil entity kegiatan
+        // Tambahkan di routes/api.php atau routes/web.php
+        // Route::get('/api/kegiatan/{id}/entity', [AnalisisController::class, 'getKegiatanEntity']);
     </script>
 @endsection
