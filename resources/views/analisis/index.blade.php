@@ -485,8 +485,10 @@
                                                 <tr>
                                                     @if (request('kota_id'))
                                                         <th>Kota</th>
+                                                        <th>Total Jawab Sub Indikator</th>
                                                     @else
                                                         <th>Provinsi</th>
+                                                        <th>Total Jawab Sub Indikator</th>
                                                     @endif
                                                     <th>Sub Indikator</th>
                                                     <th>Modus Level</th>
@@ -517,6 +519,11 @@
                                                                             Banten
                                                                         </td>
                                                                     @endif
+
+                                                                    <td rowspan="{{ count($kota['sub_indikator_modus']) }}"
+                                                                        style="vertical-align: middle; text-align:center;">
+                                                                        {{ $kota['total_jawaban'] }}
+                                                                    </td>
                                                                 @endif
 
                                                                 <td>
@@ -1215,20 +1222,20 @@
             <div class="mt-3">
                 <div class="row text-center small">
                     ${labels.slice(0,5).map((label, i) => `
-                                                                                                                    <div class="col">
-                                                                                                                        <div>${label}</div>
-                                                                                                                        <div class="fw-bold">${dataValues[i] ?? 0}</div>
-                                                                                                                    </div>
-                                                                                                                `).join('')}
+                                                                                            <div class="col">
+                                                                                                <div>${label}</div>
+                                                                                                <div class="fw-bold">${dataValues[i] ?? 0}</div>
+                                                                                            </div>
+                                                                                        `).join('')}
                 </div>
 
                 <div class="row text-center small mt-2">
                     ${labels.slice(5,10).map((label, i) => `
-                                                                                                                    <div class="col">
-                                                                                                                        <div>${label}</div>
-                                                                                                                        <div class="fw-bold">${dataValues[i+5] ?? 0}</div>
-                                                                                                                    </div>
-                                                                                                                `).join('')}
+                                                                                            <div class="col">
+                                                                                                <div>${label}</div>
+                                                                                                <div class="fw-bold">${dataValues[i+5] ?? 0}</div>
+                                                                                            </div>
+                                                                                        `).join('')}
                 </div>
             </div>
 
@@ -1387,9 +1394,9 @@
                                     ${
                                         gapIndex === 0
                                             ? `
-                                                                                                                                                                                                                <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
-                                                                                                                                                                                                                <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
-                                                                                                                                                                                                            `
+                                                                                                                                                                                        <small class="text-muted">${rek.sub_indikator_code || '-'}</small><br>
+                                                                                                                                                                                        <span class="fw-medium">${rek.sub_indikator_name || '-'}</span>
+                                                                                                                                                                                    `
                                             : ''
                                     }
                                 </td>
@@ -1488,11 +1495,13 @@
                                 ${
                                     subIndex === 0
                                         ? `
-                                                                                                                                                                                                            <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
-                                                                                                                                                                                                                ${kota.nama_kota || 'Banten'}
-                                                                                                                                                                                                            </td>
-
-                                                                                                                                                                                                        `
+                                                                                                                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;font-weight:600;">
+                                                                                                                                                                                        ${kota.nama_kota || 'Banten'}
+                                                                                                                                                                                    </td>
+                                                                                                                                                                                    <td rowspan="${kota.sub_indikator_modus.length}" style="vertical-align:middle;text-align:center;">
+                                                                                                                                                                                        ${kota.total_jawaban || 0}
+                                                                                                                                                                                    </td>
+                                                                                                                                                                                `
                                         : ''
                                 }
 
@@ -1527,6 +1536,7 @@
                                     <thead>
                                         <tr>
                                             <th>Kota</th>
+                                            <th>Total Jawaban Sub Indikator</th>
                                             <th>Sub Indikator</th>
                                             <th>Modus Level</th>
                                             <th>Jumlah PTK</th>
@@ -1642,19 +1652,19 @@
                                                           : '-';
 
                                                 return `
-                                                                                                                                                                                                                    <tr>
-                                                                                                                                                                                                                        <td class="text-center">${i + 1}</td>
-                                                                                                                                                                                                                        <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
-                                                                                                                                                                                                                        <td class="text-center">${tipeBadge}</td>
-                                                                                                                                                                                                                        <td class="text-center">${p.jumlah_ptk || 0}</td>
-                                                                                                                                                                                                                        <td class="text-center fw-bold">${persen}%</td>
-                                                                                                                                                                                                                        <td>
-                                                                                                                                                                                                                            <div class="progress" style="height:8px;">
-                                                                                                                                                                                                                                <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
-                                                                                                                                                                                                                            </div>
-                                                                                                                                                                                                                        </td>
-                                                                                                                                                                                                                    </tr>
-                                                                                                                                                                                                                `;
+                                                                                                                                                                                            <tr>
+                                                                                                                                                                                                <td class="text-center">${i + 1}</td>
+                                                                                                                                                                                                <td>${p.nama_pelatihan || 'Pelatihan Lainnya'}</td>
+                                                                                                                                                                                                <td class="text-center">${tipeBadge}</td>
+                                                                                                                                                                                                <td class="text-center">${p.jumlah_ptk || 0}</td>
+                                                                                                                                                                                                <td class="text-center fw-bold">${persen}%</td>
+                                                                                                                                                                                                <td>
+                                                                                                                                                                                                    <div class="progress" style="height:8px;">
+                                                                                                                                                                                                        <div class="progress-bar ${cls}" role="progressbar" style="width:${persen}%;"></div>
+                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                </td>
+                                                                                                                                                                                            </tr>
+                                                                                                                                                                                        `;
                                             })
                                             .join('')}
                                     </tbody>
