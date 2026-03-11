@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SoalController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\LockScreenController;
+use App\Http\Controllers\ApiLockScreenController;
 use App\Http\Controllers\HasilInstrumenController;
 use App\Http\Controllers\InstrumenController;
 use App\Http\Controllers\RegisterController;
@@ -114,7 +115,8 @@ Route::get('/api/sekolah/{id}/info', function ($id) {
 Route::get('/search/sekolah', [RegisterController::class, 'searchSekolah'])->name('search.sekolah');
 // Route untuk mendapatkan alamat sekolah
 Route::get('/api/sekolah/{id}/alamat', [RegisterController::class, 'getSekolahAlamat']);
-
+Route::get('/lockscreen/api/search-sekolah-dapodik', [ApiLockscreenController::class, 'searchSekolahDapodik'])
+    ->name('lockscreen.api.search-sekolah-dapodik');
 /*
 |--------------------------------------------------------------------------
 | Lockscreen Routes
@@ -199,7 +201,8 @@ Route::post('/submit-jawaban', [SoalController::class, 'submitJawaban']);
 */
 
 Route::get('/api/search-sekolah', [LockScreenController::class, 'searchSekolah'])->name('api.search-sekolah');
-
+Route::get('/lockscreen/api/cek-nip', [ApiLockscreenController::class, 'cekNip'])->name('lockscreen.api.cek-nip');
+Route::get('/lockscreen/api/cek-nik', [ApiLockscreenController::class, 'cekNik'])->name('lockscreen.api.cek-nik');
 /*
 |--------------------------------------------------------------------------
 | Hasil Instrumen Routes

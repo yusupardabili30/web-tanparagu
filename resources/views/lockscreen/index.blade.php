@@ -831,7 +831,7 @@
                                 </div>
                             </div>
 
-                        
+
 
                             <!-- SEKOLAH / INSTANSI -->
                               <div class="col-12 mb-3">
@@ -1178,85 +1178,120 @@
             }
         });
 
-        function searchSekolahModal(keyword) {
-            const searchResults = document.getElementById('searchResults');
-            const loadingIndicator = document.getElementById('modalSearchLoading');
 
-            loadingIndicator.classList.remove('d-none');
-            searchResults.innerHTML = '';
-            fetch(`/tanparagu/api/search-sekolah?keyword=${encodeURIComponent(keyword)}`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                })
 
-                .then(response => response.json())
-                .then(data => {
-                    loadingIndicator.classList.add('d-none');
+  // ============================================
+// SEARCH SEKOLAH DARI API DAPODIK
+// ============================================
 
-                    if (data.success && data.data && data.data.length > 0) {
-                        let resultsHTML = '';
-                        data.data.forEach(sekolah => {
-                            resultsHTML += `
-                                <div class="card mb-2 sekolah-item">
-                                    <div class="card-body">
-                                        <h6 class="card-title mb-1">${sekolah.nama_sekolah}</h6>
-                                        ${sekolah.npsn ? `<p class="card-text mb-1"><small><strong>NPSN:</strong> ${sekolah.npsn}</small></p>` : ''}
-                                        ${sekolah.alamat ? `<p class="card-text mb-1"><small><i class="ri-map-pin-line"></i> ${sekolah.alamat}</small></p>` : ''}
-                                        <button class="btn btn-sm btn-primary mt-2 pilih-sekolah-btn" 
-                                                data-id="${sekolah.sekolah_id}"
-                                                data-nama="${sekolah.nama_sekolah}"
-                                                data-alamat="${sekolah.alamat || ''}">
-                                            <i class="ri-check-line"></i> Pilih Sekolah Ini
-                                        </button>
-                                    </div>
-                                </div>`;
-                        });
-                        searchResults.innerHTML = resultsHTML;
-                    } else {
-                        searchResults.innerHTML = `
-                            <div class="text-center text-muted py-4">
-                                <i class="ri-search-line fs-4"></i>
-                                <p class="mt-2">Sekolah tidak ditemukan</p>
-                            </div>`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error searching sekolah:', error);
-                    loadingIndicator.classList.add('d-none');
-                    searchResults.innerHTML = `
-                        <div class="text-center text-danger py-4">
-                            <i class="ri-error-warning-line fs-4"></i>
-                            <p class="mt-2">Gagal mencari sekolah. Silakan coba lagi.</p>
-                        </div>`;
-                });
+function searchSekolahModal(keyword) {
+    const searchResults = document.getElementById('searchResults');
+    const loadingIndicator = document.getElementById('modalSearchLoading');
+
+    loadingIndicator.classList.remove('d-none');
+    searchResults.innerHTML = '';
+
+    // Panggil API Dapodik
+    fetch(`/lockscreen/api/search-sekolah-dapodik?keyword=${encodeURIComponent(keyword)}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(apiData => {
+        loadingIndicator.classList.add('d-none');
+
+        // Tampilkan hasil dari API Dapodik
+        if (apiData.success && apiData.data && apiData.data.length > 0) {
+            let resultsHTML = '';
+            apiData.data.forEach(sekolah => {
+                // Badge Dapodik
+                const sourceBadge = '<span class="badge bg-info ms-2">Dapodik</span>';
+
+                resultsHTML += `
+                    <div class="card mb-2 sekolah-item">
+                        <div class="card-body">
+                            <h6 class="card-title mb-1">
+                                ${sekolah.nama_sekolah || 'Nama tidak tersedia'}
+                                ${sourceBadge}
+                            </h6>
+                            ${sekolah.npsn ? `<p class="card-text mb-1"><small><strong>NPSN:</strong> ${sekolah.npsn}</small></p>` : ''}
+                            ${sekolah.alamat ? `<p class="card-text mb-1"><small><i class="ri-map-pin-line"></i> ${sekolah.alamat}</small></p>` : ''}
+                            ${sekolah.kab_kota ? `<p class="card-text mb-1"><small><i class="ri-building-line"></i> ${sekolah.kab_kota}</small></p>` : ''}
+                            <button class="btn btn-sm btn-primary mt-2 pilih-sekolah-btn"
+                                    data-id="${sekolah.sekolah_id || ''}"
+                                    data-nama="${sekolah.nama_sekolah || ''}"
+                                    data-alamat="${sekolah.alamat || ''}">
+                                <i class="ri-check-line"></i> Pilih Sekolah Ini
+                            </button>
+                        </div>
+                    </div>`;
+            });
+            searchResults.innerHTML = resultsHTML;
+        } else {
+            searchResults.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="ri-search-line fs-4"></i>
+                    <p class="mt-2">Sekolah tidak ditemukan</p>
+                    <small class="text-muted">Coba dengan kata kunci lain</small>
+                </div>`;
+        }
+    })
+    .catch(error => {
+        console.error('Error searching sekolah dari Dapodik:', error);
+        loadingIndicator.classList.add('d-none');
+        searchResults.innerHTML = `
+            <div class="text-center text-danger py-4">
+                <i class="ri-error-warning-line fs-4"></i>
+                <p class="mt-2">Gagal mencari sekolah dari Dapodik</p>
+                <small class="text-muted">Silakan coba lagi</small>
+            </div>`;
+    });
+}
+// ============================================
+// PERBAIKI HANDLER PILIH SEKOLAH - SEDERHANA
+// ============================================
+
+// Ganti dengan event listener sederhana
+document.addEventListener('click', function(e) {
+    // Cari tombol dengan class pilih-sekolah-btn
+    const pilihButton = e.target.closest('.pilih-sekolah-btn');
+
+    if (pilihButton) {
+        e.preventDefault();
+
+        const sekolahId = pilihButton.getAttribute('data-id');
+        const sekolahNama = pilihButton.getAttribute('data-nama');
+        const sekolahAlamat = pilihButton.getAttribute('data-alamat');
+
+        console.log('Memilih sekolah:', { sekolahId, sekolahNama, sekolahAlamat });
+
+        if (!sekolahId || !sekolahNama) {
+            showAlert('error', 'Kesalahan', 'Data sekolah tidak lengkap');
+            return;
         }
 
-        document.getElementById('searchResults')?.addEventListener('click', function(e) {
-            if (e.target.classList.contains('pilih-sekolah-btn') || e.target.closest('.pilih-sekolah-btn')) {
-                const button = e.target.classList.contains('pilih-sekolah-btn') ? e.target : e.target.closest('.pilih-sekolah-btn');
-                const sekolahId = button.getAttribute('data-id');
-                const sekolahNama = button.getAttribute('data-nama');
-                const sekolahAlamat = button.getAttribute('data-alamat');
+        // Panggil fungsi handlePilihSekolah yang sudah ada
+        handlePilihSekolah(sekolahId, sekolahNama, sekolahAlamat);
 
-                handlePilihSekolah(sekolahId, sekolahNama, sekolahAlamat);
+        // Tutup modal search
+        const searchModal = bootstrap.Modal.getInstance(document.getElementById('searchSekolahModal'));
+        if (searchModal) {
+            searchModal.hide();
+        }
 
-                const searchModal = bootstrap.Modal.getInstance(document.getElementById('searchSekolahModal'));
-                searchModal.hide();
+        // Reset input search
+        document.getElementById('modalSearchInput').value = '';
+    }
+});
 
-                document.getElementById('modalSearchInput').value = '';
-            }
-        });
-
-        document.getElementById('searchSekolahModal')?.addEventListener('show.bs.modal', function() {
-            document.getElementById('modalSearchInput').value = '';
-            document.getElementById('searchResults').innerHTML = `
-                <div class="text-center text-muted">
-                    <i class="ri-search-line fs-4"></i>
-                    <p class="mt-2">Masukkan kata kunci untuk mencari sekolah</p>
-                </div>`;
-        });
 
         // ============================================
         // 4. LOGIN FORM
@@ -1668,6 +1703,246 @@
         document.getElementById('registerModal')?.addEventListener('shown.bs.modal', function() {
             initRegisterFloatingLabels();
         });
+
+
+
+
+
+        // ============================================================
+// AUTOFILL NIP/NIK DARI API DAPODIK - LOCKSCREEN
+// ============================================================
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Simpan data sekolah yang belum bisa diisi (modal belum terbuka)
+    let _pendingSekolah = null;
+
+    // ----------------------------------------------------------
+    // Isi field PTK biasa (nama, nip, email, dll.)
+    // ----------------------------------------------------------
+    function doAutofill(data) {
+        if (!data) return;
+
+        const map = {
+            'nuptk'        : 'nuptk',
+            'nik'          : 'nik',
+            'nip'          : 'nip',
+            'jenis_kelamin': 'jenis_kelamin',
+            'tgl_lahir'    : 'tgl_lahir',
+            'agama'        : 'agama',
+            'email'        : 'email',
+            'no_hp'        : 'no_hp',
+            'nama'         : 'nama',
+            'tempat_lahir' : 'tempat_lahir',
+            'no_telepon'   : 'no_hp'
+        };
+
+        Object.entries(map).forEach(([key, fieldName]) => {
+            if (data[key] == null || data[key] === '') return;
+            const el = document.querySelector(`#registerModal [name="${fieldName}"]`);
+            if (!el) return;
+            el.value = data[key];
+            el.dispatchEvent(new Event('input',  { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        syncFloatingLabels();
+    }
+
+    // ----------------------------------------------------------
+    // Isi field sekolah
+    // ----------------------------------------------------------
+    function doAutofillSekolah(sekolah) {
+        if (!sekolah) return;
+
+        const sekolahId     = String(sekolah.sekolah_id || '').trim();
+        const sekolahNama   = String(sekolah.nama_sekolah || '').trim();
+        const sekolahAlamat = String(sekolah.alamat || '').trim();
+
+        if (!sekolahNama) return;
+
+        console.log('[AUTOFILL] Isi sekolah:', sekolahNama);
+
+        // Pastikan radio "Pilih Sekolah" aktif
+        const optSekolah = document.getElementById('optionSekolah');
+        if (optSekolah) {
+            optSekolah.checked = true;
+            optSekolah.dispatchEvent(new Event('change'));
+        }
+
+        const sel = document.getElementById('sekolahSelect');
+        if (!sel) return;
+
+        // Cek apakah option sudah ada
+        const val = sekolahId || sekolahNama;
+        let found = false;
+        for (let i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === val ||
+                sel.options[i].getAttribute('data-nama') === sekolahNama) {
+                sel.value = sel.options[i].value;
+                found = true;
+                break;
+            }
+        }
+
+        // Belum ada → tambahkan option baru
+        if (!found) {
+            const opt = new Option(sekolahNama, val, true, true);
+            opt.setAttribute('data-nama',   sekolahNama);
+            opt.setAttribute('data-alamat', sekolahAlamat);
+            opt.setAttribute('data-source', 'dapodik');
+            sel.add(opt);
+            sel.value = val;
+        }
+
+        // Tampilkan info box di bawah dropdown
+        const infoBox  = document.getElementById('sekolahInfo');
+        const nameEl   = document.getElementById('selectedSekolahName');
+        const alamatEl = document.getElementById('selectedSekolahAlamat');
+        if (nameEl)   nameEl.textContent   = sekolahNama;
+        if (alamatEl) alamatEl.textContent = sekolahAlamat || 'Alamat tidak tersedia';
+        if (infoBox)  infoBox.classList.remove('d-none');
+
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        syncFloatingLabels();
+
+        console.log('[AUTOFILL] Sekolah selesai diisi:', sekolahNama);
+    }
+
+    function syncFloatingLabels() {
+        document.querySelectorAll('#registerModal .mm-float').forEach(wrap => {
+            const field = wrap.querySelector('input, select, textarea');
+            if (field) {
+                wrap.classList.toggle('is-filled', (field.value ?? '').toString().trim() !== '');
+            }
+        });
+    }
+
+    // ----------------------------------------------------------
+    // Fetch endpoint + isi form
+    // ----------------------------------------------------------
+    function cekDanAutofill(value) {
+        const clean = value.trim().replace(/\D/g, '');
+        if (!clean) return;
+
+        let endpoint = null;
+        if (clean.length === 16)                             endpoint = `/lockscreen/api/cek-nik?nik=${clean}`;
+        else if (clean.length === 18 || clean.length === 19) endpoint = `/lockscreen/api/cek-nip?nip=${clean}`;
+        else return;
+
+        console.log('[AUTOFILL] fetch:', endpoint);
+
+        fetch(endpoint, {
+            headers: {
+                'Accept'      : 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (!res.success) return;
+
+            // Simpan sekolah — akan diisi saat modal terbuka dan form sudah siap
+            if (res.sekolah) {
+                _pendingSekolah = res.sekolah;
+                console.log('[AUTOFILL] Sekolah disimpan pending:', res.sekolah.nama_sekolah);
+            }
+
+            // Simpan data PTK juga untuk diisi setelah modal terbuka
+            if (res.data) {
+                window._pendingPtk = res.data;
+            }
+        })
+        .catch(err => console.error('[AUTOFILL] error:', err));
+    }
+
+    // ----------------------------------------------------------
+    // Saat modal register terbuka:
+    // 1. Isi data PTK
+    // 2. Tunggu form reset dari login-handler selesai (80ms)
+    // 3. Isi sekolah SETELAH reset selesai (delay 300ms)
+    // ----------------------------------------------------------
+    document.getElementById('registerModal')?.addEventListener('shown.bs.modal', function () {
+        console.log('[AUTOFILL] Modal terbuka');
+
+        // Form di-reset oleh login-handler dengan setTimeout 80ms
+        // Kita tunggu lebih lama (350ms) agar reset pasti selesai dulu
+        setTimeout(() => {
+
+            // Isi data PTK biasa
+            if (window._pendingPtk) {
+                console.log('[AUTOFILL] Isi PTK pending');
+                doAutofill(window._pendingPtk);
+                window._pendingPtk = null;
+            }
+
+            // Isi sekolah setelah PTK selesai
+            if (_pendingSekolah) {
+                console.log('[AUTOFILL] Isi sekolah pending:', _pendingSekolah.nama_sekolah);
+                doAutofillSekolah(_pendingSekolah);
+                _pendingSekolah = null;
+            }
+
+        }, 350); // 350ms > 80ms reset form, pasti aman
+    });
+
+    // ----------------------------------------------------------
+    // NIP di form login — prefetch saat 18 digit
+    // ----------------------------------------------------------
+    const nipInput = document.getElementById('nip');
+    if (nipInput) {
+        let timer;
+        nipInput.addEventListener('input', function () {
+            clearTimeout(timer);
+            const val = this.value;
+            if (val.replace(/\D/g, '').length === 18) {
+                timer = setTimeout(() => cekDanAutofill(val), 600);
+            }
+        });
+        nipInput.addEventListener('blur', function () {
+            cekDanAutofill(this.value);
+        });
+    }
+
+    // ----------------------------------------------------------
+    // NIK di modal registrasi
+    // ----------------------------------------------------------
+    const nikInput = document.querySelector('#registerModal [name="nik"]');
+    if (nikInput) {
+        nikInput.addEventListener('blur', function () {
+            // NIK diisi saat modal sudah terbuka, langsung isi
+            const clean = this.value.trim().replace(/\D/g, '');
+            if (clean.length !== 16) return;
+
+            fetch(`/lockscreen/api/cek-nik?nik=${clean}`, {
+                headers: {
+                    'Accept'      : 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                }
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (!res.success) return;
+                if (res.data)    doAutofill(res.data);
+                if (res.sekolah) doAutofillSekolah(res.sekolah);
+            })
+            .catch(err => console.error('[AUTOFILL NIK] error:', err));
+        });
+
+        // Tombol Cek manual di samping field NIK
+        const nikWrapper = nikInput.closest('.mm-float');
+        if (nikWrapper && !nikWrapper.querySelector('.btn-check-nik')) {
+            const btn = document.createElement('button');
+            btn.type          = 'button';
+            btn.className     = 'btn btn-sm btn-outline-primary position-absolute btn-check-nik';
+            btn.style.cssText = 'right: 10px; top: 15px; z-index: 10; padding: 2px 10px;';
+            btn.innerHTML     = '<i class="ri-search-line"></i> Cek';
+            btn.onclick       = () => nikInput.dispatchEvent(new Event('blur'));
+            nikWrapper.style.position = 'relative';
+            nikWrapper.appendChild(btn);
+        }
+    }
+
+});
     </script>
 </body>
 

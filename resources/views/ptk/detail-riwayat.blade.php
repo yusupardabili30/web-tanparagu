@@ -932,7 +932,7 @@
 
                             $summaryAchList = array_values($summaryAch);
                             $summaryRekList = array_values($summaryRek);
-                            
+
                             // ✅ URUTKAN LIST SUMMARY BERDASARKAN KODE (1.1.1 -> ... -> 1.3.5)
                             $cmpCodeArr = function($a, $b) {
                                 $ka = trim((string)($a['code'] ?? ''));
@@ -988,10 +988,11 @@
                                 @if($targetLevel > 0 && $isAllMeet)
                                     <span class="badge bg-success-subtle text-success"
                                           style="border-radius:999px; font-weight:900; padding:8px 12px;">
-                                        <i class="ri-check-line me-1"></i> Good job!
+                                        <i class="ri-check-line me-1"></i> Selamat Anda Mencapai Level Kompetensi {{ number_format($presentasePtk,2) }}%
                                     </span>
                                     <span class="ms-2">
-                                        Anda telah memenuhi sesuai dengan level capaian Anda (Capaian Level {{ $targetLevel }}).
+                                       Anda mencapai capaian kompetensi sebesar<strong>{{ number_format($presentasePtk,2) }}%</strong> pada level {{ $kegiatan->entity }} {{ $ptk->pangkatJabatan->jenjang_jabatan ?? '-' }}
+                                        Berdasarkan hasil tersebut, Anda telah memenuhi semua indikator kompetensi pada jenjang ini.
                                     </span>
 
                                     <div class="summary-rek">
@@ -1031,14 +1032,46 @@
                                     </div>
 
                                 @elseif($targetLevel > 0)
+                                @php
+                                    $nilai = (float) $presentasePtk;
+                                @endphp
+
+                                @if($nilai < 100)
                                     <span class="badge bg-danger-subtle text-danger"
-                                          style="border-radius:999px; font-weight:900; padding:8px 12px;">
-                                        <i class="ri-error-warning-line me-1"></i> Perlu peningkatan
+                                        style="border-radius:999px; font-weight:900; padding:8px 12px;">
+                                        <i class="ri-error-warning-line me-1"></i> Perlu Peningkatan
                                     </span>
-                                    <span class="ms-2">
-                                        Anda belum mencapai sesuai dengan level jabatan Anda (Capaian Level {{ $targetLevel }}).
-                                        Maka direkomendasikan:
-                                    </span>
+                                @endif
+                                
+                                    
+
+    <span class="ms-2">
+        @php
+        $nilai = (float) $presentasePtk;
+
+        switch (true) {
+            case ($nilai == 100):
+                $kategori = 'Anda telah memenuhi semua indikator kompetensi pada jenjang ini.';
+                break;
+            case ($nilai >= 81 && $nilai <= 99):
+                $kategori = 'Anda telah memenuhi sebagian besar indikator kompetensi pada jenjang ini.';
+                break;
+
+            case ($nilai >= 51 && $nilai <= 80):
+                $kategori = 'Anda telah memenuhi beberapa indikator kompetensi pada jenjang ini, namun masih diperlukan penguatan pada beberapa aspek untuk mencapai hasil yang lebih baik.';
+                break;
+
+            case ($nilai >= 0 && $nilai <= 50):
+                $kategori = 'Anda belum memenuhi sebagian besar indikator kompetensi pada jenjang ini, Capaian kompetensi Anda masih perlu ditingkatkan.';
+                break;
+
+            default:
+                $kategori = 'tidak_diketahui';
+        }
+        @endphp
+      Anda mencapai capaian kompetensi sebesar <strong>{{ number_format($presentasePtk,2) }}% pada level {{ $kegiatan->entity }} {{ $ptk->pangkatJabatan->jenjang_jabatan ?? '-' }}</strong> Berdasarkan hasil tersebut, {{ $kategori }}
+   
+    </span>
 
                                     <div class="summary-rek">
                                         <div class="summary-sections">

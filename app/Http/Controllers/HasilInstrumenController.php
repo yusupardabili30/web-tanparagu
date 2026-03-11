@@ -39,6 +39,7 @@ public function index(Request $request)
         ->select(
             'ptk_jawaban.ptk_jawaban_id',
             'ptk_jawaban.tahap',
+             'ptk_jawaban.level_kalkulasi',
             'ptk_jawaban.level as level_jawaban',
             'ptk_jawaban.sub_indikator_code',
             'ptk_jawaban.sub_indikator_id',
@@ -161,6 +162,36 @@ $summaryRows = $summaryQuery
         ];
     }
 
+
+    // ✅ Hitung presentase per NIP dari SEMUA data (bukan hanya halaman ini)
+$presentaseQuery = DB::table('ptk_jawaban')
+    ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
+    ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+    ->leftJoin('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+    ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
+    ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+    ->leftJoin('jenis_ptk', 'ptk.jenis_ptk_id', '=', 'jenis_ptk.jenis_ptk_id');
+
+// apply filter SAMA PERSIS
+$applyFilters($presentaseQuery);
+
+$presentaseRows = $presentaseQuery
+    ->select(
+        DB::raw("TRIM(ptk.nip) as nip"),
+        DB::raw("SUM(COALESCE(ptk_jawaban.level_kalkulasi, 0)) as total_kalkulasi"),
+        DB::raw("COUNT(ptk_jawaban.sub_indikator_id) as jumlah_sub")
+    )
+    ->groupBy(DB::raw("TRIM(ptk.nip)"))
+    ->get();
+
+$presentaseByNip = [];
+foreach ($presentaseRows as $pr) {
+    $nipKey = (string)($pr->nip ?? 'tanpa_nip');
+    $jumlah = (int)($pr->jumlah_sub ?? 0);
+    $total  = (float)($pr->total_kalkulasi ?? 0);
+    $presentaseByNip[$nipKey] = $jumlah > 0 ? round($total / $jumlah, 2) : 0;
+}
+
     // =========================
     // 4) rekomendasi & pelatihan (tetap seperti punya kamu)
     // =========================
@@ -203,13 +234,16 @@ $summaryRows = $summaryQuery
         ->orderBy('jenis_ptk', 'asc')
         ->get();
 
+
+
     return view('hasil.index', compact(
         'tittle',
         'data',
         'kegiatans',
         'pangkatJabatans',
         'jenisPtk',
-        'summaryByNip' // ✅ WAJIB dikirim ke blade
+        'summaryByNip',
+         'presentaseByNip' // ✅ WAJIB dikirim ke blade
     ));
 }   
 

@@ -403,7 +403,7 @@ class PtkController extends Controller
 
 
 
-    /**
+       /**
      * Menampilkan detail riwayat dengan format seperti hasil instrumen
      * Hanya untuk PTK yang sedang login
      */
@@ -445,6 +445,7 @@ class PtkController extends Controller
                     'ptk_jawaban.bobot',
                     'ptk_jawaban.created_at',
                     'ptk.nama',
+                    'ptk_jawaban.level_kalkulasi',
                     'ptk.nip',
                     'ptk.pangkat_jabatan_id',
                     'ptk.instansi',
@@ -465,6 +466,28 @@ class PtkController extends Controller
                 ->orderBy('ptk_jawaban.created_at', 'desc');
 
             $data = $query->get();
+
+
+// ============================================
+// HITUNG PERSENTASE CAPAIAN DARI LEVEL_KALKULASI
+// ============================================
+
+// 1. Ambil semua nilai level_kalkulasi dari data
+$nilaiKalkulasi = $data->pluck('level_kalkulasi')->toArray();
+
+// 2. Hitung total nilai kalkulasi (sum)
+$totalKalkulasi = array_sum($nilaiKalkulasi);
+
+// 3. Hitung jumlah sub indikator
+$jumlahSubIndikator = count($nilaiKalkulasi);
+
+// 4. Hitung rata-rata level kalkulasi
+$rataKalkulasi = $jumlahSubIndikator > 0 
+    ? round($totalKalkulasi / $jumlahSubIndikator, 2) 
+    : 0;
+
+// 5. Untuk persentase PTK, gunakan rata-rata (karena setiap sub indikator sudah dalam bentuk persen)
+$presentasePtk = $rataKalkulasi;
 
             // ============================================
             // TAMBAHKAN REKOMENDASI DENGAN GAP
@@ -510,12 +533,16 @@ class PtkController extends Controller
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'encode_kegiatan_id' => $encode_kegiatan_id,
+                'presentasePtk' => $presentasePtk,
+    'totalKalkulasi' => $totalKalkulasi,
+   
                 'nip' => $nip
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
 
     /**
      * Fungsi untuk mendapatkan rekomendasi dengan GAP level
