@@ -627,21 +627,24 @@
                     @csrf
                     <input type="hidden" id="kegiatan_id" name="kegiatan_id" value="{{ $kegiatan_id }}">
 
-                    <!-- Field NIP -->
-                    <div class="mb-4">
-                        <label class="form-label">
-                            <i></i> Nomor Induk Pegawai (NIP)
-                        </label>
-                        <input type="text" name="nip" id="nip" class="form-control"
-                            value="{{ old('nip', session('preserve_nip') ?? '') }}"
-                            placeholder="Masukkan 18 digit NIP Anda"
-                            required
-                            autofocus
-                            maxlength="18"
-                            pattern="\d{18}"
-                            title="Masukkan 18 digit NIP">
-                        <small class="form-text text-muted mt-1">Contoh: 197010021990092010</small>
-                    </div>
+                    <!-- Field NIP/NIK -->
+    <div class="mb-4">
+        <label class="form-label">
+            <i></i> Nomor Induk Pegawai (NIP)
+        </label>
+        <input type="text" name="nip" id="nip" class="form-control"
+            value="{{ old('nip', session('preserve_nip') ?? '') }}"
+            placeholder="Masukkan 18 digit NIP atau 16 digit NIK"
+            required
+            autofocus
+            maxlength="18"
+            pattern="\d{16,18}"
+            title="Masukkan 16 digit NIK atau 18 digit NIP">
+        <small class="form-text text-muted mt-1">
+            <span id="nipInputHint">Masukkan NIP (18 digit) atau NIK (16 digit)</span>
+            <span id="nipInputCounter" class="ms-2 badge bg-secondary">0/16-18</span>
+        </small>
+    </div>
 
                     <!-- Field Token -->
                     <div class="mb-4">
@@ -712,6 +715,34 @@
                         <input type="hidden" id="reg_token" name="token">
 
                         <div class="row">
+
+
+ <!-- NIK -->
+    <div class="col-md-6 mb-3">
+        <div class="mm-float">
+            <input type="text" name="nik" id="nik_field" class="form-control"
+                placeholder=" " maxlength="16" pattern="\d{16}"
+                title="Masukkan 16 digit NIK">
+            <label class="mm-label">16 digit NIK</label>
+            <small class="form-text text-muted" style="font-size: 11px; position: absolute; bottom: -18px; left: 14px;">
+                Nomor Induk Kependudukan
+            </small>
+        </div>
+    </div>
+
+     <!-- NIP -->
+    <div class="col-md-6 mb-3">
+        <div class="mm-float">
+            <input type="text" name="nip_visible" id="nip_visible" class="form-control"
+                placeholder=" " maxlength="18" pattern="\d{18}"
+                title="Masukkan 18 digit NIP" required
+                onfocus="this.removeAttribute('readonly')">
+            <label class="mm-label">18 digit NIP *</label>
+            <small class="form-text text-muted" style="font-size: 11px; position: absolute; bottom: -18px; left: 14px;">
+                Nomor Induk Pegawai
+            </small>
+        </div>
+    </div>
 
                             <!-- NUPTK -->
                             <div class="col-md-6 mb-3">
@@ -997,51 +1028,83 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // ============================================
-        // 1. FUNGSI UTAMA
-        // ============================================
+      // ============================================
+// 1. FUNGSI UTAMA - UPDATE UNTUK NIP/NIK
+// ============================================
 
-        function togglePassword() {
-            const input = document.getElementById('tokenInput');
-            const icon = document.getElementById('passwordIcon');
+function togglePassword() {
+    const input = document.getElementById('tokenInput');
+    const icon = document.getElementById('passwordIcon');
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('ri-eye-fill', 'ri-eye-off-fill');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('ri-eye-off-fill', 'ri-eye-fill');
-            }
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('ri-eye-fill', 'ri-eye-off-fill');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('ri-eye-off-fill', 'ri-eye-fill');
+    }
+}
+
+// Update handler untuk input NIP/NIK
+document.getElementById('nip')?.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 18) value = value.substring(0, 18);
+    e.target.value = value;
+
+    // Update counter dan hint
+    updateNipInputHint(value);
+});
+
+// Fungsi untuk update hint dan counter
+function updateNipInputHint(value) {
+    const hintElement = document.getElementById('nipInputHint');
+    const counterElement = document.getElementById('nipInputCounter');
+
+    if (!hintElement || !counterElement) return;
+
+    const length = value.length;
+
+    if (length === 0) {
+        counterElement.textContent = '0/16-18';
+        counterElement.className = 'ms-2 badge bg-secondary';
+        hintElement.innerHTML = 'Masukkan NIP (18 digit) atau NIK (16 digit)';
+    } else if (length === 16) {
+        counterElement.textContent = '16/16 (NIK)';
+        counterElement.className = 'ms-2 badge bg-info';
+        hintElement.innerHTML = '<span class="text-info">✓ NIK 16 digit</span>';
+    } else if (length === 18) {
+        counterElement.textContent = '18/18 (NIP)';
+        counterElement.className = 'ms-2 badge bg-success';
+        hintElement.innerHTML = '<span class="text-success">✓ NIP 18 digit</span>';
+    } else if (length < 16) {
+        counterElement.textContent = `${length}/16 (kurang ${16 - length})`;
+        counterElement.className = 'ms-2 badge bg-warning text-dark';
+        hintElement.innerHTML = 'Masukkan 16 digit NIK atau 18 digit NIP';
+    } else if (length > 16 && length < 18) {
+        counterElement.textContent = `${length}/18 (kurang ${18 - length})`;
+        counterElement.className = 'ms-2 badge bg-warning text-dark';
+        hintElement.innerHTML = 'Lanjutkan hingga 18 digit untuk NIP';
+    }
+}
+
+const showAlert = (type, title, message) => {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
         }
+    });
 
-        document.getElementById('nip')?.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 18) value = value.substring(0, 18);
-            e.target.value = value;
-        });
-
-        document.querySelector('input[name="no_hp"]')?.addEventListener('input', function(e) {
-            e.target.value = e.target.value.replace(/\D/g, '');
-        });
-
-        const showAlert = (type, title, message) => {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer);
-                    toast.addEventListener('mouseleave', Swal.resumeTimer);
-                }
-            });
-
-            Toast.fire({
-                icon: type,
-                title: message
-            });
-        };
+    Toast.fire({
+        icon: type,
+        title: message
+    });
+};
 
         // ============================================
         // 1.5 FLOATING LABEL STATE (ISI -> LABEL NAIK)
@@ -1192,7 +1255,7 @@ function searchSekolahModal(keyword) {
     searchResults.innerHTML = '';
 
     // Panggil API Dapodik
-    fetch(`/lockscreen/api/search-sekolah-dapodik?keyword=${encodeURIComponent(keyword)}`, {
+    fetch(`/tanparagu/lockscreen/api/search-sekolah-dapodik?keyword=${encodeURIComponent(keyword)}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -1293,92 +1356,119 @@ document.addEventListener('click', function(e) {
 });
 
 
-        // ============================================
-        // 4. LOGIN FORM
-        // ============================================
+     // ============================================
+// 4. LOGIN FORM - UPDATE
+// ============================================
 
-        document.getElementById('login-form')?.addEventListener('submit', function(e) {
-            e.preventDefault();
+document.getElementById('login-form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
 
-            const nip = document.getElementById('nip').value.trim();
-            const token = document.getElementById('tokenInput').value.trim();
-            const kegiatan_id = document.getElementById('kegiatan_id').value;
+    const identifier = document.getElementById('nip').value.trim();
+    const token = document.getElementById('tokenInput').value.trim();
+    const kegiatan_id = document.getElementById('kegiatan_id').value;
 
-            if (nip.length !== 18) {
-                showAlert('error', 'Kesalahan', 'NIP harus terdiri dari 18 digit angka!');
-                return false;
-            }
+    // Validasi panjang (16 atau 18 digit)
+    if (identifier.length !== 18 && identifier.length !== 16) {
+        showAlert('error', 'Kesalahan', 'Masukkan 16 digit NIK atau 18 digit NIP!');
+        return false;
+    }
 
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="ri-loader-4-line me-2"></i> MEMPROSES...';
-            submitBtn.disabled = true;
+    const isNIK = identifier.length === 16;
+    const fieldName = isNIK ? 'NIK' : 'NIP';
 
-            fetch("{{ route('lockscreen.authenticate') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nip: nip,
-                        token: token,
-                        kegiatan_id: kegiatan_id
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: 'Login berhasil, mengarahkan ke sistem...',
-                            showConfirmButton: false,
-                            timer: 1500,
-                            willClose: () => {
-                                window.location.href = data.redirect_url;
-                            }
-                        });
-                    } else {
-                        if (data.show_register_modal) {
-                            document.getElementById('modal-info-text').innerHTML =
-                                `NIP <strong>${data.nip}</strong> belum terdaftar dalam sistem. Silakan lengkapi data diri Anda.`;
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="ri-loader-4-line me-2"></i> MEMPROSES...';
+    submitBtn.disabled = true;
 
-                            document.getElementById('reg_nip').value = data.nip;
-                            document.getElementById('reg_kegiatan_id').value = data.kegiatan_id;
-                            document.getElementById('reg_token').value = data.token;
+    console.log('Login attempt:', { identifier, isNIK, fieldName });
 
-                            const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
-                            registerModal.show();
+    fetch("{{ route('lockscreen.authenticate') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            identifier: identifier,
+            token: token,
+            kegiatan_id: kegiatan_id,
+            is_nik: isNIK
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Login response:', data);
 
-                            setTimeout(() => {
-                                document.getElementById('optionSekolah').checked = true;
-                                document.getElementById('optionSekolah').dispatchEvent(new Event('change'));
-                                document.getElementById('sekolahSelect').value = '';
-                                document.getElementById('instansiInput').value = '';
-                                document.getElementById('sekolahInfo').classList.add('d-none');
-                                document.getElementById('kotaSelect').value = '';
-                                document.getElementById('jenjangSelect').value = '';
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: 'Login berhasil, mengarahkan ke sistem...',
+                showConfirmButton: false,
+                timer: 1500,
+                willClose: () => {
+                    window.location.href = data.redirect_url;
+                }
+            });
+        } else {
+            if (data.show_register_modal) {
+                document.getElementById('modal-info-text').innerHTML =
+                    `${fieldName} <strong>${data.identifier}</strong> belum terdaftar. Silakan lengkapi data diri Anda.`;
 
-                                document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                document.getElementById('reg_nip').value = data.identifier;
+                document.getElementById('reg_kegiatan_id').value = data.kegiatan_id;
+                document.getElementById('reg_token').value = data.token;
 
-                                initRegisterFloatingLabels();
-                            }, 80);
-                        } else {
-                            showAlert('error', 'Kesalahan', data.message);
-                        }
+                const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+                registerModal.show();
+
+                setTimeout(() => {
+                    document.getElementById('optionSekolah').checked = true;
+                    document.getElementById('optionSekolah').dispatchEvent(new Event('change'));
+                    document.getElementById('sekolahSelect').value = '';
+                    document.getElementById('instansiInput').value = '';
+                    document.getElementById('sekolahInfo').classList.add('d-none');
+                    document.getElementById('kotaSelect').value = '';
+                    document.getElementById('jenjangSelect').value = '';
+
+                    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+                    initRegisterFloatingLabels();
+                }, 80);
+            } else if (data.use_nip_instead) {
+                // NIK ditemukan di database, harus login dengan NIP
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Gunakan NIP untuk Login',
+                    html: `
+                        <div class="text-center">
+                            <p>NIK <strong>${data.nik}</strong> sudah terdaftar.</p>
+                            <p>Silakan login menggunakan NIP Anda: <strong>${data.nip}</strong></p>
+                        </div>
+                    `,
+                    confirmButtonText: 'Mengerti',
+                    confirmButtonColor: '#1a4d8e',
+                    willClose: () => {
+                        document.getElementById('nip').value = data.nip;
+                        document.getElementById('nip').focus();
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showAlert('error', 'Kesalahan', 'Terjadi kesalahan pada server. Silakan coba lagi.');
-                })
-                .finally(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
                 });
-        });
+            } else {
+                showAlert('error', 'Kesalahan', data.message);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', 'Kesalahan', 'Terjadi kesalahan pada server. Silakan coba lagi.');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
 
         // ============================================
         // 5. REGISTER FORM - UPDATE BAGIAN INI SAJA
@@ -1716,37 +1806,64 @@ document.addEventListener('DOMContentLoaded', function () {
     // Simpan data sekolah yang belum bisa diisi (modal belum terbuka)
     let _pendingSekolah = null;
 
-    // ----------------------------------------------------------
-    // Isi field PTK biasa (nama, nip, email, dll.)
-    // ----------------------------------------------------------
-    function doAutofill(data) {
-        if (!data) return;
+   // ----------------------------------------------------------
+// Isi field PTK biasa (nama, nip, nik, email, dll.)
+// ----------------------------------------------------------
+function doAutofill(data) {
+    if (!data) return;
 
-        const map = {
-            'nuptk'        : 'nuptk',
-            'nik'          : 'nik',
-            'nip'          : 'nip',
-            'jenis_kelamin': 'jenis_kelamin',
-            'tgl_lahir'    : 'tgl_lahir',
-            'agama'        : 'agama',
-            'email'        : 'email',
-            'no_hp'        : 'no_hp',
-            'nama'         : 'nama',
-            'tempat_lahir' : 'tempat_lahir',
-            'no_telepon'   : 'no_hp'
-        };
+    console.log('[AUTOFILL] Mengisi data:', data);
 
-        Object.entries(map).forEach(([key, fieldName]) => {
-            if (data[key] == null || data[key] === '') return;
-            const el = document.querySelector(`#registerModal [name="${fieldName}"]`);
-            if (!el) return;
-            el.value = data[key];
-            el.dispatchEvent(new Event('input',  { bubbles: true }));
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        });
+    // Mapping data dari API ke field di form
+    const map = {
+        'nuptk'        : 'nuptk',
+        'nik'          : 'nik_field',      // Field NIK
+        'nip'          : 'nip_visible',     // Field NIP visible
+        'jenis_kelamin': 'jenis_kelamin',
+        'tgl_lahir'    : 'tgl_lahir',
+        'agama'        : 'agama',
+        'email'        : 'email',
+        'no_hp'        : 'no_hp',
+        'nama'         : 'nama',
+        'tempat_lahir' : 'tempat_lahir',
+        'no_telepon'   : 'no_hp'
+    };
 
-        syncFloatingLabels();
+    Object.entries(map).forEach(([key, fieldName]) => {
+        if (data[key] == null || data[key] === '') return;
+
+        // Cari element dengan name attribute atau ID
+        let el = null;
+        if (fieldName === 'nik_field') {
+            el = document.getElementById('nik_field');
+        } else if (fieldName === 'nip_visible') {
+            el = document.getElementById('nip_visible');
+        } else {
+            el = document.querySelector(`#registerModal [name="${fieldName}"]`);
+        }
+
+        if (!el) {
+            console.log('[AUTOFILL] Field tidak ditemukan:', fieldName);
+            return;
+        }
+
+        el.value = data[key];
+        el.dispatchEvent(new Event('input',  { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        console.log('[AUTOFILL] Field terisi:', fieldName, '=', data[key]);
+    });
+
+    // Set NIP di field hidden juga
+    if (data.nip) {
+        const regNip = document.getElementById('reg_nip');
+        if (regNip) {
+            regNip.value = data.nip;
+            console.log('[AUTOFILL] reg_nip terisi:', data.nip);
+        }
     }
+
+    syncFloatingLabels();
+}
 
     // ----------------------------------------------------------
     // Isi field sekolah
@@ -1825,8 +1942,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!clean) return;
 
         let endpoint = null;
-        if (clean.length === 16)                             endpoint = `/lockscreen/api/cek-nik?nik=${clean}`;
-        else if (clean.length === 18 || clean.length === 19) endpoint = `/lockscreen/api/cek-nip?nip=${clean}`;
+        if (clean.length === 16)                             endpoint = `/tanparagu/lockscreen/api/cek-nik?nik=${clean}`;
+        else if (clean.length === 18 || clean.length === 19) endpoint = `/tanparagu/lockscreen/api/cek-nip?nip=${clean}`;
         else return;
 
         console.log('[AUTOFILL] fetch:', endpoint);
@@ -1913,7 +2030,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const clean = this.value.trim().replace(/\D/g, '');
             if (clean.length !== 16) return;
 
-            fetch(`/lockscreen/api/cek-nik?nik=${clean}`, {
+            fetch(`/tanparagu/lockscreen/api/cek-nik?nik=${clean}`, {
                 headers: {
                     'Accept'      : 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
@@ -1927,19 +2044,6 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(err => console.error('[AUTOFILL NIK] error:', err));
         });
-
-        // Tombol Cek manual di samping field NIK
-        const nikWrapper = nikInput.closest('.mm-float');
-        if (nikWrapper && !nikWrapper.querySelector('.btn-check-nik')) {
-            const btn = document.createElement('button');
-            btn.type          = 'button';
-            btn.className     = 'btn btn-sm btn-outline-primary position-absolute btn-check-nik';
-            btn.style.cssText = 'right: 10px; top: 15px; z-index: 10; padding: 2px 10px;';
-            btn.innerHTML     = '<i class="ri-search-line"></i> Cek';
-            btn.onclick       = () => nikInput.dispatchEvent(new Event('blur'));
-            nikWrapper.style.position = 'relative';
-            nikWrapper.appendChild(btn);
-        }
     }
 
 });

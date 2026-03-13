@@ -403,7 +403,7 @@ class PtkController extends Controller
 
 
 
-       /**
+    /**
      * Menampilkan detail riwayat dengan format seperti hasil instrumen
      * Hanya untuk PTK yang sedang login
      */
@@ -468,26 +468,26 @@ class PtkController extends Controller
             $data = $query->get();
 
 
-// ============================================
-// HITUNG PERSENTASE CAPAIAN DARI LEVEL_KALKULASI
-// ============================================
+            // ============================================
+            // HITUNG PERSENTASE CAPAIAN DARI LEVEL_KALKULASI
+            // ============================================
 
-// 1. Ambil semua nilai level_kalkulasi dari data
-$nilaiKalkulasi = $data->pluck('level_kalkulasi')->toArray();
+            // 1. Ambil semua nilai level_kalkulasi dari data
+            $nilaiKalkulasi = $data->pluck('level_kalkulasi')->toArray();
 
-// 2. Hitung total nilai kalkulasi (sum)
-$totalKalkulasi = array_sum($nilaiKalkulasi);
+            // 2. Hitung total nilai kalkulasi (sum)
+            $totalKalkulasi = array_sum($nilaiKalkulasi);
 
-// 3. Hitung jumlah sub indikator
-$jumlahSubIndikator = count($nilaiKalkulasi);
+            // 3. Hitung jumlah sub indikator
+            $jumlahSubIndikator = count($nilaiKalkulasi);
 
-// 4. Hitung rata-rata level kalkulasi
-$rataKalkulasi = $jumlahSubIndikator > 0 
-    ? round($totalKalkulasi / $jumlahSubIndikator, 2) 
-    : 0;
+            // 4. Hitung rata-rata level kalkulasi
+            $rataKalkulasi = $jumlahSubIndikator > 0
+                ? round($totalKalkulasi / $jumlahSubIndikator, 2)
+                : 0;
 
-// 5. Untuk persentase PTK, gunakan rata-rata (karena setiap sub indikator sudah dalam bentuk persen)
-$presentasePtk = $rataKalkulasi;
+            // 5. Untuk persentase PTK, gunakan rata-rata (karena setiap sub indikator sudah dalam bentuk persen)
+            $presentasePtk = $rataKalkulasi;
 
             // ============================================
             // TAMBAHKAN REKOMENDASI DENGAN GAP
@@ -534,8 +534,8 @@ $presentasePtk = $rataKalkulasi;
                 'end_date' => $end_date,
                 'encode_kegiatan_id' => $encode_kegiatan_id,
                 'presentasePtk' => $presentasePtk,
-    'totalKalkulasi' => $totalKalkulasi,
-   
+                'totalKalkulasi' => $totalKalkulasi,
+
                 'nip' => $nip
             ]);
         } catch (\Exception $e) {

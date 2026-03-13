@@ -76,23 +76,26 @@ class LockScreenController extends Controller
     public function authenticate(Request $request)
     {
         $request->validate([
-            'nip' => 'required',
+            'identifier' => 'required',
             'token' => 'required',
-            'kegiatan_id' => 'required' // Ini adalah kegiatan_id asli (belum encode)
+            'kegiatan_id' => 'required',
+            'is_nik' => 'nullable|boolean'
         ]);
 
         $kegiatan_id = $request->kegiatan_id;
+        $isNIK = $request->boolean('is_nik');
+        $identifier = $request->identifier;
 
-        $ptk = Ptk::where('nip', $request->nip)->first();
+        \Log::info('Login attempt', [
+            'identifier' => $identifier,
+            'length' => strlen($identifier),
+            'is_nik' => $isNIK
+        ]);
 
         // Cari kegiatan yang aktif
         $kegiatan = Kegiatan::where('kegiatan_id', $kegiatan_id)
             ->where('status', 'Active')
             ->first();
-
-
-
-
 
         if (!$kegiatan) {
             return response()->json([
@@ -101,7 +104,7 @@ class LockScreenController extends Controller
             ]);
         }
 
-        // Verifikasi token dari kegiatan
+        // Verifikasi token
         if ($request->token !== $kegiatan->instrumen_token) {
             return response()->json([
                 'success' => false,
@@ -109,50 +112,82 @@ class LockScreenController extends Controller
             ]);
         }
 
-        // Cek apakah NIP ada di database
-        $ptk = Ptk::where('nip', $request->nip)->first();
+        // Jika login dengan NIK
+        if ($isNIK) {
+            // Cari PTK berdasarkan NIK
+            $ptk = Ptk::where('nik', $identifier)->first();
 
-        if (!$ptk) {
-            return response()->json([
-                'success' => false,
-                'show_register_modal' => true,
-                'nip' => $request->nip,
-                'kegiatan_id' => $kegiatan_id, // Kirim kegiatan_id asli
-                'token' => $request->token
-            ]);
-        }
-
-        // VALIDASI: Cek apakah jenis_ptk_id PTK sesuai dengan entity kegiatan
-        if ($ptk->jenis_ptk_id && $kegiatan->entity) {
-            $jenisPtk = JenisPtk::find($ptk->jenis_ptk_id);
-
-            // PERBAIKAN: Validasi harus SAMA, bukan BEDA
-            if ($jenisPtk && $jenisPtk->jenis_ptk !== $kegiatan->entity) {
+            if ($ptk) {
+                // NIK ditemukan di database lokal
+                if ($ptk->nip) {
+                    // PTK punya NIP, suruh login dengan NIP
+                    return response()->json([
+                        'success' => false,
+                        'use_nip_instead' => true,
+                        'nik' => $ptk->nik,
+                        'nip' => $ptk->nip,
+                        'message' => 'NIK sudah terdaftar. Silakan login menggunakan NIP.'
+                    ]);
+                } else {
+                    // PTK tidak punya NIP - TIDAK DIIZINKAN LOGIN DENGAN NIK
+                    // Tetap suruh login dengan NIP (tapi NIP tidak ada)
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data dengan NIK ini tidak memiliki NIP. Silakan hubungi administrator untuk mendapatkan NIP.'
+                    ]);
+                }
+            } else {
+                // NIK tidak ditemukan, tampilkan modal registrasi
                 return response()->json([
                     'success' => false,
-                    'message' => 'Maaf, Anda tidak dapat mengikuti kegiatan ini. Jenis PTK Anda (' . $jenisPtk->jenis_ptk . ') tidak sesuai dengan kategori kegiatan (' . $kegiatan->entity . ').'
+                    'show_register_modal' => true,
+                    'identifier' => $identifier,
+                    'kegiatan_id' => $kegiatan_id,
+                    'token' => $request->token
                 ]);
             }
-        } else {
-            // Jika jenis_ptk_id tidak ada di PTK
+        }
+        // Login dengan NIP
+        else {
+            // Cari PTK berdasarkan NIP
+            $ptk = Ptk::where('nip', $identifier)->first();
+
+            if (!$ptk) {
+                return response()->json([
+                    'success' => false,
+                    'show_register_modal' => true,
+                    'identifier' => $identifier,
+                    'kegiatan_id' => $kegiatan_id,
+                    'token' => $request->token
+                ]);
+            }
+
+            // VALIDASI jenis PTK
+            if ($ptk->jenis_ptk_id && $kegiatan->entity) {
+                $jenisPtk = JenisPtk::find($ptk->jenis_ptk_id);
+                if ($jenisPtk && $jenisPtk->jenis_ptk !== $kegiatan->entity) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Maaf, Anda tidak dapat mengikuti kegiatan ini. Jenis PTK Anda (' . $jenisPtk->jenis_ptk . ') tidak sesuai dengan kategori kegiatan (' . $kegiatan->entity . ').'
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data PTK tidak lengkap. Silakan hubungi administrator.'
+                ]);
+            }
+
+            $encoded_kegiatan_id = Hashids::encode($kegiatan_id);
+
             return response()->json([
-                'success' => false,
-                'message' => 'Data PTK tidak lengkap. Silakan hubungi administrator.'
+                'success' => true,
+                'redirect_url' => route('ptk.show', [
+                    'encode_kegiatan_id' => $encoded_kegiatan_id,
+                    'nip' => $ptk->nip
+                ])
             ]);
         }
-
-
-        // ENCODE kegiatan_id untuk URL PTK
-        $encoded_kegiatan_id = Hashids::encode($kegiatan_id);
-
-        // Redirect ke halaman PTK dengan encode_kegiatan_id
-        return response()->json([
-            'success' => true,
-            'redirect_url' => route('ptk.show', [
-                'encode_kegiatan_id' => $encoded_kegiatan_id, // Gunakan encoded ID
-                'nip' => $request->nip
-            ])
-        ]);
     }
 
     public function register(Request $request)
