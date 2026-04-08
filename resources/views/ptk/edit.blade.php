@@ -44,10 +44,36 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, var(--mm-primary) 0%, #2563eb 100%);
+            position: relative;
+            /* Ini warna biru dasarnya (silakan diubah kalau kurang pas) */
+            background-color: #2b5da4; 
             color: white;
             padding: 20px 30px;
             border-bottom: none;
+            overflow: hidden; /* Biar gambar gak keluar dari sudut melengkung card */
+            z-index: 1;
+        }
+
+        /* Ini khusus untuk ngatur gambar motif baduy-nya */
+        .card-header::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            
+            background-image: url('{{ asset("build/images/baduy.jpg") }}');
+            background-repeat: repeat;
+            background-position: center;
+            background-size: 150px; 
+            
+            /* =========================================================
+               DI SINI KENDALI PENUHNYA (SATURASI & OPACITY)
+               ========================================================= */
+            filter: saturate(40%) opacity(60%); 
+            
+            /* Efek nge-blend biar menyatu sama biru dasar */
+            mix-blend-mode: soft-light; 
+            
+            z-index: -1; /* Posisi di paling belakang (di bawah teks) */
         }
 
         .card-header h3 {
@@ -66,10 +92,18 @@
         }
 
         .form-section {
-            background: #f8fafc;
+            /* Warna abu-abu yang lebih kontras (darker grey) */
+            background: #f0f6fe; 
+            
+            /* Tambahan outline/border tipis */
+            border: 1px solid #e2e8f0; 
+            
             border-radius: 12px;
-            padding: 20px;
+            padding: 25px; /* Padding ditambah sedikit biar lebih lega */
             margin-bottom: 25px;
+            
+            /* Opsional: Tambah sedikit shadow halus biar lebih 'depth' */
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
         }
 
         .form-section-title {
@@ -295,6 +329,54 @@
         .text-muted small {
             font-size: 11px;
         }
+/* Style untuk Badge NIP efek putih blur (Glassmorphism) */
+        .badge-nip {
+            background: rgba(255, 255, 255, 0.2); /* Background putih transparan */
+            backdrop-filter: blur(8px); /* Efek blur (kunci utamanya di sini) */
+            -webkit-backdrop-filter: blur(8px); /* Support untuk browser Safari */
+            border: 1px solid rgba(255, 255, 255, 0.35); /* Garis pinggir putih tipis */
+            color: #ffffff !important; /* Teks warna putih solid */
+            padding: 8px 18px; /* Jarak atas-bawah dan kiri-kanan */
+            border-radius: 50rem; /* Bentuk lonjong (pill) */
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+            cursor: default; /* Kursor biasa (panah), menegaskan ini BUKAN tombol */
+        }
+        
+        .badge-nip strong {
+            font-weight: 700; /* NIP dibikin tebal */
+            margin-left: 4px;
+        }
+        .form-section-title {
+            /* Ukuran teks diperbesar */
+            font-size: 22px; 
+            font-weight: 700;
+            
+            /* Warna biru utama */
+            color: var(--mm-primary);
+            
+            margin-bottom: 22px;
+            padding-bottom: 12px;
+            
+            /* Garis bawah dibikin lebih soft warnanya */
+            border-bottom: 2px solid #eef2f7; 
+            
+            display: flex;
+            align-items: center;
+        }
+
+        .form-section-title i {
+            /* Ukuran ikon ikut diperbesar agar seimbang */
+            font-size: 24px; 
+            margin-right: 12px;
+            
+            /* Memberi sedikit warna background soft di ikon (opsional, biar makin modern) */
+            background: rgba(26, 77, 142, 0.1);
+            padding: 8px;
+            border-radius: 10px;
+            color: var(--mm-primary);
+        }
     </style>
 </head>
 
@@ -317,8 +399,8 @@
                         <p>Perbarui data diri Anda. Perubahan akan disimpan ke database Sistem dan Dapodik.</p>
                     </div>
                     <div class="text-end">
-                        <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
-                            <i class="ri-id-card-line me-1"></i> NIP: <strong>{{ $ptk->nip }}</strong>
+                        <span class="badge-nip">
+                            NIP: <strong>{{ $ptk->nip }}</strong>
                         </span>
                     </div>
                 </div>
