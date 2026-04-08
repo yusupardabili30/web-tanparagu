@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UiController;
 use App\Http\Controllers\PtkController;
+use App\Http\Controllers\PtkEditController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SoalController;
@@ -262,8 +263,18 @@ Route::get('/api/kegiatan/{id}/entity', [AnalisisController::class, 'getKegiatan
 
 
 
+/*
+|--------------------------------------------------------------------------
+| PTK Edit Routes (Edit Biodata)
+|--------------------------------------------------------------------------
+*/
 
-
+Route::prefix('ptk/edit')->name('ptk.edit.')->group(function () {
+    Route::get('/{encode_kegiatan_id}/{nip}', [PtkEditController::class, 'edit'])->name('index');
+    Route::put('/{encode_kegiatan_id}/{nip}', [PtkEditController::class, 'update'])->name('update');
+    Route::get('/search-sekolah', [PtkEditController::class, 'searchSekolah'])->name('search-sekolah');
+    Route::get('/search-sekolah-dapodik', [PtkEditController::class, 'searchSekolahDapodik'])->name('search-sekolah-dapodik');
+});
 
 
 

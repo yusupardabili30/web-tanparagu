@@ -239,16 +239,23 @@
                         </table>
 
                         <!-- BUTTON LIHAT RIWAYAT -->
-                        <div class="mt-3">
-                            <a href="{{ route('ptk.riwayat', [
-                                'encode_kegiatan_id' => $current_encode_kegiatan_id,
-                                'nip' => $current_nip,
-                            ]) }}"
-                                class="btn btn-primary btn-sm w-100 d-block text-center"
-                                style="border-radius:8px; font-size:14px; padding:8px;">
-                                <i class="ri-book-open-line me-1"></i> Lihat Riwayat Kegiatan
-                            </a>
-                        </div>
+                       <!-- BUTTON LIHAT RIWAYAT -->
+<div class="mt-3">
+    <a href="{{ route('ptk.riwayat', [
+        'encode_kegiatan_id' => $current_encode_kegiatan_id,
+        'nip' => $current_nip,
+    ]) }}"
+        class="btn btn-primary btn-sm w-100 d-block text-center mb-2"
+        style="border-radius:8px; font-size:14px; padding:8px;">
+        <i class="ri-book-open-line me-1"></i> Lihat Riwayat Kegiatan
+    </a>
+
+    <a href="{{ route('ptk.edit.index', ['encode_kegiatan_id' => $current_encode_kegiatan_id, 'nip' => $current_nip]) }}"
+       class="btn btn-primary btn-sm w-100 d-block text-center"
+       style="border-radius:8px; font-size:14px; padding:8px;">
+        <i class="ri-edit-line me-1"></i> Edit Biodata
+    </a>
+</div>
 
                     </div>
                 </div>

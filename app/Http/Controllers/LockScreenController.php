@@ -271,10 +271,28 @@ class LockScreenController extends Controller
                 'last_update' => now()
             ]);
 
+            // Sinkronisasi PTK ke API Dapodik
+            try {
+                $apiLockscreen = new \App\Http\Controllers\ApiLockScreenController();
+                $syncResult    = $apiLockscreen->syncPtkToDapodik($request->all());
+
+                \Log::info('LockScreen: Hasil sync PTK ke Dapodik', [
+                    'nip'     => $request->nip,
+                    'success' => $syncResult['success'],
+                    'action'  => $syncResult['action']  ?? null,
+                    'message' => $syncResult['message'] ?? null,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('LockScreen: Gagal sync PTK ke Dapodik', [
+                    'nip'   => $request->nip,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Registrasi berhasil! Silakan login dengan NIP Anda.',
-                'nip' => $request->nip
+                'nip'     => $request->nip
             ]);
         } catch (\Exception $e) {
             \Log::error('Error registering PTK: ' . $e->getMessage());

@@ -533,6 +533,43 @@
         margin-top: 2px;
         font-family: var(--mm-font) !important;
     }
+
+    /* Spinner animation */
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+
+/* Loading overlay untuk modal */
+.modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+    border-radius: 10px;
+}
+
+.modal-loading-overlay .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+.modal-loading-overlay p {
+    margin-top: 1rem;
+    color: var(--mm-primary);
+    font-weight: 600;
+}
 </style>
 
 </head>
@@ -1255,7 +1292,7 @@ function searchSekolahModal(keyword) {
     searchResults.innerHTML = '';
 
     // Panggil API Dapodik
-    fetch(`/tanparagu/lockscreen/api/search-sekolah-dapodik?keyword=${encodeURIComponent(keyword)}`, {
+    fetch(`/lockscreen/api/search-sekolah-dapodik?keyword=${encodeURIComponent(keyword)}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -1413,31 +1450,26 @@ document.getElementById('login-form')?.addEventListener('submit', function(e) {
                 }
             });
         } else {
-            if (data.show_register_modal) {
-                document.getElementById('modal-info-text').innerHTML =
-                    `${fieldName} <strong>${data.identifier}</strong> belum terdaftar. Silakan lengkapi data diri Anda.`;
+if (data.show_register_modal) {
+    document.getElementById('modal-info-text').innerHTML =
+        `${fieldName} <strong>${data.identifier}</strong> belum terdaftar. Silakan lengkapi data diri Anda.`;
 
-                document.getElementById('reg_nip').value = data.identifier;
-                document.getElementById('reg_kegiatan_id').value = data.kegiatan_id;
-                document.getElementById('reg_token').value = data.token;
+    document.getElementById('reg_nip').value     = '';
+    document.getElementById('reg_kegiatan_id').value = data.kegiatan_id;
+    document.getElementById('reg_token').value   = data.token;
 
-                const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
-                registerModal.show();
+    // Reset form
+    document.getElementById('optionSekolah').checked = true;
+    document.getElementById('sekolahSelect').value   = '';
+    document.getElementById('instansiInput').value   = '';
+    document.getElementById('sekolahInfo').classList.add('d-none');
+    document.getElementById('kotaSelect').value      = '';
+    document.getElementById('jenjangSelect').value   = '';
+    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-                setTimeout(() => {
-                    document.getElementById('optionSekolah').checked = true;
-                    document.getElementById('optionSekolah').dispatchEvent(new Event('change'));
-                    document.getElementById('sekolahSelect').value = '';
-                    document.getElementById('instansiInput').value = '';
-                    document.getElementById('sekolahInfo').classList.add('d-none');
-                    document.getElementById('kotaSelect').value = '';
-                    document.getElementById('jenjangSelect').value = '';
-
-                    document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-
-                    initRegisterFloatingLabels();
-                }, 80);
-            } else if (data.use_nip_instead) {
+    // Fetch autofill lalu buka modal — 1 request, tepat waktu dibutuhkan
+    window.fetchAutofillLaluBukaModal(identifier, isNIK);
+} else if (data.use_nip_instead) {
                 // NIK ditemukan di database, harus login dengan NIP
                 Swal.fire({
                     icon: 'info',
@@ -1469,6 +1501,28 @@ document.getElementById('login-form')?.addEventListener('submit', function(e) {
         submitBtn.disabled = false;
     });
 });
+
+// ========== SINRONISASI NIP VISIBLE KE HIDDEN REG_NIP ==========
+// Setiap kali user mengetik di nip_visible, update reg_nip
+const nipVisibleField = document.getElementById('nip_visible');
+const regNipHidden = document.getElementById('reg_nip');
+
+if (nipVisibleField && regNipHidden) {
+    // Saat user mengetik
+    nipVisibleField.addEventListener('input', function() {
+        regNipHidden.value = this.value;
+        console.log('[NIP SYNC] reg_nip diupdate ke:', this.value);
+    });
+
+    // Saat field kehilangan fokus
+    nipVisibleField.addEventListener('blur', function() {
+        regNipHidden.value = this.value;
+        console.log('[NIP SYNC] reg_nip diupdate (blur):', this.value);
+    });
+
+    // Inisialisasi awal
+    regNipHidden.value = nipVisibleField.value;
+}
 
         // ============================================
         // 5. REGISTER FORM - UPDATE BAGIAN INI SAJA
@@ -1790,96 +1844,114 @@ document.getElementById('login-form')?.addEventListener('submit', function(e) {
             initRegisterFloatingLabels();
         });
 
-        document.getElementById('registerModal')?.addEventListener('shown.bs.modal', function() {
-            initRegisterFloatingLabels();
+document.getElementById('registerModal')?.addEventListener('shown.bs.modal', function() {
+    initRegisterFloatingLabels();
+    // Sync reg_nip dari nip_visible saat modal terbuka
+    const nipVis = document.getElementById('nip_visible');
+    const regNip = document.getElementById('reg_nip');
+    if (nipVis && regNip && nipVis.value) regNip.value = nipVis.value;
+});
+
+
+
+
+// ============================================================
+// AUTOFILL - FETCH HANYA SAAT MODAL AKAN DIBUKA (DENGAN RESET FORM)
+// ============================================================
+(function() {
+
+    // Fungsi untuk reset semua field form registrasi
+    function resetRegisterForm() {
+        // Reset semua input text
+        document.querySelectorAll('#registerModal input:not([type="hidden"]), #registerModal select, #registerModal textarea').forEach(field => {
+            if (field.type !== 'hidden' && field.type !== 'radio' && field.type !== 'checkbox') {
+                field.value = '';
+            }
+            field.classList.remove('is-invalid');
         });
 
-
-
-
-
-        // ============================================================
-// AUTOFILL NIP/NIK DARI API DAPODIK - LOCKSCREEN
-// ============================================================
-document.addEventListener('DOMContentLoaded', function () {
-
-    // Simpan data sekolah yang belum bisa diisi (modal belum terbuka)
-    let _pendingSekolah = null;
-
-   // ----------------------------------------------------------
-// Isi field PTK biasa (nama, nip, nik, email, dll.)
-// ----------------------------------------------------------
-function doAutofill(data) {
-    if (!data) return;
-
-    console.log('[AUTOFILL] Mengisi data:', data);
-
-    // Mapping data dari API ke field di form
-    const map = {
-        'nuptk'        : 'nuptk',
-        'nik'          : 'nik_field',      // Field NIK
-        'nip'          : 'nip_visible',     // Field NIP visible
-        'jenis_kelamin': 'jenis_kelamin',
-        'tgl_lahir'    : 'tgl_lahir',
-        'agama'        : 'agama',
-        'email'        : 'email',
-        'no_hp'        : 'no_hp',
-        'nama'         : 'nama',
-        'tempat_lahir' : 'tempat_lahir',
-        'no_telepon'   : 'no_hp'
-    };
-
-    Object.entries(map).forEach(([key, fieldName]) => {
-        if (data[key] == null || data[key] === '') return;
-
-        // Cari element dengan name attribute atau ID
-        let el = null;
-        if (fieldName === 'nik_field') {
-            el = document.getElementById('nik_field');
-        } else if (fieldName === 'nip_visible') {
-            el = document.getElementById('nip_visible');
-        } else {
-            el = document.querySelector(`#registerModal [name="${fieldName}"]`);
+        // Reset radio button ke default (Pilih Sekolah)
+        const optionSekolah = document.getElementById('optionSekolah');
+        if (optionSekolah) {
+            optionSekolah.checked = true;
+            optionSekolah.dispatchEvent(new Event('change'));
         }
 
-        if (!el) {
-            console.log('[AUTOFILL] Field tidak ditemukan:', fieldName);
-            return;
+        // Reset select sekolah
+        const sekolahSelect = document.getElementById('sekolahSelect');
+        if (sekolahSelect) {
+            sekolahSelect.value = '';
         }
 
-        el.value = data[key];
-        el.dispatchEvent(new Event('input',  { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-        console.log('[AUTOFILL] Field terisi:', fieldName, '=', data[key]);
-    });
+        // Sembunyikan info sekolah
+        const sekolahInfo = document.getElementById('sekolahInfo');
+        if (sekolahInfo) sekolahInfo.classList.add('d-none');
 
-    // Set NIP di field hidden juga
-    if (data.nip) {
-        const regNip = document.getElementById('reg_nip');
-        if (regNip) {
-            regNip.value = data.nip;
-            console.log('[AUTOFILL] reg_nip terisi:', data.nip);
-        }
+        // Reset floating labels
+        syncFloatingLabels();
+
+        console.log('[AUTOFILL] Form registrasi di-reset');
     }
 
-    syncFloatingLabels();
-}
+    function doAutofill(data, source = 'api') {
+        if (!data) return;
 
-    // ----------------------------------------------------------
-    // Isi field sekolah
-    // ----------------------------------------------------------
+        console.log('[AUTOFILL] Mengisi data dari:', source, data);
+
+        const fieldMappings = {
+            'nuptk':        'nuptk',
+            'nik':          'nik_field',
+            'jenis_kelamin':'jenis_kelamin',
+            'tgl_lahir':    'tgl_lahir',
+            'agama':        'agama',
+            'email':        'email',
+            'no_hp':        'no_hp',
+            'no_telepon':   'no_hp',
+            'nama':         'nama',
+            'tempat_lahir': 'tempat_lahir',
+        };
+
+        Object.entries(fieldMappings).forEach(([apiField, formFieldName]) => {
+            const val = data[apiField];
+            if (!val || val === '') return;
+
+            const element = formFieldName === 'nik_field'
+                ? document.getElementById('nik_field')
+                : document.querySelector(`#registerModal [name="${formFieldName}"]`);
+
+            if (element) {
+                element.value = val;
+                element.dispatchEvent(new Event('input',  { bubbles: true }));
+                element.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+
+        // Isi NIP jika ada dari API
+        const nipFromApi = data['nip'];
+        const nipVisible  = document.getElementById('nip_visible');
+        const regNipHidden = document.getElementById('reg_nip');
+
+        if (nipVisible && nipFromApi) {
+            nipVisible.value = nipFromApi;
+            nipVisible.dispatchEvent(new Event('input',  { bubbles: true }));
+            nipVisible.dispatchEvent(new Event('change', { bubbles: true }));
+            if (regNipHidden) regNipHidden.value = nipFromApi;
+        }
+
+        syncFloatingLabels();
+    }
+
     function doAutofillSekolah(sekolah) {
         if (!sekolah) return;
 
-        const sekolahId     = String(sekolah.sekolah_id || '').trim();
-        const sekolahNama   = String(sekolah.nama_sekolah || '').trim();
-        const sekolahAlamat = String(sekolah.alamat || '').trim();
+        console.log('[AUTOFILL] Mengisi data sekolah:', sekolah);
+
+        const sekolahId    = String(sekolah.sekolah_id   || '').trim();
+        const sekolahNama  = String(sekolah.nama_sekolah || '').trim();
+        const sekolahAlamat = String(sekolah.alamat      || '').trim();
 
         if (!sekolahNama) return;
 
-        console.log('[AUTOFILL] Isi sekolah:', sekolahNama);
-
-        // Pastikan radio "Pilih Sekolah" aktif
         const optSekolah = document.getElementById('optionSekolah');
         if (optSekolah) {
             optSekolah.checked = true;
@@ -1889,40 +1961,36 @@ function doAutofill(data) {
         const sel = document.getElementById('sekolahSelect');
         if (!sel) return;
 
-        // Cek apakah option sudah ada
         const val = sekolahId || sekolahNama;
         let found = false;
+
         for (let i = 0; i < sel.options.length; i++) {
-            if (sel.options[i].value === val ||
-                sel.options[i].getAttribute('data-nama') === sekolahNama) {
-                sel.value = sel.options[i].value;
+            const opt = sel.options[i];
+            if (opt.value === val || opt.getAttribute('data-nama') === sekolahNama) {
+                sel.value = opt.value;
                 found = true;
                 break;
             }
         }
 
-        // Belum ada → tambahkan option baru
         if (!found) {
-            const opt = new Option(sekolahNama, val, true, true);
-            opt.setAttribute('data-nama',   sekolahNama);
-            opt.setAttribute('data-alamat', sekolahAlamat);
-            opt.setAttribute('data-source', 'dapodik');
-            sel.add(opt);
+            const newOption = new Option(sekolahNama, val, true, true);
+            newOption.setAttribute('data-nama', sekolahNama);
+            newOption.setAttribute('data-alamat', sekolahAlamat);
+            sel.add(newOption);
             sel.value = val;
         }
 
-        // Tampilkan info box di bawah dropdown
         const infoBox  = document.getElementById('sekolahInfo');
         const nameEl   = document.getElementById('selectedSekolahName');
         const alamatEl = document.getElementById('selectedSekolahAlamat');
+
         if (nameEl)   nameEl.textContent   = sekolahNama;
         if (alamatEl) alamatEl.textContent = sekolahAlamat || 'Alamat tidak tersedia';
         if (infoBox)  infoBox.classList.remove('d-none');
 
         sel.dispatchEvent(new Event('change', { bubbles: true }));
         syncFloatingLabels();
-
-        console.log('[AUTOFILL] Sekolah selesai diisi:', sekolahNama);
     }
 
     function syncFloatingLabels() {
@@ -1934,119 +2002,192 @@ function doAutofill(data) {
         });
     }
 
-    // ----------------------------------------------------------
-    // Fetch endpoint + isi form
-    // ----------------------------------------------------------
-    function cekDanAutofill(value) {
-        const clean = value.trim().replace(/\D/g, '');
-        if (!clean) return;
+    // ========== FUNGSI UNTUK RESET TOMBOL SUBMIT ==========
+    function resetSubmitButton() {
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="ri-login-box-line me-1"></i> Masuk ke Sistem';
+            submitBtn.disabled = false;
+            console.log('[BUTTON] Tombol submit dikembalikan ke keadaan normal');
+        }
+    }
 
-        let endpoint = null;
-        if (clean.length === 16)                             endpoint = `/tanparagu/lockscreen/api/cek-nik?nik=${clean}`;
-        else if (clean.length === 18 || clean.length === 19) endpoint = `/tanparagu/lockscreen/api/cek-nip?nip=${clean}`;
-        else return;
+    // ========== FUNGSI UTAMA: fetch + reset + buka modal ==========
+    window.fetchAutofillLaluBukaModal = function(identifier, isNIK) {
+        const endpoint = isNIK
+            ? `/lockscreen/api/cek-nik?nik=${identifier}`
+            : `/lockscreen/api/cek-nip?nip=${identifier}`;
 
-        console.log('[AUTOFILL] fetch:', endpoint);
+        console.log('[AUTOFILL] Memanggil endpoint:', endpoint);
+
+        // Tampilkan loading di tombol submit
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn?.innerHTML;
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="ri-loader-4-line me-2 spinner"></i> MEMPROSES...';
+            submitBtn.disabled = true;
+        }
 
         fetch(endpoint, {
             headers: {
-                'Accept'      : 'application/json',
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
             }
         })
         .then(r => r.json())
         .then(res => {
-            if (!res.success) return;
+            console.log('[AUTOFILL] Response dari server:', res);
 
-            // Simpan sekolah — akan diisi saat modal terbuka dan form sudah siap
-            if (res.sekolah) {
-                _pendingSekolah = res.sekolah;
-                console.log('[AUTOFILL] Sekolah disimpan pending:', res.sekolah.nama_sekolah);
+            // RESET FORM DULU sebelum diisi dengan data baru
+            resetRegisterForm();
+
+            // Update info text di modal
+            const modalInfoText = document.getElementById('modal-info-text');
+            if (modalInfoText) {
+                modalInfoText.innerHTML = `${isNIK ? 'NIK' : 'NIP'} <strong>${identifier}</strong> belum terdaftar. Silakan lengkapi data diri Anda.`;
             }
 
-            // Simpan data PTK juga untuk diisi setelah modal terbuka
-            if (res.data) {
-                window._pendingPtk = res.data;
+            // Update hidden fields
+            const regNipHidden = document.getElementById('reg_nip');
+            const regKegiatanId = document.getElementById('reg_kegiatan_id');
+            const regToken = document.getElementById('reg_token');
+
+            if (regNipHidden) regNipHidden.value = identifier;
+            if (regKegiatanId && window.currentKegiatanId) regKegiatanId.value = window.currentKegiatanId;
+            if (regToken && window.currentToken) regToken.value = window.currentToken;
+
+            // Buka modal
+            const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+            registerModal.show();
+
+            // Isi form setelah modal tampil (delay sedikit agar DOM siap)
+            setTimeout(() => {
+                if (res.success) {
+                    if (res.data) {
+                        doAutofill(res.data, res.source || 'api');
+                    }
+                    if (res.sekolah) {
+                        doAutofillSekolah(res.sekolah);
+                    }
+                }
+                syncFloatingLabels();
+            }, 300);
+        })
+        .catch(err => {
+            console.error('[AUTOFILL] Gagal fetch:', err);
+            // Reset form tetap dilakukan
+            resetRegisterForm();
+            // Tetap buka modal walau fetch gagal
+            const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+            registerModal.show();
+
+            // Tampilkan error di modal
+            const modalInfoText = document.getElementById('modal-info-text');
+            if (modalInfoText) {
+                modalInfoText.innerHTML = `Gagal mengambil data untuk ${isNIK ? 'NIK' : 'NIP'} <strong>${identifier}</strong>. Silakan isi manual.`;
             }
         })
-        .catch(err => console.error('[AUTOFILL] error:', err));
+        .finally(() => {
+            // KEMBALIKAN TOMBOL SUBMIT KE NORMAL
+            if (submitBtn) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    };
+
+    // ========== EVENT LISTENER UNTUK MODAL DITUTUP ==========
+    // Pastikan tombol submit kembali normal saat modal ditutup
+    const registerModalElement = document.getElementById('registerModal');
+    if (registerModalElement) {
+        // Saat modal mulai disembunyikan
+        registerModalElement.addEventListener('hide.bs.modal', function() {
+            console.log('[MODAL] Modal registrasi akan ditutup, mereset tombol submit');
+            resetSubmitButton();
+        });
+
+        // Saat modal sudah tertutup sepenuhnya
+        registerModalElement.addEventListener('hidden.bs.modal', function() {
+            console.log('[MODAL] Modal registrasi sudah tertutup, memastikan tombol submit normal');
+            resetSubmitButton();
+        });
     }
 
-    // ----------------------------------------------------------
-    // Saat modal register terbuka:
-    // 1. Isi data PTK
-    // 2. Tunggu form reset dari login-handler selesai (80ms)
-    // 3. Isi sekolah SETELAH reset selesai (delay 300ms)
-    // ----------------------------------------------------------
-    document.getElementById('registerModal')?.addEventListener('shown.bs.modal', function () {
-        console.log('[AUTOFILL] Modal terbuka');
-
-        // Form di-reset oleh login-handler dengan setTimeout 80ms
-        // Kita tunggu lebih lama (350ms) agar reset pasti selesai dulu
-        setTimeout(() => {
-
-            // Isi data PTK biasa
-            if (window._pendingPtk) {
-                console.log('[AUTOFILL] Isi PTK pending');
-                doAutofill(window._pendingPtk);
-                window._pendingPtk = null;
-            }
-
-            // Isi sekolah setelah PTK selesai
-            if (_pendingSekolah) {
-                console.log('[AUTOFILL] Isi sekolah pending:', _pendingSekolah.nama_sekolah);
-                doAutofillSekolah(_pendingSekolah);
-                _pendingSekolah = null;
-            }
-
-        }, 350); // 350ms > 80ms reset form, pasti aman
+    // ========== TOMBOL CLOSE DI MODAL ==========
+    // Pastikan tombol close (X) dan tombol Tutup juga mereset tombol submit
+    const closeButtons = document.querySelectorAll('#registerModal .btn-close, #registerModal .btn-secondary');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            console.log('[MODAL] Tombol close diklik, mereset tombol submit');
+            setTimeout(() => {
+                resetSubmitButton();
+            }, 100);
+        });
     });
 
-    // ----------------------------------------------------------
-    // NIP di form login — prefetch saat 18 digit
-    // ----------------------------------------------------------
-    const nipInput = document.getElementById('nip');
-    if (nipInput) {
-        let timer;
-        nipInput.addEventListener('input', function () {
-            clearTimeout(timer);
-            const val = this.value;
-            if (val.replace(/\D/g, '').length === 18) {
-                timer = setTimeout(() => cekDanAutofill(val), 600);
-            }
-        });
-        nipInput.addEventListener('blur', function () {
-            cekDanAutofill(this.value);
-        });
-    }
+    // Simpan kegiatan_id dan token untuk digunakan di modal
+    window.currentKegiatanId = document.getElementById('kegiatan_id')?.value || '';
+    window.currentToken = document.getElementById('tokenInput')?.value || '';
 
-    // ----------------------------------------------------------
-    // NIK di modal registrasi
-    // ----------------------------------------------------------
-    const nikInput = document.querySelector('#registerModal [name="nik"]');
-    if (nikInput) {
-        nikInput.addEventListener('blur', function () {
-            // NIK diisi saat modal sudah terbuka, langsung isi
+    // ========== NIK DI MODAL REGISTRASI (blur) - tetap dipertahankan ==========
+    const nikInputField = document.querySelector('#registerModal [name="nik"]');
+    if (nikInputField) {
+        // Hapus event listener lama jika ada, lalu pasang yang baru
+        const newNikInputField = nikInputField.cloneNode(true);
+        nikInputField.parentNode.replaceChild(newNikInputField, nikInputField);
+
+        newNikInputField.addEventListener('blur', function() {
             const clean = this.value.trim().replace(/\D/g, '');
             if (clean.length !== 16) return;
 
-            fetch(`/tanparagu/lockscreen/api/cek-nik?nik=${clean}`, {
+            console.log('[AUTOFILL NIK] Mencari data untuk NIK:', clean);
+
+            fetch(`/lockscreen/api/cek-nik?nik=${clean}`, {
                 headers: {
-                    'Accept'      : 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                 }
             })
             .then(r => r.json())
             .then(res => {
+                console.log('[AUTOFILL NIK] Response:', res);
                 if (!res.success) return;
-                if (res.data)    doAutofill(res.data);
-                if (res.sekolah) doAutofillSekolah(res.sekolah);
+                // Jangan reset form, hanya update field yang kosong
+                if (res.data) {
+                    // Hanya isi field yang masih kosong
+                    Object.entries({
+                        'nuptk': 'nuptk',
+                        'jenis_kelamin': 'jenis_kelamin',
+                        'tgl_lahir': 'tgl_lahir',
+                        'agama': 'agama',
+                        'email': 'email',
+                        'no_hp': 'no_hp',
+                        'nama': 'nama',
+                        'tempat_lahir': 'tempat_lahir',
+                    }).forEach(([apiField, formFieldName]) => {
+                        const val = res.data[apiField];
+                        if (!val || val === '') return;
+                        const element = document.querySelector(`#registerModal [name="${formFieldName}"]`);
+                        if (element && !element.value) {
+                            element.value = val;
+                            element.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    });
+                }
+                if (res.sekolah && !document.getElementById('sekolahSelect').value) {
+                    doAutofillSekolah(res.sekolah);
+                }
+                syncFloatingLabels();
             })
             .catch(err => console.error('[AUTOFILL NIK] error:', err));
         });
     }
 
-});
+    // Initial sync floating labels
+    document.addEventListener('DOMContentLoaded', function() {
+        syncFloatingLabels();
+    });
+})();
     </script>
 </body>
 

@@ -672,72 +672,79 @@
         $('#entity, #status_id, #start_date, #end_date, input[name="kegiatan"]').prop('disabled', false);
     });
 
-    // view
-    $('.btn-view').on('click', function() {
-        let kegiatan_id = $(this).data('id');
-        $('#modal-tittle').text('View Data');
-        $('#exampleModalLabel').text('View Data');
-        $('#add-btn').hide();
+   // view
+$('.btn-view').on('click', function() {
+    let kegiatan_id = $(this).data('id');
+    $('#modal-tittle').text('View Data');
+    $('#exampleModalLabel').text('View Data');
+    $('#add-btn').hide();
 
-        $.get('/kegiatan/get/' + kegiatan_id, function(data) {
-            $('input[name="kegiatan_id"]').val(data.kegiatan_id);
-            $('input[name="kegiatan"]').val(data.kegiatan_name);
-            $('#entity').val(data.entity).prop('disabled', true);
-            $('#status_id').val(data.status).prop('disabled', true);
-            $('#start_date').val(data.start_date).prop('disabled', true);
-            $('#end_date').val(data.end_date).prop('disabled', true);
+    $.get('/kegiatan/get/' + kegiatan_id, function(data) {
+        $('input[name="kegiatan_id"]').val(data.kegiatan_id);
+        $('input[name="kegiatan"]').val(data.kegiatan_name);
+        $('#entity').val(data.entity).prop('disabled', true);
+        $('#status_id').val(data.status).prop('disabled', true);
+        $('#start_date').val(data.start_date).prop('disabled', true);
+        $('#end_date').val(data.end_date).prop('disabled', true);
 
-            $('#token_display').val(data.instrumen_token || 'Token tidak tersedia');
+        // TAMBAHKAN INI - Untuk dropdown tahap di VIEW
+        $('#ddl_tahap').val(data.tahap).prop('disabled', true);
 
-            const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
-            const baseUrl = window.location.origin;
+        $('#token_display').val(data.instrumen_token || 'Token tidak tersedia');
 
-            $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
-            $('#url_register').val(baseUrl + '/register/' + encoded_kegiatan_id);
+        const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
+        const baseUrl = window.location.origin;
 
-            $('#copy-token-btn').prop('disabled', !(data.instrumen_token && data.instrumen_token !== ''));
-            $('#copy-url-btn').prop('disabled', !($('#url_display').val()));
-            $('#copy-url-register-btn').prop('disabled', !($('#url_register').val()));
+        $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
+        $('#url_register').val(baseUrl + '/register/' + encoded_kegiatan_id);
 
-            $('#showModal').modal('show');
-        }).fail(function() {
-            Swal.fire({ position:'center', icon:'error', title:'Gagal memuat data', showConfirmButton:true });
-        });
+        $('#copy-token-btn').prop('disabled', !(data.instrumen_token && data.instrumen_token !== ''));
+        $('#copy-url-btn').prop('disabled', !($('#url_display').val()));
+        $('#copy-url-register-btn').prop('disabled', !($('#url_register').val()));
+
+        $('#showModal').modal('show');
+    }).fail(function() {
+        Swal.fire({ position:'center', icon:'error', title:'Gagal memuat data', showConfirmButton:true });
     });
+});
 
-    // edit
-    $('.btn-edit').on('click', function() {
-        let kegiatan_id = $(this).data('id');
-        $('#modal-tittle').text('Ubah Kegiatan');
-        $('#exampleModalLabel').text('Ubah Kegiatan');
-        $('#add-btn').text('Ubah Kegiatan');
-        $('#add-btn').show();
 
-        $.get('/kegiatan/get/' + kegiatan_id, function(data) {
-            $('input[name="kegiatan_id"]').val(data.kegiatan_id);
-            $('input[name="kegiatan"]').val(data.kegiatan_name);
-            $('#entity').val(data.entity).prop('disabled', false);
-            $('#status_id').val(data.status).prop('disabled', false);
-            $('#start_date').val(data.start_date).prop('disabled', false);
-            $('#end_date').val(data.end_date).prop('disabled', false);
+// edit
+$('.btn-edit').on('click', function() {
+    let kegiatan_id = $(this).data('id');
+    $('#modal-tittle').text('Ubah Kegiatan');
+    $('#exampleModalLabel').text('Ubah Kegiatan');
+    $('#add-btn').text('Ubah Kegiatan');
+    $('#add-btn').show();
 
-            $('#token_display').val(data.instrumen_token || 'Token tidak tersedia');
+    $.get('/kegiatan/get/' + kegiatan_id, function(data) {
+        $('input[name="kegiatan_id"]').val(data.kegiatan_id);
+        $('input[name="kegiatan"]').val(data.kegiatan_name);
+        $('#entity').val(data.entity).prop('disabled', false);
+        $('#status_id').val(data.status).prop('disabled', false);
+        $('#start_date').val(data.start_date).prop('disabled', false);
+        $('#end_date').val(data.end_date).prop('disabled', false);
 
-            const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
-            const baseUrl = window.location.origin;
+        // TAMBAHKAN INI - Untuk dropdown tahap
+        $('#ddl_tahap').val(data.tahap).prop('disabled', false);
 
-            $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
-            $('#url_register').val(baseUrl + '/register/' + encoded_kegiatan_id);
+        $('#token_display').val(data.instrumen_token || 'Token tidak tersedia');
 
-            $('#copy-token-btn').prop('disabled', !(data.instrumen_token && data.instrumen_token !== ''));
-            $('#copy-url-btn').prop('disabled', !($('#url_display').val()));
-            $('#copy-url-register-btn').prop('disabled', !($('#url_register').val()));
+        const encoded_kegiatan_id = btoa(data.kegiatan_id.toString());
+        const baseUrl = window.location.origin;
 
-            $('#showModal').modal('show');
-        }).fail(function() {
-            Swal.fire({ position:'center', icon:'error', title:'Gagal memuat data', showConfirmButton:true });
-        });
+        $('#url_display').val(baseUrl + '/lockscreen/' + encoded_kegiatan_id);
+        $('#url_register').val(baseUrl + '/register/' + encoded_kegiatan_id);
+
+        $('#copy-token-btn').prop('disabled', !(data.instrumen_token && data.instrumen_token !== ''));
+        $('#copy-url-btn').prop('disabled', !($('#url_display').val()));
+        $('#copy-url-register-btn').prop('disabled', !($('#url_register').val()));
+
+        $('#showModal').modal('show');
+    }).fail(function() {
+        Swal.fire({ position:'center', icon:'error', title:'Gagal memuat data', showConfirmButton:true });
     });
+});
 
     // reset modal
     $('#showModal').on('hidden.bs.modal', function() {

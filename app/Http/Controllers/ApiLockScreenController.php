@@ -467,4 +467,199 @@ class ApiLockscreenController extends Controller
             'tempat_lahir'  => $ptk->tempat_lahir  ?? null,
         ];
     }
+
+
+
+
+    // =========================================================================
+    // SYNC PTK KE DATABASE API DAPODIK (UPDATE ATAU CREATE DALAM 1 FUNGSI)
+    // Logika pencarian:
+    //   1. Cari pakai NIP  → ketemu → UPDATE
+    //   2. NIP tidak ada   → cari pakai NIK → ketemu → UPDATE
+    //   3. Keduanya tidak ketemu → CREATE
+    // =========================================================================
+    public function syncPtkToDapodik(array $ptkData): array
+    {
+        Log::info('ApiLockscreen: syncPtkToDapodik mulai', [
+            'nip'  => $ptkData['nip'] ?? null,
+            'nama' => $ptkData['nama'] ?? null,
+        ]);
+
+        // Login ke API
+        $loginResult = $this->loginToApi();
+        if (!$loginResult['success']) {
+            Log::error('ApiLockscreen: syncPtkToDapodik - gagal login', [
+                'message' => $loginResult['message'],
+            ]);
+            return ['success' => false, 'message' => $loginResult['message']];
+        }
+
+        $token = $loginResult['token'];
+        $nip   = $ptkData['nip'] ?? null;
+        $nik   = $ptkData['nik'] ?? null;
+
+        if (!$nip && !$nik) {
+            return ['success' => false, 'message' => 'NIP dan NIK tidak tersedia untuk sinkronisasi'];
+        }
+
+        // Siapkan payload dari data PTK baru
+        $payload = $this->buildSyncPayload($ptkData, $token);
+
+        // Cari existing PTK di API: NIP dulu, fallback NIK, fallback CREATE
+        $existing = null;
+
+        if ($nip) {
+            $existing = $this->fetchPtkFromApi($token, $nip);
+            if ($existing) {
+                Log::info('ApiLockscreen: PTK ditemukan via NIP', ['nip' => $nip]);
+            }
+        }
+
+        if (!$existing && $nik) {
+            $existing = $this->fetchPtkFromApi($token, $nik);
+            if ($existing) {
+                Log::info('ApiLockscreen: PTK ditemukan via NIK', ['nik' => $nik]);
+            }
+        }
+
+        if ($existing && isset($existing['ptk_id'])) {
+            // Ambil semua data existing dari API sebagai base
+            // Override hanya field yang ada di payload baru
+            // Sehingga field lama yang tidak dikirim tetap aman
+            $mergedPayload = [
+                'ptk_id'              => $existing['ptk_id'],
+                'jenis_ptk_id'        => $existing['jenis_ptk_id']       ?? null,
+                'jenis_ptk'           => $existing['jenis_ptk']          ?? null,
+                'jabatan_ptk_id'      => $existing['jabatan_ptk_id']     ?? null,
+                'jabatan_ptk'         => $existing['jabatan_ptk']        ?? null,
+                'sekolah_id'          => $existing['sekolah_id']         ?? null,
+                'npsn'                => $existing['npsn']               ?? null,
+                'status_kepegawaian'  => $existing['status_kepegawaian'] ?? null,
+                'nama'                => $existing['nama']               ?? null,
+                'nik'                 => $existing['nik']                ?? null,
+                'nip'                 => $existing['nip']                ?? null,
+                'pangkat_golongan'    => $existing['pangkat_golongan']   ?? null,
+                'jabatan_fungsional'  => $existing['jabatan_fungsional'] ?? null,
+                'nuptk'               => $existing['nuptk']              ?? null,
+                'jenis_kelamin'       => $existing['jenis_kelamin']      ?? null,
+                'tempat_lahir'        => $existing['tempat_lahir']       ?? null,
+                'tanggal_lahir'       => $existing['tanggal_lahir']      ?? null,
+                'agama'               => $existing['agama']              ?? null,
+                'email'               => $existing['email']              ?? null,
+                'no_telepon'          => $existing['no_telepon']         ?? null,
+                'npwp'                => $existing['npwp']               ?? null,
+                'alamat'              => $existing['alamat']             ?? null,
+                'pendidikan_terakhir' => $existing['pendidikan_terakhir'] ?? null,
+            ];
+
+            // Override dengan payload baru — hanya field yang ada isinya
+            foreach ($payload as $key => $value) {
+                $mergedPayload[$key] = $value;
+            }
+
+            $payload = $mergedPayload;
+            $action  = 'updated';
+        } else {
+            $action = 'created';
+            Log::info('ApiLockscreen: PTK tidak ditemukan di API, akan CREATE baru');
+        }
+
+        // Kirim ke endpoint /ptk/store — 1 endpoint untuk update maupun create
+        try {
+            $baseUrl  = config('api.base_url');
+
+            Log::info('ApiLockscreen: payload dikirim ke API', ['payload' => $payload]);
+
+            $response = Http::withToken($token)
+                ->timeout(30)
+                ->post($baseUrl . '/ptk/store', $payload);
+
+            Log::info('ApiLockscreen: syncPtkToDapodik selesai', [
+                'nip'    => $nip,
+                'nik'    => $nik,
+                'action' => $action,
+                'status' => $response->status(),
+                'body'   => $response->body(),
+            ]);
+
+            if (in_array($response->status(), [200, 201])) {
+                return [
+                    'success' => true,
+                    'action'  => $action,
+                    'message' => 'PTK berhasil ' . ($action === 'created' ? 'dibuat' : 'diperbarui') . ' di API Dapodik',
+                ];
+            }
+
+            return [
+                'success' => false,
+                'action'  => $action . '_failed',
+                'message' => 'Gagal ' . ($action === 'created' ? 'membuat' : 'memperbarui') . ' PTK di API: HTTP ' . $response->status(),
+            ];
+        } catch (\Exception $e) {
+            Log::error('ApiLockscreen: syncPtkToDapodik exception', ['error' => $e->getMessage()]);
+            return [
+                'success' => false,
+                'action'  => 'exception',
+                'message' => 'Exception saat sync PTK: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    private function buildSyncPayload(array $ptkData, string $token): array
+    {
+        $payload = [];
+
+        // Hanya masukkan field ke payload kalau memang ada nilainya
+        // Field yang tidak ada = tidak dikirim = API tidak akan null-kan
+
+        if (!empty($ptkData['nip']))  $payload['nip']  = $ptkData['nip'];
+        if (!empty($ptkData['nik']))  $payload['nik']  = $ptkData['nik'];
+        if (!empty($ptkData['nuptk'])) $payload['nuptk'] = $ptkData['nuptk'];
+        if (!empty($ptkData['nama'])) $payload['nama'] = $ptkData['nama'];
+
+        if (!empty($ptkData['jenis_kelamin'])) {
+            $jk = $this->formatJenisKelamin($ptkData['jenis_kelamin']);
+            if ($jk) $payload['jenis_kelamin'] = $jk;
+        }
+
+        if (!empty($ptkData['tempat_lahir'])) {
+            $payload['tempat_lahir'] = $ptkData['tempat_lahir'];
+        }
+
+        // Tanggal lahir
+        $rawTgl = $ptkData['tgl_lahir'] ?? $ptkData['tanggal_lahir'] ?? null;
+        if (!empty($rawTgl)) {
+            try {
+                $payload['tanggal_lahir'] = Carbon::parse($rawTgl)->format('Y-m-d');
+            } catch (\Exception $e) {
+                $payload['tanggal_lahir'] = $rawTgl;
+            }
+        }
+
+        if (!empty($ptkData['agama']))  $payload['agama']      = $ptkData['agama'];
+        if (!empty($ptkData['email']))  $payload['email']      = $ptkData['email'];
+        if (!empty($ptkData['no_hp']))  $payload['no_telepon'] = $ptkData['no_hp'];
+
+        // Sekolah — resolve dari sekolah_id dulu, fallback instansi
+        $sekolahId = $ptkData['sekolah_id'] ?? null;
+        $instansi  = $ptkData['instansi']   ?? null;
+        $sekolahData = null;
+
+        if (!empty($sekolahId)) {
+            $sekolahData = $this->resolveSekolahDariApi($token, (string) $sekolahId);
+        }
+        if (!$sekolahData && !empty($instansi)) {
+            $sekolahData = $this->resolveSekolahDariApi($token, $instansi);
+        }
+
+        if ($sekolahData) {
+            if (!empty($sekolahData['sekolah_id']))   $payload['sekolah_id']   = $sekolahData['sekolah_id'];
+            if (!empty($sekolahData['npsn']))         $payload['npsn']         = $sekolahData['npsn'];
+            if (!empty($sekolahData['nama_sekolah'])) $payload['nama_sekolah'] = $sekolahData['nama_sekolah'];
+        } elseif (!empty($instansi)) {
+            $payload['nama_sekolah'] = $instansi;
+        }
+
+        return $payload;
+    }
 }
