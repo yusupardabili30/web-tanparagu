@@ -61,6 +61,12 @@
                                     @case(4)
                                     Tim
                                     @break
+                                    @case(6)
+                                    Dinas Pendidikan Kab/kota
+                                    @break
+                                    @case(7)
+                                    Dinas Pendidikan Provinsi
+                                    @break
                                     @default
                                     Role Tidak Terdaftar
                                     @endswitch

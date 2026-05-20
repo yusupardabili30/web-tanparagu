@@ -148,18 +148,34 @@
                             </select>
                         </div>
 
-                        <div class="filter-col">
-                            <label class="form-label">Kota</label>
-                            <select class="form-select" name="kota_id" id="kotaSelect">
-                                <option value="">Semua Kota</option>
-                                @foreach ($kotas as $kota)
-                                    <option value="{{ $kota->kota_id }}"
-                                        {{ request('kota_id') == $kota->kota_id ? 'selected' : '' }}>
-                                        {{ $kota->nama_kota }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+               <div class="filter-col">
+    <label class="form-label">Kota</label>
+    @php $roleId = auth()->user()->role_id; @endphp
+
+    @if (in_array($roleId, [1, 2, 3, 7]))
+        <select class="form-select" name="kota_id" id="kotaSelect">
+            <option value="">Semua Kota</option>
+            @foreach ($kotas as $kota)
+                <option value="{{ $kota->kota_id }}"
+                    {{ request('kota_id') == $kota->kota_id ? 'selected' : '' }}>
+                    {{ $kota->nama_kota }}
+                </option>
+            @endforeach
+        </select>
+    @else
+        {{-- Cari kota_id berdasarkan nama kab_kota dari user --}}
+        @php
+            $userKota = $kotas->firstWhere('nama_kota', auth()->user()->kab_kota);
+        @endphp
+
+        <select class="form-select" name="kota_id" id="kotaSelect" disabled>
+            <option value="{{ $userKota->kota_id ?? '' }}" selected>
+                {{ auth()->user()->kab_kota ?? 'Kota tidak ditemukan' }}
+            </option>
+        </select>
+        <input type="hidden" name="kota_id" value="{{ $userKota->kota_id ?? '' }}">
+    @endif
+</div>
 
                         <div class="filter-col">
                             <label class="form-label">Jenjang Pendidikan</label>
@@ -184,6 +200,17 @@
                                 </option>
                             </select>
                         </div>
+
+                        <div class="filter-col">
+    <label class="form-label">NPSN Sekolah</label>
+    <input type="text"
+           class="form-control"
+           name="npsn"
+           id="npsnInput"
+           placeholder="Ketik NPSN..."
+           value="{{ request('npsn') }}"
+           maxlength="20">
+</div>
 
                         <div class="filter-col d-flex gap-2 align-items-end">
                             <div class="d-flex gap-2 w-100">
@@ -269,7 +296,7 @@
                             <div class="chart-container" id="sec-level-ptk">
                                 <div class="chart-title">
                                     <i class="ri-arrow-down-line"></i> Rata-rata Capaian PTK Per Provinsi
-                                    <small class="text-muted ms-2">(Rata-rata level_kalkulasi per jenjang jabatan)</small>
+                                    <small class="text-muted ms-2">(Rata-rata Capaian Kompetensi Pada Semua Sub Indikator Per Jenjang Jabatan)</small>
                                 </div>
                                 <canvas id="levelTerendahChart" height="300"></canvas>
                             </div>
@@ -282,8 +309,7 @@
                             <div class="chart-container">
                                 <div class="chart-title">
                                     <i class="ri-arrow-down-line"></i> Rata-rata Capaian PTK Per Kab/Kota
-                                    <small class="text-muted ms-2">(Rata-rata level_kalkulasi per jenjang jabatan per
-                                        kota)</small>
+                                    <small class="text-muted ms-2">(Rata-rata Capaian Kompetensi Pada Semua Sub Indikator Per Jenjang Jabatan)</small>
                                 </div>
                                 <canvas id="levelTerendahkabkotaChart" height="300"></canvas>
                             </div>
@@ -769,6 +795,7 @@
                                                                                             <input type="hidden"
                                                                                                 name="jenjang_jabatan"
                                                                                                 value="{{ $jenjang['jenjang_jabatan'] ?? '' }}">
+                                                                                                <input type="hidden" name="npsn" value="{{ request('npsn', '') }}">
 
                                                                                             <button type="submit"
                                                                                                 class="btn btn-sm btn-info">
@@ -1011,6 +1038,7 @@
             document.getElementById('kotaSelect').value = '';
             document.getElementById('jenjangPendidikanSelect').value = '';
             document.getElementById('jenisKelaminSelect').value = '';
+            document.getElementById('npsnInput').value = '';
             document.getElementById('analisisForm').submit();
         }
 
@@ -1122,7 +1150,7 @@
         <div class="chart-container" id="sec-level-ptk">
             <div class="chart-title">
                 <i class="ri-arrow-down-line"></i> Rata-rata Capaian PTK Per Provinsi
-                <small class="text-muted ms-2">(Rata-rata level_kalkulasi per jenjang jabatan)</small>
+                <small class="text-muted ms-2">(Rata-rata Capaian Kompetensi Pada Semua Sub Indikator Per Jenjang Jabatan)</small>
             </div>
             <canvas id="levelTerendahChart" height="300"></canvas>
         </div>
@@ -1135,7 +1163,7 @@
         <div class="chart-container">
             <div class="chart-title">
                 <i class="ri-arrow-down-line"></i> Rata-rata Capaian PTK Per Kab/Kota
-                <small class="text-muted ms-2">(Rata-rata level_kalkulasi per jenjang jabatan per kota)</small>
+                <small class="text-muted ms-2">(Rata-rata Capaian Kompetensi Pada Semua Sub Indikator Per Jenjang Jabatan)</small>
             </div>
             <canvas id="levelTerendahkabkotaChart" height="300"></canvas>
         </div>
@@ -1424,6 +1452,7 @@
                                         <input type="hidden" name="jenis_kelamin" value="${getFilterValue('jenis_kelamin')}">
                                         <input type="hidden" name="sub_indikator_id" value="${rek.sub_indikator_id || ''}">
                                         <input type="hidden" name="jenjang_jabatan" value="${jenjang.jenjang_jabatan || ''}">
+                                        <input type="hidden" name="npsn" value="${getFilterValue('npsn')}">
                                         <button type="submit" class="btn btn-sm btn-info">Lihat Detail PTK</button>
                                     </form>
                                 </td>
@@ -1604,7 +1633,7 @@
 
             // PELATIHAN
             if (data.pelatihan_data?.length > 0) {
-                const totalPelatihan = data.pelatihan_data.reduce((sum, it) => sum + (it.jumlah_ptk || 0), 0);
+                const totalPelatihan = data.pelatihan_data.reduce((sum, it) => sum + (Number(it.jumlah_ptk) || 0), 0);
 
                 html += `
                 <div class="row mt-4">

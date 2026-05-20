@@ -16,7 +16,6 @@ class AnalisisRekomendasiGapController extends Controller
     {
         $title = 'Detail PTK dengan Kebutuhan Belajar';
 
-        // Definisi warna level
         $levelColors = [
             1 => '#17a212',
             2 => '#17a2b8',
@@ -25,25 +24,10 @@ class AnalisisRekomendasiGapController extends Controller
             5 => '#28a745',
         ];
 
-        // Ambil data analisis - otomatis pakai filter dari URL
+        // Ambil data analisis
         $analisisData = $this->getDetailPtkPerSubIndikator($request);
 
-        // Paginate untuk ringkasan semua PTK
-        if (isset($analisisData['all_ptks']) && !empty($analisisData['all_ptks'])) {
-            $currentPage = LengthAwarePaginator::resolveCurrentPage();
-            $perPage = 20;
-            $currentItems = array_slice($analisisData['all_ptks'], ($currentPage - 1) * $perPage, $perPage);
-            $allPtksPaginated = new LengthAwarePaginator(
-                $currentItems,
-                count($analisisData['all_ptks']),
-                $perPage,
-                $currentPage,
-                ['path' => Paginator::resolveCurrentPath()]
-            );
-            $analisisData['all_ptks_paginated'] = $allPtksPaginated;
-        }
-
-        // Ambil data untuk dropdown filter (untuk tampilan saja)
+        // Ambil data untuk dropdown filter
         $kegiatans = DB::table('kegiatan')->get();
         $pangkatJabatans = DB::table('pangkat_jabatan')->get();
         $jenisPtkList = DB::table('jenis_ptk')->get();
@@ -71,376 +55,465 @@ class AnalisisRekomendasiGapController extends Controller
     }
 
     /**
-     * Method untuk mengambil data DETAIL PTK per sub indikator dan level
-     * DIPERBAIKI: Menghilangkan duplikat dan menampilkan semua rekomendasi
+     * ============================================================
+     * PERBAIKAN UTAMA: Query yang benar dan pagination terisolasi
+     * ============================================================
      */
     private function getDetailPtkPerSubIndikator(Request $request)
     {
-        // Tentukan target level per jenjang
         $targetLevels = [
-            'Pertama' => 2,
-            'Muda'    => 3,
-            'Madya'   => 4,
-            'Utama'   => 5
+            'Pertama' => ['min' => 2, 'max' => 2, 'target' => 2],
+            'Muda'    => ['min' => 2, 'max' => 3, 'target' => 3],
+            'Madya'   => ['min' => 2, 'max' => 4, 'target' => 4],
+            'Utama'   => ['min' => 2, 'max' => 5, 'target' => 5],
         ];
 
-        // QUERY UTAMA: Gabungkan dengan ptk_jawaban_rekomendasi
-        $query = DB::table('ptk_jawaban')
-            ->select([
+        // ============================================================
+        // 1. Ambil data gap dari ptk_jawaban_rekomendasi
+        // ============================================================
+        $gapQuery = DB::table('ptk_jawaban_rekomendasi as pjr')
+            ->select(
+                'pjr.ptk_id',
+                'pjr.kegiatan_id',
+                'pjr.sub_indikator_id',
+                'pjr.sub_indikator_code',
+                'pjr.level_gap',
+                'pangkat_jabatan.jenjang_jabatan',
+                'sub_indikator.sub_indikator_name',
+                'kegiatan.entity',
+                'kegiatan.tahap',
+                DB::raw('(
+                    SELECT pj.level
+                    FROM ptk_jawaban as pj
+                    WHERE pj.ptk_id = pjr.ptk_id
+                    AND pj.sub_indikator_id = pjr.sub_indikator_id
+                    AND pj.kegiatan_id = pjr.kegiatan_id
+                    ORDER BY pj.ptk_jawaban_id DESC
+                    LIMIT 1
+                ) as level_dicapai')
+            )
+            ->join('ptk', 'pjr.ptk_id', '=', 'ptk.ptk_id')
+            ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
+            ->join('kegiatan', 'pjr.kegiatan_id', '=', 'kegiatan.kegiatan_id')
+            ->leftJoin('sub_indikator', 'pjr.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+            ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
+            ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
+            ->whereIn('pangkat_jabatan.jenjang_jabatan', ['Pertama', 'Muda', 'Madya', 'Utama']);
+
+        // Apply filters
+        if ($request->filled('kegiatan_id'))
+            $gapQuery->where('pjr.kegiatan_id', $request->kegiatan_id);
+
+        if ($request->filled('pangkat_jabatan_id')) {
+            $pangkat = DB::table('pangkat_jabatan')
+                ->where('pangkat_jabatan_id', $request->pangkat_jabatan_id)
+                ->value('jenjang_jabatan');
+            if ($pangkat) $gapQuery->where('pangkat_jabatan.jenjang_jabatan', $pangkat);
+        }
+
+        if ($request->filled('jenis_ptk_id'))
+            $gapQuery->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
+
+        if ($request->filled('kota_id'))
+            $gapQuery->where('ptk.kota_id', $request->kota_id);
+
+        if ($request->filled('jenjang_pendidikan_id'))
+            $gapQuery->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
+
+        if ($request->filled('bentuk_pendidikan'))
+            $gapQuery->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
+
+        if ($request->filled('jenis_kelamin'))
+            $gapQuery->where('ptk.jenis_kelamin', $request->jenis_kelamin);
+
+        if ($request->filled('sub_indikator_id'))
+            $gapQuery->where('pjr.sub_indikator_id', $request->sub_indikator_id);
+
+        if ($request->filled('jenjang_jabatan'))
+            $gapQuery->where('pangkat_jabatan.jenjang_jabatan', $request->jenjang_jabatan);
+
+        $gapData = $gapQuery->get();
+
+        if ($gapData->isEmpty()) {
+            return [
+                'total_data_ptk' => 0,
+                'total_unique_ptk' => 0,
+                'total_unique_sub_indikator' => 0,
+                'detail_per_jenjang' => [],
+                'all_ptks' => [],
+                'message' => 'Tidak ada data ditemukan'
+            ];
+        }
+
+        // ============================================================
+        // 2. Hitung gap untuk setiap PTK per sub indikator
+        // ============================================================
+        $ptkGapMap = [];
+
+        foreach ($gapData as $row) {
+            $jenjang = $row->jenjang_jabatan;
+
+            // AMBIL TARGET LEVEL SESUAI JENJANG - SAMA KAYA ANALISIS CONTROLLER
+            $targetLevelConfig = $targetLevels[$jenjang] ?? ['min' => 2, 'max' => 2, 'target' => 2];
+            $levelMin = $targetLevelConfig['min'];
+            $levelMax = $targetLevelConfig['max'];
+            $targetLevel = $targetLevelConfig['target']; // ← INI YANG PENTING
+
+            $levelDicapai = (int) ($row->level_dicapai ?? 1);
+
+            // JANGAN PAKAI $row->level_gap LANGSUNG!
+            // Hitung level_harus yang sebenarnya: dari levelDicapai+1 sampai targetLevel
+            // Tapi hanya jika levelDicapai < targetLevel
+
+            if ($levelDicapai < $targetLevel) {
+                // Loop untuk setiap level yang harus dicapai (sama kayak AnalisisController)
+                for ($levelHarus = $levelDicapai + 1; $levelHarus <= $targetLevel; $levelHarus++) {
+                    // Validasi: levelHarus harus dalam range yang valid
+                    if ($levelHarus >= $levelMin && $levelHarus <= $targetLevel) {
+                        $key = $row->ptk_id . '_' . $row->sub_indikator_id . '_' . $levelDicapai . '_' . $levelHarus;
+
+                        if (!isset($ptkGapMap[$key])) {
+                            $ptkGapMap[$key] = [
+                                'ptk_id' => $row->ptk_id,
+                                'sub_indikator_id' => $row->sub_indikator_id,
+                                'sub_indikator_code' => $row->sub_indikator_code,
+                                'sub_indikator_name' => $row->sub_indikator_name,
+                                'jenjang_jabatan' => $jenjang,
+                                'entity' => $row->entity,
+                                'tahap' => $row->tahap,
+                                'level_dicapai' => $levelDicapai,
+                                'target_level' => $targetLevel,      // ← DARI CONFIG
+                                'level_harus' => $levelHarus,        // ← DIHITUNG, BUKAN DARI DB
+                                'level_min' => $levelMin,            // ← TAMBAHAN
+                                'level_max' => $levelMax,            // ← TAMBAHAN
+                                'gap' => $levelHarus - $levelDicapai // ← DIHITUNG ULANG
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        // ============================================================
+        // 3. Ambil data PTK detail
+        // ============================================================
+        $uniquePtkIds = array_unique(array_column($ptkGapMap, 'ptk_id'));
+        $totalUniquePtk = count($uniquePtkIds);
+        $totalUniqueSubIndikator = count(array_unique(array_column($ptkGapMap, 'sub_indikator_id')));
+
+        $ptkDetails = DB::table('ptk')
+            ->select(
                 'ptk.ptk_id',
                 'ptk.nip',
                 'ptk.nama',
-                'ptk.instansi',
                 'ptk.no_hp',
+                'ptk.instansi',
                 'ptk.jenis_kelamin',
-                'pangkat_jabatan.jenjang_jabatan',
                 'sekolah.nama_sekolah',
-                'sekolah.bentuk_pendidikan',
                 'kota.nama_kota',
-                'kegiatan.kegiatan_name',
-                'kegiatan.entity',
-                'ptk_jawaban.sub_indikator_id',
-                'ptk_jawaban.sub_indikator_code',
-                'sub_indikator.sub_indikator_name',
-                'ptk_jawaban.level as level_dicapai',
-                'ptk_jawaban.tahap',
-                'ptk_jawaban.created_at',
-                'jenjang_pendidikan.jenjang_pendidikan',
-                'jenis_ptk.jenis_ptk',
-                'kegiatan.tahap as kegiatan_tahap',
-                'kegiatan.entity as kegiatan_entity',
-                // Ambil dari ptk_jawaban_rekomendasi
-                'ptk_jawaban_rekomendasi.level_gap',
-                // Ambil rekomendasi dari ptk_rekomendasi
-                'ptk_rekomendasi.rekomendasi as rekomendasi_ptk'
-            ])
-            ->join('ptk', 'ptk_jawaban.ptk_id', '=', 'ptk.ptk_id')
-            ->join('kegiatan', 'ptk_jawaban.kegiatan_id', '=', 'kegiatan.kegiatan_id')
-            ->join('pangkat_jabatan', 'ptk.pangkat_jabatan_id', '=', 'pangkat_jabatan.pangkat_jabatan_id')
-            ->leftJoin('sub_indikator', 'ptk_jawaban.sub_indikator_id', '=', 'sub_indikator.sub_indikator_id')
+                'jenjang_pendidikan.jenjang_pendidikan'
+            )
             ->leftJoin('sekolah', 'ptk.sekolah_id', '=', 'sekolah.sekolah_id')
             ->leftJoin('kota', 'ptk.kota_id', '=', 'kota.kota_id')
             ->leftJoin('jenjang_pendidikan', 'ptk.jenjang_pendidikan_id', '=', 'jenjang_pendidikan.jenjang_pendidikan_id')
-            ->leftJoin('jenis_ptk', 'ptk.jenis_ptk_id', '=', 'jenis_ptk.jenis_ptk_id')
-            // LEFT JOIN dengan ptk_jawaban_rekomendasi
-            ->leftJoin('ptk_jawaban_rekomendasi', function ($join) {
-                $join->on('ptk_jawaban.ptk_id', '=', 'ptk_jawaban_rekomendasi.ptk_id')
-                    ->on('ptk_jawaban.sub_indikator_id', '=', 'ptk_jawaban_rekomendasi.sub_indikator_id');
-            })
-            // LEFT JOIN dengan ptk_rekomendasi untuk mendapatkan teks rekomendasi
-            ->leftJoin('ptk_rekomendasi', function ($join) {
-                $join->on('ptk_jawaban.sub_indikator_id', '=', 'ptk_rekomendasi.sub_indikator_id')
-                    ->whereRaw('ptk_jawaban_rekomendasi.level_gap = ptk_rekomendasi.level');
-            })
-            ->where('ptk_jawaban.level', '>=', 1)
-            ->whereNotNull('pangkat_jabatan.jenjang_jabatan')
-            ->whereIn('pangkat_jabatan.jenjang_jabatan', ['Pertama', 'Muda', 'Madya', 'Utama']);
+            ->whereIn('ptk.ptk_id', $uniquePtkIds)
+            ->get()
+            ->keyBy('ptk_id');
 
-        // ================================================
-        // APPLY FILTERS FROM REQUEST
-        // ================================================
-        if ($request->filled('kegiatan_id')) {
-            $query->where('ptk_jawaban.kegiatan_id', $request->kegiatan_id);
-        }
-        if ($request->filled('pangkat_jabatan_id')) {
-            $query->where('ptk.pangkat_jabatan_id', $request->pangkat_jabatan_id);
-        }
-        if ($request->filled('jenis_ptk_id')) {
-            $query->where('ptk.jenis_ptk_id', $request->jenis_ptk_id);
-        }
-        if ($request->filled('kota_id')) {
-            $query->where('ptk.kota_id', $request->kota_id);
-        }
-        if ($request->filled('jenjang_pendidikan_id')) {
-            $query->where('ptk.jenjang_pendidikan_id', $request->jenjang_pendidikan_id);
-        }
-        if ($request->filled('bentuk_pendidikan')) {
-            $query->where('sekolah.bentuk_pendidikan', $request->bentuk_pendidikan);
-        }
-        if ($request->filled('jenis_kelamin')) {
-            $query->where('ptk.jenis_kelamin', $request->jenis_kelamin);
-        }
+        // ============================================================
+        // 4. Ambil rekomendasi
+        // ============================================================
+        $allSubIds = array_unique(array_column($ptkGapMap, 'sub_indikator_id'));
+        $rekomendasiMap = DB::table('ptk_rekomendasi')
+            ->whereIn('sub_indikator_id', $allSubIds)
+            ->get()
+            ->groupBy('sub_indikator_id');
 
-        // Filter tambahan
-        if ($request->filled('sub_indikator_id')) {
-            $query->where('ptk_jawaban.sub_indikator_id', $request->sub_indikator_id);
-        }
-        if ($request->filled('jenjang_jabatan')) {
-            $query->where('pangkat_jabatan.jenjang_jabatan', $request->jenjang_jabatan);
-        }
+        // ============================================================
+        // 5. Bangun struktur per jenjang
+        // ============================================================
+        $byJenjang = [];
+        foreach ($ptkGapMap as $item) {
+            $jenjang = $item['jenjang_jabatan'];
+            $subId = $item['sub_indikator_id'];
+            $levelDicapai = $item['level_dicapai'];
 
-        $data = $query->orderBy('pangkat_jabatan.jenjang_jabatan')
-            ->orderBy('ptk_jawaban.sub_indikator_code')
-            ->orderBy('ptk_jawaban.level')
-            ->orderBy('ptk.nama')
-            ->get();
-
-        if ($data->isEmpty()) {
-            return [
-                'total_data_ptk' => 0,
-                'total_unique_ptk' => 0,
-                'total_unique_sub_indikator' => 0,
-                'detail_per_jenjang' => [],
-                'message' => 'Tidak ada data ditemukan berdasarkan filter yang diterapkan'
-            ];
-        }
-
-        // ================================================
-        // FILTER HANYA YANG ADA GAP (tidak mencapai target)
-        // DAN HILANGKAN DUPLIKAT
-        // ================================================
-        $dataWithGap = collect();
-        $uniqueKeys = []; // Untuk melacak data unik
-
-        foreach ($data as $row) {
-            $jenjang = $row->jenjang_jabatan;
-            $levelDicapai = $row->level_dicapai;
-            $targetLevel = $targetLevels[$jenjang] ?? 2;
-
-            // Buat key unik: PTK + Sub Indikator
-            $uniqueKey = $row->ptk_id . '_' . $row->sub_indikator_id;
-
-            // HANYA SIMPAN JIKA:
-            // 1. Ada gap (level_dicapai < targetLevel)
-            // 2. Belum ada dalam uniqueKeys
-            if ($levelDicapai < $targetLevel && !isset($uniqueKeys[$uniqueKey])) {
-                $dataWithGap->push($row);
-                $uniqueKeys[$uniqueKey] = true;
+            if (!isset($byJenjang[$jenjang])) {
+                $byJenjang[$jenjang] = [];
             }
+
+            if (!isset($byJenjang[$jenjang][$subId])) {
+                $byJenjang[$jenjang][$subId] = [
+                    'sub_indikator_id' => $subId,
+                    'sub_indikator_code' => $item['sub_indikator_code'],
+                    'sub_indikator_name' => $item['sub_indikator_name'],
+                    'entity' => $item['entity'],
+                    'tahap' => $item['tahap'],
+                    'target_level' => $item['target_level'],
+                    'level_min' => $item['level_min'],    // ← TAMBAH INI
+                    'level_max' => $item['level_max'],    // ← TAMBAH INI
+                    'levels' => []
+                ];
+            }
+
+            if (!isset($byJenjang[$jenjang][$subId]['levels'][$levelDicapai])) {
+                $byJenjang[$jenjang][$subId]['levels'][$levelDicapai] = [];
+            }
+            $byJenjang[$jenjang][$subId]['levels'][$levelDicapai][] = $item['ptk_id'];
         }
 
-        if ($dataWithGap->isEmpty()) {
-            return [
-                'total_data_ptk' => 0,
-                'total_unique_ptk' => 0,
-                'total_unique_sub_indikator' => 0,
-                'detail_per_jenjang' => [],
-                'message' => 'Tidak ada PTK yang memiliki gap (semua sudah mencapai target)'
-            ];
-        }
-
-        // Kelompokkan data per jenjang
+        // ============================================================
+        // 6. Bangun hasil akhir dengan pagination terisolasi
+        // ============================================================
+        $order = ['Pertama', 'Muda', 'Madya', 'Utama'];
         $result = [];
-        $groupedByJenjang = $dataWithGap->groupBy('jenjang_jabatan');
+        $allPtks = [];
+        $ptkGapCount = [];
 
-        // Kumpulkan semua PTK unik untuk ringkasan
-        $summaryPtks = [];
-        $counter = 1;
-        $ptkGapDetails = []; // Untuk menyimpan detail gap per PTK
+        // Ambil semua parameter query dari request untuk dipertahankan
+        $queryParams = $request->except(['page', 'lvl_*']);
+        $baseUrl = url('/analisis/rekomendasi-gap');
 
-        foreach ($groupedByJenjang as $jenjang => $jenjangData) {
-            if (!isset($targetLevels[$jenjang])) continue;
+        foreach ($order as $jenjang) {
+            if (!isset($byJenjang[$jenjang])) continue;
 
             $targetLevel = $targetLevels[$jenjang];
-
-            // Kelompokkan per sub indikator
-            $groupedBySubIndikator = $jenjangData->groupBy('sub_indikator_id');
+            $subIndikatorList = $byJenjang[$jenjang];
             $detailPerSubIndikator = [];
+            $totalPtkJenjang = 0;
 
-            foreach ($groupedBySubIndikator as $subIndikatorId => $subData) {
-                $firstSubData = $subData->first();
-
-                // Kelompokkan PTK per level dicapai
-                $groupedByLevel = $subData->groupBy('level_dicapai');
+            foreach ($subIndikatorList as $subId => $subData) {
                 $ptkPerLevel = [];
 
-                foreach ($groupedByLevel as $levelDicapai => $levelData) {
-                    $ptkList = [];
+                foreach ($subData['levels'] as $levelDicapai => $ptkIds) {
+                    $ptcCount = count($ptkIds);
+                    $totalPtkJenjang += $ptcCount;
 
-                    // Ambil rekomendasi untuk level ini
-                    $rekomendasiText = [];
-                    $firstPtk = $levelData->first();
+                    // Ambil rekomendasi - SESUAIKAN DENGAN LEVEL YANG BENAR
+                    $rekomendasiPelatihan = [];
+                    $subRekoms = $rekomendasiMap->get($subId, collect());
 
-                    if ($firstPtk) {
-                        // Ambil SEMUA rekomendasi dari level dicapai sampai target
-                        $allRekomendasi = $this->getAllRekomendasiForPtk(
-                            $firstPtk->ptk_id,
-                            $firstPtk->sub_indikator_id,
-                            $firstPtk->tahap ?? $firstPtk->kegiatan_tahap,
-                            $firstPtk->entity ?? $firstPtk->kegiatan_entity,
-                            $firstPtk->sub_indikator_code,
-                            $levelDicapai,
-                            $targetLevel
-                        );
+                    // Loop dari levelDicapai+1 sampai targetLevel (sama kayak AnalisisController)
+                    for ($lvlTarget = $levelDicapai + 1; $lvlTarget <= $targetLevel; $lvlTarget++) {
+                        // Validasi sama dengan AnalisisController
+                        $levelMin = $subData['level_min'] ?? 2;  // Ambil dari data yang sudah disimpan
+                        $levelMax = $subData['level_max'] ?? $targetLevel;
 
-                        $rekomendasiText = $allRekomendasi;
+                        if ($lvlTarget >= $levelMin && $lvlTarget <= $targetLevel) {
+                            $rek = $subRekoms->firstWhere('level', $lvlTarget);
+                            $rekomendasiText = $rek ? $rek->rekomendasi : $this->getRekomendasiText(
+                                $subId,
+                                $subData['sub_indikator_code'],
+                                $subData['tahap'] ?? '',
+                                $subData['entity'] ?? '',
+                                $levelDicapai,
+                                $lvlTarget
+                            );
+
+                            $rekomendasiPelatihan[] = [
+                                'level_target' => $lvlTarget,
+                                'rekomendasi' => $rekomendasiText
+                            ];
+                        }
                     }
 
-                    // Kumpulkan PTK untuk level ini
-                    foreach ($levelData as $ptk) {
-                        // Ambil SEMUA rekomendasi untuk PTK ini
-                        $allRekomendasi = $this->getAllRekomendasiForPtk(
-                            $ptk->ptk_id,
-                            $ptk->sub_indikator_id,
-                            $ptk->tahap ?? $ptk->kegiatan_tahap,
-                            $ptk->entity ?? $ptk->kegiatan_entity,
-                            $ptk->sub_indikator_code,
-                            $levelDicapai,
-                            $targetLevel
-                        );
+                    // ============================================================
+                    // PERBAIKAN UTAMA: Pagination dengan pageName unik
+                    // ============================================================
+                    $pageName = 'lvl_' . substr($jenjang, 0, 2) . '_' . $subId . '_' . $levelDicapai;
 
-                        // Format rekomendasi untuk tampilan
-                        $rekomendasiFormatted = [];
-                        foreach ($allRekomendasi as $rek) {
-                            $rekomendasiFormatted[] = "Level {$rek['level_target']}: {$rek['rekomendasi']}";
-                        }
-                        $rekomendasiTextPtk = implode('<br>', $rekomendasiFormatted);
+                    // Ambil current page dari request dengan pageName yang spesifik
+                    $currentPage = $request->input($pageName, 1);
+                    $perPage = 20;
 
-                        $ptkList[] = [
-                            'ptk_id' => $ptk->ptk_id,
+                    $paginatedIds = array_slice($ptkIds, ($currentPage - 1) * $perPage, $perPage);
+
+                    $ptkListPage = [];
+                    foreach ($paginatedIds as $ptkId) {
+                        $ptk = $ptkDetails->get($ptkId);
+                        if (!$ptk) continue;
+
+                        $ptkListPage[] = [
+                            'ptk_id' => $ptkId,
                             'nip' => $ptk->nip,
                             'nama' => $ptk->nama,
+                            'no_hp' => $ptk->no_hp,
                             'sekolah' => $ptk->nama_sekolah,
-                            'jenjang_pendidikan' => $ptk->jenjang_pendidikan ?? '-',
                             'instansi' => $ptk->instansi,
                             'kota' => $ptk->nama_kota,
-                            'no_hp' => $ptk->no_hp,
-                            'entity' => $ptk->entity,
-                            'created_at' => $ptk->created_at,
+                            'jenjang_pendidikan' => $ptk->jenjang_pendidikan ?? '-',
                             'level_dicapai' => $levelDicapai,
-                            'sub_indikator_id' => $subIndikatorId,
-                            'rekomendasi' => $rekomendasiTextPtk,
-                            'all_rekomendasi' => $allRekomendasi // Simpan semua rekomendasi untuk summary
+                            'sub_indikator_id' => $subId,
                         ];
 
-                        // Simpan detail untuk summary
-                        $ptkId = $ptk->ptk_id;
-                        if (!isset($ptkGapDetails[$ptkId])) {
-                            $ptkGapDetails[$ptkId] = [
-                                'ptk_info' => [
-                                    'ptk_id' => $ptk->ptk_id,
-                                    'nip' => $ptk->nip,
-                                    'nama' => $ptk->nama,
-                                    'no_hp' => $ptk->no_hp,
-                                    'jenjang_jabatan' => $ptk->jenjang_jabatan,
-                                    'jenjang_pendidikan' => $ptk->jenjang_pendidikan ?? '-',
-                                    'nama_sekolah' => $ptk->nama_sekolah,
-                                    'instansi' => $ptk->instansi,
-                                    'nama_kota' => $ptk->nama_kota
-                                ],
-                                'gaps' => []
-                            ];
-                        }
-
-                        // Simpan gap detail dengan semua rekomendasi
-                        $gapKey = $subIndikatorId . '_' . $levelDicapai;
-                        if (!isset($ptkGapDetails[$ptkId]['gaps'][$gapKey])) {
-                            $ptkGapDetails[$ptkId]['gaps'][$gapKey] = [
-                                'sub_indikator_id' => $subIndikatorId,
-                                'sub_indikator_name' => $firstSubData->sub_indikator_name,
-                                'level_dicapai' => $levelDicapai,
-                                'target_level' => $targetLevel,
-                                'gap' => $targetLevel - $levelDicapai,
-                                'all_rekomendasi' => $allRekomendasi
-                            ];
-                        }
+                        if (!isset($ptkGapCount[$ptkId])) $ptkGapCount[$ptkId] = 0;
+                        $ptkGapCount[$ptkId]++;
                     }
 
-                    // Paginate PTK per level
-                    $currentPage = LengthAwarePaginator::resolveCurrentPage('level_' . $jenjang . '_' . $subIndikatorId . '_' . $levelDicapai);
-                    $perPage = 20;
-                    $currentItems = array_slice($ptkList, ($currentPage - 1) * $perPage, $perPage);
-                    $ptkListPaginated = new LengthAwarePaginator(
-                        $currentItems,
-                        count($ptkList),
+                    // ============================================================
+                    // PERBAIKAN: Buat URL custom untuk pagination dengan parameter lengkap
+                    // ============================================================
+                    $urlGenerator = function ($page) use ($baseUrl, $queryParams, $pageName) {
+                        $params = $queryParams;
+                        $params[$pageName] = $page;
+                        return $baseUrl . '?' . http_build_query($params);
+                    };
+
+                    $paginator = new LengthAwarePaginator(
+                        $ptkListPage,
+                        $ptcCount,
                         $perPage,
                         $currentPage,
                         [
-                            'path' => Paginator::resolveCurrentPath(),
-                            'pageName' => 'level_' . $jenjang . '_' . $subIndikatorId . '_' . $levelDicapai
+                            'path' => $baseUrl,
+                            'pageName' => $pageName,
+                            'query' => $queryParams  // Tambahkan query params
                         ]
                     );
 
+                    // Override URL generator untuk mempertahankan semua parameter
+                    $paginator->withPath($baseUrl);
+                    $paginator->appends($queryParams);
+                    $paginator->setPageName($pageName);
+
                     $ptkPerLevel[] = [
-                        'level' => $levelDicapai,
-                        'ptk_count' => count($ptkList),
-                        'ptk_list' => $ptkListPaginated,
+                        'level' => (int) $levelDicapai,
+                        'ptk_count' => $ptcCount,
+                        'ptk_list' => $paginator,
                         'status' => 'BELUM MENCAPAI',
                         'gap' => $targetLevel - $levelDicapai,
-                        'rekomendasi_pelatihan' => $rekomendasiText
+                        'rekomendasi_pelatihan' => $rekomendasiPelatihan,
                     ];
                 }
 
-                // Urutkan berdasarkan level
-                usort($ptkPerLevel, function ($a, $b) {
-                    return $a['level'] - $b['level'];
-                });
+                if (empty($ptkPerLevel)) continue;
+
+                usort($ptkPerLevel, fn($a, $b) => $a['level'] - $b['level']);
 
                 $detailPerSubIndikator[] = [
-                    'sub_indikator_id' => $subIndikatorId,
-                    'sub_indikator_code' => $firstSubData->sub_indikator_code,
-                    'sub_indikator_name' => $firstSubData->sub_indikator_name,
+                    'sub_indikator_id' => $subId,
+                    'sub_indikator_code' => $subData['sub_indikator_code'],
+                    'sub_indikator_name' => $subData['sub_indikator_name'],
                     'target_level' => $targetLevel,
                     'ptk_per_level' => $ptkPerLevel,
-                    'total_ptk' => $subData->unique('ptk_id')->count(),
-                    'total_levels' => count($ptkPerLevel)
+                    'total_ptk' => array_sum(array_map(fn($l) => $l['ptk_count'], $ptkPerLevel)),
+                    'total_levels' => count($ptkPerLevel),
                 ];
             }
+
+            if (empty($detailPerSubIndikator)) continue;
 
             $result[] = [
                 'jenjang_jabatan' => $jenjang,
                 'target_level' => $targetLevel,
-                'total_ptk' => $jenjangData->unique('ptk_id')->count(),
-                'total_sub_indikator' => count($groupedBySubIndikator),
-                'detail_per_sub_indikator' => $detailPerSubIndikator
+                'total_ptk' => $totalPtkJenjang,
+                'total_sub_indikator' => count($detailPerSubIndikator),
+                'detail_per_sub_indikator' => $detailPerSubIndikator,
             ];
         }
 
-        // ================================================
-        // BUAT SUMMARY PTK UNIK TANPA DUPLIKAT
-        // ================================================
-        $allPtks = [];
+        // ============================================================
+        // 7. Ringkasan PTK dengan pagination terisolasi
+        // ============================================================
+        $counter = 1;
+        foreach ($uniquePtkIds as $ptkId) {
+            $ptk = $ptkDetails->get($ptkId);
+            if (!$ptk) continue;
 
-        foreach ($ptkGapDetails as $ptkId => $detail) {
-            $ptkInfo = $detail['ptk_info'];
-            $gapCount = count($detail['gaps']);
-
-            // Kumpulkan SEMUA rekomendasi dari semua gaps
-            $allRekomendasi = [];
-            foreach ($detail['gaps'] as $gap) {
-                if (!empty($gap['all_rekomendasi'])) {
-                    foreach ($gap['all_rekomendasi'] as $rek) {
-                        // Format: Sub Indikator (Level Target): Rekomendasi
-                        $rekText = "{$gap['sub_indikator_name']} (Level {$rek['level_target']}): {$rek['rekomendasi']}";
-                        if (!in_array($rekText, $allRekomendasi)) {
-                            $allRekomendasi[] = $rekText;
-                        }
-                    }
+            $ptkJenjang = '';
+            foreach ($ptkGapMap as $item) {
+                if ($item['ptk_id'] == $ptkId) {
+                    $ptkJenjang = $item['jenjang_jabatan'];
+                    break;
                 }
             }
 
             $allPtks[] = [
                 'no' => $counter++,
                 'ptk_id' => $ptkId,
-                'nip' => $ptkInfo['nip'],
-                'nama' => $ptkInfo['nama'],
-                'no_hp' => $ptkInfo['no_hp'] ?? '-',
-                'jenjang' => $ptkInfo['jenjang_jabatan'],
-                'jenjang_pendidikan' => $ptkInfo['jenjang_pendidikan'] ?? '-',
-                'sekolah' => $ptkInfo['nama_sekolah'] ?? ($ptkInfo['instansi'] ?? '-'),
-                'kota' => $ptkInfo['nama_kota'] ?? '-',
-                'gap_count' => $gapCount,
-                'rekomendasi' => !empty($allRekomendasi) ? implode('<br><br>', $allRekomendasi) : '-'
+                'nip' => $ptk->nip,
+                'nama' => $ptk->nama,
+                'no_hp' => $ptk->no_hp ?? '-',
+                'jenjang' => $ptkJenjang,
+                'jenjang_pendidikan' => $ptk->jenjang_pendidikan ?? '-',
+                'sekolah' => $ptk->nama_sekolah ?? ($ptk->instansi ?? '-'),
+                'kota' => $ptk->nama_kota ?? '-',
+                'gap_count' => $ptkGapCount[$ptkId] ?? 0,
+                'rekomendasi' => '-',
             ];
         }
 
-        // Urutkan berdasarkan nama
-        usort($allPtks, function ($a, $b) {
-            return strcmp($a['nama'], $b['nama']);
-        });
+        usort($allPtks, fn($a, $b) => strcmp($a['nama'], $b['nama']));
+        foreach ($allPtks as $i => &$p) $p['no'] = $i + 1;
+        unset($p);
 
-        // Reset nomor urut setelah sorting
-        foreach ($allPtks as $index => &$ptk) {
-            $ptk['no'] = $index + 1;
-        }
+        // Pagination untuk ringkasan
+        $currentPageRingkasan = $request->input('page_ringkasan', 1);
+        $perPageRingkasan = 20;
+        $paginatedPtks = new LengthAwarePaginator(
+            array_slice($allPtks, ($currentPageRingkasan - 1) * $perPageRingkasan, $perPageRingkasan),
+            count($allPtks),
+            $perPageRingkasan,
+            $currentPageRingkasan,
+            [
+                'path' => $baseUrl,
+                'pageName' => 'page_ringkasan',
+                'query' => $queryParams
+            ]
+        );
+        $paginatedPtks->appends($queryParams);
 
         return [
             'detail_per_jenjang' => $result,
-            'total_data_ptk' => $dataWithGap->count(),
-            'total_unique_ptk' => $dataWithGap->unique('ptk_id')->count(),
-            'total_unique_sub_indikator' => $dataWithGap->unique('sub_indikator_id')->count(),
-            'all_ptks' => $allPtks
+            'total_data_ptk' => count($ptkGapMap),
+            'total_unique_ptk' => $totalUniquePtk,
+            'total_unique_sub_indikator' => $totalUniqueSubIndikator,
+            'all_ptks' => $allPtks,
+            'all_ptks_paginated' => $paginatedPtks,
         ];
+    }
+
+    private function getRekomendasiText($subIndikatorId, $subIndikatorCode, $tahap, $entity, $levelDicapai, $levelTarget)
+    {
+        $rekomendasi = DB::table('ptk_rekomendasi')
+            ->where('sub_indikator_id', $subIndikatorId)
+            ->where('sub_indikator_code', $subIndikatorCode)
+            ->where('tahap', $tahap)
+            ->where('entity', $entity)
+            ->where('level', $levelTarget)
+            ->first();
+
+        if ($rekomendasi) {
+            return $rekomendasi->rekomendasi;
+        }
+
+        $rekomendasi = DB::table('ptk_rekomendasi')
+            ->where('sub_indikator_id', $subIndikatorId)
+            ->where('sub_indikator_code', $subIndikatorCode)
+            ->where('level', $levelTarget)
+            ->first();
+
+        if ($rekomendasi) {
+            return $rekomendasi->rekomendasi;
+        }
+
+        $levelNames = [
+            1 => 'Dasar',
+            2 => 'Penerapan',
+            3 => 'Analisis',
+            4 => 'Evaluasi',
+            5 => 'Pembimbingan'
+        ];
+
+        $levelDicapaiName = $levelNames[$levelDicapai] ?? "Level $levelDicapai";
+        $levelTargetName = $levelNames[$levelTarget] ?? "Level $levelTarget";
+        $gap = $levelTarget - $levelDicapai;
+
+        if ($gap == 1) {
+            return "Perlu meningkatkan dari $levelDicapaiName ke $levelTargetName (naik 1 level)";
+        } else {
+            return "Perlu meningkatkan dari $levelDicapaiName ke $levelTargetName (naik $gap level)";
+        }
     }
 
     /**

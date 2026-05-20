@@ -1490,82 +1490,70 @@
                                                                     </table>
                                                                 </div>
 
-                                                                @if ($levelData['ptk_list']->hasPages())
-                                                                    <div class="mt-3">
-                                                                        <nav aria-label="Pagination">
-                                                                            <ul
-                                                                                class="pagination pagination-sm justify-content-center mb-0">
-                                                                                {{-- Previous --}}
-                                                                                @if ($levelData['ptk_list']->onFirstPage())
-                                                                                    <li class="page-item disabled">
-                                                                                        <span
-                                                                                            class="page-link">&laquo;</span>
-                                                                                    </li>
-                                                                                @else
-                                                                                    <li class="page-item">
-                                                                                        <a class="page-link"
-                                                                                            href="{{ $levelData['ptk_list']->previousPageUrl() }}"
-                                                                                            rel="prev">&laquo;</a>
-                                                                                    </li>
-                                                                                @endif
+                                                 @if ($levelData['ptk_list']->hasPages())
+    @php
+        $pageName = $levelData['ptk_list']->getPageName();
+        $queryParams = request()->except([$pageName, 'page_ringkasan']);
+        $currentUrl = url('/analisis/rekomendasi-gap');
+    @endphp
+    <div class="mt-3">
+        <nav aria-label="Pagination">
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                @if ($levelData['ptk_list']->onFirstPage())
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;</span>
+                    </li>
+                @else
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="{{ $currentUrl }}?{{ http_build_query(array_merge($queryParams, [$pageName => $levelData['ptk_list']->currentPage() - 1])) }}"
+                            rel="prev">&laquo;</a>
+                    </li>
+                @endif
 
-                                                                                @php
-                                                                                    $currentPage = $levelData[
-                                                                                        'ptk_list'
-                                                                                    ]->currentPage();
-                                                                                    $lastPage = $levelData[
-                                                                                        'ptk_list'
-                                                                                    ]->lastPage();
-                                                                                    $start = max(1, $currentPage - 2);
-                                                                                    $end = min(
-                                                                                        $lastPage,
-                                                                                        $currentPage + 2,
-                                                                                    );
-                                                                                @endphp
+                @php
+                    $currentPage = $levelData['ptk_list']->currentPage();
+                    $lastPage = $levelData['ptk_list']->lastPage();
+                    $start = max(1, $currentPage - 2);
+                    $end = min($lastPage, $currentPage + 2);
+                @endphp
 
-                                                                                @for ($i = $start; $i <= $end; $i++)
-                                                                                    @if ($i == $currentPage)
-                                                                                        <li class="page-item active">
-                                                                                            <span
-                                                                                                class="page-link">{{ $i }}</span>
-                                                                                        </li>
-                                                                                    @else
-                                                                                        <li class="page-item">
-                                                                                            <a class="page-link"
-                                                                                                href="{{ $levelData['ptk_list']->url($i) }}">{{ $i }}</a>
-                                                                                        </li>
-                                                                                    @endif
-                                                                                @endfor
+                @for ($i = $start; $i <= $end; $i++)
+                    @if ($i == $currentPage)
+                        <li class="page-item active">
+                            <span class="page-link">{{ $i }}</span>
+                        </li>
+                    @else
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="{{ $currentUrl }}?{{ http_build_query(array_merge($queryParams, [$pageName => $i])) }}">{{ $i }}</a>
+                        </li>
+                    @endif
+                @endfor
 
-                                                                                {{-- Next --}}
-                                                                                @if ($levelData['ptk_list']->hasMorePages())
-                                                                                    <li class="page-item">
-                                                                                        <a class="page-link"
-                                                                                            href="{{ $levelData['ptk_list']->nextPageUrl() }}"
-                                                                                            rel="next">&raquo;</a>
-                                                                                    </li>
-                                                                                @else
-                                                                                    <li class="page-item disabled">
-                                                                                        <span
-                                                                                            class="page-link">&raquo;</span>
-                                                                                    </li>
-                                                                                @endif
-                                                                            </ul>
+                @if ($levelData['ptk_list']->hasMorePages())
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="{{ $currentUrl }}?{{ http_build_query(array_merge($queryParams, [$pageName => $levelData['ptk_list']->currentPage() + 1])) }}"
+                            rel="next">&raquo;</a>
+                    </li>
+                @else
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo;</span>
+                    </li>
+                @endif
+            </ul>
 
-                                                                            <div class="text-center">
-                                                                                <small class="text-muted">
-                                                                                    Menampilkan
-                                                                                    {{ $levelData['ptk_list']->firstItem() ?? 0 }}
-                                                                                    -
-                                                                                    {{ $levelData['ptk_list']->lastItem() ?? 0 }}
-                                                                                    dari
-                                                                                    {{ $levelData['ptk_list']->total() }}
-                                                                                    PTK
-                                                                                </small>
-                                                                            </div>
-                                                                        </nav>
-                                                                    </div>
-                                                                @endif
+            <div class="text-center">
+                <small class="text-muted">
+                    Menampilkan {{ $levelData['ptk_list']->firstItem() ?? 0 }} -
+                    {{ $levelData['ptk_list']->lastItem() ?? 0 }} dari
+                    {{ $levelData['ptk_list']->total() }} PTK
+                </small>
+            </div>
+        </nav>
+    </div>
+@endif
                                                             </div>
                                                         </div>
                                                     @elseif($level < $sub['target_level'])

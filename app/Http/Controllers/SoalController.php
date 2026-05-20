@@ -749,7 +749,7 @@ class SoalController extends Controller
                     $i = 0;
 
                     while ($level_final < $pangkat_jabatan->level_kompetensi) {
-                        PtkJawabanRekomendasi::Create([
+                        PtkJawabanRekomendasi::updateOrCreate([
                             'kegiatan_id' => $kegiatan_id,
                             'sub_indikator_id' => $sub_indikator->sub_indikator_id,
                             'sub_indikator_code' => $sub_indikator->sub_indikator_code,

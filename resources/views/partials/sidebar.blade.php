@@ -60,50 +60,51 @@
                         </ul>
                     </div>
                 </li> <!-- end Dashboard Menu -->
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#sidebarApps" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
-                        <i class="ri-apps-2-line"></i> <span data-key="t-apps">Apps</span>
-                    </a>
-                    <div class="collapse menu-dropdown" id="sidebarApps">
-                        <ul class="nav nav-sm flex-column">
-                            <li class="nav-item">
-                                <a href="#sidebarCalendar" class="nav-link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarCalendar" data-key="t-calender">
-                                    Master
-                                </a>
-                                <div class="collapse menu-dropdown" id="sidebarCalendar">
-                                    <ul class="nav nav-sm flex-column">
-                                        <li class="nav-item">
-                                            <a href="{{ route('kegiatan.index') }}" class="nav-link" data-key="t-chat"> Kegiatan </a>
-                                        </li>
-                                    </ul>
-                                    <ul class="nav nav-sm flex-column">
-                                        <li class="nav-item">
-                                            {{-- Menjadi: --}}
-                                            <a href="{{ route('hasil-instrumen.index') }}" class="nav-link">Hasil Instrumen</a>
-                                        </li>
-                                    </ul><ul class="nav nav-sm flex-column">
-                                        <li class="nav-item">
-                                            {{-- Menjadi: --}}
-                                            <a href="{{ route('users.index') }}" class="nav-link">Management Users</a>
-                                        </li>
-                                    </ul>
 
-                                    <ul class="nav nav-sm flex-column">
-                                        <li class="nav-item">
-                                            {{-- Menjadi: --}}
-                                            <a href="{{ route('biodata.index') }}" class="nav-link">Register Peserta</a>
-                                        </li>
-                                    </ul>
-                                    
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('kegiatan.index') }}" class="nav-link" data-key="t-chat"> Other Menu </a>
-                            </li>
 
-                        </ul>
-                    </div>
-                </li>
+    @php $roleId = auth()->user()->role_id; @endphp
+
+@if (in_array($roleId, [1, 2, 3]))
+<li class="nav-item">
+    <a class="nav-link menu-link" href="#sidebarApps" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
+        <i class="ri-apps-2-line"></i> <span data-key="t-apps">Apps</span>
+    </a>
+    <div class="collapse menu-dropdown" id="sidebarApps">
+        <ul class="nav nav-sm flex-column">
+            <li class="nav-item">
+                <a href="#sidebarCalendar" class="nav-link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarCalendar" data-key="t-calender">
+                    Master
+                </a>
+                <div class="collapse menu-dropdown" id="sidebarCalendar">
+                    <ul class="nav nav-sm flex-column">
+                        <li class="nav-item">
+                            <a href="{{ route('kegiatan.index') }}" class="nav-link" data-key="t-chat"> Kegiatan </a>
+                        </li>
+                    </ul>
+                    <ul class="nav nav-sm flex-column">
+                        <li class="nav-item">
+                            <a href="{{ route('hasil-instrumen.index') }}" class="nav-link">Hasil Instrumen</a>
+                        </li>
+                    </ul>
+                    <ul class="nav nav-sm flex-column">
+                        <li class="nav-item">
+                            <a href="{{ route('users.index') }}" class="nav-link">Management Users</a>
+                        </li>
+                    </ul>
+                    <ul class="nav nav-sm flex-column">
+                        <li class="nav-item">
+                            <a href="{{ route('biodata.index') }}" class="nav-link">Register Peserta</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('kegiatan.index') }}" class="nav-link" data-key="t-chat"> Other Menu </a>
+            </li>
+        </ul>
+    </div>
+</li>
+@endif
 
                 {{-- <li class="nav-item">
                     <a class="nav-link menu-link" href="#sidebarLayouts" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLayouts">

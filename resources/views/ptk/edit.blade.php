@@ -46,7 +46,7 @@
         .card-header {
             position: relative;
             /* Ini warna biru dasarnya (silakan diubah kalau kurang pas) */
-            background-color: #2b5da4; 
+            background-color: #2b5da4;
             color: white;
             padding: 20px 30px;
             border-bottom: none;
@@ -59,20 +59,20 @@
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            
+
             background-image: url('{{ asset("build/images/baduy.jpg") }}');
             background-repeat: repeat;
             background-position: center;
-            background-size: 150px; 
-            
+            background-size: 150px;
+
             /* =========================================================
                DI SINI KENDALI PENUHNYA (SATURASI & OPACITY)
                ========================================================= */
-            filter: saturate(40%) opacity(60%); 
-            
+            filter: saturate(40%) opacity(60%);
+
             /* Efek nge-blend biar menyatu sama biru dasar */
-            mix-blend-mode: soft-light; 
-            
+            mix-blend-mode: soft-light;
+
             z-index: -1; /* Posisi di paling belakang (di bawah teks) */
         }
 
@@ -93,15 +93,15 @@
 
         .form-section {
             /* Warna abu-abu yang lebih kontras (darker grey) */
-            background: #f0f6fe; 
-            
+            background: #f0f6fe;
+
             /* Tambahan outline/border tipis */
-            border: 1px solid #e2e8f0; 
-            
+            border: 1px solid #e2e8f0;
+
             border-radius: 12px;
             padding: 25px; /* Padding ditambah sedikit biar lebih lega */
             margin-bottom: 25px;
-            
+
             /* Opsional: Tambah sedikit shadow halus biar lebih 'depth' */
             box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
         }
@@ -343,34 +343,34 @@
             font-size: 14px;
             cursor: default; /* Kursor biasa (panah), menegaskan ini BUKAN tombol */
         }
-        
+
         .badge-nip strong {
             font-weight: 700; /* NIP dibikin tebal */
             margin-left: 4px;
         }
         .form-section-title {
             /* Ukuran teks diperbesar */
-            font-size: 22px; 
+            font-size: 22px;
             font-weight: 700;
-            
+
             /* Warna biru utama */
             color: var(--mm-primary);
-            
+
             margin-bottom: 22px;
             padding-bottom: 12px;
-            
+
             /* Garis bawah dibikin lebih soft warnanya */
-            border-bottom: 2px solid #eef2f7; 
-            
+            border-bottom: 2px solid #eef2f7;
+
             display: flex;
             align-items: center;
         }
 
         .form-section-title i {
             /* Ukuran ikon ikut diperbesar agar seimbang */
-            font-size: 24px; 
+            font-size: 24px;
             margin-right: 12px;
-            
+
             /* Memberi sedikit warna background soft di ikon (opsional, biar makin modern) */
             background: rgba(26, 77, 142, 0.1);
             padding: 8px;

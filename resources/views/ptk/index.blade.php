@@ -373,7 +373,7 @@
                             </div>
                         </div>
 
-                        <!-- CHECKBOX KONFIRMASI -->
+                                              <!-- CHECKBOX KONFIRMASI -->
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="konfirmasiCheckbox"
@@ -387,7 +387,7 @@
                             </div>
                         </div>
 
-                        <!-- TOMBOL MULAI -->
+                        <!-- TOMBOL MULAI / LANJUTKAN / SELESAI -->
                         <div class="text-center mt-4">
                             @php
                                 $encoded_no_urut = Hashids::encode(1);
@@ -399,7 +399,7 @@
                                     <div class="d-flex align-items-center">
                                         <i class="ri-checkbox-circle-fill fs-4 me-2"></i>
                                         <div class="text-start">
-                                            <h6 class="mb-1">Instumen Selesai</h6>
+                                            <h6 class="mb-1">Instrumen Selesai</h6>
                                             <small>Anda telah menyelesaikan instrumen ini.</small>
                                         </div>
                                     </div>
@@ -422,8 +422,9 @@
                                     </div>
                                 </div>
 
+                                <!-- HANYA TOMBOL LANJUTKAN - TANPA MULAI BARU -->
                                 <div class="row">
-                                    <div class="col-md-6 mb-2">
+                                    <div class="col-12">
                                         <a href="{{ route('ptk.continue-quiz', [
                                             'encode_kegiatan_id' => $current_encode_kegiatan_id,
                                             'nip' => $current_nip,
@@ -432,48 +433,6 @@
                                             style="border-radius:10px; font-size:16px; padding:10px;">
                                             <i class="ri-play-circle-line me-2"></i> Lanjutkan Instrumen
                                         </a>
-                                    </div>
-                                    <div class="col-md-6 mb-2">
-                                        @switch($kegiatan->tahap)
-                                            @case(1)
-                                                @php
-                                                    $encoded_indikator_id = Hashids::encode($data->indikator_id);
-                                                    $encoded_no_urut = Hashids::encode(1);
-                                                @endphp
-                                                <a href="{{ route('quiz1.show', [
-                                                    'tahap' => $kegiatan->tahap,
-                                                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-                                                    'nip' => $current_nip,
-                                                    'encoded_indikator_id' => $encoded_indikator_id,
-                                                    'encoded_no_urut' => $encoded_no_urut,
-                                                ]) }}"
-                                                    id="btnMulai"
-                                                    class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-                                                    style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
-                                                    <i class="ri-play-line me-2"></i> Mulai Baru
-                                                </a>
-                                            @break
-
-                                            @case(2)
-                                                @php
-                                                    $encoded_no_urut = Hashids::encode(1);
-                                                @endphp
-                                                <a href="{{ route('quiz2.show', [
-                                                    'tahap' => $kegiatan->tahap,
-                                                    'encoded_kegiatan_id' => $current_encode_kegiatan_id,
-                                                    'nip' => $current_nip,
-                                                    'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
-                                                    'encoded_no_urut' => $encoded_no_urut,
-                                                ]) }}"
-                                                    id="btnMulai"
-                                                    class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-                                                    style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
-                                                    <i class="ri-play-line me-2"></i> Mulai Baru
-                                                </a>
-                                            @break
-
-                                            @default
-                                        @endswitch
                                     </div>
                                 </div>
                             @else
@@ -491,8 +450,8 @@
                                             'encoded_indikator_id' => $encoded_indikator_id,
                                             'encoded_no_urut' => $encoded_no_urut,
                                         ]) }}"
-                                            id="btnMulai" class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-                                            style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+                                            id="btnMulai" class="btn btn-primary btn-lg px-5 w-100 d-block text-center"
+                                            style="border-radius:10px; font-size:16px; padding:10px;">
                                             <i class="ri-play-line me-2"></i> Mulai
                                         </a>
                                     @break
@@ -508,8 +467,8 @@
                                             'encoded_sub_indikator_id' => $encoded_sub_indikator_id,
                                             'encoded_no_urut' => $encoded_no_urut,
                                         ]) }}"
-                                            id="btnMulai" class="btn btn-primary btn-lg px-5 w-100 d-block text-center disabled"
-                                            style="border-radius:10px; opacity: 0.6; pointer-events: none; font-size:16px; padding:10px;">
+                                            id="btnMulai" class="btn btn-primary btn-lg px-5 w-100 d-block text-center"
+                                            style="border-radius:10px; font-size:16px; padding:10px;">
                                             <i class="ri-play-line me-2"></i> Mulai
                                         </a>
                                     @break
